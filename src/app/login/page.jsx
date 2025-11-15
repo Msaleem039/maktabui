@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { LayoutGrid } from "lucide-react";
 
 const Page = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +39,7 @@ const Page = () => {
 
         // UI-only build: simulate a successful login without hitting an API.
         await new Promise((resolve) => setTimeout(resolve, 800));
-        
+
         // Set cookie for UI testing - allows dashboard redirect to work
         const userData = {
             role: role,
@@ -46,7 +47,7 @@ const Page = () => {
             name: email.split('@')[0]
         };
         document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`; // 24 hours
-        
+
         router.push('/dashboard');
         setIsLoading(false);
         return;
@@ -63,7 +64,7 @@ const Page = () => {
                             "linear-gradient(217.64deg, #0B4B31 -5.84%, #85A598 106.72%, #FFFFFF 106.73%)",
                     }}
                 >
-                    <p  className="font-outfit text-center w-[90%] mb-8 font-medium text-[32px] leading-[54px]">
+                    <p className="font-outfit text-center w-[90%] mb-8 font-medium text-[32px] leading-[54px]">
                         Do not withhold your knowledge, for whoever withholds it will be bridled
                         with a bridle of fire on the Day of Resurrection.
                     </p>
@@ -71,13 +72,10 @@ const Page = () => {
                         Sunan Abi Dawud 3658
                     </p>
 
-                    <img
-                        src="/Maktab-Logo-New.svg"
-                        alt="MaktabOS Logo"
-                        height={200}
-                        width={200}
-                        className=" object-contain my-10"
-                    />
+                    <div className="flex items-center gap-3 my-10">
+                        <LayoutGrid size={40} className="text-black fill-black" />
+                        <span className="text-black text-3xl font-bold">MaktabOS</span>
+                    </div>
                 </div>
 
 
@@ -108,7 +106,7 @@ const Page = () => {
                         <div className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="w-6 h-6 text-black mr-3 flex-shrink-0"
+                                className="w-6 h-6 text-[#0B4B31] mr-3 flex-shrink-0"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                             >
@@ -123,7 +121,7 @@ const Page = () => {
                                     placeholder="example@gmail.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="bg-transparent text-gray-800 font-semibold outline-none placeholder-gray-500 w-full"
+                                    className=" text-gray-800 font-semibold outline-none placeholder-gray-500 w-full"
                                     required
                                 />
                             </div>
@@ -133,7 +131,7 @@ const Page = () => {
                         <div className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="w-6 h-6 text-black mr-3 flex-shrink-0"
+                                className="w-6 h-6 text-[#0B4B31] mr-3 flex-shrink-0"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                             >
@@ -155,7 +153,7 @@ const Page = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="text-black ml-3"
+                                className="text-[#0B4B31] ml-3"
                             >
                                 {showPassword ? (
                                     <svg
@@ -205,7 +203,7 @@ const Page = () => {
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    className="w-6 h-6 mr-3 flex-shrink-0"
+                                    className="w-6 h-6 text-[#0B4B31] mr-3 flex-shrink-0"
                                     fill="currentColor"
                                     viewBox="0 0 24 24"
                                 >
