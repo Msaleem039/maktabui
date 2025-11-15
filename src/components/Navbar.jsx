@@ -10,46 +10,48 @@ const Navbar = ({ items = [] }) => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-6xl items-center justify-between rounded-[18px] bg-gradient-to-r from-[#0B4B31] via-[#0B4B31]/90 to-[#0B4B31]/80 px-5 py-4 shadow-lg shadow-black/10 backdrop-blur-md md:px-8 md:py-5">
+      <div className="mx-auto flex max-w-6xl min-w-0 items-center justify-between rounded-[18px] bg-gradient-to-r from-[#0B4B31] via-[#0B4B31]/90 to-[#0B4B31]/80 px-4 py-3 shadow-lg shadow-black/10 backdrop-blur-md md:px-6 md:py-4 lg:px-5 lg:py-4">
         <a
           href="/"
-          className="text-xl font-bold tracking-tight text-white md:text-2xl flex items-center"
+          className="flex shrink-0 items-center text-lg font-bold tracking-tight text-white md:text-xl lg:text-xl xl:text-2xl"
           style={{ fontFamily: "Inter, sans-serif" }}
           onClick={closeMenu}
         >
-         <LayoutGrid size={28} className="text-white mr-2" /> MaktabOS
+          <LayoutGrid size={24} className="text-white fill-white mr-2 shrink-0 lg:size-6" />
+          <span className="whitespace-nowrap">MaktabOS</span>
         </a>
 
         <nav
-          className="hidden items-center gap-8 lg:flex"
+          className="hidden items-center gap-4 lg:flex lg:gap-3 xl:gap-6"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
           {items.map((item) => (
             <a
               key={item.label}
               href={item.href}
-              className="group relative inline-flex items-center gap-1 text-base font-semibold text-white/85 transition-colors hover:text-white after:absolute after:left-1/2 after:-bottom-2 after:h-[2px] after:w-0 after:-translate-x-1/2 after:rounded-full after:bg-white after:opacity-0 after:content-[''] after:transition-all after:duration-200 group-hover:after:w-3/5 group-hover:after:opacity-100 xl:text-lg"
+              className="group relative inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-bold text-white transition-colors hover:text-white/85 after:absolute after:left-1/2 after:-bottom-2 after:h-[2px] after:w-0 after:-translate-x-1/2 after:rounded-full after:bg-white after:opacity-0 after:content-[''] after:transition-all after:duration-200 group-hover:after:w-3/5 group-hover:after:opacity-100 lg:text-sm xl:text-base"
             >
               {item.label}
             </a>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden shrink-0 items-center gap-2 lg:flex lg:gap-2 xl:gap-4">
           <a
             href="#get-started"
-            className="rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/25"
+            className="whitespace-nowrap rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             Get Started →
           </a>
           <a
             href="#book-demo"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            className="whitespace-nowrap rounded-tr-xl rounded-bl-xl rounded-tl-none rounded-br-none bg-white px-3 py-1.5 text-xs font-bold text-[#0B4B31] transition hover:bg-[#F3F6F5] lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
+            style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Book a Demo
           </a>
+
         </div>
 
         <button

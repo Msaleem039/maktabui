@@ -18,7 +18,7 @@ const OnlineQuranSection = () => {
 
       <div className="absolute inset-0 bg-gradient-to-r from-[#0B4B31]/90 via-[#0B4B31]/70 to-[#0B4B31]/55" />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-16 px-6 lg:flex-row lg:items-center">
+      <div className="relative z-10 mx-auto flex max-w-325 flex-col gap-16 px-6 lg:flex-row lg:items-center">
         <div className="flex-1 space-y-8 text-left">
           {/* <p className="text-xs uppercase tracking-[0.4em] text-white/75">
             Online Quran
@@ -27,16 +27,14 @@ const OnlineQuranSection = () => {
             Bring Your School Online —
             <br /> The Smart Way
           </h2>
-          <p className="max-w-lg text-lg leading-8 text-white/85 md:text-xl">
-            Get your custom MaktabOS portal and manage everything in one place. We
-            tailor the experience to your school, so operations stay organized and
-            your community stays connected.
+          <p className="max-w-sm text-lg  font-light leading-10 text[#FAFAFA] md:text-xl">
+            Get your custom MaktabOS portal and manage everything in one place.
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
             <a
               href="#get-started"
-              className="rounded-full bg-black px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-black/80"
+              className="rounded-full bg-black px-7 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
             >
               Get Started Now
             </a>
