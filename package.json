@@ -1,0 +1,30 @@
+{
+  "name": "maktab-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "axios": "^1.13.1",
+    "bcryptjs": "^3.0.2",
+    "chart.js": "^4.5.1",
+    "cookies-next": "^6.1.1",
+    "devextreme": "^25.1.6",
+    "devextreme-react": "^25.1.6",
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.548.0",
+    "mongoose": "^8.19.1",
+    "next": "15.5.5",
+    "postcss": "^8.5.6",
+    "react": "19.1.0",
+    "react-chartjs-2": "^5.3.1",
+    "react-datepicker": "^8.9.0",
+    "react-dom": "19.1.0",
+    "tailwindcss": "^4.1.16"
+  }
+}
