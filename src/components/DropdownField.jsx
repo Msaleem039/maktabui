@@ -12,7 +12,7 @@ export const DropdownField = ({
   className = "",
   placeholder = "Select an option"
 }) => {
-  const dropdownBaseStyle = "w-full bg-[#0B4B3199] text-white rounded-full px-4 py-4 flex justify-between items-center cursor-pointer select-none";
+  const dropdownBaseStyle = "w-full bg-[#0B4B3199] text-black text-sm rounded-full px-4 py-4 flex justify-between items-center cursor-pointer select-none";
   const dropdownMenuStyle = "absolute w-full bg-white text-[#104D2E] mt-2 rounded-xl shadow-lg z-10 max-h-[200px] overflow-y-auto";
 
   // Generate a unique key for each option
@@ -46,7 +46,7 @@ export const DropdownField = ({
 
   return (
     <div className={`relative ${className}`}>
-      <label className="block text-sm text-gray-600 mb-1">{label}</label>
+      <label className="block font-normal text-sm text-[#000000] mb-1">{label}</label>
       <div
         className={dropdownBaseStyle}
         onClick={() => onToggle(name)}
@@ -62,7 +62,7 @@ export const DropdownField = ({
       {isOpen && (
         <div className={dropdownMenuStyle}>
           {options.length === 0 ? (
-            <div className="px-4 py-3 text-gray-500">No options available</div>
+            <div className="px-4 py-3 text-[#000000]">No options available</div>
           ) : (
             options.map((option, index) => (
               renderOption ? (
@@ -73,9 +73,8 @@ export const DropdownField = ({
                 <div
                   key={getOptionKey(option, index)}
                   onClick={() => onSelect(name, getOptionValue(option))}
-                  className={`px-4 py-3 cursor-pointer hover:bg-[#bdc9c4] ${
-                    value === getOptionValue(option) ? "bg-[#0e6b49]" : ""
-                  }`}
+                  className={`px-4 py-3 text-sm cursor-pointer hover:bg-[#bdc9c4] ${value === getOptionValue(option) ? "bg-[#0e6b49]" : ""
+                    }`}
                 >
                   {getOptionDisplay(option)}
                 </div>
