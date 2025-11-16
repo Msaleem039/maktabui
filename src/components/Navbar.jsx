@@ -9,16 +9,16 @@ const Navbar = ({ items = [] }) => {
   const closeMenu = () => setIsOpen(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-6xl min-w-0 items-center justify-between rounded-[18px] bg-gradient-to-r from-[#0B4B31] via-[#0B4B31]/90 to-[#0B4B31]/80 px-4 py-3 shadow-lg shadow-black/10 backdrop-blur-md md:px-6 md:py-4 lg:px-5 lg:py-4">
+    <header className="fixed top-0 left-0 right-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4 md:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[98%] sm:max-w-[95%] md:max-w-[92%] lg:max-w-6xl xl:max-w-7xl items-center justify-between rounded-[18px] bg-gradient-to-r from-[#0B4B31] via-[#0B4B31]/90 to-[#0B4B31]/80 px-3 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-4 lg:px-8 lg:py-5 shadow-lg shadow-black/10 backdrop-blur-md">
         <a
           href="/"
           className="flex shrink-0 items-center text-lg font-bold tracking-tight text-white md:text-xl lg:text-xl xl:text-2xl"
           style={{ fontFamily: "Inter, sans-serif" }}
           onClick={closeMenu}
         >
-          <LayoutGrid size={24} className="text-white fill-white mr-2 shrink-0 lg:size-6" />
-          <span className="whitespace-nowrap">MaktabOS</span>
+          <LayoutGrid size={24} className="text-white fill-white shrink-0 md:mr-2 md:size-6 lg:size-6" />
+          <span className="hidden md:inline whitespace-nowrap">MaktabOS</span>
         </a>
 
         <nav
@@ -56,7 +56,7 @@ const Navbar = ({ items = [] }) => {
 
         <button
           type="button"
-          className="inline-flex items-center rounded-full bg-white/15 p-2 text-white transition hover:bg-white/25 lg:hidden"
+          className="inline-flex items-center rounded-full bg-white/15 p-2 text-white transition hover:bg-white/25 lg:hidden shrink-0"
           aria-expanded={isOpen}
           aria-label="Toggle navigation menu"
           onClick={() => setIsOpen((prev) => !prev)}
@@ -67,7 +67,7 @@ const Navbar = ({ items = [] }) => {
 
       {isOpen && (
         <nav
-          className="mx-auto mt-3 flex w-full max-w-6xl flex-col gap-3 rounded-[18px] bg-white px-6 py-6 text-[#0B4B31] shadow-lg lg:hidden"
+          className="mx-auto mt-2 sm:mt-3 flex w-full max-w-[98%] sm:max-w-[95%] md:max-w-[92%] lg:max-w-6xl xl:max-w-7xl flex-col gap-3 rounded-[18px] bg-white px-4 py-4 sm:px-6 sm:py-6 text-[#0B4B31] shadow-lg lg:hidden"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
           {items.map((item) => (
@@ -75,7 +75,7 @@ const Navbar = ({ items = [] }) => {
               key={item.label}
               href={item.href}
               onClick={closeMenu}
-              className="rounded-full bg-[#0B4B31]/5 px-4 py-3 text-base font-semibold transition hover:bg-[#0B4B31] hover:text-white"
+              className="rounded-full bg-[#0B4B31]/5 px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition hover:bg-[#0B4B31] hover:text-white"
             >
               {item.label}
             </a>
@@ -84,14 +84,14 @@ const Navbar = ({ items = [] }) => {
             <a
               href="#get-started"
               onClick={closeMenu}
-              className="rounded-full bg-[#0B4B31] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="rounded-full bg-[#0B4B31] px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
             >
               Get Started →
             </a>
             <a
               href="#book-demo"
               onClick={closeMenu}
-              className="rounded-full bg-[#0B4B31]/10 px-4 py-3 text-center text-sm font-semibold text-[#0B4B31] transition hover:bg-[#0B4B31]/15"
+              className="rounded-full bg-[#0B4B31]/10 px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-[#0B4B31] transition hover:bg-[#0B4B31]/15"
             >
               Book a Demo
             </a>
