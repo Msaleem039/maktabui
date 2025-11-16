@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
+import { Plus } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
 import Chatbot from "@/components/dashboard/Chatbot";
@@ -22,7 +23,7 @@ const NavItem = ({
 }) => {
   // More precise active state logic - only one item should be active at a time
   let isActive = false;
-  
+
   if (hasSubmenu && subItems) {
     // For items with submenus (path is empty), check if any subItem matches the current pathname
     isActive = subItems.some(
@@ -51,27 +52,24 @@ const NavItem = ({
         className={`
                     ${baseClasses}
                     ${isCollapsed ? collapsedClasses : unCollapsedClasses}
-                    ${
-                      isActive
-                        ? "bg-[#13574A]"
-                        : hasSubmenu && isOpen
-                        ? "bg-[#0F5B3F]/70"
-                        : "hover:bg-[#13574A]/45"
-                    }
+                    ${isActive
+            ? "bg-[#13574A]"
+            : hasSubmenu && isOpen
+              ? "bg-[#0F5B3F]/70"
+              : "hover:bg-[#13574A]/45"
+          }
                 `}
         title={isCollapsed ? name : undefined}
       >
         <div
-          className={`flex items-center ${
-            isCollapsed ? "space-x-0" : "space-x-4"
-          }`}
+          className={`flex items-center ${isCollapsed ? "space-x-0" : "space-x-4"
+            }`}
         >
           {Icon ? (
             typeof Icon === "string" ? (
               <div
-                className={`w-5 h-5 transition-all duration-200 ${
-                  isActive ? "opacity-100" : "opacity-80"
-                }`}
+                className={`w-5 h-5 transition-all duration-200 ${isActive ? "opacity-100" : "opacity-80"
+                  }`}
               >
                 <Image
                   src={Icon}
@@ -83,9 +81,8 @@ const NavItem = ({
               </div>
             ) : (
               <Icon
-                className={`w-5 h-5 transition-all duration-200 ${
-                  isActive ? "opacity-100" : "opacity-80"
-                }`}
+                className={`w-5 h-5 transition-all duration-200 ${isActive ? "opacity-100" : "opacity-80"
+                  }`}
               />
             )
           ) : (
@@ -94,9 +91,8 @@ const NavItem = ({
 
           {!isCollapsed && (
             <span
-              className={`font-medium text-sm leading-5 tracking-normal transition-all duration-200 ${
-                isActive ? "text-white" : "text-white/90"
-              }`}
+              className={`font-medium text-sm leading-5 tracking-normal transition-all duration-200 ${isActive ? "text-white" : "text-white/90"
+                }`}
             >
               {name}
             </span>
@@ -108,9 +104,8 @@ const NavItem = ({
             {hasSubmenu ? (
               <ChevronDown
                 size={18}
-                className={`text-white/80 transition-transform duration-200 ${
-                  isOpen ? "rotate-0" : "-rotate-90"
-                }`}
+                className={`text-white/80 transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"
+                  }`}
               />
             ) : (
               <ChevronDown
@@ -139,11 +134,10 @@ const SubNavItem = ({ name, path, pathname, router, isCollapsed }) => {
       onClick={() => router.push(path)}
       className={`
             flex items-center w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 group relative
-            ${
-              isActive
-                ? "bg-gradient-to-r from-[#13574A] to-[#13574A]/80 text-white shadow-md"
-                : "text-white/80 hover:bg-[#13574A]/20 hover:text-white hover:pl-6"
-            }
+            ${isActive
+          ? "bg-gradient-to-r from-[#13574A] to-[#13574A]/80 text-white shadow-md"
+          : "text-white/80 hover:bg-[#13574A]/20 hover:text-white hover:pl-6"
+        }
         `}
     >
       {isActive && (
@@ -155,19 +149,17 @@ const SubNavItem = ({ name, path, pathname, router, isCollapsed }) => {
       )}
 
       <div
-        className={`w-2 h-2 mr-3 transition-all duration-200 ${
-          isActive
-            ? "opacity-100 scale-110"
-            : "opacity-40 group-hover:opacity-70 group-hover:scale-110"
-        }`}
+        className={`w-2 h-2 mr-3 transition-all duration-200 ${isActive
+          ? "opacity-100 scale-110"
+          : "opacity-40 group-hover:opacity-70 group-hover:scale-110"
+          }`}
       >
         <div className="w-full h-full bg-current rounded-full" />
       </div>
 
       <span
-        className={`font-medium transition-all duration-200 ${
-          isActive ? "text-white" : "group-hover:text-white"
-        }`}
+        className={`font-medium transition-all duration-200 ${isActive ? "text-white" : "group-hover:text-white"
+          }`}
       >
         {name}
       </span>
@@ -206,8 +198,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       userRole === "Super Admin"
         ? "/dashboard/super-admin"
         : userRole === "Admin"
-        ? "/dashboard/admin"
-        : "/dashboard/parent";
+          ? "/dashboard/admin"
+          : "/dashboard/parent";
 
     const items = [
       {
@@ -345,9 +337,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300 ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
         onClick={() => setIsOpen(false)}
       ></div>
 
@@ -355,10 +346,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         className={`
           fixed lg:static top-0 left-0 h-screen ${sidebarBg} flex flex-col justify-between p-4 shadow-2xl
           transition-all duration-300 ease-in-out z-50
-          ${
-            isCollapsed
-              ? "w-20"
-              : "w-[70%] sm:w-[45%] md:w-[32%] lg:w-[220px] min-w-[200px] max-w-[220px]"
+          ${isCollapsed
+            ? "w-20"
+            : "w-[70%] sm:w-[45%] md:w-[32%] lg:w-[220px] min-w-[200px] max-w-[220px]"
           }
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           rounded-tr-[28px] rounded-br-[28px]
@@ -378,9 +368,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <div
-            className={`transform transition-transform duration-300 ${
-              isCollapsed ? "rotate-180" : "rotate-0"
-            }`}
+            className={`transform transition-transform duration-300 ${isCollapsed ? "rotate-180" : "rotate-0"
+              }`}
           >
             <Image
               src="/collapsable-arrow.png"
@@ -394,9 +383,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         <div className="flex flex-col space-y-8 overflow-y-auto flex-grow">
           <div
-            className={`flex items-center space-x-2 text-white p-2 ${
-              isCollapsed ? "justify-center" : ""
-            }`}
+            className={`flex items-center space-x-2 text-white p-2 ${isCollapsed ? "justify-center" : ""
+              }`}
           >
             <div className="w-6 h-6">
               <Image
@@ -463,7 +451,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               height={20}
               className="w-5 h-5 object-contain"
             />
-            
+
             {!isCollapsed && (
               <>
                 <span>Log Out</span>
@@ -484,54 +472,58 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 };
 
 export default function DashboardLayout({ children }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
-    // Only show header and action buttons on Parent and Student pages
-    const showStudentHeader = pathname?.includes("/parent") || pathname?.includes("/student") || pathname === "/dashboard/student";
+  // Only show header and action buttons on Parent and Student pages
+  const showStudentHeader = pathname?.includes("/parent") || pathname?.includes("/student") || pathname === "/dashboard/student";
 
-    return (
-        <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 bg-[#0B4B31] text-white p-3 rounded-md shadow-md"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z" />
-                </svg>
-            </button>
+  return (
+    <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 bg-[#0B4B31] text-white p-3 rounded-md shadow-md"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z" />
+        </svg>
+      </button>
 
-            <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-            <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6">
-                {showStudentHeader && (
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-                        <div>
-                            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
-                                Welcome to
-                            </p>
-                            <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
-                                MaktabOS
-                            </h1>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                type="button"
-                                className="inline-flex items-center gap-2 rounded-full border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-                            >
-                                Archived Students
-                            </button>
-                            <button
-                                type="button"
-                                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/85"
-                            >
-                                Add Students
-                            </button>
-                        </div>
-                    </div>
-                )}
-                {children}
-            </main>
-            <Chatbot />
-        </div>
-    );
+      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6">
+        {showStudentHeader && (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <p className="font-medium text-[2.3rem] text-[#0B4B31]">
+                Welcome to
+              </p>
+              <h1 className="text-[1.875rem] font-medium text-black sm:text-[2rem]">
+                MaktabOS
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] text-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#F3F6F5]"
+              >
+                Archived Students
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] text-[#0B4B31] px-4 py-2 text-sm font-normal transition"
+              >
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#0B4B31]">
+                  <Plus className="w-3 h-3 text-white" strokeWidth={3} />
+                </span>
+
+                Add Students
+              </button>
+            </div>
+          </div>
+        )}
+        {children}
+      </main>
+      <Chatbot />
+    </div>
+  );
 }

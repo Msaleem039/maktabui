@@ -4,8 +4,6 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import {
   Phone,
-  Mail,
-  MapPin,
   Calendar,
   Users2,
   Receipt,
@@ -70,12 +68,12 @@ const ParentProfile = ({
     switch (activeTab) {
       case "about":
         return (
-          <div className="rounded-[30px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
+          <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
             <SectionTitle>Primary Information</SectionTitle>
             <div className="mt-5 grid gap-4 text-sm text-[#123629] sm:grid-cols-2 xl:grid-cols-4">
               <InfoItem icon={Phone} label="Phone" value={profile.phone} />
-              <InfoItem icon={Mail} label="Email" value={profile.email} />
-              <InfoItem icon={MapPin} label="Location" value={profile.location} />
+              <InfoItem iconSrc="/Email.svg" label="Email" value={profile.email} />
+              <InfoItem iconSrc="/Location.svg" label="Location" value={profile.location} />
               <InfoItem
                 icon={Calendar}
                 label="Member Since"
@@ -98,12 +96,12 @@ const ParentProfile = ({
                 value={profile.spouse.phone}
               />
               <InfoItem
-                icon={Mail}
+                iconSrc="/Email.svg"
                 label="Email"
                 value={profile.spouse.email}
               />
               <InfoItem
-                icon={MapPin}
+                iconSrc="/Location.svg"
                 label="Location"
                 value={profile.spouse.location}
               />
@@ -206,13 +204,13 @@ const ParentProfile = ({
         </div>
       </div>
 
-      <div className="px-10 pb-8 pt-8 sm:px-12">
+      <div className="px-10 pb-8 pt-2 sm:px-12">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-3xl font-semibold text-[#0B4B31]">
+            <h2 className="text-[1.75rem] font-medium text-[#0B4B31]">
               {profile.name}
             </h2>
-            <p className="text-sm uppercase tracking-[0.35em] text-[#627169]">
+            <p className="text-sm uppercase  text-[#0B4B31]">
               {profile.role}
             </p>
           </div>
@@ -231,13 +229,12 @@ const ParentProfile = ({
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-semibold transition ${
-                  isActive
-                    ? "bg-[#B9F2E3] text-[#0B4B31]"
-                    : "bg-[#E0ECE6] text-[#0B4B31]/70 hover:bg-[#D4E6DE]"
-                }`}
+                className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-xs font-medium transition ${isActive
+                  ? "bg-[#96E2D6FA] text-black"
+                  : "bg-[#E0ECE6] text-[#0B4B31]/70 hover:bg-[#D4E6DE]"
+                  }`}
               >
-                <span className="text-lg">📁</span>
+                <span className="text-[1.25rem]">📁</span>
                 {tab.label}
                 <span className="ml-1 text-xs">▸</span>
               </button>
@@ -252,19 +249,29 @@ const ParentProfile = ({
 };
 
 const SectionTitle = ({ children }) => (
-  <h3 className="text-lg font-semibold text-[#0B4B31]">{children}</h3>
+  <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">{children}</h3>
 );
 
-const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center gap-3 rounded-[18px] bg-white px-4 py-3 shadow-[0_12px_30px_-24px_rgba(0,0,0,0.45)]">
-    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0B4B31]/10 text-[#0B4B31]">
-      <Icon size={16} />
+const InfoItem = ({ icon: Icon, iconSrc, label, value }) => (
+  <div className="flex items-center gap-3 rounded-[18px] px-4 py-3">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full">
+      {iconSrc ? (
+        <Image
+          src={iconSrc}
+          alt={label}
+          width={20}
+          height={20}
+          className="object-contain"
+        />
+      ) : Icon ? (
+        <Icon size={20} className="text-[#0B4B31] fill-[#0B4B31]" />
+      ) : null}
     </div>
     <div className="flex flex-col">
-      <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7D8D87]">
+      <span className="text-sm font-medium text-[#0B4B31]">
         {label}
       </span>
-      <span className="text-sm font-semibold text-[#123629]">{value}</span>
+      <span className="text-xs font-medium text-black">{value}</span>
     </div>
   </div>
 );
@@ -279,26 +286,26 @@ const InfoRow = ({ label, value }) => (
 );
 
 const StatusCard = ({ stats }) => (
-  <div className="rounded-[26px] bg-gradient-to-br from-white/95 via-white/85 to-[#C7E7DD]/60 p-5 text-[#0B4B31] shadow-[0_24px_60px_-50px_rgba(0,0,0,0.65)] backdrop-blur">
-    <h3 className="text-sm font-semibold">Account Status</h3>
-    <div className="mt-4 space-y-3 text-sm">
+  <div className="rounded-[26px] p-5 bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74]">
+    <h3 className="text-base text-white text-center font-extrabold">Account Status</h3>
+    <div div className="mt-4 space-y-3 text-sm" >
       <StatusRow label="Status" value={stats?.status ?? "Active"} />
       <StatusRow label="Waiting List" value={stats?.waitingList ?? "No"} />
       <StatusRow label="Opted Out of Text" value={stats?.optedOut ?? "No"} />
-    </div>
-  </div>
+    </div >
+  </div >
 );
 
 const StatusRow = ({ label, value }) => (
-  <div className="flex items-center justify-between rounded-[14px] bg-[#EDF3F0] px-3 py-2">
-    <span className="text-xs font-semibold text-[#6F8279]">{label}</span>
-    <span className="text-sm font-semibold text-[#0B4B31]">{value}</span>
+  <div className="flex items-center justify-between rounded-[14px] bg-[#F8F8F8] px-3 py-2">
+    <span className="text-[0.6875rem] font-normal text-black">{label}</span>
+    <span className="text-[0.6875rem] font-semibold text-black">{value}</span>
   </div>
 );
 
 const QuickActionCard = ({ actions = [] }) => (
-  <div className="rounded-[26px] bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74] p-5 text-white shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur">
-    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
+  <div className="rounded-[26px] bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74] py-5 px-10 text-white shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur">
+    <h3 className="text-base font-extrabold text-center text-white">
       Quick Action
     </h3>
     <div className="mt-4 space-y-3">
@@ -306,10 +313,10 @@ const QuickActionCard = ({ actions = [] }) => (
         <button
           key={label}
           type="button"
-          className="flex w-full items-center justify-between rounded-[16px] bg-white/15 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/25"
+          className="flex w-full items-center justify-between rounded-[16px] bg-[#F8F8F8] px-4 py-3 text-[0.6875rem] font-normal text-black transition"
         >
           <span className="flex items-center gap-2">
-            {Icon ? <Icon size={16} /> : null}
+            {Icon ? <Icon size={14} /> : null}
             {label}
           </span>
           <span>↗</span>
