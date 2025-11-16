@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import StudentTable from "@/components/dashboard/students/StudentTable";
+import dynamic from "next/dynamic";
+
+const StudentTable = dynamic(
+  () => import("@/components/dashboard/students/StudentTable"),
+  { ssr: false }
+);
 
 export default function StudentsPage() {
   const [searchValue, setSearchValue] = useState("");

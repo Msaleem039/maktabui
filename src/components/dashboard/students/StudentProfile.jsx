@@ -173,8 +173,8 @@ const StudentProfile = ({
       </div>
 
       <div className="px-10 pb-8 pt-24 sm:px-12">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div className="sm:pl-44">
+        <div className="flex flex-col gap-2">
+          <div>
             <h2 className="text-3xl font-semibold text-[#0B4B31]">
               {profile.name}
             </h2>
@@ -182,14 +182,9 @@ const StudentProfile = ({
               {profile.role}
             </p>
           </div>
-
-          <div className="mt-6 grid gap-4 sm:mt-0 sm:grid-cols-2 sm:gap-6">
-            <StatusCard stats={profile.stats} />
-            <QuickActionCard actions={profile.quickActions} />
-          </div>
         </div>
 
-        <nav className="mt-8 flex flex-wrap items-center gap-3 sm:pl-44">
+        <nav className="mt-8 flex flex-wrap items-center gap-3">
           {tabs.map((tab) => {
             const isActive = tab.key === activeTab;
             const tabIcons = {
@@ -242,52 +237,7 @@ const InfoItem = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-const StatusCard = ({ stats }) => (
-  <div className="rounded-[26px] bg-gradient-to-br from-white/95 via-white/85 to-[#C7E7DD]/60 p-5 text-[#0B4B31] shadow-[0_24px_60px_-50px_rgba(0,0,0,0.65)] backdrop-blur">
-    <h3 className="text-sm font-semibold">Account Status</h3>
-    <div className="mt-4 space-y-3 text-sm">
-      <StatusRow label="Status" value={stats?.status ?? "Active"} />
-      <StatusRow
-        label="Attendance"
-        value={stats?.attendance ?? "95%"}
-      />
-      <StatusRow
-        label="Assignments"
-        value={stats?.assignments ?? "8/10"}
-      />
-    </div>
-  </div>
-);
-
-const StatusRow = ({ label, value }) => (
-  <div className="flex items-center justify-between rounded-[14px] bg-[#EDF3F0] px-3 py-2">
-    <span className="text-xs font-semibold text-[#6F8279]">{label}</span>
-    <span className="text-sm font-semibold text-[#0B4B31]">{value}</span>
-  </div>
-);
-
-const QuickActionCard = ({ actions = [] }) => (
-  <div className="rounded-[26px] bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74] p-5 text-white shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur">
-    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
-      Quick Action
-    </h3>
-    <div className="mt-4 space-y-3">
-      {actions.map(({ label, icon: Icon }) => (
-        <button
-          key={label}
-          type="button"
-          className="flex w-full items-center justify-between rounded-[16px] bg-white/15 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/25"
-        >
-          <span className="flex items-center gap-2">
-            {Icon ? <Icon size={16} /> : null}
-            {label}
-          </span>
-          <span>↗</span>
-        </button>
-      ))}
-    </div>
-  </div>
-);
+// Status and quick action cards removed as per updated design
 
 const PlaceholderCard = ({ icon: Icon, title, description }) => (
   <div className="flex flex-col items-start gap-4 rounded-[26px] border border-[#D2E2DB] bg-white/85 p-6 shadow-sm">

@@ -31,13 +31,9 @@ export default function Page() {
 
     switch (user.role) {
       case "Super Admin":
-        router.push("/dashboard/super-admin/dashboard");
-        break;
       case "Admin":
-        router.push("/dashboard/admin");
-        break;
       case "Teacher":
-        router.push("/dashboard/teacher");
+        router.push("/dashboard/dashboard");
         break;
       case "Student":
         router.push("/dashboard/student");

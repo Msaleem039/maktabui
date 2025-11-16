@@ -49,17 +49,19 @@ const AdminCard = ({ admin, isInstitute = false }) => {
 
   return (
     <div className="relative h-[280px] rounded-[28px] overflow-hidden">
-      {/* Background with pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-green-50 to-green-100">
-        <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-[#0B4B31]/20"></div>
-        <div className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-[#0B4B31]/15"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#0B4B31] transform rotate-45"></div>
-        <div className="absolute top-20 right-20 w-2 h-2 bg-[#0B4B31] transform rotate-45"></div>
-        <div className="absolute bottom-20 left-20 w-2 h-2 bg-[#0B4B31] transform rotate-45"></div>
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <Image
+          src="/proofile card 4.svg"
+          alt="Admin card background"
+          fill
+          priority
+          className="object-cover"
+        />
       </div>
 
       {/* Avatar */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10">
+      {/* <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10">
         <div className="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden">
           {admin.photo ? (
             <Image src={admin.photo} alt={admin.name} width={96} height={96} className="w-full h-full object-cover" />
@@ -69,7 +71,7 @@ const AdminCard = ({ admin, isInstitute = false }) => {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Glassmorphism overlay */}
       <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-b-[28px] p-4 border-t border-white/20">

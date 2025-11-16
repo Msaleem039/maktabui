@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
+import dynamic from "next/dynamic";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -13,7 +14,16 @@ import {
   BarElement,
   Title,
 } from "chart.js";
-import { Doughnut, Bar } from "react-chartjs-2";
+
+const Doughnut = dynamic(
+  () => import("react-chartjs-2").then((mod) => mod.Doughnut),
+  { ssr: false }
+);
+
+const Bar = dynamic(
+  () => import("react-chartjs-2").then((mod) => mod.Bar),
+  { ssr: false }
+);
 
 ChartJS.register(
   ArcElement,
@@ -174,7 +184,7 @@ export default function InvoicePage() {
   const handleActionClick = (action, id, event) => {
     event.stopPropagation();
     if (action === "addFunds" || action === "payment") {
-      router.push(`/dashboard/super-admin/finance/invoice/${id}/payment`);
+      router.push(`/dashboard/finance/invoice/${id}/payment`);
     } else {
       console.log(`${action} clicked for invoice ${id}`);
     }

@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { Plus } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, PlusIcon } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
 import Chatbot from "@/components/dashboard/Chatbot";
 
@@ -194,19 +193,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const userRole = getUserRole();
 
   const getNavItems = () => {
-    const basePath =
-      userRole === "Super Admin"
-        ? "/dashboard/super-admin"
-        : userRole === "Admin"
-          ? "/dashboard/admin"
-          : "/dashboard/parent";
+    const basePath = "/dashboard";
 
     const items = [
       {
         name: "Dashboard",
         icon: "/01.png",
-        path:
-          userRole === "Parent" ? "/dashboard/parent" : `${basePath}/dashboard`,
+        path: userRole === "Parent" ? "/dashboard/parent" : `${basePath}/dashboard`,
       },
       {
         name: "Parents",
@@ -490,33 +483,29 @@ export default function DashboardLayout({ children }) {
       </button>
 
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6">
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10">
         {showStudentHeader && (
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>
-              <p className="font-medium text-[2.3rem] text-[#0B4B31]">
+              <p className="text-[2.5rem] font-[600]  text-[#0B4B31]">
                 Welcome to
               </p>
-              <h1 className="text-[1.875rem] font-medium text-black sm:text-[2rem]">
+              <p className="text-[1.75rem] font-[500] text-black ">
                 MaktabOS
-              </h1>
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] text-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#F3F6F5]"
+                className="inline-flex items-center gap-2 rounded-full bg-[#B4B31] border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
               >
                 Archived Students
               </button>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] text-[#0B4B31] px-4 py-2 text-sm font-normal transition"
+                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/85"
               >
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#0B4B31]">
-                  <Plus className="w-3 h-3 text-white" strokeWidth={3} />
-                </span>
-
-                Add Students
+                <PlusIcon size={20} /> Add Students
               </button>
             </div>
           </div>

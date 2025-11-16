@@ -28,6 +28,8 @@ const StudentTable = ({
   const [selectedId, setSelectedId] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const dropdownRefs = useRef({});
+  const [commentStudentId, setCommentStudentId] = useState(null);
+  const [commentText, setCommentText] = useState("");
 
   const handleSearchChange = (event) => {
     onSearchChange?.(event.target.value);
@@ -50,6 +52,9 @@ const StudentTable = ({
       router.push(`/dashboard/student/${studentId}`);
     } else if (action === "edit") {
       router.push(`/dashboard/student/${studentId}/edit`);
+    } else if (action === "comment") {
+      setCommentStudentId(studentId);
+      setCommentText("");
     } else {
       console.log(`${action} clicked for student ${studentId}`);
     }
@@ -248,6 +253,48 @@ const StudentTable = ({
           </div>
         </div>
       </div>
+
+      {commentStudentId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="mb-3 text-lg font-semibold text-[#0B4B31]">
+              Add Comment
+            </h3>
+            <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-[#799086]">
+              {commentStudentId}
+            </p>
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Write a comment about this student..."
+              className="mb-4 h-32 w-full resize-none rounded-xl border border-[#C5D2CD] bg-[#F7FAF8] p-3 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setCommentStudentId(null);
+                  setCommentText("");
+                }}
+                className="rounded-full border border-[#0B4B31]/20 px-4 py-2 text-sm font-semibold text-[#0B4B31] hover:bg-[#F3F6F5]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("Comment saved for", commentStudentId, commentText);
+                  setCommentStudentId(null);
+                  setCommentText("");
+                }}
+                className="rounded-full bg-[#0B4B31] px-5 py-2 text-sm font-semibold text-white hover:bg-[#0B4B31]/90"
+              >
+                Save Comment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
