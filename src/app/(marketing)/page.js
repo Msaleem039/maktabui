@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getCookie } from "cookies-next";
+import "../globals.css";
+
 import Navbar from "@/components/Navbar";
 import AboutSection from "@/components/landing/AboutSection";
 import CoreFeature from "@/components/landing/CoreFeature";
@@ -21,61 +20,7 @@ const primaryNavItems = [
   { label: "Contact Us", href: "#contact" },
 ];
 
-const getRedirectPath = (role) => {
-  switch (role) {
-    case "Super Admin":
-      return "/dashboard/super-admin/dashboard";
-    case "Admin":
-      return "/dashboard/admin";
-    case "Teacher":
-      return "/dashboard/teacher";
-    case "Student":
-      return "/dashboard/student";
-    case "Parent":
-      return "/dashboard/parent";
-    default:
-      return null;
-  }
-};
-
 export default function Home() {
-  const router = useRouter();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [shouldShowLanding, setShouldShowLanding] = useState(false);
-
-  useEffect(() => {
-    const userCookie = getCookie("user");
-
-    if (!userCookie) {
-      setShouldShowLanding(true);
-      setIsCheckingAuth(false);
-      return;
-    }
-
-    try {
-      const user = JSON.parse(userCookie);
-      const redirectPath = getRedirectPath(user?.role);
-
-      if (redirectPath) {
-        router.replace(redirectPath);
-        return;
-      }
-    } catch (error) {
-      console.error("Failed to parse user cookie:", error);
-    }
-
-    setShouldShowLanding(true);
-    setIsCheckingAuth(false);
-  }, [router]);
-
-  if (isCheckingAuth && !shouldShowLanding) {
-    return null;
-  }
-
-  if (!shouldShowLanding) {
-    return null;
-  }
-
   return (
     <>
       <div
@@ -136,3 +81,5 @@ export default function Home() {
     </>
   );
 }
+
+
