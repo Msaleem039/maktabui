@@ -68,7 +68,7 @@ const ParentTable = ({
             value={searchValue}
             onChange={handleSearchChange}
             placeholder="Search..."
-            className="w-full rounded-full border border-[#0B4B31] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+            className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
       </div>
@@ -77,13 +77,13 @@ const ParentTable = ({
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
           <thead className="text-xs font-normal uppercase tracking-wide text-black/40">
             <tr>
-              <th className="px-4">Primary Parent</th>
-              <th className="px-4">Address</th>
-              <th className="px-4">Phone Number</th>
-              <th className="px-4">Invoices</th>
-              <th className="px-4">Spouse</th>
-              <th className="px-4">Children</th>
-              <th className="px-4 text-right">Actions</th>
+              <th className="px-4 font-normal text-[#0000008C]">Primary Parent</th>
+              <th className="px-4 font-normal text-[#0000008C]">Address</th>
+              <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
+              <th className="px-4 font-normal text-[#0000008C]">Invoices</th>
+              <th className="px-4 font-normal text-[#0000008C]">Spouse</th>
+              <th className="px-4 font-normal text-[#0000008C]">Children</th>
+              <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
             </tr>
           </thead>
           <tbody>
