@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
+import axios from "axios";
 
 const Page = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +27,12 @@ const Page = () => {
         setIsDropdownOpen(false);
     };
 
+    const setCookie = (name, value, days = 1) => {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = `${name}=${JSON.stringify(value)}; expires=${expires.toUTCString()}; path=/; SameSite=Strict`;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -37,26 +44,44 @@ const Page = () => {
             return;
         }
 
-        // UI-only build: simulate a successful login without hitting an API.
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        try {
+            const response = await axios.post('/api/auth/login', {
+                email,
+                password,
+                role
+            });
 
-        // Set cookie for UI testing - allows dashboard redirect to work
-        const userData = {
-            role: role,
-            email: email,
-            name: email.split('@')[0]
-        };
-        document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`; // 24 hours
+            const data = response.data;
 
-        router.push('/dashboard');
-        setIsLoading(false);
-        return;
+            const userData = {
+                email: data.email,
+                role: data.role,
+                token: data.token
+            };
+            
+            setCookie('user', userData, rememberMe ? 30 : 1);
+            
+            setCookie('token', data.token, rememberMe ? 30 : 1);
+
+            router.push('/dashboard');
+
+        } catch (error) {
+            console.error('Login error:', error);
+            if (error.response) {
+                setError(error.response.data.message || 'Login failed');
+            } else if (error.request) {
+                setError('Network error. Please check your connection.');
+            } else {
+                setError('An unexpected error occurred');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <div className="min-h-screen flex bg-gray-100 items-center justify-center p-6">
             <div className="bg-white rounded-3xl shadow-lg overflow-hidden w-full max-w-6xl grid md:grid-cols-2">
-                {/* Left Section */}
                 <div
                     className="text-white flex flex-col justify-center items-center p-12 min-h-[600px]"
                     style={{
@@ -78,8 +103,6 @@ const Page = () => {
                     </div>
                 </div>
 
-
-                {/* Right Section */}
                 <div className="p-12 flex flex-col justify-center bg-white">
                     <div className="mb-1">
                         <h2 className="font-medium text-[27px] leading-[136%] mb-1 text-[#2F2F2F]">
@@ -94,17 +117,16 @@ const Page = () => {
                         Please login to continue
                     </p>
 
-                    {/* Error Message */}
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
 
-                    {/* Login with Google Button */}
                     <button
                         type="button"
-                        className="w-full flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 rounded-xl px-4 py-3 mb-6 transition-colors shadow-sm"
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 rounded-xl px-4 py-3 mb-6 transition-colors shadow-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -115,7 +137,6 @@ const Page = () => {
                         <span className="text-[#2F2F2F] font-normal">Login with Google</span>
                     </button>
 
-                    {/* OR Separator */}
                     <div className="flex items-center mb-6">
                         <div className="flex-1 border-t border-gray-300"></div>
                         <span className="px-4 text-gray-600 text-sm font-medium">OR</span>
@@ -123,7 +144,6 @@ const Page = () => {
                     </div>
 
                     <form className="space-y-6" onSubmit={handleSubmit}>
-                        {/* Email Field */}
                         <div className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -142,13 +162,13 @@ const Page = () => {
                                     placeholder="example@gmail.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className=" text-gray-800 font-semibold outline-none placeholder-gray-500 w-full"
+                                    className=" text-gray-800 font-semibold outline-none placeholder-gray-500 w-full bg-transparent"
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                         </div>
 
-                        {/* Password Field */}
                         <div className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -169,12 +189,14 @@ const Page = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="bg-transparent text-gray-800 font-semibold outline-none placeholder-gray-500 w-full"
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="text-black ml-3"
+                                disabled={isLoading}
                             >
                                 {showPassword ? (
                                     <svg
@@ -219,8 +241,8 @@ const Page = () => {
                         {/* Role Selection - Custom Dropdown */}
                         <div className="relative w-full">
                             <div
-                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full cursor-pointer hover:bg-gray-300 transition-all duration-200"
+                                onClick={() => !isLoading && setIsDropdownOpen(!isDropdownOpen)}
+                                className={`flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full cursor-pointer hover:bg-gray-300 transition-all duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -252,7 +274,7 @@ const Page = () => {
                             </div>
 
                             {/* Dropdown Menu */}
-                            {isDropdownOpen && (
+                            {isDropdownOpen && !isLoading && (
                                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl overflow-hidden z-10 border border-gray-200 animate-slideDown">
                                     {roles.map((roleOption, index) => (
                                         <div
@@ -292,14 +314,15 @@ const Page = () => {
                                 <input
                                     type="checkbox"
                                     checked={rememberMe}
-                                    onChange={() => setRememberMe(!rememberMe)}
+                                    onChange={() => !isLoading && setRememberMe(!rememberMe)}
+                                    disabled={isLoading}
                                     className="mr-2 h-4 w-4 text-[#0B4B31] border-gray-300 rounded focus:ring-[#0B4B31]"
                                 />
                                 Remember me
                             </label>
                             <a
                                 href="#"
-                                className="text-[#0B4B31] font-semibold hover:underline"
+                                className={`text-[#0B4B31] font-semibold hover:underline ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
                             >
                                 Forgot Password?
                             </a>
@@ -309,16 +332,29 @@ const Page = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full text-white font-medium py-4 rounded-xl bg-[#0B4B31] hover:bg-[#084A2E] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm"
+                            className="w-full text-white font-medium py-4 rounded-xl bg-[#0B4B31] hover:bg-[#084A2E] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center gap-2"
                         >
-                            {isLoading ? "Logging in..." : "Login"}
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Logging in...
+                                </>
+                            ) : (
+                                "Login"
+                            )}
                         </button>
                     </form>
 
                     {/* Register Link */}
                     <p className="text-center text-gray-600 mt-8 font-medium">
                         Don't have an account?{" "}
-                        <a href="#" className="text-[#0B4B31] hover:underline font-semibold">
+                        <a 
+                            href="#" 
+                            className={`text-[#0B4B31] hover:underline font-semibold ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
+                        >
                             Register
                         </a>
                     </p>
@@ -329,5 +365,3 @@ const Page = () => {
 };
 
 export default Page;
-
-
