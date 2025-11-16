@@ -167,10 +167,10 @@ const ParentProfile = ({
                     👤
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-white">
+                    <p className="text-sm font-medium text-[#0B4B31]">
                       {child.name}
                     </p>
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/80">
+                    <p className="text-sm font-medium text-black">
                       ID: {child.id}
                     </p>
                   </div>
@@ -269,24 +269,24 @@ const ParentProfile = ({
               const getTabStyles = () => {
                 if (isActive) {
                   // Active tab: dark forest green with white text/icons
-                  return "bg-[#0B4B31] text-white";
+                  return "bg-[#96E2D6FA] text-black font-medium";
                 }
                 // Inactive tabs with different colors
                 switch (tab.key) {
                   case "about":
                     // Light teal/mint green with dark grey
-                    return "bg-[#B9F2E3] text-[#4A5568]";
+                    return "bg-[#0B4B3185] text-white font-medium";
                   case "children":
                     // Muted medium-dark green-grey with light grey
-                    return "bg-[#6B7F7A] text-[#E0ECE6]";
+                    return "bg-[#0B4B3185] text-white font-medium";
                   case "payments":
                     // Solid medium-dark grey with light grey
-                    return "bg-[#6B7280] text-[#E0ECE6]";
+                    return "bg-[#767D7A] text-white font-medium";
                   case "comments":
                     // Very light pastel mint green with dark grey
-                    return "bg-[#E1F4EC] text-[#4A5568]";
+                    return "bg-[#39DE5433] text-black font-medium";
                   default:
-                    return "bg-[#E0ECE6] text-[#4A5568]";
+                    return "bg-[#0B4B31] text-white font-medium";
                 }
               };
               return (
@@ -294,7 +294,7 @@ const ParentProfile = ({
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-semibold transition ${getTabStyles()}`}
+                  className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-medium transition ${getTabStyles()}`}
                 >
                   <span className="text-lg">📁</span>
                   {tab.label}
@@ -336,12 +336,12 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#0B4B31]">Invoices</h3>
+        <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">Invoices</h3>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
-          <FileSpreadsheet size={16} />
+        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90">
+          <FileSpreadsheet size={14} />
           Export Data
         </button>
         <div className="flex flex-1 items-center gap-3 sm:ml-4">
@@ -356,28 +356,28 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
         </div>
       </div>
 
-      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#A8E8D5]">
         See All
-        <ArrowUpRight size={16} />
+        <ArrowUpRight size={14} />
       </button>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#CAD9D2]">
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Items
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Due Amount
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Due Date
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Status
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 View
               </th>
             </tr>
@@ -386,24 +386,24 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
             {invoices.length > 0 ? (
               invoices.map((invoice) => (
                 <tr key={invoice.id} className="border-b border-[#CAD9D2]">
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {invoice.item}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {invoice.dueAmount}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {invoice.dueDate}
                   </td>
                   <td className="py-4">
-                    <span className="inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
+                    <span className="inline-block rounded-full bg-[#F14336] px-3 py-1 text-xs font-normal text-white">
                       {invoice.status}
                     </span>
                   </td>
                   <td className="py-4">
                     <button
                       onClick={() => onViewInvoice(invoice)}
-                      className="rounded-full bg-[#0B4B31] px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                      className="rounded-full bg-[#0B4B31] px-4 py-1.5 text-xs font-normal text-white transition hover:bg-[#0B4B31]/90"
                     >
                       View
                     </button>
@@ -430,7 +430,7 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#0B4B31]">Cards</h3>
+        <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">Cards</h3>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -443,11 +443,11 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
               className="w-full rounded-full border border-gray-200 bg-white px-10 py-2 text-sm focus:border-[#0B4B31] focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
+          <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0B4B31]/90">
             <FileSpreadsheet size={16} />
             Export Data
           </button>
-          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]">
             See All
             <ArrowUpRight size={16} />
           </button>
@@ -455,12 +455,12 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
         <div className="flex gap-3">
           <button
             onClick={onAddCard}
-            className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]"
+            className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-xs font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]"
           >
             <CreditCard size={16} />
             Add New Card
           </button>
-          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-xs font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]">
             <CreditCard size={16} />
             Add New Bank
           </button>
@@ -471,16 +471,16 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#CAD9D2]">
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Card Ending
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Expiring Date
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Default
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Action
               </th>
             </tr>
@@ -489,17 +489,17 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
             {cards.length > 0 ? (
               cards.map((card) => (
                 <tr key={card.id} className="border-b border-[#CAD9D2]">
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {card.cardEnding}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {card.expiringDate}
                   </td>
                   <td className="py-4">
                     <span
-                      className={`text-sm font-semibold ${card.isDefault
-                        ? "text-green-600"
-                        : "text-red-600"
+                      className={`text-sm font-medium ${card.isDefault
+                        ? "text-[#0B4B31]"
+                        : "text-[#F14336]"
                         }`}
                     >
                       {card.isDefault ? "Default" : "Not Default"}
@@ -508,7 +508,7 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
                   <td className="py-4">
                     <button
                       onClick={() => onEditCard(card)}
-                      className="flex items-center gap-1 rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                      className="flex items-center gap-1 rounded-full bg-[#0B4B31] px-3 py-1.5 text-sm font-normal text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
                     >
                       Take Action
                       <ChevronDown size={14} />
@@ -540,7 +540,7 @@ const PaymentCardModal = ({ card, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="relative w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-[#0B4B31]">
+          <h2 className="text-[0.9375rem] font-medium text-[#0B4B31]">
             {isEditing ? "Edit Payment Method" : "Add Payment Method"}
           </h2>
           <button
@@ -553,7 +553,7 @@ const PaymentCardModal = ({ card, onClose }) => {
 
         <div className="space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#0B4B31]">
+            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
               Card Number
             </label>
             <input
@@ -563,7 +563,7 @@ const PaymentCardModal = ({ card, onClose }) => {
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#0B4B31]">
+            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
               Expiration
             </label>
             <input
@@ -573,7 +573,7 @@ const PaymentCardModal = ({ card, onClose }) => {
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#0B4B31]">
+            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
               CVC
             </label>
             <input
@@ -610,11 +610,11 @@ const CommentsTab = ({ comments = [] }) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#0B4B31]">Comments</h3>
+        <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">Comments</h3>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
+        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90">
           <FileSpreadsheet size={16} />
           Export Data
         </button>
@@ -630,7 +630,7 @@ const CommentsTab = ({ comments = [] }) => {
         </div>
       </div>
 
-      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#A8E8D5]">
         See All
         <ArrowUpRight size={16} />
       </button>
@@ -639,16 +639,16 @@ const CommentsTab = ({ comments = [] }) => {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#CAD9D2]">
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Comments
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Created By
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Date
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Action
               </th>
             </tr>
@@ -657,13 +657,13 @@ const CommentsTab = ({ comments = [] }) => {
             {comments.length > 0 ? (
               comments.map((comment, index) => (
                 <tr key={index} className="border-b border-[#CAD9D2]">
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {comment.text}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {comment.createdBy}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {comment.date}
                   </td>
                   <td className="py-4">
