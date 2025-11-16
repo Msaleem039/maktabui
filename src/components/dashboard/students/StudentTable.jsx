@@ -47,7 +47,7 @@ const StudentTable = ({
   const handleActionClick = (action, studentId, event) => {
     event.stopPropagation();
     setOpenDropdownId(null);
-    
+
     if (action === "view") {
       router.push(`/dashboard/student/${studentId}`);
     } else if (action === "edit") {
@@ -113,20 +113,20 @@ const StudentTable = ({
             value={searchValue}
             onChange={handleSearchChange}
             placeholder="Search..."
-            className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+            className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
       </div>
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-          <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+          <thead className="text-xs font-normal uppercase tracking-wide text-[#00000066]">
             <tr>
-              <th className="px-4">Student Name</th>
-              <th className="px-4">Parent Names</th>
-              <th className="px-4">Phone Number</th>
-              <th className="px-4">Class</th>
-              <th className="px-4 text-right">Actions</th>
+              <th className="px-4 font-normal text-[#0000008C]">Student Name</th>
+              <th className="px-4 font-normal text-[#0000008C]">Parent Names</th>
+              <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
+              <th className="px-4 font-normal text-[#0000008C]">Class</th>
+              <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -137,18 +137,16 @@ const StudentTable = ({
                 <tr
                   key={student.id}
                   onClick={() => handleRowSelect(student.id)}
-                  className={`group cursor-pointer rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm transition hover:shadow-md ${
-                    isSelected ? "bg-[#C9DCD4] border-[#AECDBF]" : ""
-                  }`}
+                  className={`group cursor-pointer rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm transition hover:shadow-md ${isSelected ? "bg-[#C9DCD4] border-[#AECDBF]" : ""
+                    }`}
                 >
                   <td className="px-4 py-3 font-medium text-[#0B4B31]">
                     <div className="relative flex items-center gap-3 pl-3">
                       <span
-                        className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${
-                          isSelected
-                            ? "bg-[#0B4B31]"
-                            : "bg-transparent group-hover:bg-[#0B4B31]/50"
-                        }`}
+                        className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${isSelected
+                          ? "bg-[#0B4B31]"
+                          : "bg-transparent group-hover:bg-[#0B4B31]/50"
+                          }`}
                       ></span>
                       <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F5EF] text-sm">
                         👤
@@ -156,29 +154,29 @@ const StudentTable = ({
                       <div className="flex flex-col">
                         <Link
                           href={`/dashboard/student/${student.id}`}
-                          className="font-semibold text-[#0B4B31] transition hover:text-[#0B4B31]/70"
+                          className="font-medium text-[#1E1E1E] transition hover:text-[#0B4B31]/70"
                         >
                           {student.name}
                         </Link>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#555]">
+                  <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#E8F5EF] text-xs">
                         👤
                       </span>
-                      {student.parentName}
+                      <span className="font-medium text-[#1E1E1E]">{student.parentName}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#555]">{student.phone}</td>
-                  <td className="px-4 py-3 text-[#555]">{student.class}</td>
+                  <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.phone}</td>
+                  <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.class}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="relative inline-block">
                       <button
                         type="button"
                         onClick={(e) => toggleDropdown(student.id, e)}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                        className="inline-flex items-center gap-2 rounded-full text-[#71DD8C] bg-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#0B4B31]/90"
                       >
                         Take Action
                         <span>▾</span>
@@ -198,11 +196,10 @@ const StudentTable = ({
                                 onClick={(e) =>
                                   handleActionClick(item.action, student.id, e)
                                 }
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
-                                  index === 0
-                                    ? ""
-                                    : "border-t border-[#E2E7E4]"
-                                } hover:bg-[#E5EFEB]`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${index === 0
+                                  ? ""
+                                  : "border-t border-[#E2E7E4]"
+                                  } hover:bg-[#E5EFEB]`}
                               >
                                 <Icon size={16} className="text-[#0B4B31]" />
                                 <span>{item.label}</span>

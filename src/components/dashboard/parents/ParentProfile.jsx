@@ -4,8 +4,6 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import {
   Phone,
-  Mail,
-  MapPin,
   Calendar,
   Users2,
   Receipt,
@@ -116,12 +114,12 @@ const ParentProfile = ({
     switch (activeTab) {
       case "about":
         return (
-          <div className="rounded-[30px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
+          <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
             <SectionTitle>Primary Information</SectionTitle>
             <div className="mt-5 grid gap-4 text-sm text-[#123629] sm:grid-cols-2 xl:grid-cols-4">
               <InfoItem icon={Phone} label="Phone" value={profile.phone} />
-              <InfoItem icon={Mail} label="Email" value={profile.email} />
-              <InfoItem icon={MapPin} label="Location" value={profile.location} />
+              <InfoItem iconSrc="/Email.svg" label="Email" value={profile.email} />
+              <InfoItem iconSrc="/Location.svg" label="Location" value={profile.location} />
               <InfoItem
                 icon={Calendar}
                 label="Member Since"
@@ -144,12 +142,12 @@ const ParentProfile = ({
                 value={profile.spouse.phone}
               />
               <InfoItem
-                icon={Mail}
+                iconSrc="/Email.svg"
                 label="Email"
                 value={profile.spouse.email}
               />
               <InfoItem
-                icon={MapPin}
+                iconSrc="/Location.svg"
                 label="Location"
                 value={profile.spouse.location}
               />
@@ -158,36 +156,36 @@ const ParentProfile = ({
         );
       case "children":
         return (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
             {profile.children.map((child) => (
               <div
                 key={child.id}
-                className="flex flex-col gap-5 rounded-[26px] border border-[#D2E2DB] bg-white/85 p-6 shadow-sm"
+                className="flex flex-col gap-5 rounded-[26px] border-[#00000030] bg-[#CEDBD6] px-6 py-10 shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#E1F4EC] text-3xl text-[#0B4B31]">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur text-3xl text-white">
                     👤
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-[#0B4B31]">
+                    <p className="text-sm font-medium text-[#0B4B31]">
                       {child.name}
                     </p>
-                    <p className="text-xs uppercase tracking-[0.2em] text-[#6A7A72]">
+                    <p className="text-sm font-medium text-black">
                       ID: {child.id}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3 text-sm text-[#123629]">
-                  <InfoRow label="Classes" value={child.classes} />
-                  <InfoRow label="Date Of Birth" value={child.birthDate} />
+                <div className="space-y-3 text-sm">
+                  <ChildInfoRow label="Classes" value={child.classes} />
+                  <ChildInfoRow label="Date Of Birth" value={child.birthDate} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <button className="rounded-full border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <button className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-white/25 backdrop-blur">
                     View Profile
                   </button>
-                  <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
+                  <button className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-white/90">
                     Edit Profile
                   </button>
                 </div>
@@ -258,7 +256,7 @@ const ParentProfile = ({
               </p>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:mt-0 sm:grid-cols-2 sm:gap-6">
+            <div className="mt-4 grid gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 ">
               <StatusCard stats={profile.stats} />
               <QuickActionCard actions={profile.quickActions} />
             </div>
@@ -271,24 +269,24 @@ const ParentProfile = ({
               const getTabStyles = () => {
                 if (isActive) {
                   // Active tab: dark forest green with white text/icons
-                  return "bg-[#0B4B31] text-white";
+                  return "bg-[#96E2D6FA] text-black font-medium";
                 }
                 // Inactive tabs with different colors
                 switch (tab.key) {
                   case "about":
                     // Light teal/mint green with dark grey
-                    return "bg-[#B9F2E3] text-[#4A5568]";
+                    return "bg-[#0B4B3185] text-white font-medium";
                   case "children":
                     // Muted medium-dark green-grey with light grey
-                    return "bg-[#6B7F7A] text-[#E0ECE6]";
+                    return "bg-[#0B4B3185] text-white font-medium";
                   case "payments":
                     // Solid medium-dark grey with light grey
-                    return "bg-[#6B7280] text-[#E0ECE6]";
+                    return "bg-[#767D7A] text-white font-medium";
                   case "comments":
                     // Very light pastel mint green with dark grey
-                    return "bg-[#E1F4EC] text-[#4A5568]";
+                    return "bg-[#39DE5433] text-black font-medium";
                   default:
-                    return "bg-[#E0ECE6] text-[#4A5568]";
+                    return "bg-[#0B4B31] text-white font-medium";
                 }
               };
               return (
@@ -296,7 +294,7 @@ const ParentProfile = ({
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-semibold transition ${getTabStyles()}`}
+                  className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-medium transition ${getTabStyles()}`}
                 >
                   <span className="text-lg">📁</span>
                   {tab.label}
@@ -338,12 +336,12 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#0B4B31]">Invoices</h3>
+        <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">Invoices</h3>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
-          <FileSpreadsheet size={16} />
+        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90">
+          <FileSpreadsheet size={14} />
           Export Data
         </button>
         <div className="flex flex-1 items-center gap-3 sm:ml-4">
@@ -358,28 +356,28 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
         </div>
       </div>
 
-      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#A8E8D5]">
         See All
-        <ArrowUpRight size={16} />
+        <ArrowUpRight size={14} />
       </button>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#CAD9D2]">
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Items
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Due Amount
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Due Date
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Status
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 View
               </th>
             </tr>
@@ -388,24 +386,24 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
             {invoices.length > 0 ? (
               invoices.map((invoice) => (
                 <tr key={invoice.id} className="border-b border-[#CAD9D2]">
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {invoice.item}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {invoice.dueAmount}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {invoice.dueDate}
                   </td>
                   <td className="py-4">
-                    <span className="inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
+                    <span className="inline-block rounded-full bg-[#F14336] px-3 py-1 text-xs font-normal text-white">
                       {invoice.status}
                     </span>
                   </td>
                   <td className="py-4">
                     <button
                       onClick={() => onViewInvoice(invoice)}
-                      className="rounded-full bg-[#0B4B31] px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                      className="rounded-full bg-[#0B4B31] px-4 py-1.5 text-xs font-normal text-white transition hover:bg-[#0B4B31]/90"
                     >
                       View
                     </button>
@@ -432,7 +430,7 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#0B4B31]">Cards</h3>
+        <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">Cards</h3>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -445,11 +443,11 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
               className="w-full rounded-full border border-gray-200 bg-white px-10 py-2 text-sm focus:border-[#0B4B31] focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
+          <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0B4B31]/90">
             <FileSpreadsheet size={16} />
             Export Data
           </button>
-          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]">
             See All
             <ArrowUpRight size={16} />
           </button>
@@ -457,12 +455,12 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
         <div className="flex gap-3">
           <button
             onClick={onAddCard}
-            className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]"
+            className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-xs font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]"
           >
             <CreditCard size={16} />
             Add New Card
           </button>
-          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-xs font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]">
             <CreditCard size={16} />
             Add New Bank
           </button>
@@ -473,16 +471,16 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#CAD9D2]">
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Card Ending
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Expiring Date
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Default
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Action
               </th>
             </tr>
@@ -491,19 +489,18 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
             {cards.length > 0 ? (
               cards.map((card) => (
                 <tr key={card.id} className="border-b border-[#CAD9D2]">
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {card.cardEnding}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {card.expiringDate}
                   </td>
                   <td className="py-4">
                     <span
-                      className={`text-sm font-semibold ${
-                        card.isDefault
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+                      className={`text-sm font-medium ${card.isDefault
+                        ? "text-[#0B4B31]"
+                        : "text-[#F14336]"
+                        }`}
                     >
                       {card.isDefault ? "Default" : "Not Default"}
                     </span>
@@ -511,7 +508,7 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
                   <td className="py-4">
                     <button
                       onClick={() => onEditCard(card)}
-                      className="flex items-center gap-1 rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                      className="flex items-center gap-1 rounded-full bg-[#0B4B31] px-3 py-1.5 text-sm font-normal text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
                     >
                       Take Action
                       <ChevronDown size={14} />
@@ -543,7 +540,7 @@ const PaymentCardModal = ({ card, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="relative w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-[#0B4B31]">
+          <h2 className="text-[0.9375rem] font-medium text-[#0B4B31]">
             {isEditing ? "Edit Payment Method" : "Add Payment Method"}
           </h2>
           <button
@@ -556,7 +553,7 @@ const PaymentCardModal = ({ card, onClose }) => {
 
         <div className="space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#0B4B31]">
+            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
               Card Number
             </label>
             <input
@@ -566,7 +563,7 @@ const PaymentCardModal = ({ card, onClose }) => {
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#0B4B31]">
+            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
               Expiration
             </label>
             <input
@@ -576,7 +573,7 @@ const PaymentCardModal = ({ card, onClose }) => {
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#0B4B31]">
+            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
               CVC
             </label>
             <input
@@ -613,11 +610,11 @@ const CommentsTab = ({ comments = [] }) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#0B4B31]">Comments</h3>
+        <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">Comments</h3>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
+        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90">
           <FileSpreadsheet size={16} />
           Export Data
         </button>
@@ -633,7 +630,7 @@ const CommentsTab = ({ comments = [] }) => {
         </div>
       </div>
 
-      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#A8E8D5]">
+      <button className="mb-6 flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#A8E8D5]">
         See All
         <ArrowUpRight size={16} />
       </button>
@@ -642,16 +639,16 @@ const CommentsTab = ({ comments = [] }) => {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#CAD9D2]">
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Comments
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Created By
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Date
               </th>
-              <th className="pb-3 text-left text-sm font-semibold text-[#7D8D87]">
+              <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
                 Action
               </th>
             </tr>
@@ -660,13 +657,13 @@ const CommentsTab = ({ comments = [] }) => {
             {comments.length > 0 ? (
               comments.map((comment, index) => (
                 <tr key={index} className="border-b border-[#CAD9D2]">
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {comment.text}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {comment.createdBy}
                   </td>
-                  <td className="py-4 text-sm font-semibold text-[#123629]">
+                  <td className="py-4 text-sm font-medium text-[#1E1E1E]">
                     {comment.date}
                   </td>
                   <td className="py-4">
@@ -695,19 +692,29 @@ const CommentsTab = ({ comments = [] }) => {
 };
 
 const SectionTitle = ({ children }) => (
-  <h3 className="text-lg font-semibold text-[#0B4B31]">{children}</h3>
+  <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">{children}</h3>
 );
 
-const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center gap-3 rounded-[18px] bg-white px-4 py-3 shadow-[0_12px_30px_-24px_rgba(0,0,0,0.45)]">
-    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0B4B31]/10 text-[#0B4B31]">
-      <Icon size={16} />
+const InfoItem = ({ icon: Icon, iconSrc, label, value }) => (
+  <div className="flex items-center gap-3 rounded-[18px] px-4 py-3">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full">
+      {iconSrc ? (
+        <Image
+          src={iconSrc}
+          alt={label}
+          width={20}
+          height={20}
+          className="object-contain"
+        />
+      ) : Icon ? (
+        <Icon size={20} className="text-[#0B4B31] fill-[#0B4B31]" />
+      ) : null}
     </div>
     <div className="flex flex-col">
-      <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7D8D87]">
+      <span className="text-sm font-medium text-[#0B4B31]">
         {label}
       </span>
-      <span className="text-sm font-semibold text-[#123629]">{value}</span>
+      <span className="text-xs font-medium text-black">{value}</span>
     </div>
   </div>
 );
@@ -721,27 +728,36 @@ const InfoRow = ({ label, value }) => (
   </div>
 );
 
-const StatusCard = ({ stats }) => (
-  <div className="rounded-[26px] bg-gradient-to-br from-white/95 via-white/85 to-[#C7E7DD]/60 p-5 text-[#0B4B31] shadow-[0_24px_60px_-50px_rgba(0,0,0,0.65)] backdrop-blur">
-    <h3 className="text-sm font-semibold">Account Status</h3>
-    <div className="mt-4 space-y-3 text-sm">
-      <StatusRow label="Status" value={stats?.status ?? "Active"} />
-      <StatusRow label="Waiting List" value={stats?.waitingList ?? "No"} />
-      <StatusRow label="Opted Out of Text" value={stats?.optedOut ?? "No"} />
-    </div>
+const ChildInfoRow = ({ label, value }) => (
+  <div className="flex items-center justify-between rounded-[18px] bg-gradient-to-r from-[#85A598] to-[#0B4B31] px-4 py-3">
+    <span className="text-sm font-medium text-[#000000]">
+      {label}
+    </span>
+    <span className="text-sm font-medium text-white">{value}</span>
   </div>
 );
 
+const StatusCard = ({ stats }) => (
+  <div className="rounded-[26px] p-5 bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74]">
+    <h3 className="text-base text-white text-center font-extrabold">Account Status</h3>
+    <div div className="mt-4 space-y-3 text-sm" >
+      <StatusRow label="Status" value={stats?.status ?? "Active"} />
+      <StatusRow label="Waiting List" value={stats?.waitingList ?? "No"} />
+      <StatusRow label="Opted Out of Text" value={stats?.optedOut ?? "No"} />
+    </div >
+  </div >
+);
+
 const StatusRow = ({ label, value }) => (
-  <div className="flex items-center justify-between rounded-[14px] bg-[#EDF3F0] px-3 py-2">
-    <span className="text-xs font-semibold text-[#6F8279]">{label}</span>
-    <span className="text-sm font-semibold text-[#0B4B31]">{value}</span>
+  <div className="flex items-center justify-between rounded-[14px] bg-[#F8F8F8] px-3 py-2">
+    <span className="text-[0.6875rem] font-normal text-black">{label}</span>
+    <span className="text-[0.6875rem] font-semibold text-black">{value}</span>
   </div>
 );
 
 const QuickActionCard = ({ actions = [] }) => (
-  <div className="rounded-[26px] bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74] p-5 text-white shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur">
-    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
+  <div className="rounded-[26px] bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74] py-5 px-10 text-white shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur">
+    <h3 className="text-base font-extrabold text-center text-white">
       Quick Action
     </h3>
     <div className="mt-4 space-y-3">
@@ -749,10 +765,10 @@ const QuickActionCard = ({ actions = [] }) => (
         <button
           key={label}
           type="button"
-          className="flex w-full items-center justify-between rounded-[16px] bg-white/15 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/25"
+          className="flex w-full items-center justify-between rounded-[16px] bg-[#F8F8F8] px-4 py-3 text-[0.6875rem] font-normal text-black transition"
         >
           <span className="flex items-center gap-2">
-            {Icon ? <Icon size={16} /> : null}
+            {Icon ? <Icon size={14} /> : null}
             {label}
           </span>
           <span>↗</span>

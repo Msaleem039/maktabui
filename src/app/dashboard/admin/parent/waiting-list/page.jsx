@@ -51,7 +51,7 @@ export default function ParentsWaitingListPage() {
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
                 <th className="px-4">ID</th>
-                <th className="px-4">Primary Parent</th>
+                <th className="px-4">Primary Parent </th>
                 <th className="px-4">Data Added</th>
                 <th className="px-4">Children</th>
                 <th className="px-4">Action</th>

@@ -68,7 +68,7 @@ const StudentProfile = ({
       case "about":
         return (
           <div className="space-y-6">
-            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
+            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
               <SectionTitle>Basic Information</SectionTitle>
               <div className="mt-5 grid gap-4 text-sm text-[#123629] sm:grid-cols-2 xl:grid-cols-3">
                 <InfoItem
@@ -81,7 +81,7 @@ const StudentProfile = ({
               </div>
             </div>
 
-            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
+            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
               <SectionTitle>Parent/Guardian Info</SectionTitle>
               <div className="mt-5 space-y-4">
                 {profile.parents.map((parent, index) => (
@@ -187,6 +187,26 @@ const StudentProfile = ({
         <nav className="mt-8 flex flex-wrap items-center gap-3">
           {tabs.map((tab) => {
             const isActive = tab.key === activeTab;
+
+            const getTabStyles = () => {
+              if (isActive) {
+                // Active tab styling aligned with ParentProfile
+                return "bg-[#96E2D6FA] text-black font-medium";
+              }
+
+              switch (tab.key) {
+                case "about":
+                case "attendance":
+                case "assignments":
+                case "files":
+                  return "bg-[#0B4B3185] text-white font-medium";
+                case "comments":
+                  return "bg-[#39DE5433] text-black font-medium";
+                default:
+                  return "bg-[#0B4B31] text-white font-medium";
+              }
+            };
+
             const tabIcons = {
               about: "📄",
               attendance: "📅",
@@ -194,16 +214,13 @@ const StudentProfile = ({
               files: "📁",
               comments: "💬",
             };
+
             return (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-semibold transition ${
-                  isActive
-                    ? "bg-[#0B4B31] text-white"
-                    : "bg-[#E0ECE6] text-[#0B4B31]/70 hover:bg-[#D4E6DE]"
-                }`}
+                className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-medium transition ${getTabStyles()}`}
               >
                 <span className="text-lg">{tabIcons[tab.key] || "📁"}</span>
                 {tab.label}
@@ -220,19 +237,19 @@ const StudentProfile = ({
 };
 
 const SectionTitle = ({ children }) => (
-  <h3 className="text-lg font-semibold text-[#0B4B31]">{children}</h3>
+  <h3 className="text-[0.9375rem] font-medium text-[#0B4B31]">{children}</h3>
 );
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center gap-3 rounded-[18px] bg-white px-4 py-3 shadow-[0_12px_30px_-24px_rgba(0,0,0,0.45)]">
-    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0B4B31]/10 text-[#0B4B31]">
-      <Icon size={16} />
+  <div className="flex items-center gap-3 rounded-[18px] px-4 py-3">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full">
+      <Icon size={16} className="text-[#0B4B31]" />
     </div>
     <div className="flex flex-col">
-      <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7D8D87]">
+      <span className="text-sm font-medium text-[#0B4B31]">
         {label}
       </span>
-      <span className="text-sm font-semibold text-[#123629]">{value}</span>
+      <span className="text-xs font-medium text-black">{value}</span>
     </div>
   </div>
 );

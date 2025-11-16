@@ -37,20 +37,13 @@ export default function AboutPage() {
 
           <main className="relative z-10 flex min-h-screen items-center pt-24">
             <div className="mx-auto w-full max-w-6xl px-6 py-16 lg:px-8">
-              <div className="max-w-2xl space-y-6 text-left">
-                <h1 className="text-4xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
-                  <span className="text-black">MaktabOS</span>{" "}
-                  <span className="text-white">– The Complete Operating System for</span>
-                  <br />
-                  <span className="text-white text-5xl md:text-6xl lg:text-7xl">
-                    Islamic Schools
-                  </span>
+              <div className="max-w-6xl space-y-6 text-left">
+                <h1 className="text-3xl leading-tight tracking-tight font-medium  text-white md:text-5xl lg:text-[3.75rem]">
+                  <span className="text-black">MaktabOS</span> – The Complete Operating System for Islamic Schools
                 </h1>
 
-                <p className="max-w-xl text-lg font-medium leading-relaxed text-white/90 md:text-xl lg:text-2xl">
-                  One platform. Endless possibilities. Manage attendance,
-                  communication, billing, and analytics — all from your own
-                  branded dashboard
+                <p className="max-w-240 text-base font-medium text-black  sm:text-lg md:text-xl lg:text-[1.875rem]">
+                  <span>One platform. Endless possibilities. Manage attendance, communication, billing, and analytics — all <br /> from your own branded dashboard.</span>
                 </p>
               </div>
             </div>
@@ -80,15 +73,15 @@ export default function AboutPage() {
 
           {/* Right Side - Text Content */}
           <div className="flex-1 space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#33D0A2]">
+            <p className="text-xl font-bold  text-[#0B4B31]">
               About Us
             </p>
 
-            <h2 className="text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+            <h2 className="text-4xl font-bold text-[#1E1E1E] md:text-5xl lg:text-[3rem]">
               About MaktabOS
             </h2>
 
-            <div className="space-y-4 text-base leading-relaxed text-white/90 md:text-lg">
+            <div className="space-y-4 text-base font-medium leading-relaxed text-[#1E1E1EC7] md:text-xl">
               <p>
                 MaktabOS is a modern, modular "Operating System" built
                 exclusively for Islamic schools and academies. We provide your
@@ -106,7 +99,7 @@ export default function AboutPage() {
 
             <a
               href="#learn-more"
-              className="inline-block rounded-lg bg-[#0B4B31] px-8 py-3 text-base font-semibold text-white transition hover:bg-[#0A492F]"
+              className="inline-block rounded-lg bg-[#0B4B31] px-8 py-3 text-base font-bold text-white transition hover:bg-[#0A492F]"
             >
               Learn More
             </a>

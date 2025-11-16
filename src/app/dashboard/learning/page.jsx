@@ -66,13 +66,13 @@ export default function LearningPage() {
 
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+            <thead className="text-xs font-normal uppercase tracking-wide text-[#00000066]">
               <tr>
-                <th className="px-4">Learning Name</th>
-                <th className="px-4">Description</th>
-                <th className="px-4">Type</th>
-                <th className="px-4">Status</th>
-                <th className="px-4 text-right">Actions</th>
+                <th className="px-4 font-normal text-[#0000008C]">Learning Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Description</th>
+                <th className="px-4 font-normal text-[#0000008C]">Type</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -89,11 +89,11 @@ export default function LearningPage() {
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
                     <td className="px-4 py-3 font-medium text-[#0B4B31]">{item.name}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.description}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.type}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.status}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{item.description}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{item.type}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{item.status}</td>
                     <td className="px-4 py-3 text-right">
-                      <button className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90">
+                      <button className="inline-flex items-center gap-2 rounded-full text-[#71DD8C] bg-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#0B4B31]/90">
                         Take Action
                         <span>▾</span>
                       </button>

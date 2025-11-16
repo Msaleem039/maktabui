@@ -47,16 +47,16 @@ export default function WaitingListPage() {
         </div>
 
         <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+          <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#1E1E1E]">
+            <thead className="text-xs font-normal uppercase tracking-wide text-[#00000066]">
               <tr>
-                <th className="px-4">Student Name</th>
-                <th className="px-4">Parent Name</th>
-                <th className="px-4">Age</th>
-                <th className="px-4">Gender</th>
-                <th className="px-4">Phone</th>
-                <th className="px-4">Added</th>
-                <th className="px-4 text-right">Action</th>
+                <th className="px-4 font-normal text-[#0000008C]">Student Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Age</th>
+                <th className="px-4 font-normal text-[#0000008C]">Gender</th>
+                <th className="px-4 font-normal text-[#0000008C]">Phone</th>
+                <th className="px-4 font-normal text-[#0000008C]">Added</th>
+                <th className="px-4 font-normal text-right text-[#0000008C]">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -73,11 +73,11 @@ export default function WaitingListPage() {
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
                     <td className="px-4 py-3 font-medium text-[#0B4B31]">{student.name}</td>
-                    <td className="px-4 py-3 text-[#555]">{student.parentName}</td>
-                    <td className="px-4 py-3 text-[#555]">{student.age}</td>
-                    <td className="px-4 py-3 text-[#555]">{student.gender}</td>
-                    <td className="px-4 py-3 text-[#555]">{student.phone}</td>
-                    <td className="px-4 py-3 text-[#555]">{student.added}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{student.parentName}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{student.age}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{student.gender}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{student.phone}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{student.added}</td>
                     <td className="px-4 py-3 text-right">
                       <button className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90">
                         Take Action

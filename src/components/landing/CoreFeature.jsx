@@ -8,58 +8,58 @@ const features = [
     description:
       "Secure multi-role access for admins, teachers, parents, and students.",
     image: "/core1.svg",
-    background: "#BFEFD8",
-    textColor: "#063522",
+    background: "#94E9B8",
+    textColor: "#262626",
   },
   {
     title: "DashboardOS",
     description:
-      "Intuitive dashboards with widgets and insights tailored to each user.",
+      "Intuitive dashboards with widgets and insights per user type.",
     image: "/core2.svg",
-    background: "#194F38",
+    background: "#3E715C",
     textColor: "#FFFFFF",
   },
   {
     title: "Attendance Management",
-    description: "Assign teachers, manage subjects, and set schedules easily.",
+    description: "Assign teachers, manage subjects, and set schedules.",
     image: "/core3.svg",
-    background: "#E4F3FF",
-    textColor: "#0A3D2B",
+    background: "#F0F9FF",
+    textColor: "#262626",
   },
   {
     title: "Class & Teacher Management",
-    description: "Organize classes, subjects, and teaching assignments.",
+    description: "Assign teachers, manage subjects, and set schedules.",
     image: "/core4.svg",
-    background: "#ECFCE8",
+    background: "#EBFFEE",
     textColor: "#063522",
   },
   {
-    title: "Student Progress",
-    description: "Track academics, behavior, and Quran memorization progress.",
+    title: " Payments & Billing",
+    description: "Collect tuition and fees online, generate invoices, and track balances.",
     image: "/core5.svg",
-    background: "#FDF2E0",
+    background: "#FFFBEB",
     textColor: "#063522",
   },
   {
-    title: "Parent Communication",
-    description: "Send announcements, reminders, and secure messages.",
+    title: "Parent Portal",
+    description: "Parents can view attendance, grades, announcements, and payments",
     image: "/core7.svg",
-    background: "#DCD5FF",
+    background: "#FEF2F2",
     textColor: "#063522",
   },
   {
-    title: "Finance & Fees",
-    description: "Manage payments, invoices, and receipts with ease.",
+    title: "Messaging Center",
+    description: "Send announcements, reminders, and SMS/email notifications",
     image: "/core8.svg",
-    background: "#FFECE6",
+    background: "#F0F9FF",
     textColor: "#063522",
   },
   {
-    title: "Operations & Logistics",
-    description: "Oversee inventory, facility requests, and daily workflows.",
+    title: "Analytics",
+    description: "Monitor enrollment, finances, and attendance trends in one place",
     image: "/core9.svg",
-    background: "#DFF1F9",
-    textColor: "#063522",
+    background: "#0B4B31F2",
+    textColor: "#FFFFFF",
   },
 ];
 
@@ -71,8 +71,8 @@ const CoreFeature = () => {
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       <div className="mx-auto max-w-6xl px-6 md:px-10">
-        <div className="mx-auto mb-16 max-w-3xl text-center">
-          <h2 className="text-4xl font-bold text-[#0B4B31] md:text-5xl">
+        <div className="mx-auto mb-16 max-w-6xl text-center">
+          <h2 className="text-3xl font-bold text-[#0B4B31] md:text-4xl lg:text-5xl">
             Core Features
           </h2>
         </div>
@@ -99,18 +99,16 @@ const CoreFeature = () => {
 
               <div className="space-y-3">
                 <h3
-                  className={`text-2xl font-semibold ${
-                    feature.textColor === "#FFFFFF" ? "text-white" : ""
-                  }`}
+                  className={`text-2xl font-semibold ${feature.textColor === "#FFFFFF" ? "text-white" : ""
+                    }`}
                 >
                   {feature.title}
                 </h3>
                 <p
-                  className={`text-base leading-7 ${
-                    feature.textColor === "#FFFFFF"
-                      ? "text-white/80"
-                      : "text-[#063522]/80"
-                  }`}
+                  className={`text-base leading-7 ${feature.textColor === "#FFFFFF"
+                    ? "text-white"
+                    : "text-[#737373]"
+                    }`}
                 >
                   {feature.description}
                 </p>

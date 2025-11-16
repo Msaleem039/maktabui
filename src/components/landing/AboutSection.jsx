@@ -9,11 +9,11 @@ const AboutSection = () => {
       className="bg-[#0B4B31] pt-24 pb-10 text-white"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
-      <div className="relative mx-auto mb-8 flex w-full max-w-4xl items-center justify-center px-6">
+      <div className="relative mx-auto mb-8 flex w-full max-w-7xl items-center justify-center px-6">
         <div className="pointer-events-none absolute inset-0 flex -translate-y-6 items-center justify-center opacity-60">
           <Landing1 />
         </div>
-        <h2 className="relative z-10 top-0 text-center text-[7.188rem] font-bold md:text-5xl">
+        <h2 className="relative z-10 top-0 text-center text-[5rem] font-bold md:text-5xl lg-[7.125rem]">
           About MaktabOS
         </h2>
       </div>
@@ -28,10 +28,10 @@ const AboutSection = () => {
           width={220}
           height={160}
           priority
-          className="pointer-events-none relative z-10 mx-auto mb-4 w-32 select-none md:w-40"
+          className="pointer-events-none relative z-10 mx-auto mb-4 w-32 select-none md:w-60"
         />
 
-        <div className="relative z-10 mx-auto flex max-w-3xl flex-col gap-6 text-[2.43rem] text-white md:text-xl">
+        <div className="pb-8 relative z-10 mx-auto flex max-w-7xl font-medium flex-col gap-6 text-[1.75rem] text-white md:text-[1.5rem] lg:[2.4375rem]">
           <p>
             MaktabOS is a modern, modular “Operating System” built exclusively for Islamic schools and academies. We provide
             your school with its own branded, secure online portal — powered by our central system — so you can manage students,

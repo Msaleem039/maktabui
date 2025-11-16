@@ -39,18 +39,18 @@ const HowItWorks = () => {
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 px-6 text-center">
         <a
           href="#get-started"
-          className="rounded-full bg-black px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-black/80"
+          className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
         >
           Get Started Now
         </a>
 
         <div className="space-y-4">
-          <h2 className="text-4xl font-bold text-[#1F1F1F] md:text-5xl">
+          <h2 className="text-4xl font-bold text-[#262626] md:text-5xl ">
             How It Works
           </h2>
-          <p className="text-base text-[#1F1F1F]/70 md:text-lg">
+          {/* <p className="text-base text-[#1F1F1F]/70 md:text-lg">
             Launch your school on MaktabOS in four simple steps.
-          </p>
+          </p> */}
         </div>
 
         <div className="grid w-full gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -63,7 +63,7 @@ const HowItWorks = () => {
                 "--card-bg": step.background,
               }}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-semibold text-black">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-bold text-black">
                 {step.number}
               </div>
 
@@ -71,7 +71,7 @@ const HowItWorks = () => {
                 <h3 className="text-xl font-semibold text-white transition group-hover:text-white group-focus-visible:text-white">
                   {step.title}
                 </h3>
-                <p className="text-sm leading-6 text-white/80 group-hover:text-white group-focus-visible:text-white">
+                <p className="text-sm leading-6 text-[#A3A3A3] group-hover:text-white group-focus-visible:text-white">
                   {step.description}
                 </p>
               </div>
@@ -81,7 +81,7 @@ const HowItWorks = () => {
 
         <a
           href="#get-started"
-          className="rounded-full bg-black px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-black/80"
+          className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
         >
           Get Started Now
         </a>

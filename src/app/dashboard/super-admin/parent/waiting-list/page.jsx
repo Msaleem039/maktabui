@@ -50,12 +50,12 @@ export default function ParentsWaitingListPage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">ID</th>
-                <th className="px-4">Primary Parent</th>
-                <th className="px-4">Data Added</th>
-                <th className="px-4">Children</th>
-                <th className="px-4">Action</th>
-                <th className="px-4">Delete</th>
+                <th className="px-4 font-normal text-[#0000008C]">ID</th>
+                <th className="px-4 font-normal text-[#0000008C]">Primary Parent</th>
+                <th className="px-4 font-normal text-[#0000008C]">Data Added</th>
+                <th className="px-4 font-normal text-[#0000008C]">Children</th>
+                <th className="px-4 font-normal text-[#0000008C]">Action</th>
+                <th className="px-4 font-normal text-[#0000008C]">Delete</th>
               </tr>
             </thead>
             <tbody>
@@ -72,11 +72,11 @@ export default function ParentsWaitingListPage() {
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
                     <td className="px-4 py-3 font-medium text-[#0B4B31]">{parent.id}</td>
-                    <td className="px-4 py-3 text-[#555]">{parent.primaryParent}</td>
-                    <td className="px-4 py-3 text-[#555]">{parent.dataAdded}</td>
-                    <td className="px-4 py-3 text-[#555]">{parent.children}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.primaryParent}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.dataAdded}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.children}</td>
                     <td className="px-4 py-3">
-                      <button className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90">
+                      <button className="inline-flex items-center gap-2 rounded-full text-[#71DD8C] bg-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#0B4B31]/90">
                         Take Action
                         <span>▾</span>
                       </button>
