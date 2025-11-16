@@ -273,8 +273,26 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Payment", path: `${basePath}/finance/payment` },
         ],
       },
-      { name: "Activities", icon: "/Rubik's Cube.png", path: `${basePath}/activities` },
-      { name: "Send A Text", icon: "/SMS.png", path: `${basePath}/text` },
+      {
+        name: "Activities",
+        icon: "/Rubik's Cube.png",
+        path: "",
+        hasSubmenu: true,
+        subItems: [
+          { name: "Activities", path: `${basePath}/activities` },
+          { name: "Text Log", path: `${basePath}/activities/text-log` },
+        ],
+      },
+      {
+        name: "Send A Text",
+        icon: "/SMS.png",
+        path: "",
+        hasSubmenu: true,
+        subItems: [
+          { name: "Send A Text", path: `${basePath}/text` },
+          { name: "Schedule", path: `${basePath}/text/schedule` },
+        ],
+      },
     ];
 
     if (userRole === "Super Admin") {
@@ -388,7 +406,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         <div className="flex flex-col space-y-8 overflow-y-auto flex-grow">
           <div
-            className={`flex items-center space-x-2 text-white p-2 ${
+            className={`flex items-center space-x-2 text-white p-2 pt-10 ${
               isCollapsed ? "justify-center" : ""
             }`}
           >

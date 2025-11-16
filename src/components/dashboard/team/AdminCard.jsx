@@ -7,23 +7,25 @@ const AdminCard = ({ admin, isInstitute = false }) => {
   if (isInstitute) {
     return (
       <div className="relative h-[280px] rounded-[28px] overflow-hidden">
-        {/* Background with pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-pink-50 to-pink-100">
-          <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-[#0B4B31]/20"></div>
-          <div className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-[#0B4B31]/15"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#0B4B31] transform rotate-45"></div>
-          <div className="absolute top-20 right-20 w-2 h-2 bg-[#0B4B31] transform rotate-45"></div>
-          <div className="absolute bottom-20 left-20 w-2 h-2 bg-[#0B4B31] transform rotate-45"></div>
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/institute.svg"
+            alt="Institute card background"
+            fill
+            priority
+            className="object-cover"
+          />
         </div>
 
         {/* Logo */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
-          <div className="grid grid-cols-3 gap-1">
+          {/* <div className="grid grid-cols-3 gap-1">
             {Array.from({ length: 9 }).map((_, i) => (
               <div key={i} className="w-2 h-2 bg-[#0B4B31] rounded-sm"></div>
             ))}
-          </div>
-          <span className="text-[#0B4B31] font-bold text-lg">MaktabOS</span>
+          </div> */}
+          {/* <span className="text-[#0B4B31] font-bold text-lg">MaktabOS</span> */}
         </div>
 
         {/* Glassmorphism overlay */}
