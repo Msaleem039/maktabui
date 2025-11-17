@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Trash2 } from "lucide-react";
+import { Download } from "lucide-react";
 
 export default function ParentsWaitingListPage() {
   const [searchValue, setSearchValue] = useState("");
@@ -12,14 +12,14 @@ export default function ParentsWaitingListPage() {
     <div className="space-y-8">
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-[#104D2E]">Parents/Guardians in Waiting List</h2>
+          <h2 className="text-lg font-semibold text-[#104D2E]">Parents in Waiting List</h2>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
             >
-              <Download size={16} className="text-white" />
+              <Download size={16} />
               Export Data
             </button>
           </div>
@@ -50,12 +50,12 @@ export default function ParentsWaitingListPage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4 font-normal text-[#0000008C]">ID</th>
-                <th className="px-4 font-normal text-[#0000008C]">Primary Parent</th>
-                <th className="px-4 font-normal text-[#0000008C]">Data Added</th>
+                <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Email</th>
+                <th className="px-4 font-normal text-[#0000008C]">Phone</th>
                 <th className="px-4 font-normal text-[#0000008C]">Children</th>
-                <th className="px-4 font-normal text-[#0000008C]">Action</th>
-                <th className="px-4 font-normal text-[#0000008C]">Delete</th>
+                <th className="px-4 font-normal text-[#0000008C]">Added</th>
+                <th className="px-4 font-normal text-right text-[#0000008C]">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -71,20 +71,15 @@ export default function ParentsWaitingListPage() {
                     key={parent.id}
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
-                    <td className="px-4 py-3 font-medium text-[#0B4B31]">{parent.id}</td>
-                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.primaryParent}</td>
-                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.dataAdded}</td>
+                    <td className="px-4 py-3 font-medium text-[#0B4B31]">{parent.name}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.email}</td>
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.phone}</td>
                     <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.children}</td>
-                    <td className="px-4 py-3">
-                      <button className="inline-flex items-center gap-2 rounded-full text-[#71DD8C] bg-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#0B4B31]/90">
+                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.added}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90">
                         Take Action
                         <span>▾</span>
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button className="inline-flex items-center gap-2 rounded-full bg-[#F16957] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#F16957]/90">
-                        <Trash2 size={14} />
-                        Delete
                       </button>
                     </td>
                   </tr>
@@ -96,17 +91,28 @@ export default function ParentsWaitingListPage() {
 
         {/* Pagination */}
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">Showing 0 out of 0 entries</div>
+          <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[#8A928F]">Display</span>
             <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-              <option>10</option>
-              <option>20</option>
-              <option>50</option>
+              <option>Display 10</option>
+              <option>Display 20</option>
+              <option>Display 50</option>
             </select>
             <div className="flex items-center gap-2">
               <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
                 ‹
+              </button>
+              <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
+                1
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                2
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                3
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                4
               </button>
               <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
                 ›

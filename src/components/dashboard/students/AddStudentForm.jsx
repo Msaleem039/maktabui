@@ -332,8 +332,14 @@ export default function AddStudentForm() {
           Add More Students
         </button>
         <button
+          type="button"
+          className="flex-1 rounded-full border border-[#0B4B31] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+        >
+          Save
+        </button>
+        <button
           type="submit"
-          className="flex-1 rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
+          className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
         >
           Add Family
         </button>

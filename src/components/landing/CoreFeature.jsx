@@ -67,7 +67,7 @@ const CoreFeature = () => {
   return (
     <section
       id="features"
-      className="bg-white py-24"
+      className="bg-white py-12"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       <div className="mx-auto max-w-6xl px-6 md:px-10">
