@@ -209,7 +209,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Parents", path: "/dashboard/parent/parents" },
           { name: "Add Parent", path: `${basePath}/parent/add` },
-          { name: "Waiting List", path: `${basePath}/parent/waiting-list` },
+          { name: "Waiting List", path: `${basePath}/parent/waitlist` },
         ],
       },
       {
@@ -512,7 +512,7 @@ export default function DashboardLayout({ children }) {
                 MaktabOS
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full bg-[#B4B31] border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
@@ -525,7 +525,7 @@ export default function DashboardLayout({ children }) {
               >
                 <PlusIcon size={20} /> Add Students
               </button>
-            </div>
+            </div> */}
           </div>
         )}
         {children}

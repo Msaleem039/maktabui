@@ -1,11 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const ParentTable = dynamic(
-  () => import("@/components/dashboard/parents/ParentTable"),
-  { ssr: false }
-);
+import ParentTable from "@/components/dashboard/parents/ParentTable";
 
 export default function ParentsPage() {
   return (

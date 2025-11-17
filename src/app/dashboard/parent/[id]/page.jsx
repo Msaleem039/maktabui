@@ -1,24 +1,30 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getParentById, resetParentState } from "@/redux/slices/getParentsByIdSlice";
 import ParentProfile from "@/components/dashboard/parents/ParentProfile";
 
-const demoParents = {
-  "parent-1": {
-    name: "Abdifatah Soyal",
-  },
-};
-
 export default function ParentDetailPage({ params }) {
-  const parentData = useMemo(() => {
-    if (!params?.id) return {};
-    return demoParents[params.id] ?? { name: "Abdifatah Soyal" };
-  }, [params?.id]);
+  const dispatch = useDispatch();
+  
+  const { parent, status, error } = useSelector((state) => state.parentById);
+
+  useEffect(() => {
+    if (params?.id) {
+      dispatch(getParentById(params.id));
+    }
+
+    return () => {
+      dispatch(resetParentState());
+    };
+  }, [params?.id, dispatch]);
 
   return (
     <div className="space-y-8">
-      <ParentProfile parent={parentData} />
+      {status === "loading" && <p>Loading parent details...</p>}
+      {status === "failed" && <p className="text-red-500">{error}</p>}
+      {status === "succeeded" && parent && <ParentProfile parent={parent} />}
     </div>
   );
 }
-

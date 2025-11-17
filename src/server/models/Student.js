@@ -9,7 +9,7 @@ const studentSchema = new mongoose.Schema({
   gender: { type: String, enum: ["Male", "Female", "Other"] },
   enrollDate: { type: Date, default: Date.now },
   fee: { type: Number, default: 0 },
-  class: { type: String },
+  class: { type: [String] },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
   parent: { type: mongoose.Schema.Types.ObjectId, ref: "Parent" },
@@ -20,4 +20,4 @@ const studentSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-export default  mongoose.models.Student || mongoose.model("Student", studentSchema);
+export default mongoose.models.Student || mongoose.model("Student", studentSchema);

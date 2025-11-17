@@ -29,9 +29,7 @@ const parentSchema = new mongoose.Schema({
   identityNumber: { type: String, required: true, unique: true },
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-
   cardDetail: { type: cardSchema, default: {} },
-
 }, { timestamps: true });
 
 export default mongoose.models.Parent || mongoose.model("Parent", parentSchema);
