@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Download, Eye, Edit, MessageSquare, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
 
 const StudentTable = ({
   title = "Students (All Classes)",
@@ -26,8 +26,7 @@ const StudentTable = ({
   }, [students]);
 
   const [selectedId, setSelectedId] = useState(null);
-  const [openDropdownId, setOpenDropdownId] = useState(null);
-  const dropdownRefs = useRef({});
+  const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
   const [commentStudentId, setCommentStudentId] = useState(null);
   const [commentText, setCommentText] = useState("");
 
@@ -41,12 +40,17 @@ const StudentTable = ({
 
   const toggleDropdown = (studentId, event) => {
     event.stopPropagation();
-    setOpenDropdownId(openDropdownId === studentId ? null : studentId);
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    const menuHeight = 220;
+    const openUp = buttonRect.bottom + menuHeight > window.innerHeight;
+    setActionMenu((prev) =>
+      prev.id === studentId ? { id: null, openUp: false } : { id: studentId, openUp }
+    );
   };
 
   const handleActionClick = (action, studentId, event) => {
     event.stopPropagation();
-    setOpenDropdownId(null);
+    setActionMenu({ id: null, openUp: false });
 
     if (action === "view") {
       router.push(`/dashboard/student/${studentId}`);
@@ -62,23 +66,18 @@ const StudentTable = ({
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      Object.values(dropdownRefs.current).forEach((ref) => {
-        if (ref && !ref.contains(event.target)) {
-          setOpenDropdownId(null);
-        }
-      });
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
+    const handleClickOutside = () => setActionMenu({ id: null, openUp: false });
+    if (actionMenu.id) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [actionMenu.id]);
 
   const actionMenuItems = [
     { label: "View Profile", icon: Eye, action: "view" },
-    { label: "Edit", icon: Edit, action: "edit" },
+    { label: "Edit", icon: Pencil, action: "edit" },
     { label: "Comment", icon: MessageSquare, action: "comment" },
     { label: "Remove", icon: Trash2, action: "remove" },
   ];
@@ -132,7 +131,7 @@ const StudentTable = ({
           <tbody>
             {tableData.map((student) => {
               const isSelected = student.id === selectedId;
-              const isDropdownOpen = openDropdownId === student.id;
+              const isDropdownOpen = actionMenu.id === student.id;
               return (
                 <tr
                   key={student.id}
@@ -172,11 +171,11 @@ const StudentTable = ({
                   <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.phone}</td>
                   <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.class}</td>
                   <td className="px-4 py-3 text-right">
-                    <div className="relative inline-block">
+                    <div className="relative inline-block text-left">
                       <button
                         type="button"
                         onClick={(e) => toggleDropdown(student.id, e)}
-                        className="inline-flex items-center gap-2 rounded-full text-[#71DD8C] bg-[#0B4B31] px-4 py-2 text-sm font-normal transition hover:bg-[#0B4B31]/90"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
                       >
                         Take Action
                         <span>▾</span>
@@ -184,8 +183,7 @@ const StudentTable = ({
 
                       {isDropdownOpen && (
                         <div
-                          ref={(el) => (dropdownRefs.current[student.id] = el)}
-                          className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                          className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "mt-3"} z-50 min-w-[200px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden`}
                         >
                           {actionMenuItems.map((item, index) => {
                             const Icon = item.icon;
@@ -196,12 +194,15 @@ const StudentTable = ({
                                 onClick={(e) =>
                                   handleActionClick(item.action, student.id, e)
                                 }
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${index === 0
-                                  ? ""
-                                  : "border-t border-[#E2E7E4]"
-                                  } hover:bg-[#E5EFEB]`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium ${index === 0 ? "" : "border-t border-[#E2E7E4]"} ${item.action === "remove"
+                                  ? "text-[#C43B30] hover:bg-[#FCEDEA]"
+                                  : "text-[#0B4B31] hover:bg-[#F3F6F5]"
+                                  }`}
                               >
-                                <Icon size={16} className="text-[#0B4B31]" />
+                                <Icon
+                                  size={16}
+                                  className={item.action === "remove" ? "text-[#C43B30]" : "text-[#0B4B31]"}
+                                />
                                 <span>{item.label}</span>
                               </button>
                             );

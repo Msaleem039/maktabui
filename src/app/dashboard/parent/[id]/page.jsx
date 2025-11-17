@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { use } from "react";
 import ParentProfile from "@/components/dashboard/parents/ParentProfile";
 
 const demoParents = {
@@ -10,10 +10,9 @@ const demoParents = {
 };
 
 export default function ParentDetailPage({ params }) {
-  const parentData = useMemo(() => {
-    if (!params?.id) return {};
-    return demoParents[params.id] ?? { name: "Abdifatah Soyal" };
-  }, [params?.id]);
+  const resolvedParams = use(params);
+  const parentId = resolvedParams?.id;
+  const parentData = parentId ? demoParents[parentId] ?? { name: "Abdifatah Soyal" } : {};
 
   return (
     <div className="space-y-8">

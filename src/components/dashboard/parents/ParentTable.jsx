@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Download } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
 
 const ParentTable = ({
   title = "Parents",
@@ -29,6 +30,10 @@ const ParentTable = ({
   }, [parents]);
 
   const [selectedId, setSelectedId] = useState(null);
+  const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
+  const [commentParent, setCommentParent] = useState(null);
+  const [commentText, setCommentText] = useState("");
+  const router = useRouter();
 
   const handleSearchChange = (event) => {
     onSearchChange?.(event.target.value);
@@ -36,6 +41,58 @@ const ParentTable = ({
 
   const handleRowSelect = (parentId) => {
     setSelectedId(parentId);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => setActionMenu({ id: null, openUp: false });
+    if (actionMenu.id) {
+      document.addEventListener("click", handleClickOutside);
+    }
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [actionMenu.id]);
+
+  const toggleActionMenu = (event, parentId) => {
+    event.stopPropagation();
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    const menuHeight = 220;
+    const openUp = buttonRect.bottom + menuHeight > window.innerHeight;
+    setActionMenu((prev) =>
+      prev.id === parentId ? { id: null, openUp: false } : { id: parentId, openUp }
+    );
+  };
+
+  const handleViewProfile = (event, parentId) => {
+    event.stopPropagation();
+    setActionMenu({ id: null, openUp: false });
+    router.push(`/dashboard/parent/${parentId}`);
+  };
+
+  const handleEdit = (event, parentId) => {
+    event.stopPropagation();
+    setActionMenu({ id: null, openUp: false });
+    router.push(`/dashboard/parent/${parentId}/edit`);
+  };
+
+  const handleComment = (event, parent) => {
+    event.stopPropagation();
+    setCommentParent(parent);
+    setCommentText("");
+    setActionMenu({ id: null, openUp: false });
+  };
+
+  const handleRemove = (event, parent) => {
+    event.stopPropagation();
+    setActionMenu({ id: null, openUp: false });
+    if (window.confirm(`Remove ${parent.name} from list?`)) {
+      console.log("Removing parent from list:", parent);
+    }
+  };
+
+  const handleCommentSubmit = (event) => {
+    event.preventDefault();
+    console.log("Comment submitted for parent:", commentParent?.name, commentText);
+    setCommentParent(null);
+    setCommentText("");
   };
 
   return (
@@ -137,13 +194,51 @@ const ParentTable = ({
                   <td className="px-4 py-3 text-black">{parent.spouse}</td>
                   <td className="px-4 py-3 text-black">{parent.children}</td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
-                    >
-                      Take Action
-                      <span>▾</span>
-                    </button>
+                    <div className="relative inline-block text-left">
+                      <button
+                        type="button"
+                        onClick={(event) => toggleActionMenu(event, parent.id)}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                      >
+                        Take Action
+                        <span>▾</span>
+                      </button>
+                      {actionMenu.id === parent.id && (
+                        <div
+                          onClick={(event) => event.stopPropagation()}
+                          className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "mt-3"} w-48 rounded-2xl border border-[#DDE5E0] bg-white shadow-xl z-20 overflow-hidden`}
+                        >
+                          <button
+                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#0B4B31] hover:bg-[#F3F6F5]"
+                            onClick={(event) => handleViewProfile(event, parent.id)}
+                          >
+                            <Eye size={16} />
+                            View Profile
+                          </button>
+                          <button
+                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#0B4B31] hover:bg-[#F3F6F5]"
+                            onClick={(event) => handleEdit(event, parent.id)}
+                          >
+                            <Pencil size={16} />
+                            Edit
+                          </button>
+                          <button
+                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#0B4B31] hover:bg-[#F3F6F5]"
+                            onClick={(event) => handleComment(event, parent)}
+                          >
+                            <MessageSquare size={16} />
+                            Comment
+                          </button>
+                          <button
+                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#C43B30] hover:bg-[#FCEDEA]"
+                            onClick={(event) => handleRemove(event, parent)}
+                          >
+                            <Trash2 size={16} />
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -151,6 +246,45 @@ const ParentTable = ({
           </tbody>
         </table>
       </div>
+
+      {commentParent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-[#0B4B31]">Add Comment</h3>
+              <p className="text-sm text-[#5E6C64]">Parent: {commentParent.name}</p>
+            </div>
+            <form onSubmit={handleCommentSubmit} className="space-y-4">
+              <textarea
+                value={commentText}
+                onChange={(event) => setCommentText(event.target.value)}
+                rows={4}
+                placeholder="Write your comment..."
+                className="w-full rounded-2xl border border-[#D5E2DB] px-4 py-3 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+                required
+              />
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCommentParent(null);
+                    setCommentText("");
+                  }}
+                  className="flex-1 rounded-full border border-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                >
+                  Save Comment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

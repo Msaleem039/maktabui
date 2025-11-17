@@ -14,6 +14,7 @@ import {
   FileSpreadsheet,
   ArrowUpRight,
   ChevronDown,
+  X,
 } from "lucide-react";
 import ViewInvoiceModal from "./ViewInvoiceModal";
 
@@ -740,12 +741,12 @@ const ChildInfoRow = ({ label, value }) => (
 const StatusCard = ({ stats }) => (
   <div className="rounded-[26px] p-5 bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74]">
     <h3 className="text-base text-white text-center font-extrabold">Account Status</h3>
-    <div div className="mt-4 space-y-3 text-sm" >
+    <div className="mt-4 space-y-3 text-sm">
       <StatusRow label="Status" value={stats?.status ?? "Active"} />
       <StatusRow label="Waiting List" value={stats?.waitingList ?? "No"} />
       <StatusRow label="Opted Out of Text" value={stats?.optedOut ?? "No"} />
-    </div >
-  </div >
+    </div>
+  </div>
 );
 
 const StatusRow = ({ label, value }) => (
@@ -761,9 +762,9 @@ const QuickActionCard = ({ actions = [] }) => (
       Quick Action
     </h3>
     <div className="mt-4 space-y-3">
-      {actions.map(({ label, icon: Icon }) => (
+      {actions.map(({ label, icon: Icon }, index) => (
         <button
-          key={label}
+          key={`${label}-${index}`}
           type="button"
           className="flex w-full items-center justify-between rounded-[16px] bg-[#F8F8F8] px-4 py-3 text-[0.6875rem] font-normal text-black transition"
         >
