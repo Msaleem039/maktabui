@@ -31,21 +31,21 @@ export default function TextLogPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E]">
+        <h1 className="text-[2.5rem] font-semibold text-[#0B4B31]">
           Welcome to
         </h1>
-        <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E]">
+        <p className="text-[1.75rem] font-medium text-[#000000]">
           MaktabOS
         </p>
       </div>
 
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-4 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg sm:text-xl font-semibold text-[#104D2E]">
+          <h2 className="text-[1.125rem] font-semibold text-[#0B4B31]">
             All Activity Logs
           </h2>
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <div className="flex items-center rounded-full border border-[#C5D2CD] px-4 py-2 bg-white min-w-[240px]">
+            <div className="flex items-center rounded-full border border-[#0B4B31] px-4 py-2 bg-white min-w-[240px]">
               <Search size={16} className="text-[#799086] mr-2" />
               <input
                 type="text"
@@ -57,14 +57,14 @@ export default function TextLogPage() {
             <div className="flex gap-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-normal text-white transition "
               >
                 <Download size={16} />
                 Export Data
               </button>
               <button
                 type="button"
-                className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-xs sm:text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5] whitespace-nowrap"
+                className="rounded-full border border-[#0B4B3138] px-4 py-2 text-xs sm:text-sm font-normal text-[#0B4B31] transition hover:bg-[#F3F6F5] whitespace-nowrap"
               >
                 See All ↗
               </button>
@@ -74,15 +74,15 @@ export default function TextLogPage() {
 
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+            <thead className="text-xs font-normal uppercase tracking-wide text-[#979699]">
               <tr>
-                <th className="px-4 py-2">From</th>
-                <th className="px-4 py-2">Message</th>
-                <th className="px-4 py-2">To</th>
-                <th className="px-4 py-2">Data Sent</th>
-                <th className="px-4 py-2">Direction</th>
-                <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Error</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">From</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">Message</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">To</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">Data Sent</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">Direction</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 py-2 font-normal text-[#0000008C]">Error</th>
               </tr>
             </thead>
             <tbody>
@@ -91,25 +91,25 @@ export default function TextLogPage() {
                   key={row.id}
                   className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm align-top"
                 >
-                  <td className="px-4 py-3 text-[#0B4B31] font-medium whitespace-nowrap">
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e] whitespace-nowrap">
                     {row.from}
                   </td>
-                  <td className="px-4 py-3 text-[#555] whitespace-pre-line max-w-xs sm:max-w-md">
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e] whitespace-pre-line max-w-xs sm:max-w-md">
                     {row.message}
                   </td>
-                  <td className="px-4 py-3 text-[#555] whitespace-nowrap">
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e] whitespace-nowrap">
                     {row.to}
                   </td>
-                  <td className="px-4 py-3 text-[#555] whitespace-nowrap">
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e] whitespace-nowrap">
                     {row.dateSent}
                   </td>
-                  <td className="px-4 py-3 text-[#555] whitespace-nowrap">
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e] whitespace-nowrap">
                     {row.direction}
                   </td>
-                  <td className="px-4 py-3 text-emerald-700 font-medium whitespace-nowrap">
+                  <td className="px-4 py-3 text-[#1e1e1e] font-normal whitespace-nowrap">
                     {row.status}
                   </td>
-                  <td className="px-4 py-3 text-[#8A928F] whitespace-nowrap">
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e] whitespace-nowrap">
                     {row.error}
                   </td>
                 </tr>
@@ -119,14 +119,14 @@ export default function TextLogPage() {
         </div>
 
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">
+          <div className="text-sm text-[#979699]">
             Showing 2 out of {mockTextLogData.length} entries
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[#8A928F]">Display 10</span>
+            <span className="text-sm text-[#979699]">Display 10</span>
             <div className="flex items-center gap-2">
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+              <button className="rounded-full border border-[#0B4B3138] bg-white px-3 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
                 ‹
               </button>
               <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-semibold text-white">

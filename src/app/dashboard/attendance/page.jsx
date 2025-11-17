@@ -172,187 +172,187 @@ export default function AttendancePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[2.5rem] font-semibold  text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
       </div>
 
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-lg font-semibold text-[#104D2E]">Attendance</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-[#104D2E]">Attendance</h2>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                >
-                  <Download size={16} className="text-white" />
-                  Export Data
-                </button>
-              </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+            >
+              <Download size={16} className="text-white" />
+              Export Data
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {/* Date and Class Selection */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative flex-1" ref={datePickerRef}>
+              <button
+                type="button"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] flex items-center justify-between"
+              >
+                <span>{selectedDate ? formatDate(selectedDate) : "Select the Date"}</span>
+                <span className="text-[#0B4B31]">▾</span>
+              </button>
+              {showDatePicker && (
+                <div className="absolute top-full left-0 mt-2 z-50 shadow-lg">
+                  <CalendarWidget
+                    selectedDate={selectedDate}
+                    onDateChange={(date) => {
+                      setSelectedDate(date);
+                      setShowDatePicker(false);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="mt-6 space-y-4">
-              {/* Date and Class Selection */}
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="relative flex-1" ref={datePickerRef}>
-                  <button
-                    type="button"
-                    onClick={() => setShowDatePicker(!showDatePicker)}
-                    className="w-full rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] flex items-center justify-between"
-                  >
-                    <span>{selectedDate ? formatDate(selectedDate) : "Select the Date"}</span>
-                    <span className="text-[#0B4B31]">▾</span>
-                  </button>
-                  {showDatePicker && (
-                    <div className="absolute top-full left-0 mt-2 z-50 shadow-lg">
-                      <CalendarWidget
-                        selectedDate={selectedDate}
-                        onDateChange={(date) => {
-                          setSelectedDate(date);
-                          setShowDatePicker(false);
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="relative flex-1">
-                  <select
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    className="w-full appearance-none rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-                  >
-                    <option value="">Select the class</option>
-                    <option value="class-1">Mohamed Karie Class</option>
-                    <option value="class-2">Class 2</option>
-                    <option value="class-3">Class 3</option>
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
-                </div>
-
-                <button
-                  type="button"
-                  className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
-                >
-                  Manage
-                </button>
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-                >
-                  See All ↗
-                </button>
-              </div>
+            <div className="relative flex-1">
+              <select
+                value={selectedClass}
+                onChange={(e) => setSelectedClass(e.target.value)}
+                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="">Select the class</option>
+                <option value="class-1">Mohamed Karie Class</option>
+                <option value="class-2">Class 2</option>
+                <option value="class-3">Class 3</option>
+              </select>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
             </div>
 
-            {/* Attendance Table */}
-            <div className="mt-6 overflow-x-auto">
-              <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-                <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
-                  <tr>
-                    <th className="px-4">Name</th>
-                    <th className="px-4">ID</th>
-                    <th className="px-4">Status</th>
-                    <th className="px-4">Reason</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.map((student) => {
-                    const currentStatus = statusDropdowns[student.id] || student.status;
-                    const isAbsent = currentStatus === "Absent";
-                    return (
-                      <tr
-                        key={student.id}
-                        className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
-                      >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span>👤</span>
-                            <span className="font-medium text-[#0B4B31]">{student.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-[#555]">{student.studentId}</td>
-                        <td className="px-4 py-3">
-                          <div className="relative">
-                            <select
-                              value={currentStatus}
-                              onChange={(e) => handleStatusChange(student.id, e.target.value)}
-                              className={`
-                                appearance-none rounded-full px-4 py-2 text-xs font-semibold text-white transition
-                                ${isAbsent ? "bg-red-500" : "bg-[#0B4B31]"}
+            <button
+              type="button"
+              className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
+            >
+              Manage
+            </button>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
+            >
+              See All ↗
+            </button>
+          </div>
+        </div>
+
+        {/* Attendance Table */}
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
+            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+              <tr>
+                <th className="px-4 font-normal text-[#0000008C]">Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">ID</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((student) => {
+                const currentStatus = statusDropdowns[student.id] || student.status;
+                const isAbsent = currentStatus === "Absent";
+                return (
+                  <tr
+                    key={student.id}
+                    className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span>👤</span>
+                        <span className="font-medium text-[#1e1e1e]">{student.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{student.studentId}</td>
+                    <td className="px-4 py-3">
+                      <div className="relative">
+                        <select
+                          value={currentStatus}
+                          onChange={(e) => handleStatusChange(student.id, e.target.value)}
+                          className={`
+                                appearance-none rounded-full px-4 py-2 text-sm font-normal transition
+                                ${isAbsent ? "bg-[#F71735] text-white" : "bg-[#0B4B31] text-[#71DD8C]"}
                                 pr-8 cursor-pointer outline-none
                               `}
-                            >
-                              <option value="Present">Present</option>
-                              <option value="Absent">Absent</option>
-                              <option value="Late">Late</option>
-                            </select>
-                            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-white text-xs">▾</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            value={reasons[student.id] || ""}
-                            onChange={(e) => handleReasonChange(student.id, e.target.value)}
-                            placeholder="Reason"
-                            className="w-full rounded-full border border-[#C5D2CD] bg-white py-2 px-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        >
+                          <option value="Present">Present</option>
+                          <option value="Absent">Absent</option>
+                          <option value="Late">Late</option>
+                        </select>
+                        <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[#0B4B31]/60">▾</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={reasons[student.id] || ""}
+                        onChange={(e) => handleReasonChange(student.id, e.target.value)}
+                        placeholder="Reason"
+                        className="w-full rounded-full placeholder:text-[#000000] border border-[#00000040] bg-white py-2 px-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-            {/* Footer */}
-            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  className="rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] w-fit"
-                >
-                  Save All Changes
-                </button>
-                <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-[#8A928F]">Display 10</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    disabled
-                    className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    ‹
-                  </button>
-                  <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                    1
-                  </button>
-                  <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                    2
-                  </button>
-                  <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                    3
-                  </button>
-                  <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                    4
-                  </button>
-                  <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                    ›
-                  </button>
-                </div>
-              </div>
+        {/* Footer */}
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              className="rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] w-fit"
+            >
+              Save All Changes
+            </button>
+            <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-[#8A928F]">Display 10</span>
+            <div className="flex items-center gap-2">
+              <button
+                disabled
+                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ‹
+              </button>
+              <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
+                1
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                2
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                3
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                4
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                ›
+              </button>
             </div>
-          </section>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

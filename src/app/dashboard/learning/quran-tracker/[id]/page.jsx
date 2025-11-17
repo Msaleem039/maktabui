@@ -34,10 +34,10 @@ export default function QuranTrackerDetailPage({ params }) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[2.5rem] font-semibold  text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
@@ -48,8 +48,8 @@ export default function QuranTrackerDetailPage({ params }) {
         <div className="lg:col-span-2 space-y-6">
           {/* Quran Tracker Header */}
           <div>
-            <h2 className="text-3xl font-bold text-[#0B4B31] mb-2">Quran Tracker</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-[#104D2E]">Quran Tracker</h2>
+            <p className="text-sm font-normal text-[#0000008C]">
               Monitor and manage student Quran progress with ease.
             </p>
           </div>
@@ -62,7 +62,7 @@ export default function QuranTrackerDetailPage({ params }) {
                   <GraduationCap size={24} className="text-[#0B4B31]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#627169]">Total Lesson</p>
+                  <p className="text-sm font-normal text-[#0000008C]">Total Lesson</p>
                   <p className="text-2xl font-bold text-[#0B4B31]">{trackerData.totalLessons}</p>
                 </div>
               </div>
@@ -74,7 +74,7 @@ export default function QuranTrackerDetailPage({ params }) {
                   <CheckCircle2 size={24} className="text-[#0B4B31]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#627169]">Passed</p>
+                  <p className="text-sm font-normal text-[#0000008C]">Passed</p>
                   <p className="text-2xl font-bold text-[#0B4B31]">{trackerData.passed}</p>
                 </div>
               </div>
@@ -86,7 +86,7 @@ export default function QuranTrackerDetailPage({ params }) {
                   <XCircle size={24} className="text-[#0B4B31]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#627169]">Failed</p>
+                  <p className="text-sm font-normal text-[#0000008C]">Failed</p>
                   <p className="text-2xl font-bold text-[#0B4B31]">{trackerData.failed}</p>
                 </div>
               </div>
@@ -95,9 +95,9 @@ export default function QuranTrackerDetailPage({ params }) {
 
           {/* Quran Completion Progress */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-[#0B4B31] mb-4">Quran Completion Progress</h3>
+            <h3 className="text-lg font-semibold text-[#104D2E] mb-4">Quran Completion Progress</h3>
             <div className="flex items-center gap-4">
-              <span className="text-sm font-semibold text-[#0B4B31]">{trackerData.completionProgress}%</span>
+              <span className="text-sm font-semibold text-[#104D2E]">{trackerData.completionProgress}%</span>
               <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#0B4B31] transition-all duration-300"
@@ -109,7 +109,7 @@ export default function QuranTrackerDetailPage({ params }) {
 
           {/* Completion Projection */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-[#0B4B31] mb-4">Completion Projection</h3>
+            <h3 className="text-lg font-semibold text-[#104D2E] mb-4">Completion Projection</h3>
             <ul className="space-y-2 text-sm text-gray-700">
               <li>
                 <span className="font-semibold">Estimated Completion:</span> {trackerData.estimatedCompletion}
@@ -139,7 +139,7 @@ export default function QuranTrackerDetailPage({ params }) {
                   className="object-cover rounded-full"
                 />
               </div>
-              <h3 className="text-lg font-bold text-[#0B4B31] mb-6 text-center">
+              <h3 className="text-lg font-normal text-[#000000] mb-6 text-center">
                 {trackerData.studentName}
               </h3>
               <button
@@ -159,7 +159,7 @@ export default function QuranTrackerDetailPage({ params }) {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-white transition bg-[#0B4B31]"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -182,7 +182,7 @@ export default function QuranTrackerDetailPage({ params }) {
         <div className="mt-4">
           <button
             type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
           >
             See All ↗
           </button>
@@ -192,18 +192,18 @@ export default function QuranTrackerDetailPage({ params }) {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">Date</th>
-                <th className="px-4">Chapter No</th>
-                <th className="px-4">Starting/Ending Verse</th>
-                <th className="px-4">Comment</th>
-                <th className="px-4">Due Date</th>
-                <th className="px-4">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Date</th>
+                <th className="px-4 font-normal text-[#0000008C]">Chapter No</th>
+                <th className="px-4 font-normal text-[#0000008C]">Starting/Ending Verse</th>
+                <th className="px-4 font-normal text-[#0000008C]">Comment</th>
+                <th className="px-4 font-normal text-[#0000008C]">Due Date</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
               </tr>
             </thead>
             <tbody>
               {tableData.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-4 py-8 text-center text-gray-400 font-medium">
+                  <td colSpan="6" className="px-4 py-8 text-center text-[#0B4B31] font-normal">
                     No Data Available
                   </td>
                 </tr>
@@ -213,12 +213,12 @@ export default function QuranTrackerDetailPage({ params }) {
                     key={item.id}
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
-                    <td className="px-4 py-3 text-[#555]">{item.date}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.chapterNo}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.verses}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.comment}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.dueDate}</td>
-                    <td className="px-4 py-3 text-[#555]">{item.status}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.date}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.chapterNo}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.verses}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.comment}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.dueDate}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.status}</td>
                   </tr>
                 ))
               )}

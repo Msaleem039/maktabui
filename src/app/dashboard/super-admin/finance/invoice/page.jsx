@@ -195,10 +195,10 @@ export default function InvoicePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
@@ -214,7 +214,7 @@ export default function InvoicePage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white px-4 py-2 text-sm font-normal bg-[#0B4B31] text-white transition"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -225,14 +225,14 @@ export default function InvoicePage() {
         <div className="mt-6 space-y-4">
           {/* Filter and Search */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <label className="text-sm font-semibold text-[#0B4B31] whitespace-nowrap">
+            <label className="text-sm font-normal text-[#0B4B31] whitespace-nowrap">
               Filter By:
             </label>
             <div className="relative flex-1">
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full appearance-none rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
               >
                 <option value="">All</option>
                 <option value="paid">Paid</option>
@@ -242,7 +242,7 @@ export default function InvoicePage() {
             </div>
             <button
               type="button"
-              className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
+              className="rounded-full border-2 border-white bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] whitespace-nowrap"
             >
               Search
             </button>
@@ -254,14 +254,14 @@ export default function InvoicePage() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Search..."
-              className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
           </label>
 
           <div>
             <button
               type="button"
-              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+              className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
             >
               See All ↗
             </button>
@@ -273,12 +273,12 @@ export default function InvoicePage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">Parent Name</th>
-                <th className="px-4">Phone Number</th>
-                <th className="px-4">Due Amont</th>
-                <th className="px-4">Status</th>
-                <th className="px-4">Status</th>
-                <th className="px-4">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
+                <th className="px-4 font-normal text-[#0000008C]">Due Amont</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -293,16 +293,15 @@ export default function InvoicePage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
-                        <span className="font-medium text-[#0B4B31]">{invoice.parentName}</span>
+                        <span className="font-medium text-[#1e1e1e]">{invoice.parentName}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[#555]">{invoice.phoneNumber}</td>
-                    <td className="px-4 py-3 font-medium text-[#0B4B31]">{invoice.dueAmount}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{invoice.phoneNumber}</td>
+                    <td className="px-4 py-3 font-medium text-[#1e1e1e]">{invoice.dueAmount}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold text-white ${
-                          isUnpaid ? "bg-red-500" : "bg-[#0B4B31]"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-normal ${isUnpaid ? "bg-[#F71735] text-white" : "bg-[#0B4B31] text-[#71DD8C]"
+                          }`}
                       >
                         {invoice.paymentStatus}
                       </span>
@@ -314,9 +313,8 @@ export default function InvoicePage() {
                           e.stopPropagation();
                           handleActionClick(invoice.fundsAction === "Add Funds" ? "addFunds" : "payment", invoice.id, e);
                         }}
-                        className={`inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold text-white transition ${
-                          isUnpaid ? "bg-red-500 hover:bg-red-600" : "bg-[#0B4B31] hover:bg-[#0B4B31]/90"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-normal transition ${isUnpaid ? "bg-[#F71735] hover:bg-[#F71735]/90 text-white" : "bg-[#0B4B31] text-[#71DD8C]"
+                          }`}
                       >
                         {invoice.fundsAction}
                       </button>
@@ -326,7 +324,7 @@ export default function InvoicePage() {
                         <button
                           type="button"
                           onClick={(e) => toggleDropdown(invoice.id, e)}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-[#0B4B31] transition bg-[#0B4B3138]"
                         >
                           Action
                           <span>▾</span>
@@ -335,19 +333,19 @@ export default function InvoicePage() {
                         {isDropdownOpen && (
                           <div
                             ref={(el) => (dropdownRefs.current[invoice.id] = el)}
-                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
                           >
                             <button
                               type="button"
                               onClick={(e) => handleActionClick("view", invoice.id, e)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 hover:bg-[#E5EFEB]"
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 bg-[#0B4B3138]"
                             >
                               View Details
                             </button>
                             <button
                               type="button"
                               onClick={(e) => handleActionClick("edit", invoice.id, e)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] border-t border-[#E2E7E4] transition-all duration-150 hover:bg-[#E5EFEB]"
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               Edit
                             </button>
@@ -364,9 +362,9 @@ export default function InvoicePage() {
 
         {/* Pagination */}
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
+          <div className="text-sm font-normal text-[#0000008C]">Showing 1 to 10 of 50 entries</div>
           <div className="flex items-center gap-3">
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
               <option>Display 10</option>
               <option>Display 20</option>
               <option>Display 50</option>

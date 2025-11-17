@@ -28,10 +28,10 @@ export default function QuranTrackerPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="font-medium text-[#000000]  text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
@@ -44,7 +44,7 @@ export default function QuranTrackerPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -68,7 +68,7 @@ export default function QuranTrackerPage() {
             </div>
             <button
               type="button"
-              className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="rounded-full border-2 border-white bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
             >
               Manage
             </button>
@@ -79,17 +79,17 @@ export default function QuranTrackerPage() {
         <div className="mt-6 rounded-[18px] bg-[#E5EFEB] px-6 py-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-lg font-bold text-[#0B4B31]">Teacher: Mohamed Karie</p>
-              <p className="text-sm text-[#627169]">Subject:</p>
+              <p className="text-lg font-normal text-[#0B4B31]">Teacher: Mohamed Karie</p>
+              <p className="text-[0.6875rem] font-normal text-[#0B4B31]">Subject:</p>
             </div>
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <p className="text-3xl font-bold text-[#0B4B31]">51</p>
-                <p className="text-sm text-[#627169]">Students</p>
+                <p className="text-3xl font-normal text-[#0B4B31]">51</p>
+                <p className="text-[0.6875rem] font-normal text-[#0B4B31]">Students</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[#0B4B31]">0/51</p>
-                <p className="text-sm text-[#627169]">Completed</p>
+                <p className="text-3xl font-normal text-[#0B4B31]">0/51</p>
+                <p className="text-[0.6875rem] font-normal text-[#0B4B31]">Completed</p>
               </div>
             </div>
           </div>
@@ -100,11 +100,11 @@ export default function QuranTrackerPage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">Teacher Name</th>
-                <th className="px-4">Students</th>
-                <th className="px-4">Current Surah</th>
-                <th className="px-4">Actions</th>
-                <th className="px-4">Actions</th>
+                <th className="px-4 font-normal text-[#0000008C]">Teacher Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Students</th>
+                <th className="px-4 font-normal text-[#0000008C]">Current Surah</th>
+                <th className="px-4 font-normal text-[#0000008C]">Actions</th>
+                <th className="px-4 font-normal text-[#0000008C]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -113,9 +113,9 @@ export default function QuranTrackerPage() {
                   key={item.id}
                   className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                 >
-                  <td className="px-4 py-3 font-medium text-[#0B4B31]">{item.teacherName}</td>
-                  <td className="px-4 py-3 text-[#555]">{item.students}</td>
-                  <td className="px-4 py-3 text-[#555]">{item.currentSurah}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.teacherName}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.students}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.currentSurah}</td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => handleAddNew(item.id)}
