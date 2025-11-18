@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { Search, Grid, Moon, ChevronDown } from "lucide-react";
 import StatsCards from "@/components/StatsCard";
 
@@ -9,38 +10,43 @@ const Page = () => {
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-4 py-2 sm:py-4">
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
-          <div className="flex items-center border border-emerald-700 rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px]">
+          <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
             <Search size={16} className="text-gray-500 mr-2" />
             <input
               type="text"
               placeholder="Search..."
-              className="w-full bg-transparent focus:outline-none text-sm text-gray-700"
+              className="w-full bg-transparent focus:outline-none text-sm text-[#0B4B31] placeholder:text-[#979699]"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-emerald-700 hover:bg-emerald-50">
-              <Grid size={18} className="text-emerald-700" />
+            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
+              <Grid size={18} className="text-[#0B4B31]" />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-emerald-700 hover:bg-emerald-50">
-              <Moon size={18} className="text-emerald-700" />
+            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
+              <Moon size={18} className="text-[#0B4B31]" />
             </button>
-            <div className="flex items-center gap-2 border border-emerald-700 rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50">
-              <img
-                src="https://via.placeholder.com/32"
-                alt="user"
-                className="w-8 h-8 rounded-full border border-gray-200"
-              />
+            <div className="flex items-center gap-2 bg-white border border-[#0B4B31 rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+              <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
+                <Image
+                  src="/main-dashboard.jpg"
+                  alt="user"
+                  width={32}
+                  height={32}
+                  className="object-cover"
+                  priority
+                />
+              </div>
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">Ahmed J.</span>
-              <ChevronDown size={16} className="text-emerald-700" />
+              <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
           </div>
         </div>
       </header>
 
       {/* Welcome */}
-      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
-      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
+      <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</h1>
+      <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
 
       {/* Stats & Charts */}
       <div className="flex flex-col xl:flex-row gap-6 pb-6">
@@ -108,7 +114,7 @@ const Page = () => {
                 "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
             }}
           >
-            <h3 className="text-white text-[18px] leading-[100%] mb-4 font-bold">Total Unpaid</h3>
+            <h3 className="text-white text-[1.125rem] leading-[100%] mb-4 font-extrabold">Total Unpaid</h3>
 
             <div className="bg-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full flex-shrink-0">
@@ -116,8 +122,8 @@ const Page = () => {
               </div>
 
               <div className="flex flex-col items-center sm:items-start">
-                <h2 className="text-[#0B4B31] text-[20px] leading-[100%] font-bold">$33,543.00</h2>
-                <p className="text-[#525967] text-[12px] leading-[100%] mt-2 text-center sm:text-left">90 Voices Left Out of 100</p>
+                <h2 className="text-[#0B4B31] text-[1.5rem] leading-[100%] font-extrabold">$33,543.00</h2>
+                <p className="text-[#525967] text-[0.75rem] leading-[100%] mt-2 text-center sm:text-left">90 Voices Left Out of 100</p>
               </div>
             </div>
           </div>
@@ -140,7 +146,7 @@ const Page = () => {
             </div>
 
             <div className="flex justify-end mt-6">
-              <button className="text-sm font-medium hover:underline flex items-center gap-1">
+              <button className="text-sm font-normal hover:underline flex items-center gap-1">
                 Details <ChevronDown size={14} className="rotate-270" />
               </button>
             </div>
@@ -161,7 +167,7 @@ const Page = () => {
             { name: "Milad Hersi", date: "03 Jun, 2025", amount: "-$200", color: "text-red-500" },
             { name: "Milad Hersi", date: "02 Jun, 2025", amount: "+$800", color: "text-green-600" },
           ]
-        },{
+        }, {
           title: "Top Outstanding Balances",
           subtitle: "Parents with highest unpaid invoices",
           btnText: "See All ↗",

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { Search, Grid, Moon, ChevronDown } from "lucide-react";
 import StatsCards from "@/components/StatsCard";
 
@@ -9,38 +10,43 @@ const Page = () => {
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-4 py-2 sm:py-4">
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
-          <div className="flex items-center border border-emerald-700 rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px]">
+          <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
             <Search size={16} className="text-gray-500 mr-2" />
             <input
               type="text"
               placeholder="Search..."
-              className="w-full bg-transparent focus:outline-none text-sm text-gray-700"
+              className="w-full bg-transparent focus:outline-none text-sm text-[#0B4B31] placeholder:text-[#979699]"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-emerald-700 hover:bg-emerald-50">
-              <Grid size={18} className="text-emerald-700" />
+            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm hover:bg-emerald-50 transition-colors">
+              <Grid size={18} className="text-[#0B4B31]" />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-emerald-700 hover:bg-emerald-50">
-              <Moon size={18} className="text-emerald-700" />
+            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm hover:bg-emerald-50 transition-colors">
+              <Moon size={18} className="text-[#0B4B31]" />
             </button>
-            <div className="flex items-center gap-2 border border-emerald-700 rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50">
-              <img
-                src="https://via.placeholder.com/32"
-                alt="user"
-                className="w-8 h-8 rounded-full border border-gray-200"
-              />
+            <div className="flex items-center gap-2 border border-[#0B4B31] bg-white rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+              <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
+                <Image
+                  src="/main-dashboard.jpg"
+                  alt="user"
+                  width={32}
+                  height={32}
+                  className="object-cover"
+                  priority
+                />
+              </div>
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">Ahmed J.</span>
-              <ChevronDown size={16} className="text-emerald-700" />
+              <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
           </div>
         </div>
       </header>
 
       {/* Welcome */}
-      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
-      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
+      <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</h1>
+      <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
 
       {/* Stats & Charts */}
       <div className="flex flex-col xl:flex-row gap-6 pb-6">
@@ -161,11 +167,11 @@ const Page = () => {
             { name: "Milad Hersi", date: "03 Jun, 2025", amount: "-$200", color: "text-red-500" },
             { name: "Milad Hersi", date: "02 Jun, 2025", amount: "+$800", color: "text-green-600" },
           ]
-        },{
+        }, {
           title: "Top Outstanding Balances",
           subtitle: "Parents with highest unpaid invoices",
           btnText: "See All ↗",
-          btnColor: "text-[#F14336] bg-[#fde1df] hover:bg-[#FADDDD]",
+          btnColor: "text-[#F14336] bg-[#F1433629] hover:bg-[#FADDDD]",
           rows: [
             { name: "Ayan Nur", date: "06 Jun, 2025", amount: "-$5,000", color: "text-red-500" },
             { name: "Muhammad Hasan", date: "04 Jun, 2025", amount: "+$65", color: "text-green-600" },
@@ -178,25 +184,25 @@ const Page = () => {
               <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">{table.title}</h3>
               <button className={`text-[12px] px-3 py-[2px] rounded-full transition ${table.btnColor}`}>{table.btnText}</button>
             </div>
-            <p className="text-[#000000] text-sm mb-4">{table.subtitle}</p>
+            <p className="text-[#000000] text-[1.125rem] font-light mb-4">{table.subtitle}</p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[400px] sm:min-w-full">
                 <thead>
                   <tr className="bg-[#0B4B31] text-white">
-                    <th className="text-left px-3 py-2 rounded-tl-md">Names ↕</th>
-                    <th className="text-left px-3 py-2">Joined On ↕</th>
-                    <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+                    <th className="text-left px-3 py-2 font-semibold rounded-tl-md">Names ↕</th>
+                    <th className="text-left px-3 py-2 font-semibold">Joined On ↕</th>
+                    <th className="text-right px-3 py-2 font-semibold rounded-tr-md">Amount ↕</th>
                   </tr>
                 </thead>
                 <tbody>
                   {table.rows.map((row, idx) => (
                     <tr key={idx} className="border-b border-gray-100">
-                      <td className="py-3 px-3 flex items-center gap-2">
+                      <td className="py-3 px-3 flex items-center gap-2 font-normal text-[#1e1e1e]">
                         {row.name}
                       </td>
-                      <td className="py-3 px-3">{row.date}</td>
-                      <td className={`py-3 px-3 text-right font-medium ${row.color}`}>{row.amount}</td>
+                      <td className="py-3 px-3 font-normal text-[#1e1e1e]">{row.date}</td>
+                      <td className={`py-3 px-3 text-right font-normal text-[#0B4B31] ${row.color}`}>{row.amount}</td>
                     </tr>
                   ))}
                 </tbody>

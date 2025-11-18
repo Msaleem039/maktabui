@@ -195,124 +195,16 @@ export default function InvoicePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-            placeholder="Select the date"
-          />
-        </div>
-        <div className="relative flex-1">
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full appearance-none rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-          >
-            <option value="">Status</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-          </select>
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
-        </div>
-        <button
-          type="button"
-          className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
-        >
-          Manage
-        </button>
-      </div>
-
-      {/* Key Metrics Banner */}
-      <div className="relative rounded-[18px] bg-[#E5EFEB] px-8 py-6 overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: "url(/invoices.png)",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover", // or "contain"
-            backgroundPosition: "center",
-          }}
-        ></div>
-        <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">125</p>
-            <p className="text-sm text-[#627169] mt-1">Total Invoices</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$48,620.00</p>
-            <p className="text-sm text-[#627169] mt-1">Total Amount</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$333,090.00</p>
-            <p className="text-sm text-[#627169] mt-1">Paid Amount</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$47,380.00</p>
-            <p className="text-sm text-[#627169] mt-1">Unpaid Amount</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Donut Chart */}
-        <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#0B4B31]">Payment Status Distribution</h3>
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-              <option>This month</option>
-              <option>Last month</option>
-              <option>This year</option>
-            </select>
-          </div>
-          <div className="h-64">
-            <Doughnut data={donutChartData} options={donutOptions} />
-          </div>
-        </div>
-
-        {/* Semi-circle Chart */}
-        <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#0B4B31]">Payment Status Distribution</h3>
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-              <option>This month</option>
-              <option>Last month</option>
-              <option>This year</option>
-            </select>
-          </div>
-          <div className="h-64">
-            <Doughnut data={semiCircleData} options={semiCircleOptions} />
-          </div>
-        </div>
-      </div>
-
-      {/* Bar Chart */}
-      <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-[#0B4B31]">Payment Status Distribution</h3>
-          <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-            <option>This month</option>
-            <option>Last month</option>
-            <option>This year</option>
-          </select>
-        </div>
-        <div className="h-64">
-          <Bar data={barChartData} options={barOptions} />
-        </div>
-      </div>
+      {/* Removed summary widgets per new design */}
 
       {/* Invoice Table Section */}
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -322,7 +214,7 @@ export default function InvoicePage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white px-4 py-2 text-sm font-normal bg-[#0B4B31] text-white transition"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -333,14 +225,14 @@ export default function InvoicePage() {
         <div className="mt-6 space-y-4">
           {/* Filter and Search */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <label className="text-sm font-semibold text-[#0B4B31] whitespace-nowrap">
+            <label className="text-sm font-normal text-[#0B4B31] whitespace-nowrap">
               Filter By:
             </label>
             <div className="relative flex-1">
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full appearance-none rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
               >
                 <option value="">All</option>
                 <option value="paid">Paid</option>
@@ -350,7 +242,7 @@ export default function InvoicePage() {
             </div>
             <button
               type="button"
-              className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
+              className="rounded-full border-2 border-white bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] whitespace-nowrap"
             >
               Search
             </button>
@@ -362,14 +254,14 @@ export default function InvoicePage() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Search..."
-              className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
           </label>
 
           <div>
             <button
               type="button"
-              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+              className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
             >
               See All ↗
             </button>
@@ -381,12 +273,12 @@ export default function InvoicePage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">Parent Name</th>
-                <th className="px-4">Phone Number</th>
-                <th className="px-4">Due Amont</th>
-                <th className="px-4">Status</th>
-                <th className="px-4">Status</th>
-                <th className="px-4">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
+                <th className="px-4 font-normal text-[#0000008C]">Due Amont</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -401,16 +293,15 @@ export default function InvoicePage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
-                        <span className="font-medium text-[#0B4B31]">{invoice.parentName}</span>
+                        <span className="font-medium text-[#1e1e1e]">{invoice.parentName}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[#555]">{invoice.phoneNumber}</td>
-                    <td className="px-4 py-3 font-medium text-[#0B4B31]">{invoice.dueAmount}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{invoice.phoneNumber}</td>
+                    <td className="px-4 py-3 font-medium text-[#1e1e1e]">{invoice.dueAmount}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold text-white ${
-                          isUnpaid ? "bg-red-500" : "bg-[#0B4B31]"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-normal ${isUnpaid ? "bg-[#F71735] text-white" : "bg-[#0B4B31] text-[#71DD8C]"
+                          }`}
                       >
                         {invoice.paymentStatus}
                       </span>
@@ -422,9 +313,8 @@ export default function InvoicePage() {
                           e.stopPropagation();
                           handleActionClick(invoice.fundsAction === "Add Funds" ? "addFunds" : "payment", invoice.id, e);
                         }}
-                        className={`inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold text-white transition ${
-                          isUnpaid ? "bg-red-500 hover:bg-red-600" : "bg-[#0B4B31] hover:bg-[#0B4B31]/90"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-normal transition ${isUnpaid ? "bg-[#F71735] hover:bg-[#F71735]/90 text-white" : "bg-[#0B4B31] text-[#71DD8C]"
+                          }`}
                       >
                         {invoice.fundsAction}
                       </button>
@@ -434,7 +324,7 @@ export default function InvoicePage() {
                         <button
                           type="button"
                           onClick={(e) => toggleDropdown(invoice.id, e)}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-[#0B4B31] transition bg-[#0B4B3138]"
                         >
                           Action
                           <span>▾</span>
@@ -443,19 +333,19 @@ export default function InvoicePage() {
                         {isDropdownOpen && (
                           <div
                             ref={(el) => (dropdownRefs.current[invoice.id] = el)}
-                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
                           >
                             <button
                               type="button"
                               onClick={(e) => handleActionClick("view", invoice.id, e)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 hover:bg-[#E5EFEB]"
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 bg-[#0B4B3138]"
                             >
                               View Details
                             </button>
                             <button
                               type="button"
                               onClick={(e) => handleActionClick("edit", invoice.id, e)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] border-t border-[#E2E7E4] transition-all duration-150 hover:bg-[#E5EFEB]"
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               Edit
                             </button>
@@ -472,9 +362,9 @@ export default function InvoicePage() {
 
         {/* Pagination */}
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
+          <div className="text-sm font-normal text-[#0000008C]">Showing 1 to 10 of 50 entries</div>
           <div className="flex items-center gap-3">
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
               <option>Display 10</option>
               <option>Display 20</option>
               <option>Display 50</option>

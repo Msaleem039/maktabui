@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   X,
+  X,
 } from "lucide-react";
 import ViewInvoiceModal from "./ViewInvoiceModal";
 
@@ -661,9 +662,9 @@ const QuickActionCard = ({ actions = [] }) => (
       Quick Action
     </h3>
     <div className="mt-4 space-y-3">
-      {actions.map(({ label, icon: Icon }) => (
+      {actions.map(({ label, icon: Icon }, index) => (
         <button
-          key={label}
+          key={`${label}-${index}`}
           type="button"
           className="flex w-full items-center justify-between rounded-[16px] bg-[#F8F8F8] px-4 py-3 text-[0.6875rem] font-normal text-black transition"
         >

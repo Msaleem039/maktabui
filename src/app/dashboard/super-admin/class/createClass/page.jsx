@@ -83,7 +83,7 @@ const Page = () => {
         try {
             // API COMMENTED OUT FOR UI TESTING - Simulating success
             await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
-            
+
             // const classData = {
             //     name: formData.name,
             //     code: formData.code,
@@ -97,16 +97,16 @@ const Page = () => {
             // const response = await axios.post('/api/teacher/createClass', classData);
 
             // if (response.status === 201) {
-                alert('Class created successfully! (UI Testing Mode)');
-                setFormData({
-                    name: "",
-                    code: "",
-                    subject: "",
-                    description: "",
-                    teacherId: "",
-                    startDate: "",
-                    endDate: ""
-                });
+            alert('Class created successfully! (UI Testing Mode)');
+            setFormData({
+                name: "",
+                code: "",
+                subject: "",
+                description: "",
+                teacherId: "",
+                startDate: "",
+                endDate: ""
+            });
             // } else {
             //     alert(response.data.message || 'Error creating class');
             // }
@@ -134,7 +134,7 @@ const Page = () => {
             <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
 
             <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
-                <h2 className="text-sm font-semibold mb-6 text-gray-700">Create Class</h2>
+                <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Class</h2>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <CustomField
@@ -179,20 +179,21 @@ const Page = () => {
                     />
 
                     <div className="sm:col-span-2">
-                        <label className="block text-sm text-gray-600 mb-1">Description</label>
+                        <label className="block font-normal text-sm text-[#000000] mb-1">Description</label>
                         <textarea
                             name="description"
                             placeholder="Class Description (optional)"
                             value={formData.description}
                             onChange={handleInputChange}
                             rows="3"
-                            className="w-full bg-[#0B4B3199] text-white placeholder-gray-300 rounded-2xl px-4 py-4 outline-none resize-none"
+                            className="w-full bg-[#0B4B3199] text-white text-sm placeholder-[#000000] rounded-2xl px-4 py-4 outline-none resize-none"
                         />
                     </div>
 
                     <CustomField
                         label="Start Date"
                         name="startDate"
+                        placeholder="mm/dd/yyyy"
                         type="date"
                         value={formData.startDate}
                         onChange={handleInputChange}
@@ -201,6 +202,7 @@ const Page = () => {
                     <CustomField
                         label="End Date"
                         name="endDate"
+                        placeholder="mm/dd/yyyy"
                         type="date"
                         value={formData.endDate}
                         onChange={handleInputChange}
@@ -212,9 +214,8 @@ const Page = () => {
                         type="submit"
                         onClick={handleSubmit}
                         disabled={loading || fetchingTeachers}
-                        className={`bg-[#cedbd6] text-green-900 font-semibold px-8 py-3 rounded-full hover:bg-green-300 transition w-full sm:w-auto ${
-                            loading || fetchingTeachers ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`bg-[#cedbd6] text-[#0B4B31] font-normal px-8 py-3 rounded-full transition w-full sm:w-auto ${loading || fetchingTeachers ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                     >
                         {loading ? 'Creating Class...' : 'Create Class'}
                     </button>

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ChevronDown, PlusIcon } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
 import Chatbot from "@/components/dashboard/Chatbot";
-
 const NavItem = ({
   name,
   Icon,
@@ -39,7 +38,7 @@ const NavItem = ({
 
   const collapsedClasses = "justify-center p-2 w-10 h-10 mx-auto";
   const unCollapsedClasses = "px-3 py-3";
-
+  console.log("get cookies data", getCookie("user"))
   return (
     <div>
       <button
@@ -256,7 +255,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Invoice", path: `${basePath}/finance/invoice` },
-          { name: "Payment", path: `${basePath}/finance/payment` },
+          { name: "Invoices Report", path: `${basePath}/finance/invoice-report` },
+          { name: "Payments", path: `${basePath}/finance/payment` },
         ],
       },
       {
@@ -448,7 +448,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className="p-4 mt-2">
           <button
             onClick={handleLogout}
-            className="w-full bg-white text-[#0B4B31] font-medium rounded-2xl py-3 flex items-center justify-center gap-2 shadow-sm hover:bg-gray-100 transition-all"
+            className="w-full bg-white text-[#0B4B31] font-normal rounded-2xl py-3 flex items-center justify-center gap-2 shadow-sm hover:bg-gray-100 transition-all"
           >
             <Image
               src="/Logout.png"
