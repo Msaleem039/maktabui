@@ -48,9 +48,8 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
                 onChange({ target: { name, value: option.value || option } });
                 setIsOpen(false);
               }}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
-                value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-              }`}
+              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
+                }`}
             >
               {option.label || option}
             </div>
@@ -108,16 +107,16 @@ export default function AddQuranLessonPage({ params }) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[2.5rem] font-semibold  text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
       </div>
       <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-10 py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
-        <h2 className="text-lg font-semibold text-gray-700 mb-6">Add New Lesson</h2>
+        <h2 className="text-lg font-semibold text-[#104D2E] mb-6">Add New Lesson</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormInput

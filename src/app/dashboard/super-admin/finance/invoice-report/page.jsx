@@ -180,10 +180,10 @@ export default function InvoiceReportPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+        <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
           Welcome to
         </p>
-        <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+        <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
           MaktabOS
         </h1>
       </div>
@@ -194,14 +194,14 @@ export default function InvoiceReportPage() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-full border border-[#C5D2CD] bg-white py-3 px-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+            className="w-full rounded-full border border-[#0B4B31] bg-white py-3 px-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
             placeholder="dd/mm/yyyy"
           />
           <div className="relative w-full">
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full appearance-none rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
             >
               <option value="">Status</option>
               <option value="paid">Paid</option>
@@ -213,7 +213,7 @@ export default function InvoiceReportPage() {
           </div>
           <button
             type="button"
-            className="rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
+            className="rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
           >
             Manage
           </button>
@@ -221,28 +221,28 @@ export default function InvoiceReportPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 rounded-[18px] bg-[#E5EFEB] px-8 py-6">
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">125</p>
-            <p className="text-sm text-[#627169] mt-1">Total Invoices</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">125</p>
+            <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Total Invoices</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$48,620.00</p>
-            <p className="text-sm text-[#627169] mt-1">Total Amount</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">$48,620.00</p>
+            <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Total Amount</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$333,090.00</p>
-            <p className="text-sm text-[#627169] mt-1">Paid Amount</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">$333,090.00</p>
+            <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Paid Amount</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$47,380.00</p>
-            <p className="text-sm text-[#627169] mt-1">Unpaid Amount</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">$47,380.00</p>
+            <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Unpaid Amount</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-[#0B4B31]">Payment Status Distribution</h3>
-              <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
+              <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
                 <option>This month</option>
                 <option>Last month</option>
                 <option>This year</option>
@@ -256,17 +256,17 @@ export default function InvoiceReportPage() {
 
               <div className="space-y-4 text-sm font-medium text-[#0B4B31]">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#0B4B31" }}></span>
+                  <span className="inline-flex h-3 w-3 rounded-full bg-[#0B4B31]"></span>
                   <div>
-                    <p>Paid</p>
-                    <p className="text-xl font-bold">10K</p>
+                    <p className="text-[0.8125rem] font-normal text-[#979699]">Paid</p>
+                    <p className="text-[1.0625rem] font-semibold text-[#000000]">10K</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#CFE6DB" }}></span>
+                  <span className="inline-flex h-3 w-3 rounded-full bg-[#CFE6DB]"></span>
                   <div>
-                    <p>Unpaid</p>
-                    <p className="text-xl font-bold">40K</p>
+                    <p className="text-[0.8125rem] font-normal text-[#979699]">Unpaid</p>
+                    <p className="text-[1.0625rem] font-semibold text-[#000000]">40K</p>
                   </div>
                 </div>
               </div>
@@ -275,8 +275,8 @@ export default function InvoiceReportPage() {
 
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-[#0B4B31]">Payment Status Distribution</h3>
-              <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
+              <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
                 <option>This month</option>
                 <option>Last month</option>
                 <option>This year</option>
@@ -287,14 +287,14 @@ export default function InvoiceReportPage() {
               <div className="w-48 h-48">
                 <Doughnut data={semiCircleData} options={semiCircleOptions} />
               </div>
-              <div className="space-y-3 text-sm font-medium text-[#0B4B31]">
+              <div className="space-y-3 text-[0.8125rem] font-normal text-[#0000008C]">
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#0B4B31" }}></span>
-                  <span>Cash Stripe</span>
+                  <span className="text-[0.8125rem] font-normal text-[#0000008C]">Cash Stripe</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#32C66B" }}></span>
-                  <span>Cash Stripe (Alt)</span>
+                  <span className="text-[0.8125rem] font-normal text-[#0000008C]">Cash Stripe (Alt)</span>
                 </div>
               </div>
             </div>
@@ -303,8 +303,8 @@ export default function InvoiceReportPage() {
 
         <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-[#0B4B31]">Payment Status Distribution</h3>
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+            <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
+            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
               <option>This month</option>
               <option>Last month</option>
               <option>This year</option>
@@ -319,14 +319,14 @@ export default function InvoiceReportPage() {
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-3 w-3 rounded-full bg-[#A4E4CE]"></span>
                 <div>
-                  <p>Paid</p>
+                  <p className="text-[0.8125rem] font-normal text-[#0000008C]">Paid</p>
                   <p className="text-xl font-bold text-[#1B1464]">10K</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-3 w-3 rounded-full bg-[#EF7566]"></span>
                 <div>
-                  <p>Unpaid</p>
+                  <p className="text-[0.8125rem] font-normal text-[#0000008C]">Unpaid</p>
                   <p className="text-xl font-bold text-[#1B1464]">4K</p>
                 </div>
               </div>
@@ -335,10 +335,10 @@ export default function InvoiceReportPage() {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-[#0B4B31]">Unpaid Invoices Report</h2>
+          <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">Unpaid Invoices Report</h2>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition"
           >
             <Download size={16} />
             Export Data
@@ -347,14 +347,14 @@ export default function InvoiceReportPage() {
 
         <div className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <label className="text-sm font-semibold text-[#0B4B31] whitespace-nowrap">
+            <label className="text-sm font-normal text-[#0B4B31] whitespace-nowrap">
               Filter By :
             </label>
             <div className="relative flex-1">
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full appearance-none rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
               >
                 <option value="">All</option>
                 <option value="paid">Paid</option>
@@ -366,7 +366,7 @@ export default function InvoiceReportPage() {
             </div>
             <button
               type="button"
-              className="rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
             >
               Search
             </button>
@@ -378,14 +378,14 @@ export default function InvoiceReportPage() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Search..."
-              className="w-full rounded-full border border-[#C5D2CD] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
             />
           </label>
 
           <div>
             <button
               type="button"
-              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+              className="rounded-full border border-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B3138]"
             >
               See All ↗
             </button>
@@ -396,12 +396,12 @@ export default function InvoiceReportPage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">Parent Name</th>
-                <th className="px-4">Phone Number</th>
-                <th className="px-4">Due Amount</th>
-                <th className="px-4">Status</th>
-                <th className="px-4">Status</th>
-                <th className="px-4">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
+                <th className="px-4 font-normal text-[#0000008C]">Due Amount</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -415,20 +415,20 @@ export default function InvoiceReportPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
-                        <span className="font-medium text-[#0B4B31]">{invoice.parentName}</span>
+                        <span className="font-normal text-[#1e1e1e]">{invoice.parentName}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{invoice.phoneNumber}</td>
-                    <td className="px-4 py-3 font-medium text-[#0B4B31]">{invoice.dueAmount}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{invoice.phoneNumber}</td>
+                    <td className="px-4 py-3 font-medium text-[#1e1e1e]">{invoice.dueAmount}</td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center rounded-full bg-[#C43B30] px-4 py-2 text-xs font-semibold text-white">
+                      <span className="inline-flex items-center rounded-full bg-[#C43B30] px-4 py-2 text-sm font-normal text-white">
                         {invoice.paymentStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <button
                         onClick={(e) => handleActionClick("payment", invoice.id, e)}
-                        className="inline-flex items-center rounded-full bg-[#C43B30] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#a03024]"
+                        className="inline-flex items-center rounded-full bg-[#C43B30] px-4 py-2 text-sm font-normal text-[#FFFFFF] transition hover:bg-[#a03024]"
                       >
                         {invoice.fundsAction}
                       </button>
@@ -438,7 +438,7 @@ export default function InvoiceReportPage() {
                         <button
                           type="button"
                           onClick={(e) => toggleDropdown(invoice.id, e)}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
                         >
                           Action
                           <span>▾</span>
@@ -452,14 +452,14 @@ export default function InvoiceReportPage() {
                             <button
                               type="button"
                               onClick={(e) => handleActionClick("view", invoice.id, e)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 hover:bg-[#E5EFEB]"
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               View Details
                             </button>
                             <button
                               type="button"
                               onClick={(e) => handleActionClick("edit", invoice.id, e)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] border-t border-[#E2E7E4] transition-all duration-150 hover:bg-[#E5EFEB]"
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#E2E7E4] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               Edit
                             </button>
@@ -475,9 +475,9 @@ export default function InvoiceReportPage() {
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
+          <div className="text-sm font-normal text-[#0000008C]">Showing 1 to 10 of 50 entries</div>
           <div className="flex items-center gap-3">
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
               <option>Display 10</option>
               <option>Display 20</option>
               <option>Display 50</option>

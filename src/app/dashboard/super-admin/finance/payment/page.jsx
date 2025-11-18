@@ -46,29 +46,7 @@ export default function PaymentPage() {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "left",
-        labels: {
-          usePointStyle: true,
-          padding: 15,
-          font: {
-            size: 12,
-          },
-          generateLabels: function(chart) {
-            const data = chart.data;
-            if (data.labels.length && data.datasets.length) {
-              return data.labels.map((label, i) => {
-                const value = data.datasets[0].data[i];
-                return {
-                  text: `${label}: ${value}%`,
-                  fillStyle: data.datasets[0].backgroundColor[i],
-                  hidden: false,
-                  index: i,
-                };
-              });
-            }
-            return [];
-          },
-        },
+        display: false,
       },
     },
     cutout: "70%",
@@ -134,10 +112,10 @@ export default function PaymentPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[0.8125rem] font-medium uppercase tracking-[0.35em] text-[#979699]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="text-[1.5rem] font-semibold text-[#000000] leading-tight sm:text-[1.5rem]">
             MaktabOS
           </h1>
         </div>
@@ -150,7 +128,7 @@ export default function PaymentPage() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-full border border-[#C5D2CD] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+            className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
             placeholder="Select the date"
           />
         </div>
@@ -168,7 +146,7 @@ export default function PaymentPage() {
         </div>
         <button
           type="button"
-          className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
+          className="rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition whitespace-nowrap"
         >
           Manage
         </button>
@@ -176,7 +154,7 @@ export default function PaymentPage() {
 
       {/* Key Metrics Banner */}
       <div className="relative rounded-[18px] bg-[#E5EFEB] px-8 py-6 overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: "url(/invoices.png)",
@@ -187,20 +165,20 @@ export default function PaymentPage() {
         ></div>
         <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">125</p>
-            <p className="text-sm text-[#627169] mt-1">Total Payments</p>
+            <p className="text-[1.5rem] font-semibold text-[#000000]">125</p>
+            <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Total Payments</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$48,620.00</p>
-            <p className="text-sm text-[#627169] mt-1">Total Amount</p>
+            <p className="text-[1.5rem] font-semibold text-[#000000]">$48,620.00</p>
+            <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Total Amount</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">$333,090.00</p>
-            <p className="text-sm text-[#627169] mt-1">Average Payment</p>
+            <p className="text-[1.5rem] font-semibold text-[#000000]">$333,090.00</p>
+            <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Average Payment</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-[#0B4B31]">21-10-2025</p>
-            <p className="text-sm text-[#627169] mt-1">Last Payment Date</p>
+            <p className="text-[1.5rem] font-semibold text-[#000000]">21-10-2025</p>
+            <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Last Payment Date</p>
           </div>
         </div>
       </div>
@@ -209,16 +187,36 @@ export default function PaymentPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Payment Methods Distribution */}
         <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-[#0B4B31] mb-4">Payment Methods Distribution</h3>
-          <div className="h-64">
+          <h3 className="text-[0.8125rem] font-medium text-[#0000008C] mb-4">Payment Methods Distribution</h3>
+          <div className="relative h-64 flex items-center justify-center">
             <Doughnut data={paymentMethodsData} options={paymentMethodsOptions} />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="flex flex-col gap-3 items-center">
+                {paymentMethodsData.labels.map((label, i) => {
+                  const value = paymentMethodsData.datasets[0].data[i];
+                  const color = paymentMethodsData.datasets[0].backgroundColor[i];
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="text-xs" style={{ fontSize: '12px' }}>
+                        <span style={{ color: "#737373" }}>{label}: </span>
+                        <span style={{ color: "#0A0A0A" }}>{value}%</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Monthly Payment Trends */}
         <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#0B4B31]">Monthly Payment Trends</h3>
+            <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Monthly Payment Trends</h3>
             <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
               <option>2025</option>
               <option>2024</option>
@@ -234,14 +232,14 @@ export default function PaymentPage() {
       {/* All Payment Records Section */}
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-[#104D2E]">All Payment Records</h2>
+          <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">All Payment Records</h2>
         </div>
 
         <div className="mt-6 space-y-4">
           {/* Search and Actions */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <label className="relative flex w-full max-w-xl items-center">
-              <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+              <span className="absolute left-4 text-[#979699]">🔍</span>
               <input
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
@@ -254,14 +252,14 @@ export default function PaymentPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition"
             >
               <Download size={16} className="text-white" />
               Export Data
             </button>
             <button
               type="button"
-              className="rounded-full border border-[#0B4B31]/30 bg-[#E5EFEB] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
+              className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
             >
               See All ↗
             </button>
@@ -273,10 +271,10 @@ export default function PaymentPage() {
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4">Receipt #</th>
-                <th className="px-4">Payment Date</th>
-                <th className="px-4">Payment Amount</th>
-                <th className="px-4">Payment Method</th>
+                <th className="px-4 font-normal text-[#0000008C]">Receipt #</th>
+                <th className="px-4 font-normal text-[#0000008C]">Payment Date</th>
+                <th className="px-4 font-normal text-[#0000008C]">Payment Amount</th>
+                <th className="px-4 font-normal text-[#0000008C]">Payment Method</th>
               </tr>
             </thead>
             <tbody>
@@ -285,10 +283,10 @@ export default function PaymentPage() {
                   key={record.id}
                   className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                 >
-                  <td className="px-4 py-3 font-medium text-[#0B4B31]">{record.receiptNumber}</td>
-                  <td className="px-4 py-3 text-[#555]">{record.paymentDate}</td>
-                  <td className="px-4 py-3 font-medium text-[#0B4B31]">{record.paymentAmount}</td>
-                  <td className="px-4 py-3 text-[#555]">{record.paymentMethod}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.receiptNumber}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentDate}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentAmount}</td>
+                  <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentMethod}</td>
                 </tr>
               ))}
             </tbody>
@@ -297,9 +295,9 @@ export default function PaymentPage() {
 
         {/* Pagination */}
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
+          <div className="text-[0.8125rem] font-normal text-[#979699]">Showing 1 to 10 of 50 entries</div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[#8A928F]">Display 10</span>
+            <span className="text-[0.8125rem] font-normal text-[#979699]">Display 10</span>
             <div className="flex items-center gap-2">
               <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
                 ‹
