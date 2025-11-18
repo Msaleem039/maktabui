@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { Download } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllParents, resetParentsState } from "@/redux/slices/getAllParentsSlice";
+import { getAllParents, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 
 const ParentTable = ({
   title = "Parents",
@@ -13,7 +13,7 @@ const ParentTable = ({
   parents = [],
 }) => {
   const dispatch = useDispatch();
-  const { parents: reduxParents, pagination, status, error } = useSelector((state) => state.allParents);
+  const { parents: reduxParents, pagination, status, error } = useSelector((state) => state.getAllParents);
 
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
@@ -28,7 +28,7 @@ const ParentTable = ({
     }));
 
     return () => {
-      dispatch(resetParentsState());
+      dispatch(resetAllParentsState());
     };
   }, [dispatch, localSearch]);
 

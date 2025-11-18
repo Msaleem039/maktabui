@@ -86,6 +86,12 @@ export default function ClassPage() {
               <Download size={16} className="text-white" />
               Export Data
             </button>
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
           </div>
         </div>
 
@@ -99,15 +105,6 @@ export default function ClassPage() {
               className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
           </label>
-        </div>
-
-        <div className="mt-4">
-          <button
-            type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          >
-            See All ↗
-          </button>
         </div>
 
         <div className="mt-6 overflow-x-auto">
@@ -152,9 +149,8 @@ export default function ClassPage() {
                                 key={item.action}
                                 type="button"
                                 onClick={(e) => handleActionClick(item.action, classItem.id, e)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
-                                  idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                } hover:bg-[#E5EFEB]`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                  } hover:bg-[#E5EFEB]`}
                               >
                                 <Icon size={16} className="text-[#0B4B31]" />
                                 <span>{item.label}</span>

@@ -1,21 +1,37 @@
 import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './slices/userLoginSlice';
-import parentReducer from './slices/createParentSlice';
-import getAllParentsReducer from './slices/getAllParentsSlice';
-import getParentsByIdReducer from './slices/getParentsByIdSlice';
-import getWaitListParentReducer from './slices/getWaitListParentSlice';
-import addToWaitListReducer from './slices/addToWaitlistSlice';
-import removeFromWaitListReducer from './slices/removeFromWaitList';
+import userReducer from './slices/authSlices/userLoginSlice';
+import {
+  addToWaitListReducer,
+  createParentReducer,
+  getAllParentsReducer,
+  getParentByIdReducer,
+  getAllWaitListParentsReducer,
+  removeFromWaitListReducer
+} from './slices/parentSlices/parentSlice';
+import {
+  createStudentReducer,
+  getAllStudentsReducer,
+  getStudentByIdReducer,
+  getAllWaitlistStudentsReducer,
+  addToWaitlistStudentReducer,
+  removeFromWaitlistStudentReducer
+} from './slices/studentSlices/studentSlices';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
-    parent: parentReducer,
-    allParents: getAllParentsReducer,
-    parentById: getParentsByIdReducer,
-    waitlistParents: getWaitListParentReducer,
+    createParent: createParentReducer,
+    getAllParents: getAllParentsReducer,
+    getParentById: getParentByIdReducer,
+    waitlistParents: getAllWaitListParentsReducer,
     addToWaitList: addToWaitListReducer,
-    removeFromWaitList: removeFromWaitListReducer
+    removeFromWaitList: removeFromWaitListReducer,
+    createStudent: createStudentReducer,
+    getAllStudents: getAllStudentsReducer,
+    getStudentById: getStudentByIdReducer,
+    waitlistStudents: getAllWaitlistStudentsReducer,
+    addToWaitlistStudent: addToWaitlistStudentReducer,
+    removeFromWaitlistStudent: removeFromWaitlistStudentReducer
   },
 });
 

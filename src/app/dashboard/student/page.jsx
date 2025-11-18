@@ -1,15 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
-
-const StudentTable = dynamic(
-  () => import("@/components/dashboard/students/StudentTable"),
-  { ssr: false }
-);
+import StudentTable from "@/components/dashboard/students/StudentTable";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllStudents } from "@/redux/slices/studentSlices/studentSlices";
 
 export default function StudentsPage() {
   const [searchValue, setSearchValue] = useState("");
+  const dispatch = useDispatch();
+
+  const { students, status, error } = useSelector(
+    (state) => state.getAllStudents
+  );
+
+  useEffect(() => {
+    dispatch(getAllStudents());
+  }, [dispatch]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading students...</div>
+      </div>
+    );
+  }
+
+  if (status === "failed") {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-red-500 text-lg">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -17,6 +39,7 @@ export default function StudentsPage() {
         title="Students (All Classes)"
         onSearchChange={setSearchValue}
         searchValue={searchValue}
+        students={students}
       />
     </div>
   );

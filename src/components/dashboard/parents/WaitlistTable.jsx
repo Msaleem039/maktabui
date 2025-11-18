@@ -7,9 +7,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { 
   getAllWaitListParents, 
   resetWaitListParentsState 
-} from "@/redux/slices/getWaitListParentSlice";
-import { removeFromWaitList, resetRemoveWaitList } from "@/redux/slices/removeFromWaitList";
-import { addToWaitList, resetAddWaitList } from "@/redux/slices/addToWaitlistSlice";
+} from "@/redux/slices/parentSlices/parentSlice";
+import { removeFromWaitList, resetRemoveWaitList } from "@/redux/slices/parentSlices/parentSlice";
+import { addToWaitList, resetAddWaitList } from "@/redux/slices/parentSlices/parentSlice";
 
 const WaitlistTable = ({
   title = "Waitlist Parents",
@@ -19,7 +19,7 @@ const WaitlistTable = ({
 }) => {
   const dispatch = useDispatch();
   
-  // Selectors for all slices
+  
   const { parents: waitlistParents, status, error } = useSelector((state) => state.waitlistParents);
   const { 
     loading: removeLoading, 
@@ -47,7 +47,6 @@ const WaitlistTable = ({
     };
   }, [dispatch]);
 
-  // Reset and refetch when any waitlist operation is successful
   useEffect(() => {
     if (removeSuccess || addSuccess) {
       dispatch(getAllWaitListParents());
@@ -80,15 +79,12 @@ const WaitlistTable = ({
       setUpdatingParents(prev => new Set(prev).add(parentId));
 
       if (currentStatus) {
-        // Remove from waitlist
         await dispatch(removeFromWaitList(parentId)).unwrap();
       } else {
-        // Add to waitlist using Redux
         await dispatch(addToWaitList(parentId)).unwrap();
       }
     } catch (error) {
       console.error("Error updating waitlist status:", error);
-      // Error handling is done through the Redux state and useEffect above
     } finally {
       setUpdatingParents(prev => {
         const newSet = new Set(prev);

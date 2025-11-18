@@ -11,11 +11,32 @@ const StudentTable = ({
   searchValue = "",
   students = [],
 }) => {
+  console.log("students", students);
+  
   const router = useRouter();
-  const tableData = useMemo(() => {
-    if (students.length > 0) return students;
+  
+  // Transform the API data to match table structure
+  const transformedStudents = useMemo(() => {
+    return students.map((student) => ({
+      id: student._id,
+      name: student.studentName,
+      parentName: student.parent?.fullName || "N/A",
+      phone: student.phone,
+      class: student.class?.[0] || "N/A", // Take first class if array
+      email: student.email,
+      gender: student.gender,
+      dateOfBirth: student.dateOfBirth,
+      enrollDate: student.enrollDate,
+      fee: student.fee,
+      // Include original student data for potential use
+      originalData: student
+    }));
+  }, [students]);
 
-    // Fallback demo data
+  const tableData = useMemo(() => {
+    if (transformedStudents.length > 0) return transformedStudents;
+
+    // Fallback dummy data when no students
     return Array.from({ length: 10 }, (_, index) => ({
       id: `student-${index + 1}`,
       name: "Milad Hersi",
@@ -23,13 +44,27 @@ const StudentTable = ({
       phone: "123456789",
       class: "203 Abdirahman Jama Class",
     }));
-  }, [students]);
+  }, [transformedStudents]);
 
   const [selectedId, setSelectedId] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const dropdownRefs = useRef({});
   const [commentStudentId, setCommentStudentId] = useState(null);
   const [commentText, setCommentText] = useState("");
+
+  // Filter students based on search value
+  const filteredStudents = useMemo(() => {
+    if (!searchValue) return tableData;
+    
+    const lowerSearch = searchValue.toLowerCase();
+    return tableData.filter(student => 
+      student.name?.toLowerCase().includes(lowerSearch) ||
+      student.parentName?.toLowerCase().includes(lowerSearch) ||
+      student.email?.toLowerCase().includes(lowerSearch) ||
+      student.phone?.includes(searchValue) ||
+      student.class?.toLowerCase().includes(lowerSearch)
+    );
+  }, [tableData, searchValue]);
 
   const handleSearchChange = (event) => {
     onSearchChange?.(event.target.value);
@@ -55,6 +90,11 @@ const StudentTable = ({
     } else if (action === "comment") {
       setCommentStudentId(studentId);
       setCommentText("");
+    } else if (action === "remove") {
+      if (confirm("Are you sure you want to remove this student?")) {
+        console.log("Remove student:", studentId);
+        // Add your remove student logic here
+      }
     } else {
       console.log(`${action} clicked for student ${studentId}`);
     }
@@ -82,6 +122,12 @@ const StudentTable = ({
     { label: "Comment", icon: MessageSquare, action: "comment" },
     { label: "Remove", icon: Trash2, action: "remove" },
   ];
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
     <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -112,7 +158,7 @@ const StudentTable = ({
           <input
             value={searchValue}
             onChange={handleSearchChange}
-            placeholder="Search..."
+            placeholder="Search by name, parent, email, phone, or class..."
             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
@@ -123,33 +169,36 @@ const StudentTable = ({
           <thead className="text-xs font-normal uppercase tracking-wide text-[#00000066]">
             <tr>
               <th className="px-4 font-normal text-[#0000008C]">Student Name</th>
-              <th className="px-4 font-normal text-[#0000008C]">Parent Names</th>
+              <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
               <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
               <th className="px-4 font-normal text-[#0000008C]">Class</th>
+              <th className="px-4 font-normal text-[#0000008C]">Email</th>
               <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {tableData.map((student) => {
+            {filteredStudents.map((student) => {
               const isSelected = student.id === selectedId;
               const isDropdownOpen = openDropdownId === student.id;
               return (
                 <tr
                   key={student.id}
                   onClick={() => handleRowSelect(student.id)}
-                  className={`group cursor-pointer rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm transition hover:shadow-md ${isSelected ? "bg-[#C9DCD4] border-[#AECDBF]" : ""
-                    }`}
+                  className={`group cursor-pointer rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm transition hover:shadow-md ${
+                    isSelected ? "bg-[#C9DCD4] border-[#AECDBF]" : ""
+                  }`}
                 >
                   <td className="px-4 py-3 font-medium text-[#0B4B31]">
                     <div className="relative flex items-center gap-3 pl-3">
                       <span
-                        className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${isSelected
-                          ? "bg-[#0B4B31]"
-                          : "bg-transparent group-hover:bg-[#0B4B31]/50"
-                          }`}
+                        className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${
+                          isSelected
+                            ? "bg-[#0B4B31]"
+                            : "bg-transparent group-hover:bg-[#0B4B31]/50"
+                        }`}
                       ></span>
                       <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F5EF] text-sm">
-                        👤
+                        {student.gender === "Female" ? "👩" : "👨"}
                       </span>
                       <div className="flex flex-col">
                         <Link
@@ -158,6 +207,9 @@ const StudentTable = ({
                         >
                           {student.name}
                         </Link>
+                        <span className="text-xs text-[#666]">
+                          {student.gender} • {formatDate(student.dateOfBirth)}
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -171,6 +223,9 @@ const StudentTable = ({
                   </td>
                   <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.phone}</td>
                   <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.class}</td>
+                  <td className="px-4 py-3 text-[#000000] font-medium text-sm text-xs">
+                    {student.email}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="relative inline-block">
                       <button
@@ -196,10 +251,11 @@ const StudentTable = ({
                                 onClick={(e) =>
                                   handleActionClick(item.action, student.id, e)
                                 }
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${index === 0
-                                  ? ""
-                                  : "border-t border-[#E2E7E4]"
-                                  } hover:bg-[#E5EFEB]`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
+                                  index === 0
+                                    ? ""
+                                    : "border-t border-[#E2E7E4]"
+                                } hover:bg-[#E5EFEB]`}
                               >
                                 <Icon size={16} className="text-[#0B4B31]" />
                                 <span>{item.label}</span>
@@ -217,10 +273,17 @@ const StudentTable = ({
         </table>
       </div>
 
+      {/* Show message when no students found */}
+      {filteredStudents.length === 0 && (
+        <div className="text-center py-8 text-[#666]">
+          {students.length === 0 ? "No students found" : "No students match your search"}
+        </div>
+      )}
+
       {/* Pagination */}
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-[#8A928F]">
-          Showing 1 to 10 of 50 entries
+          Showing {filteredStudents.length} of {students.length} students
         </div>
         <div className="flex items-center gap-3">
           <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
@@ -297,4 +360,3 @@ const StudentTable = ({
 };
 
 export default StudentTable;
-

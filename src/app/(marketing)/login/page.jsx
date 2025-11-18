@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../../redux/slices/userLoginSlice";
+import { loginUser } from "../../../redux/slices/authSlices/userLoginSlice";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 

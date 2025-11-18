@@ -20,19 +20,15 @@ const NavItem = ({
   children,
   subItems,
 }) => {
-  // More precise active state logic - only one item should be active at a time
   let isActive = false;
 
   if (hasSubmenu && subItems) {
-    // For items with submenus (path is empty), check if any subItem matches the current pathname
     isActive = subItems.some(
       (subItem) =>
         pathname === subItem.path ||
         (subItem.path && pathname.startsWith(subItem.path + "/"))
     );
   } else if (path) {
-    // For items without submenus, only match exact path
-    // Don't use startsWith for parent paths to avoid multiple matches
     isActive = pathname === path;
   }
 
@@ -220,8 +216,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Student", path: "/dashboard/student" },
           { name: "Add Student", path: `${basePath}/student/add` },
-          { name: "Waiting List", path: `${basePath}/student/waiting-list` },
-          { name: "Incidents", path: `${basePath}/incidents` },
+          { name: "Waiting List", path: `${basePath}/student/waiting-list` }
         ],
       },
       {

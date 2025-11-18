@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Trash2, Calendar, CreditCard } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { createParent, resetParentState } from "@/redux/slices/createParentSlice";
+import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -119,7 +119,7 @@ function AddParentFormContent() {
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
-  const { status, error, parent, student } = useSelector((state) => state.parent);
+  const { status, error, parent, student } = useSelector((state) => state.createParent);
 
   const [parentData, setParentData] = useState({
     fullName: "",
@@ -291,7 +291,7 @@ function AddParentFormContent() {
 
         setTimeout(() => {
           setShowSuccess(false);
-          dispatch(resetParentState());
+          dispatch(resetAllParentsState());
         }, 5000);
       }
     } catch (error) {

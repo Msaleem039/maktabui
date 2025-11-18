@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getParentById, resetParentState } from "@/redux/slices/getParentsByIdSlice";
+import { getParentById, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 import ParentProfile from "@/components/dashboard/parents/ParentProfile";
 
 export default function ParentDetailPage({ params }) {
   const dispatch = useDispatch();
   
-  const { parent, status, error } = useSelector((state) => state.parentById);
+  const { parent, status, error } = useSelector((state) => state.getParentById);
 
   useEffect(() => {
     if (params?.id) {
@@ -16,7 +16,7 @@ export default function ParentDetailPage({ params }) {
     }
 
     return () => {
-      dispatch(resetParentState());
+      dispatch(resetAllParentsState());
     };
   }, [params?.id, dispatch]);
 

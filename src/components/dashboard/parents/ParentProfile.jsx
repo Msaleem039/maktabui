@@ -81,9 +81,6 @@ const ParentProfile = ({
       phone: parent.spousePhone || "Not Available",
     };
 
-    console.log("spouse", spouse);
-
-
     return {
       name: parent.fullName || "No Name",
       role: "Parent",
