@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { Download } from "lucide-react";
+import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllParents, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 
@@ -17,6 +17,7 @@ const ParentTable = ({
 
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
+  const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
 
   useEffect(() => {
     dispatch(getAllParents({
@@ -42,6 +43,60 @@ const ParentTable = ({
     setSelectedId(parentId);
   };
 
+  const toggleActionMenu = (event, parentId) => {
+    event.stopPropagation();
+    
+    // Calculate if menu should open upwards (if near bottom of viewport)
+    const buttonRect = event.target.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const menuHeight = 200; // Approximate menu height
+    
+    setActionMenu(prev => ({
+      id: prev.id === parentId ? null : parentId,
+      openUp: spaceBelow < menuHeight
+    }));
+  };
+
+  const handleViewProfile = (event, parentId) => {
+    event.stopPropagation();
+    // Implement view profile logic
+    console.log("View profile:", parentId);
+    setActionMenu({ id: null, openUp: false });
+  };
+
+  const handleEdit = (event, parentId) => {
+    event.stopPropagation();
+    // Implement edit logic
+    console.log("Edit:", parentId);
+    setActionMenu({ id: null, openUp: false });
+  };
+
+  const handleComment = (event, parent) => {
+    event.stopPropagation();
+    // Implement comment logic
+    console.log("Comment:", parent);
+    setActionMenu({ id: null, openUp: false });
+  };
+
+  const handleRemove = (event, parent) => {
+    event.stopPropagation();
+    // Implement remove logic
+    console.log("Remove:", parent);
+    setActionMenu({ id: null, openUp: false });
+  };
+
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActionMenu({ id: null, openUp: false });
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   const tableData = useMemo(() => {
     if (reduxParents && reduxParents.length > 0) {
       return reduxParents.map(parent => ({
@@ -59,9 +114,8 @@ const ParentTable = ({
 
     if (parents.length > 0) return parents;
 
-    return []; // Return empty array instead of dummy data
+    return [];
   }, [reduxParents, parents]);
-
 
   const getInvoiceStatus = (parent) => {
     if (parent.fee && parent.fee > 0) {
@@ -232,45 +286,6 @@ const ParentTable = ({
           </div>
         )}
       </div>
-
-      {commentParent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl space-y-5">
-            <div>
-              <h3 className="text-lg font-semibold text-[#0B4B31]">Add Comment</h3>
-              <p className="text-sm text-[#5E6C64]">Parent: {commentParent.name}</p>
-            </div>
-            <form onSubmit={handleCommentSubmit} className="space-y-4">
-              <textarea
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                rows={4}
-                placeholder="Write your comment..."
-                className="w-full rounded-2xl border border-[#D5E2DB] px-4 py-3 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-                required
-              />
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCommentParent(null);
-                    setCommentText("");
-                  }}
-                  className="flex-1 rounded-full border border-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                >
-                  Save Comment
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </section>
   );
 };

@@ -14,8 +14,7 @@ import {
   FileSpreadsheet,
   ArrowUpRight,
   ChevronDown,
-  X,
-  X,
+  X
 } from "lucide-react";
 import ViewInvoiceModal from "./ViewInvoiceModal";
 
