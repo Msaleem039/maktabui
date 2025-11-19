@@ -1,9 +1,9 @@
 "use client";
 
-import SuperAdminCreateAdminPage from "../../../super-admin/team/admin/createAdmin/page";
+import CreateAdmin from "@/components/dashboard/team/CreateAdmin";
 
 export default function CreateAdminPage(props) {
-  return <SuperAdminCreateAdminPage {...props} />;
+  return <CreateAdmin {...props} />;
 }
 
 

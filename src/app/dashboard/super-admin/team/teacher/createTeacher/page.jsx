@@ -4,11 +4,11 @@ import { ChevronDown } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { createTeacher, resetCreateTeacherState } from "@/redux/slices/teacherSlices/teacherSlices";
+import { MultiSelectDropdown } from "@/components/MultiSelectDropdown";
 
 const Page = () => {
   const dispatch = useDispatch();
-  
-  // Use more specific selectors to prevent unnecessary re-renders
+
   const classNames = useSelector((state) => state.getAllClassesName.classNames);
   const classesLoading = useSelector((state) => state.getAllClassesName.loading);
   const classesError = useSelector((state) => state.getAllClassesName.error);
@@ -35,20 +35,44 @@ const Page = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedClasses, setSelectedClasses] = useState([]);
 
-  // Memoize classes array
   const classes = useMemo(() => {
     return Array.isArray(classNames) ? classNames : [];
   }, [classNames]);
 
-  // Memoize options
-  const genderOptions = useMemo(() => ["Male", "Female", "Other"], []);
-  const qualificationOptions = useMemo(() => ["B.Ed", "M.Ed", "B.Sc", "M.Sc", "PhD"], []);
-  const experienceOptions = useMemo(() => 
-    [...Array(31).keys()].map(num => ({
-      label: `${num} years`,
-      value: `${num}`
-    })), []
-  );
+  const genderOptions = useMemo(() => [
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" },
+    { label: "Other", value: "Other" }
+  ], []);
+
+  const qualificationOptions = useMemo(() => [
+    { label: "B.Ed", value: "B.Ed" },
+    { label: "M.Ed", value: "M.Ed" },
+    { label: "B.Sc", value: "B.Sc" },
+    { label: "M.Sc", value: "M.Sc" },
+    { label: "PhD", value: "PhD" }
+  ], []);
+
+  const experienceYearsOptions = [
+    { label: "1 year", value: "1 year" },
+    { label: "2 years", value: "2 years" },
+    { label: "3 years", value: "3 years" },
+    { label: "4 years", value: "4 years" },
+    { label: "5 years", value: "5 years" },
+    { label: "6-10 years", value: "6-10 years" },
+    { label: "10+ years", value: "10+ years" },
+  ];
+
+  const languagesOptions = useMemo(() => [
+    { label: "English", value: "English" },
+    { label: "Spanish", value: "Spanish" },
+    { label: "French", value: "French" },
+    { label: "German", value: "German" },
+    { label: "Chinese", value: "Chinese" },
+    { label: "Arabic", value: "Arabic" },
+    { label: "Hindi", value: "Hindi" },
+    { label: "Urdu", value: "Urdu" },
+  ], []);
 
   useEffect(() => {
     // Fetch classes using Redux action
@@ -75,12 +99,26 @@ const Page = () => {
         languages: "",
       });
       setSelectedClasses([]);
-      
+
       setTimeout(() => {
         dispatch(resetCreateTeacherState());
       }, 3000);
     }
   }, [teacherStatus, dispatch]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Optimize input change handler
   const handleInputChange = useCallback((e) => {
@@ -132,9 +170,36 @@ const Page = () => {
     });
   }, []);
 
+  // Handle languages multi-select
+  const handleLanguageToggle = useCallback((language) => {
+    setFormData(prev => {
+      const currentLanguages = prev.languages ? prev.languages.split(",").map(lang => lang.trim()).filter(lang => lang) : [];
+      const languageIndex = currentLanguages.indexOf(language);
+
+      if (languageIndex > -1) {
+        currentLanguages.splice(languageIndex, 1);
+      } else {
+        currentLanguages.push(language);
+      }
+
+      return {
+        ...prev,
+        languages: currentLanguages.join(", ")
+      };
+    });
+  }, []);
+
   const isClassSelected = useCallback((classId) => {
     return selectedClasses.some(cls => cls.id === classId);
   }, [selectedClasses]);
+
+  const isLanguageSelected = useCallback((language) => {
+    return formData.languages ? formData.languages.split(",").map(lang => lang.trim()).includes(language) : false;
+  }, [formData.languages]);
+
+  const getSelectedLanguagesDisplay = useCallback(() => {
+    return formData.languages || "Select languages";
+  }, [formData.languages]);
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -175,7 +240,7 @@ const Page = () => {
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 transition-all duration-200 ease-in-out border border-transparent hover:border-[#0B4B31]/20 focus:border-[#0B4B31]/40"
+          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
         />
       </div>
     );
@@ -195,58 +260,47 @@ const Page = () => {
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 transition-all duration-200 ease-in-out border border-transparent hover:border-[#0B4B31]/20 focus:border-[#0B4B31]/40 [color-scheme:light]"
+          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 [color-scheme:light]"
         />
       </div>
     );
   }, []);
 
-  // Enhanced Dropdown Field Component
-  const StyledDropdownField = useCallback(({ label, name, value, options, onSelect, isOpen, onToggle, placeholder, required = false, className = "", renderOption, disabled = false }) => {
+  // Simple Dropdown Component (like Edit Teacher form)
+  const SimpleDropdown = useCallback(({ label, name, value, options, onSelect, isOpen, onToggle, placeholder, required = false }) => {
     return (
-      <div className={`relative ${className}`}>
+      <div className="relative dropdown-container">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
           {label} {required && "*"}
         </label>
-        <div
-          className={`w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30 transition-all duration-200 ease-in-out border border-transparent hover:border-[#0B4B31]/20 ${
-            disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-[#D0DCD6]"
-          }`}
-          onClick={() => !disabled && onToggle(name)}
+        <button
+          type="button"
+          onClick={() => onToggle(name)}
+          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 text-left flex justify-between items-center"
         >
-          <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-            {value || placeholder}
+          <span className={!value ? "text-[#0B4B31]/60" : "text-[#0B4B31]"}>
+            {value ? options.find(opt => opt.value === value)?.label : placeholder}
           </span>
-          <ChevronDown 
-            size={16} 
+          <ChevronDown
+            size={16}
             className={`text-[#0B4B31] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           />
-        </div>
-        {isOpen && !disabled && (
-          <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto animate-in fade-in-0 zoom-in-95">
-            {options.length > 0 ? (
-              options.map((option) => 
-                renderOption ? (
-                  renderOption(option)
-                ) : (
-                  <div
-                    key={option.value || option}
-                    onClick={() => onSelect(name, option.value || option)}
-                    className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
-                      value === (option.value || option) 
-                        ? "bg-[#0B4B31] text-white" 
-                        : "text-[#0B4B31] hover:bg-[#E5EFEB]"
-                    }`}
-                  >
-                    {option.label || option}
-                  </div>
-                )
-              )
-            ) : (
-              <div className="px-4 py-3 text-gray-500 text-center">
-                No options available
-              </div>
-            )}
+        </button>
+
+        {isOpen && (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div className="p-2">
+              {options.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onSelect(name, option.value)}
+                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md text-sm text-gray-700 transition-colors duration-150"
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -315,7 +369,7 @@ const Page = () => {
             />
 
             {/* Gender Dropdown */}
-            <StyledDropdownField
+            <SimpleDropdown
               label="Gender"
               name="gender"
               value={formData.gender}
@@ -377,7 +431,7 @@ const Page = () => {
             />
 
             {/* Qualification Dropdown */}
-            <StyledDropdownField
+            <SimpleDropdown
               label="Qualification"
               name="qualification"
               value={formData.qualification}
@@ -398,11 +452,11 @@ const Page = () => {
             />
 
             {/* Experience Years Dropdown */}
-            <StyledDropdownField
+            <SimpleDropdown
               label="Experience (Years)"
               name="experienceYears"
               value={formData.experienceYears}
-              options={experienceOptions}
+              options={experienceYearsOptions}
               onSelect={selectOption}
               isOpen={openDropdown === "experienceYears"}
               onToggle={toggleDropdown}
@@ -418,32 +472,18 @@ const Page = () => {
               placeholder="MM-DD-YYYY"
             />
 
-            {/* Assigned Classes Dropdown - Custom render */}
-            <StyledDropdownField
+            {/* Assigned Classes Multi-Select Dropdown */}
+            <MultiSelectDropdown
               label="Assigned Classes"
               name="assignedClasses"
               value={formData.assignedClasses}
               options={classes}
-              onSelect={() => {}} // Not used for this custom dropdown
               isOpen={openDropdown === "assignedClasses"}
               onToggle={toggleDropdown}
               placeholder={classesLoading ? "Loading classes..." : "Select classes"}
-              renderOption={(classItem) => (
-                <div
-                  key={classItem._id || classItem.id}
-                  onClick={() => handleClassSelection(classItem._id || classItem.id, classItem.name)}
-                  className={`px-4 py-3 cursor-pointer transition-colors duration-150 flex items-center ${
-                    isClassSelected(classItem._id || classItem.id) 
-                      ? "bg-[#0B4B31] text-white" 
-                      : "text-[#0B4B31] hover:bg-[#E5EFEB]"
-                  }`}
-                >
-                  <span className="flex-1">{classItem.name}</span>
-                  {isClassSelected(classItem._id || classItem.id) && (
-                    <span className="ml-2 text-sm">✓</span>
-                  )}
-                </div>
-              )}
+              onItemToggle={handleClassSelection}
+              isItemSelected={isClassSelected}
+              getDisplayValue={() => selectedClasses.map(cls => cls.name).join(", ") || "Select classes"}
               disabled={classesLoading}
             />
 
@@ -456,56 +496,34 @@ const Page = () => {
               placeholder="e.g. English, Math"
             />
 
-            {/* Languages */}
-            <StyledCustomField
+            {/* Languages Multi-Select Dropdown */}
+            <MultiSelectDropdown
               label="Languages"
               name="languages"
               value={formData.languages}
-              onChange={handleInputChange}
-              placeholder="e.g. English, Urdu"
+              options={languagesOptions}
+              isOpen={openDropdown === "languages"}
+              onToggle={toggleDropdown}
+              placeholder="Select languages"
+              onItemToggle={handleLanguageToggle}
+              isItemSelected={isLanguageSelected}
+              getDisplayValue={getSelectedLanguagesDisplay}
             />
           </div>
-
-          {/* Selected Classes Display */}
-          {selectedClasses.length > 0 && (
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Selected Classes:
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {selectedClasses.map((classItem) => (
-                  <span
-                    key={classItem.id}
-                    className="bg-[#0B4B31] text-white px-3 py-1 rounded-full text-sm flex items-center transition-all duration-200 hover:bg-[#0B4B31]/90"
-                  >
-                    {classItem.name}
-                    <button
-                      type="button"
-                      onClick={() => handleClassSelection(classItem.id, classItem.name)}
-                      className="ml-2 hover:text-gray-200 transition-colors"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Submit Button */}
           <div className="flex justify-center pt-6">
             <button
               type="submit"
               disabled={teacherStatus === "loading" || classesLoading}
-              className={`rounded-full px-8 py-3 text-sm font-semibold transition-all duration-200 ${
-                teacherStatus === "loading" || classesLoading
+              className={`rounded-full px-8 py-3 text-sm font-semibold ${teacherStatus === "loading" || classesLoading
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE] hover:shadow-md transform hover:-translate-y-0.5"
-              }`}
+                  : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
+                }`}
             >
-              {teacherStatus === "loading" ? "Creating Teacher..." : 
-               classesLoading ? "Loading Classes..." : 
-               "Create Teacher"}
+              {teacherStatus === "loading" ? "Creating Teacher..." :
+                classesLoading ? "Loading Classes..." :
+                  "Create Teacher"}
             </button>
           </div>
         </form>

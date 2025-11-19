@@ -5,85 +5,9 @@ import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createStudent, resetCreateStudentState } from "../../../redux/slices/studentSlices/studentSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
-
-const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-      />
-    </div>
-  );
-};
-
-const FormCheckbox = ({ label, name, checked, onChange, className = "" }) => {
-  return (
-    <div className={`flex items-start ${className}`}>
-      <div className="flex items-center h-5">
-        <input
-          type="checkbox"
-          name={name}
-          checked={checked}
-          onChange={onChange}
-          className="w-4 h-4 text-[#0B4B31] bg-[#D5E2DB] border-gray-300 rounded focus:ring-[#0B4B31]"
-        />
-      </div>
-      <label className="ml-2 text-sm font-semibold text-gray-700">
-        {label}
-      </label>
-    </div>
-  );
-};
-
-const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectedOption = options.find(option => option.value === value);
-
-  return (
-    <div className={`relative ${className}`}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label}
-      </label>
-      <div
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <span className="text-[#0B4B31]">▾</span>
-      </div>
-      {isOpen && (
-        <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
-          {options.map((option) => (
-            <div
-              key={option.value}
-              onClick={() => {
-                onChange({ target: { name, value: option.value } });
-                setIsOpen(false);
-              }}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
-                value === option.value ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-              }`}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { FormInput } from "@/components/FormInput";
+import { FormCheckbox } from "@/components/FormCheckbox";
+import { SimpleDropdown } from "@/components/SimpleDropdown";
 
 const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
   const formatDateForDisplay = (dateString) => {
@@ -192,6 +116,12 @@ export default function AddStudentSimpleForm() {
     studentAddToWaitList: false, 
   });
 
+  // State for dropdown open/close
+  const [dropdownStates, setDropdownStates] = useState({
+    gender: false,
+    class: false
+  });
+
   useEffect(() => {
     dispatch(getAllClassesNameAction());
   }, [dispatch]);
@@ -201,6 +131,11 @@ export default function AddStudentSimpleForm() {
     value: classItem._id 
   }));
 
+  const genderOptions = [
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" }
+  ];
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
@@ -209,6 +144,20 @@ export default function AddStudentSimpleForm() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  // Handle dropdown selection
+  const handleDropdownSelect = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setDropdownStates((prev) => ({ ...prev, [name]: false }));
+  };
+
+  // Toggle dropdown
+  const toggleDropdown = (name) => {
+    setDropdownStates((prev) => ({ 
+      ...prev, 
+      [name]: !prev[name] 
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -278,6 +227,12 @@ export default function AddStudentSimpleForm() {
         studentPassword: "",
         class: "", // Reset class selection
         studentAddToWaitList: false,
+      });
+
+      // Reset dropdown states
+      setDropdownStates({
+        gender: false,
+        class: false
       });
 
       console.log("Student created successfully:", { student, parent, existingParent });
@@ -472,22 +427,27 @@ export default function AddStudentSimpleForm() {
             onChange={handleChange}
             placeholder="Student Password"
           />
-          <FormDropdown
+          <SimpleDropdown
             label="Gender"
             name="gender"
             value={formData.gender}
-            onChange={handleChange}
-            options={[{ label: "Male", value: "Male" }, { label: "Female", value: "Female" }]}
+            options={genderOptions}
+            onSelect={handleDropdownSelect}
+            isOpen={dropdownStates.gender}
+            onToggle={() => toggleDropdown('gender')}
             placeholder="Select Gender"
+            required
           />
-          <FormDropdown
+          <SimpleDropdown
             label="Class"
             name="class"
             value={formData.class}
-            onChange={handleChange}
             options={classOptions}
+            onSelect={handleDropdownSelect}
+            isOpen={dropdownStates.class}
+            onToggle={() => toggleDropdown('class')}
             placeholder={classesLoading ? "Loading classes..." : "Select Class"}
-            className={classesLoading ? "opacity-50 cursor-not-allowed" : ""}
+            required
           />
           <div className="flex items-center md:col-span-2">
             <FormCheckbox

@@ -351,7 +351,6 @@ export const getAllWaitlistParents = async (req) => {
 export const getParentById = async (req) => {
   try {
     const { id } = await req.json();
-    console.log("id",id);
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return new Response(
