@@ -1,9 +1,261 @@
 "use client";
 
-import SuperAdminClassPage from "../super-admin/class/page";
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Download, Eye, Edit, Trash2 } from "lucide-react";
 
-export default function ClassPage(props) {
-  return <SuperAdminClassPage {...props} />;
+export default function ClassPage() {
+  const [searchValue, setSearchValue] = useState("");
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [deleteModalId, setDeleteModalId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const dropdownRefs = useRef({});
+  const router = useRouter();
+
+  const tableData = Array.from({ length: 10 }, (_, index) => ({
+    id: `class-${index + 1}`,
+    teacherName: "202 Mohamed Karie Class",
+    students: index === 0 ? "54" : "30",
+    className: "203 Abdirahman Jama Class",
+  }));
+
+  const actionMenuItems = [
+    { label: "View Detail", icon: Eye, action: "view" },
+    { label: "Edit", icon: Edit, action: "edit" },
+    { label: "Remove", icon: Trash2, action: "remove" },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      Object.values(dropdownRefs.current).forEach((ref) => {
+        if (ref && !ref.contains(event.target)) {
+          setOpenDropdownId(null);
+        }
+      });
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const toggleDropdown = (id, event) => {
+    event.stopPropagation();
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
+
+  const handleActionClick = (action, id, event) => {
+    event.stopPropagation();
+    setOpenDropdownId(null);
+
+    if (action === "view") {
+      router.push(`/dashboard/class/${id}`);
+    } else if (action === "edit") {
+      router.push(`/dashboard/class/${id}/edit`);
+    } else if (action === "remove") {
+      setDeleteModalId(id);
+    } else {
+      console.log(`${action} clicked for class ${id}`);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalId(null);
+    setIsDeleting(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModalId) return;
+    setIsDeleting(true);
+
+    try {
+      // TODO: replace with real delete endpoint
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      console.log("Deleted class:", deleteModalId);
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+            Welcome to
+          </p>
+          <h1 className="font-medium text-[#000000]  text-[1.75rem]">
+            MaktabOS
+          </h1>
+        </div>
+        <Link
+          href="/dashboard/class/createClass"
+          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+        >
+          <span className="text-lg">+</span>
+          Add New Class
+        </Link>
+      </div>
+
+      <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-[#104D2E]">Manage Classes</h2>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
+            >
+              <Download size={16} className="text-white" />
+              Export Data
+            </button>
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <label className="relative flex w-full max-w-xl items-center">
+            <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+            <input
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search..."
+              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
+            />
+          </label>
+        </div>
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
+            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+              <tr>
+                <th className="px-4 font-normal text-[#0000008C]">Teacher Name</th>
+                <th className="px-4 font-normal text-[#0000008C]">Students</th>
+                <th className="px-4 font-normal text-[#0000008C]">Class</th>
+                <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((classItem) => (
+                <tr
+                  key={classItem.id}
+                  className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
+                >
+                  <td className="px-4 py-3 font-medium text-[#1E1E1E]">{classItem.teacherName}</td>
+                  <td className="px-4 py-3 font-medium text-[#1E1E1E]">{classItem.students}</td>
+                  <td className="px-4 py-3 font-medium text-[#1E1E1E]">{classItem.className}</td>
+                  <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
+                    <div className="relative inline-block">
+                      <button
+                        type="button"
+                        onClick={(e) => toggleDropdown(classItem.id, e)}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
+                      >
+                        Take Action
+                        <span>▾</span>
+                      </button>
+
+                      {openDropdownId === classItem.id && (
+                        <div
+                          ref={(el) => (dropdownRefs.current[classItem.id] = el)}
+                          className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                        >
+                          {actionMenuItems.map((item, idx) => {
+                            const Icon = item.icon;
+                            return (
+                              <button
+                                key={item.action}
+                                type="button"
+                                onClick={(e) => handleActionClick(item.action, classItem.id, e)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                  } hover:bg-[#E5EFEB]`}
+                              >
+                                <Icon
+                                  size={16}
+                                  className={item.action === "remove" ? "text-[#C43B30]" : "text-[#0B4B31]"}
+                                />
+                                <span>{item.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-[#8A928F]">Showing 1 to 10 of 50 entries</div>
+          <div className="flex items-center gap-3">
+            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+              <option>Display 10</option>
+              <option>Display 20</option>
+              <option>Display 50</option>
+            </select>
+            <div className="flex items-center gap-2">
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                ‹
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                1
+              </button>
+              <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
+                2
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                3
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                4
+              </button>
+              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                ›
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {deleteModalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-[#0B4B31] mb-2">Remove Class</h3>
+            <p className="text-sm text-[#374151]">
+              Are you sure you want to remove this class? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={handleCancelDelete}
+                className="rounded-full border border-[#0B4B31]/30 px-5 py-2 text-sm font-semibold text-[#0B4B31] hover:bg-[#F3F6F5]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="rounded-full bg-[#C43B30] px-5 py-2 text-sm font-semibold text-white hover:bg-[#a83128] disabled:opacity-60"
+              >
+                {isDeleting ? "Removing..." : "Yes, Remove"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
-
-

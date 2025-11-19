@@ -202,7 +202,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         path: "",
         hasSubmenu: true,
         subItems: [
-          { name: "Parents", path: "/dashboard/parent/parents" },
+          { name: "Parents", path: "/dashboard/parent" },
           { name: "Add Parent", path: `${basePath}/parent/add` },
           { name: "Waiting List", path: `${basePath}/parent/waitlist` },
         ],
@@ -237,6 +237,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Learning", path: `${basePath}/learning` },
           { name: "Quran Tracker", path: `${basePath}/learning/quran-tracker` },
         ],
+      },
+      {
+        name: "Settings",
+        icon: "/window.svg",
+        path: `${basePath}/settings`,
+        hasSubmenu: false,
       },
       {
         name: "Attendance",
@@ -496,7 +502,7 @@ export default function DashboardLayout({ children }) {
       </button>
 
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10">
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10 pb-16 sm:pb-20">
         {showStudentHeader && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>

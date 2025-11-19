@@ -20,13 +20,13 @@ const Page = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm hover:bg-emerald-50 transition-colors">
+            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
               <Grid size={18} className="text-[#0B4B31]" />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm hover:bg-emerald-50 transition-colors">
+            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
               <Moon size={18} className="text-[#0B4B31]" />
             </button>
-            <div className="flex items-center gap-2 border border-[#0B4B31] bg-white rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+            <div className="flex items-center gap-2 bg-white border border-[#0B4B31 rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
               <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
                 <Image
                   src="/main-dashboard.jpg"
@@ -114,7 +114,7 @@ const Page = () => {
                 "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
             }}
           >
-            <h3 className="text-white text-[18px] leading-[100%] mb-4 font-bold">Total Unpaid</h3>
+            <h3 className="text-white text-[1.125rem] leading-[100%] mb-4 font-extrabold">Total Unpaid</h3>
 
             <div className="bg-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full flex-shrink-0">
@@ -122,8 +122,8 @@ const Page = () => {
               </div>
 
               <div className="flex flex-col items-center sm:items-start">
-                <h2 className="text-[#0B4B31] text-[20px] leading-[100%] font-bold">$33,543.00</h2>
-                <p className="text-[#525967] text-[12px] leading-[100%] mt-2 text-center sm:text-left">90 Voices Left Out of 100</p>
+                <h2 className="text-[#0B4B31] text-[1.5rem] leading-[100%] font-extrabold">$33,543.00</h2>
+                <p className="text-[#525967] text-[0.75rem] leading-[100%] mt-2 text-center sm:text-left">90 Voices Left Out of 100</p>
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@ const Page = () => {
             </div>
 
             <div className="flex justify-end mt-6">
-              <button className="text-sm font-medium hover:underline flex items-center gap-1">
+              <button className="text-sm font-normal hover:underline flex items-center gap-1">
                 Details <ChevronDown size={14} className="rotate-270" />
               </button>
             </div>
@@ -171,7 +171,7 @@ const Page = () => {
           title: "Top Outstanding Balances",
           subtitle: "Parents with highest unpaid invoices",
           btnText: "See All ↗",
-          btnColor: "text-[#F14336] bg-[#F1433629] hover:bg-[#FADDDD]",
+          btnColor: "text-[#F14336] bg-[#fde1df] hover:bg-[#FADDDD]",
           rows: [
             { name: "Ayan Nur", date: "06 Jun, 2025", amount: "-$5,000", color: "text-red-500" },
             { name: "Muhammad Hasan", date: "04 Jun, 2025", amount: "+$65", color: "text-green-600" },
@@ -184,25 +184,25 @@ const Page = () => {
               <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">{table.title}</h3>
               <button className={`text-[12px] px-3 py-[2px] rounded-full transition ${table.btnColor}`}>{table.btnText}</button>
             </div>
-            <p className="text-[#000000] text-[1.125rem] font-light mb-4">{table.subtitle}</p>
+            <p className="text-[#000000] text-sm mb-4">{table.subtitle}</p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[400px] sm:min-w-full">
                 <thead>
                   <tr className="bg-[#0B4B31] text-white">
-                    <th className="text-left px-3 py-2 font-semibold rounded-tl-md">Names ↕</th>
-                    <th className="text-left px-3 py-2 font-semibold">Joined On ↕</th>
-                    <th className="text-right px-3 py-2 font-semibold rounded-tr-md">Amount ↕</th>
+                    <th className="text-left px-3 py-2 rounded-tl-md">Names ↕</th>
+                    <th className="text-left px-3 py-2">Joined On ↕</th>
+                    <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
                   </tr>
                 </thead>
                 <tbody>
                   {table.rows.map((row, idx) => (
                     <tr key={idx} className="border-b border-gray-100">
-                      <td className="py-3 px-3 flex items-center gap-2 font-normal text-[#1e1e1e]">
+                      <td className="py-3 px-3 flex items-center gap-2">
                         {row.name}
                       </td>
-                      <td className="py-3 px-3 font-normal text-[#1e1e1e]">{row.date}</td>
-                      <td className={`py-3 px-3 text-right font-normal text-[#0B4B31] ${row.color}`}>{row.amount}</td>
+                      <td className="py-3 px-3">{row.date}</td>
+                      <td className={`py-3 px-3 text-right font-medium ${row.color}`}>{row.amount}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -216,5 +216,3 @@ const Page = () => {
 };
 
 export default Page;
-
-

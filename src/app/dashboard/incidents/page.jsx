@@ -48,15 +48,15 @@ export default function IncidentsPage() {
 
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-            <thead className="text-xs font-normal uppercase tracking-wide text-[#00000066]">
+            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
               <tr>
-                <th className="px-4 font-normal text-[#0000008C]">Student Name</th>
-                <th className="px-4 font-normal text-[#0000008C]">Description</th>
-                <th className="px-4 font-normal text-[#0000008C]">Action</th>
-                <th className="px-4 font-normal text-[#0000008C]">Severity</th>
-                <th className="px-4 font-normal text-[#0000008C]">Date</th>
-                <th className="px-4 font-normal text-[#0000008C]">Action</th>
-                <th className="px-4 font-normal text-[#0000008C]">Action</th>
+                <th className="px-4">Student Name</th>
+                <th className="px-4">Description</th>
+                <th className="px-4">Action</th>
+                <th className="px-4">Severity</th>
+                <th className="px-4">Date</th>
+                <th className="px-4">Action</th>
+                <th className="px-4">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -73,10 +73,10 @@ export default function IncidentsPage() {
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
                     <td className="px-4 py-3 font-medium text-[#0B4B31]">{incident.studentName}</td>
-                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{incident.description}</td>
-                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{incident.action}</td>
-                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{incident.severity}</td>
-                    <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{incident.date}</td>
+                    <td className="px-4 py-3 text-[#555]">{incident.description}</td>
+                    <td className="px-4 py-3 text-[#555]">{incident.action}</td>
+                    <td className="px-4 py-3 text-[#555]">{incident.severity}</td>
+                    <td className="px-4 py-3 text-[#555]">{incident.date}</td>
                     <td className="px-4 py-3 text-right">
                       <button className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90">
                         Action
@@ -129,5 +129,4 @@ export default function IncidentsPage() {
     </div>
   );
 }
-
 

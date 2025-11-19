@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Calendar, CreditCard } from "lucide-react";
+import { Trash2, CreditCard } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 import { loadStripe } from "@stripe/stripe-js";
@@ -11,6 +11,7 @@ import {
   useElements,
   CardElement,
 } from "@stripe/react-stripe-js";
+import CustomDatePicker from "@/components/DatePicker";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
 
@@ -91,29 +92,6 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
     </div>
   );
 };
-
-const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <div className="relative">
-        <input
-          type="date"
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          required={required}
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 appearance-none"
-          style={{ WebkitAppearance: "none", MozAppearance: "textfield" }}
-        />
-      </div>
-    </div>
-  );
-};
-
 
 function AddParentFormContent() {
   const dispatch = useDispatch();
@@ -535,12 +513,13 @@ function AddParentFormContent() {
                 placeholder="Student Address"
                 required
               />
-              <DateInput
+              <CustomDatePicker
                 label="Date of Birth"
                 name="dateOfBirth"
                 value={child.dateOfBirth}
                 onChange={(e) => handleChildChange(index, e)}
                 placeholder="Select Date"
+                maxDate={new Date()}
               />
               <FormDropdown
                 label="Gender"
@@ -554,7 +533,7 @@ function AddParentFormContent() {
                 ]}
                 placeholder="Select Gender"
               />
-              <DateInput
+              <CustomDatePicker
                 label="Enroll Date"
                 name="enrollDate"
                 value={child.enrollDate}

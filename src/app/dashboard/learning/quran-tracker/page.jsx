@@ -28,7 +28,7 @@ export default function QuranTrackerPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold text-[#0B4B31] text-[2.5rem]">
+          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000]  text-[1.75rem]">
@@ -44,7 +44,7 @@ export default function QuranTrackerPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -68,7 +68,7 @@ export default function QuranTrackerPage() {
             </div>
             <button
               type="button"
-              className="rounded-full border-2 border-white bg-[#0B4B31] px-6 py-3 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
+              className="rounded-full border-2 border-white bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
             >
               Manage
             </button>
@@ -144,7 +144,7 @@ export default function QuranTrackerPage() {
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm font-normal text-[#0000008C]">Showing 1 out of 1 entries</div>
           <div className="flex items-center gap-3">
-            <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+            <select className="rounded-full border-2 border-white bg-white px-4 py-2 text-sm font-normal text-[#0B4B31] outline-none focus:border-[#0B4B31]">
               <option>Display 10</option>
               <option>Display 20</option>
               <option>Display 50</option>
@@ -163,5 +163,3 @@ export default function QuranTrackerPage() {
     </div>
   );
 }
-
-

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createStudent, resetCreateStudentState } from "../../../redux/slices/studentSlices/studentSlices";
+import CustomDatePicker from "../../DatePicker";
 
 const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   return (
@@ -81,87 +81,6 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
   );
 };
 
-const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return '';
-    
-    // If it's already in MM-DD-YYYY format, return as is
-    if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
-      return dateString;
-    }
-    
-    // If it's in YYYY-MM-DD format (from ISO), convert to MM-DD-YYYY
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      const [year, month, day] = dateString.split('-');
-      return `${month}-${day}-${year}`;
-    }
-    
-    return dateString;
-  };
-
-  const handleDateChange = (e) => {
-    let input = e.target.value;
-    
-    // Auto-format as user types
-    input = input.replace(/\D/g, ''); // Remove non-digits
-    
-    if (input.length > 2) {
-      input = input.substring(0, 2) + '-' + input.substring(2);
-    }
-    if (input.length > 5) {
-      input = input.substring(0, 5) + '-' + input.substring(5, 9);
-    }
-    
-    onChange({
-      target: {
-        name: e.target.name,
-        value: input
-      }
-    });
-  };
-
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <div className="relative">
-        <input
-          type="text"
-          name={name}
-          value={formatDateForDisplay(value)}
-          onChange={handleDateChange}
-          placeholder={placeholder}
-          required={required}
-          maxLength={10}
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-        />
-        <Calendar size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]/60 pointer-events-none" />
-      </div>
-      <p className="text-xs text-gray-500 mt-1 ml-2">Format: MM-DD-YYYY (e.g., 05-15-2010)</p>
-    </div>
-  );
-};
-
-const convertToISODate = (dateString) => {
-  if (!dateString) return null;
-  
-  const [month, day, year] = dateString.split('-');
-  if (!month || !day || !year) return null;
-  
-  // Validate date components
-  const monthNum = parseInt(month, 10);
-  const dayNum = parseInt(day, 10);
-  const yearNum = parseInt(year, 10);
-  
-  if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31 || yearNum < 1900 || yearNum > 2100) {
-    return null;
-  }
-  
-  const isoDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-  return isoDate.toISOString();
-};
-
 export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
   const { status, error, student, parent, existingParent } = useSelector((state) => state.createStudent);
@@ -229,9 +148,9 @@ export default function AddStudentSimpleForm() {
       studentPhone: formData.studentPhone,
       studentAddress: formData.studentAddress,
       addToWaitList: formData.studentAddToWaitList ? "yes" : "no",
-      dateOfBirth: convertToISODate(formData.dateOfBirth),
+      dateOfBirth: formData.dateOfBirth || null,
       gender: formData.gender,
-      enrollDate: convertToISODate(formData.enrollDate),
+      enrollDate: formData.enrollDate || null,
       fee: formData.fee,
       studentEmail: formData.studentEmail,
       studentPassword: formData.studentPassword,
@@ -401,20 +320,29 @@ export default function AddStudentSimpleForm() {
             onChange={handleChange}
             placeholder="Student Address"
           />
-          <DateInput
+          <CustomDatePicker
             label="Date of Birth"
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleChange}
-            placeholder="MM-DD-YYYY"
+            placeholder="Select date of birth"
             required
+            maxDate={new Date()}
+            showYearDropdown
+            showMonthDropdown
+            dropdownMode="select"
+            dateFormat="MM/dd/yyyy"
           />
-          <DateInput
+          <CustomDatePicker
             label="Enroll Date"
             name="enrollDate"
             value={formData.enrollDate}
             onChange={handleChange}
-            placeholder="MM-DD-YYYY"
+            placeholder="Select enroll date"
+            showYearDropdown
+            showMonthDropdown
+            dropdownMode="select"
+            dateFormat="MM/dd/yyyy"
           />
           <FormInput
             label="Fee"
