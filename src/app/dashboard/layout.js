@@ -225,7 +225,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Class", path: `${basePath}/class` },
-          { name: "Subject", path: `${basePath}/subject` },
+          { name: "Add Class", path: `${basePath}/class/createClass` },
         ],
       },
       {

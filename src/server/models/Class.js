@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const classSchema = new mongoose.Schema(
   {
@@ -25,12 +25,6 @@ const classSchema = new mongoose.Schema(
       ref: "Teacher",
       required: true,
     },
-    students: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Student",
-      },
-    ],
     startDate: Date,
     endDate: Date,
     isActive: {

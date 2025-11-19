@@ -147,14 +147,32 @@ const getStudentByIdSlice = createSlice({
   name: "studentById",
   initialState: {
     student: null,
+    attendance: [],
+    assignments: [],
     status: "idle",
     error: null,
   },
   reducers: {
     resetStudentByIdState: (state) => {
       state.student = null;
+      state.attendance = [];
+      state.assignments = [];
       state.status = "idle";
       state.error = null;
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+    updateStudentData: (state, action) => {
+      if (state.student) {
+        state.student = { ...state.student, ...action.payload };
+      }
+    },
+    updateAttendance: (state, action) => {
+      state.attendance = action.payload;
+    },
+    updateAssignments: (state, action) => {
+      state.assignments = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -166,10 +184,16 @@ const getStudentByIdSlice = createSlice({
       .addCase(getStudentById.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.student = action.payload.student;
+        state.attendance = action.payload.student?.attendance || [];
+        state.assignments = action.payload.student?.assignments || [];
+        state.error = null;
       })
       .addCase(getStudentById.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Something went wrong";
+        state.student = null;
+        state.attendance = [];
+        state.assignments = [];
       });
   },
 });

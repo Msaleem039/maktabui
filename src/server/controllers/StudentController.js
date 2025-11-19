@@ -2,6 +2,9 @@ import bcrypt from "bcryptjs";
 import Student from "../models/Student.js";
 import Parent from "../models/Parent.js";
 import User from "../models/User.js";
+import Class from "../models/Class.js";
+
+const mongoose = require("mongoose");
 
 export const createStudent = async (req) => {
   try {
@@ -31,17 +34,38 @@ export const createStudent = async (req) => {
       class: studentClass,
     } = body;
 
+    // Check if student email exists
+    const existingStudent = await Student.findOne({ email: studentEmail });
+    if (existingStudent) {
+      return new Response(
+        JSON.stringify({ message: "Student with this email already exists." }),
+        { status: 400 }
+      );
+    }
+
+    // Check if class exists
+    const classExists = await Class.findById(studentClass);
+    if (!classExists) {
+      return new Response(
+        JSON.stringify({ message: "Class not found." }),
+        { status: 404 }
+      );
+    }
+
+    // Check if parent exists
     let parent = await Parent.findOne({ identityNumber });
 
+    const hashedStudentPassword = await bcrypt.hash(studentPassword, 10);
+
+    // Create student User
+    const studentUser = await User.create({
+      email: studentEmail,
+      password: hashedStudentPassword,
+      role: "Student",
+    });
+
     if (parent) {
-      const hashedStudentPassword = await bcrypt.hash(studentPassword, 10);
-
-      const studentUser = await User.create({
-        email: studentEmail,
-        password: hashedStudentPassword,
-        role: "Student",
-      });
-
+      // Link student to existing parent
       const student = await Student.create({
         studentName,
         phone: studentPhone,
@@ -72,19 +96,13 @@ export const createStudent = async (req) => {
       );
     }
 
+    // Create new parent and link
     const hashedParentPassword = await bcrypt.hash(parentPassword, 10);
-    const hashedStudentPassword = await bcrypt.hash(studentPassword, 10);
 
     const parentUser = await User.create({
       email: parentEmail,
       password: hashedParentPassword,
       role: "Parent",
-    });
-
-    const studentUser = await User.create({
-      email: studentEmail,
-      password: hashedStudentPassword,
-      role: "Student",
     });
 
     parent = await Parent.create({
@@ -139,7 +157,9 @@ export const createStudent = async (req) => {
 
 export const getAllStudent = async (req) => {
   try {
-    const students = await Student.find().populate("parent");
+    const students = await Student.find()
+      .populate("parent")
+      .populate("class");      
 
     return new Response(
       JSON.stringify({
@@ -158,7 +178,9 @@ export const getAllStudent = async (req) => {
 
 export const getAllWaitlistStudent = async (req) => {
   try {
-    const waitlist = await Student.find({ addToWaitList: true });
+    const waitlist = await Student.find({ addToWaitList: true })
+      .populate("parent")
+      .populate("class");
 
     return new Response(
       JSON.stringify({
@@ -261,9 +283,172 @@ export const getStudentById = async (req) => {
       });
     }
 
-    const student = await Student.findById(studentId).populate("parent");
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return new Response(JSON.stringify({ message: "Invalid student ID format" }), {
+        status: 400,
+      });
+    }
 
-    if (!student) {
+    const studentData = await Student.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(studentId)
+        }
+      },
+
+      {
+        $lookup: {
+          from: "parents",
+          localField: "parent",
+          foreignField: "_id",
+          as: "parent"
+        }
+      },
+      {
+        $unwind: {
+          path: "$parent",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      {
+        $lookup: {
+          from: "attendances",
+          let: { studentId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$$studentId", "$records.student"]
+                }
+              }
+            },
+            {
+              $unwind: "$records"
+            },
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$records.student", "$$studentId"]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: "classes",
+                localField: "class",
+                foreignField: "_id",
+                as: "classInfo"
+              }
+            },
+            {
+              $lookup: {
+                from: "teachers",
+                localField: "teacher",
+                foreignField: "_id",
+                as: "teacherInfo"
+              }
+            },
+            {
+              $project: {
+                date: 1,
+                status: "$records.status",
+                remarks: "$records.remarks",
+                className: { $arrayElemAt: ["$classInfo.name", 0] },
+                teacherName: { $arrayElemAt: ["$teacherInfo.name", 0] }
+              }
+            },
+            {
+              $sort: { date: -1 }
+            }
+          ],
+          as: "attendance"
+        }
+      },
+
+      {
+        $lookup: {
+          from: "assessments",
+          let: { studentClass: "$class" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$class", "$$studentClass"] },
+                    { $eq: ["$type", "Assignment"] }
+                  ]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: "teachers",
+                localField: "teacher",
+                foreignField: "_id",
+                as: "teacherInfo"
+              }
+            },
+            {
+              $lookup: {
+                from: "classes",
+                localField: "class",
+                foreignField: "_id",
+                as: "classInfo"
+              }
+            },
+            {
+              $project: {
+                title: 1,
+                description: 1,
+                subject: 1,
+                totalMarks: 1,
+                dateAssigned: 1,
+                dueDate: 1,
+                attachments: 1,
+                teacherName: { $arrayElemAt: ["$teacherInfo.name", 0] },
+                className: { $arrayElemAt: ["$classInfo.name", 0] }
+              }
+            },
+            {
+              $sort: { dueDate: 1 }
+            }
+          ],
+          as: "assignments"
+        }
+      },
+
+      {
+        $project: {
+          _id: 1,
+          name: "$studentName",
+          email: 1,
+          phone: 1,
+          dateOfBirth: 1,
+          gender: 1,
+          address: 1,
+          class: 1,
+          parent: {
+            _id: 1,
+            name: "$parent.fullName", 
+            email: "$parent.email",
+            phone: "$parent.phone",
+            spouse: "$parent.spouse",
+            spousePhone: "$parent.spousePhone",
+            emergencyPhone: "$parent.emergencyPhone",
+            identityNumber: "$parent.identityNumber"
+          },
+          attendance: 1,
+          assignments: 1,
+          enrollDate: 1, // Added enrollDate
+          fee: 1, // Added fee
+          createdAt: 1,
+          updatedAt: 1
+        }
+      }
+    ]);
+
+    if (!studentData || studentData.length === 0) {
       return new Response(
         JSON.stringify({ message: "Student not found." }),
         { status: 404 }
@@ -273,7 +458,7 @@ export const getStudentById = async (req) => {
     return new Response(
       JSON.stringify({
         message: "Student fetched successfully.",
-        student,
+        student: studentData[0]
       }),
       { status: 200 }
     );

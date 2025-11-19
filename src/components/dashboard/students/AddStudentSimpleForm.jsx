@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createStudent, resetCreateStudentState } from "../../../redux/slices/studentSlices/studentSlices";
+import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 
 const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   return (
@@ -46,6 +47,8 @@ const FormCheckbox = ({ label, name, checked, onChange, className = "" }) => {
 const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const selectedOption = options.find(option => option.value === value);
+
   return (
     <div className={`relative ${className}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -56,7 +59,7 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-          {value || placeholder}
+          {selectedOption ? selectedOption.label : placeholder}
         </span>
         <span className="text-[#0B4B31]">▾</span>
       </div>
@@ -64,15 +67,16 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
         <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
           {options.map((option) => (
             <div
-              key={option.value || option}
+              key={option.value}
               onClick={() => {
-                onChange({ target: { name, value: option.value || option } });
+                onChange({ target: { name, value: option.value } });
                 setIsOpen(false);
               }}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-                }`}
+              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
+                value === option.value ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
+              }`}
             >
-              {option.label || option}
+              {option.label}
             </div>
           ))}
         </div>
@@ -85,12 +89,10 @@ const DateInput = ({ label, name, value, onChange, placeholder, required = false
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
     
-    // If it's already in MM-DD-YYYY format, return as is
     if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
       return dateString;
     }
     
-    // If it's in YYYY-MM-DD format (from ISO), convert to MM-DD-YYYY
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       const [year, month, day] = dateString.split('-');
       return `${month}-${day}-${year}`;
@@ -102,8 +104,7 @@ const DateInput = ({ label, name, value, onChange, placeholder, required = false
   const handleDateChange = (e) => {
     let input = e.target.value;
     
-    // Auto-format as user types
-    input = input.replace(/\D/g, ''); // Remove non-digits
+    input = input.replace(/\D/g, '');
     
     if (input.length > 2) {
       input = input.substring(0, 2) + '-' + input.substring(2);
@@ -149,7 +150,6 @@ const convertToISODate = (dateString) => {
   const [month, day, year] = dateString.split('-');
   if (!month || !day || !year) return null;
   
-  // Validate date components
   const monthNum = parseInt(month, 10);
   const dayNum = parseInt(day, 10);
   const yearNum = parseInt(year, 10);
@@ -165,6 +165,7 @@ const convertToISODate = (dateString) => {
 export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
   const { status, error, student, parent, existingParent } = useSelector((state) => state.createStudent);
+  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -187,9 +188,18 @@ export default function AddStudentSimpleForm() {
     fee: "",
     studentEmail: "",
     studentPassword: "",
-    class: "",
+    class: "", 
     studentAddToWaitList: false, 
   });
+
+  useEffect(() => {
+    dispatch(getAllClassesNameAction());
+  }, [dispatch]);
+
+  const classOptions = classNames.map(classItem => ({
+    label: classItem.name,
+    value: classItem._id 
+  }));
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -204,13 +214,16 @@ export default function AddStudentSimpleForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.studentName) {
       alert("Student Name is required");
       return;
     }
 
-    // Convert date strings to ISO format for backend
+    if (!formData.class) {
+      alert("Please select a class");
+      return;
+    }
+
     const studentData = {
       // Parent data
       fullName: formData.fullName,
@@ -235,7 +248,7 @@ export default function AddStudentSimpleForm() {
       fee: formData.fee,
       studentEmail: formData.studentEmail,
       studentPassword: formData.studentPassword,
-      class: formData.class,
+      class: formData.class, // This now contains the class ID
     };
 
     dispatch(createStudent(studentData));
@@ -263,7 +276,7 @@ export default function AddStudentSimpleForm() {
         fee: "",
         studentEmail: "",
         studentPassword: "",
-        class: "",
+        class: "", // Reset class selection
         studentAddToWaitList: false,
       });
 
@@ -295,6 +308,19 @@ export default function AddStudentSimpleForm() {
       {status === "failed" && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center">
           Error: {error}
+        </div>
+      )}
+
+      {/* Classes Loading/Error Messages */}
+      {classesLoading && (
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-full text-center">
+          Loading classes...
+        </div>
+      )}
+
+      {classesError && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-full text-center">
+          Warning: Could not load classes - {classesError}
         </div>
       )}
 
@@ -452,19 +478,16 @@ export default function AddStudentSimpleForm() {
             value={formData.gender}
             onChange={handleChange}
             options={[{ label: "Male", value: "Male" }, { label: "Female", value: "Female" }]}
-            placeholder="Select"
+            placeholder="Select Gender"
           />
           <FormDropdown
             label="Class"
             name="class"
             value={formData.class}
             onChange={handleChange}
-            options={[
-              { label: "Class Name 1", value: "class1" },
-              { label: "Class Name 2", value: "class2" },
-              { label: "Class Name 3", value: "class3" },
-            ]}
-            placeholder="Select"
+            options={classOptions}
+            placeholder={classesLoading ? "Loading classes..." : "Select Class"}
+            className={classesLoading ? "opacity-50 cursor-not-allowed" : ""}
           />
           <div className="flex items-center md:col-span-2">
             <FormCheckbox
@@ -481,11 +504,12 @@ export default function AddStudentSimpleForm() {
       <div className="flex justify-center pt-6">
         <button
           type="submit"
-          disabled={status === "loading"}
-          className={`rounded-full px-8 py-3 text-sm font-semibold transition ${status === "loading"
+          disabled={status === "loading" || classesLoading}
+          className={`rounded-full px-8 py-3 text-sm font-semibold transition ${
+            status === "loading" || classesLoading
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
-            }`}
+          }`}
         >
           {status === "loading" ? "Creating Student..." : "Create Student"}
         </button>
