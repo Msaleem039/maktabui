@@ -48,9 +48,8 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
                 onChange({ target: { name, value: option.value || option } });
                 setIsOpen(false);
               }}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
-                value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-              }`}
+              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
+                }`}
             >
               {option.label || option}
             </div>
@@ -185,7 +184,6 @@ export default function AddLessonPage({ params }) {
             Save Changes
           </button>
         </div>
-      </div>
       </div>
     </div>
   );

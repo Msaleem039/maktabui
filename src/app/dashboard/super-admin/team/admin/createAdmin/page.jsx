@@ -1,27 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { DropdownField } from "@/components/DropdownField";
-import { Calendar } from "lucide-react";
-
-const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-      />
-    </div>
-  );
-};
+import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { FormInput } from "@/components/FormInput";
 
 export default function CreateAdminPage() {
   const [formData, setFormData] = useState({
@@ -79,7 +60,7 @@ export default function CreateAdminPage() {
         <h2 className="text-lg font-semibold text-gray-700 mb-6">Edit Admin</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <DropdownField
+          <SimpleDropdown
             label="Select Your Role"
             name="role"
             value={formData.role}

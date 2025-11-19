@@ -4,93 +4,19 @@ import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createStudent, resetCreateStudentState } from "../../../redux/slices/studentSlices/studentSlices";
-
-const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-      />
-    </div>
-  );
-};
-
-const FormCheckbox = ({ label, name, checked, onChange, className = "" }) => {
-  return (
-    <div className={`flex items-start ${className}`}>
-      <div className="flex items-center h-5">
-        <input
-          type="checkbox"
-          name={name}
-          checked={checked}
-          onChange={onChange}
-          className="w-4 h-4 text-[#0B4B31] bg-[#D5E2DB] border-gray-300 rounded focus:ring-[#0B4B31]"
-        />
-      </div>
-      <label className="ml-2 text-sm font-semibold text-gray-700">
-        {label}
-      </label>
-    </div>
-  );
-};
-
-const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className={`relative ${className}`}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label}
-      </label>
-      <div
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-          {value || placeholder}
-        </span>
-        <span className="text-[#0B4B31]">▾</span>
-      </div>
-      {isOpen && (
-        <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
-          {options.map((option) => (
-            <div
-              key={option.value || option}
-              onClick={() => {
-                onChange({ target: { name, value: option.value || option } });
-                setIsOpen(false);
-              }}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-                }`}
-            >
-              {option.label || option}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
+import { FormInput } from "@/components/FormInput";
+import { FormCheckbox } from "@/components/FormCheckbox";
+import { SimpleDropdown } from "@/components/SimpleDropdown";
 
 const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
     
-    // If it's already in MM-DD-YYYY format, return as is
     if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
       return dateString;
     }
     
-    // If it's in YYYY-MM-DD format (from ISO), convert to MM-DD-YYYY
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       const [year, month, day] = dateString.split('-');
       return `${month}-${day}-${year}`;
@@ -102,8 +28,7 @@ const DateInput = ({ label, name, value, onChange, placeholder, required = false
   const handleDateChange = (e) => {
     let input = e.target.value;
     
-    // Auto-format as user types
-    input = input.replace(/\D/g, ''); // Remove non-digits
+    input = input.replace(/\D/g, '');
     
     if (input.length > 2) {
       input = input.substring(0, 2) + '-' + input.substring(2);
@@ -149,7 +74,6 @@ const convertToISODate = (dateString) => {
   const [month, day, year] = dateString.split('-');
   if (!month || !day || !year) return null;
   
-  // Validate date components
   const monthNum = parseInt(month, 10);
   const dayNum = parseInt(day, 10);
   const yearNum = parseInt(year, 10);
@@ -165,6 +89,7 @@ const convertToISODate = (dateString) => {
 export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
   const { status, error, student, parent, existingParent } = useSelector((state) => state.createStudent);
+  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -187,9 +112,29 @@ export default function AddStudentSimpleForm() {
     fee: "",
     studentEmail: "",
     studentPassword: "",
-    class: "",
+    class: "", 
     studentAddToWaitList: false, 
   });
+
+  // State for dropdown open/close
+  const [dropdownStates, setDropdownStates] = useState({
+    gender: false,
+    class: false
+  });
+
+  useEffect(() => {
+    dispatch(getAllClassesNameAction());
+  }, [dispatch]);
+
+  const classOptions = classNames.map(classItem => ({
+    label: classItem.name,
+    value: classItem._id 
+  }));
+
+  const genderOptions = [
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" }
+  ];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -201,16 +146,33 @@ export default function AddStudentSimpleForm() {
     }
   };
 
+  // Handle dropdown selection
+  const handleDropdownSelect = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setDropdownStates((prev) => ({ ...prev, [name]: false }));
+  };
+
+  // Toggle dropdown
+  const toggleDropdown = (name) => {
+    setDropdownStates((prev) => ({ 
+      ...prev, 
+      [name]: !prev[name] 
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.studentName) {
       alert("Student Name is required");
       return;
     }
 
-    // Convert date strings to ISO format for backend
+    if (!formData.class) {
+      alert("Please select a class");
+      return;
+    }
+
     const studentData = {
       // Parent data
       fullName: formData.fullName,
@@ -235,7 +197,7 @@ export default function AddStudentSimpleForm() {
       fee: formData.fee,
       studentEmail: formData.studentEmail,
       studentPassword: formData.studentPassword,
-      class: formData.class,
+      class: formData.class, // This now contains the class ID
     };
 
     dispatch(createStudent(studentData));
@@ -263,8 +225,14 @@ export default function AddStudentSimpleForm() {
         fee: "",
         studentEmail: "",
         studentPassword: "",
-        class: "",
+        class: "", // Reset class selection
         studentAddToWaitList: false,
+      });
+
+      // Reset dropdown states
+      setDropdownStates({
+        gender: false,
+        class: false
       });
 
       console.log("Student created successfully:", { student, parent, existingParent });
@@ -295,6 +263,19 @@ export default function AddStudentSimpleForm() {
       {status === "failed" && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center">
           Error: {error}
+        </div>
+      )}
+
+      {/* Classes Loading/Error Messages */}
+      {classesLoading && (
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-full text-center">
+          Loading classes...
+        </div>
+      )}
+
+      {classesError && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-full text-center">
+          Warning: Could not load classes - {classesError}
         </div>
       )}
 
@@ -446,25 +427,27 @@ export default function AddStudentSimpleForm() {
             onChange={handleChange}
             placeholder="Student Password"
           />
-          <FormDropdown
+          <SimpleDropdown
             label="Gender"
             name="gender"
             value={formData.gender}
-            onChange={handleChange}
-            options={[{ label: "Male", value: "Male" }, { label: "Female", value: "Female" }]}
-            placeholder="Select"
+            options={genderOptions}
+            onSelect={handleDropdownSelect}
+            isOpen={dropdownStates.gender}
+            onToggle={() => toggleDropdown('gender')}
+            placeholder="Select Gender"
+            required
           />
-          <FormDropdown
+          <SimpleDropdown
             label="Class"
             name="class"
             value={formData.class}
-            onChange={handleChange}
-            options={[
-              { label: "Class Name 1", value: "class1" },
-              { label: "Class Name 2", value: "class2" },
-              { label: "Class Name 3", value: "class3" },
-            ]}
-            placeholder="Select"
+            options={classOptions}
+            onSelect={handleDropdownSelect}
+            isOpen={dropdownStates.class}
+            onToggle={() => toggleDropdown('class')}
+            placeholder={classesLoading ? "Loading classes..." : "Select Class"}
+            required
           />
           <div className="flex items-center md:col-span-2">
             <FormCheckbox
@@ -481,11 +464,12 @@ export default function AddStudentSimpleForm() {
       <div className="flex justify-center pt-6">
         <button
           type="submit"
-          disabled={status === "loading"}
-          className={`rounded-full px-8 py-3 text-sm font-semibold transition ${status === "loading"
+          disabled={status === "loading" || classesLoading}
+          className={`rounded-full px-8 py-3 text-sm font-semibold transition ${
+            status === "loading" || classesLoading
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
-            }`}
+          }`}
         >
           {status === "loading" ? "Creating Student..." : "Create Student"}
         </button>

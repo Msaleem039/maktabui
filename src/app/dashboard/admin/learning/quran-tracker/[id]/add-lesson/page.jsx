@@ -101,7 +101,6 @@ export default function AddQuranLessonPage({ params }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Quran Lesson Data:", formData);
   };
 
   return (

@@ -38,7 +38,7 @@ const NavItem = ({
 
   const collapsedClasses = "justify-center p-2 w-10 h-10 mx-auto";
   const unCollapsedClasses = "px-3 py-3";
-  console.log("get cookies data", getCookie("user"))
+  
   return (
     <div>
       <button
@@ -225,7 +225,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Class", path: `${basePath}/class` },
-          { name: "Subject", path: `${basePath}/subject` },
+          { name: "Add Class", path: `${basePath}/class/createClass` },
         ],
       },
       {

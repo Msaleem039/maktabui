@@ -11,6 +11,7 @@ import {
   useElements,
   CardElement,
 } from "@stripe/react-stripe-js";
+import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
 
@@ -56,6 +57,9 @@ const FormInput = ({ label, name, type = "text", value, onChange, placeholder, r
 const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Find the selected option label for display
+  const selectedOption = options.find(option => option.value === value);
+
   return (
     <div className={`relative ${className}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -66,7 +70,7 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-          {value || placeholder}
+          {selectedOption ? selectedOption.label : placeholder}
         </span>
         <span className="text-[#0B4B31]">▾</span>
       </div>
@@ -74,16 +78,16 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
         <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
           {options.map((option) => (
             <div
-              key={option.value || option}
+              key={option.value}
               onClick={() => {
-                onChange({ target: { name, value: option.value || option } });
+                onChange({ target: { name, value: option.value } });
                 setIsOpen(false);
               }}
               className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
-                value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
+                value === option.value ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
               }`}
             >
-              {option.label || option}
+              {option.label}
             </div>
           ))}
         </div>
@@ -114,12 +118,14 @@ const DateInput = ({ label, name, value, onChange, placeholder, required = false
   );
 };
 
-
 function AddParentFormContent() {
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
   const { status, error, parent, student } = useSelector((state) => state.createParent);
+  
+  // Add selector for classes
+  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
 
   const [parentData, setParentData] = useState({
     fullName: "",
@@ -155,6 +161,19 @@ function AddParentFormContent() {
   const [stripeError, setStripeError] = useState("");
   const [cardDetails, setCardDetails] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Fetch classes on component mount
+  useEffect(() => {
+    dispatch(getAllClassesNameAction());
+  }, [dispatch]);
+
+  // Transform classNames to dropdown options
+  const classOptions = Array.isArray(classNames) 
+    ? classNames.map(classItem => ({
+        label: classItem.name || classItem.className || 'Unnamed Class',
+        value: classItem._id || classItem.id
+      }))
+    : [];
 
   const handleParentChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -371,6 +390,20 @@ function AddParentFormContent() {
         </div>
       )}
 
+      {/* Classes Loading/Error Messages */}
+      {classesLoading && (
+        <div className="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
+          <p className="font-semibold">Loading classes...</p>
+        </div>
+      )}
+
+      {classesError && (
+        <div className="mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+          <p className="font-semibold">Warning:</p>
+          <p>Could not load classes - {classesError}</p>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <h3 className="text-lg font-semibold text-gray-700">Parent/Guardian</h3>
@@ -574,12 +607,9 @@ function AddParentFormContent() {
                 name="class"
                 value={child.class}
                 onChange={(e) => handleChildChange(index, e)}
-                options={[
-                  { label: "Class Name 1", value: "class1" },
-                  { label: "Class Name 2", value: "class2" },
-                  { label: "Class Name 3", value: "class3" },
-                ]}
-                placeholder="Select Class"
+                options={classOptions}
+                placeholder={classesLoading ? "Loading classes..." : "Select Class"}
+                className={classesLoading ? "opacity-50 cursor-not-allowed" : ""}
               />
               <div className="flex items-center gap-2 md:col-span-2">
                 <input
@@ -607,7 +637,7 @@ function AddParentFormContent() {
           </button>
           <button
             type="submit"
-            disabled={status === "loading" || !stripe || !cardComplete || isProcessing}
+            disabled={status === "loading" || !stripe || !cardComplete || isProcessing || classesLoading}
             className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isProcessing ? "Processing Payment..." : 

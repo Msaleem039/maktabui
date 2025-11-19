@@ -1,28 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { DropdownField } from "@/components/DropdownField";
+import { FormInput } from "@/components/FormInput";
+import { SimpleDropdown } from "@/components/SimpleDropdown";
 
-const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-      />
-    </div>
-  );
-};
-
-export default function EditTeacherPage({parent}) {
+export default function CreateAdmin() {
   const [formData, setFormData] = useState({
     role: "",
     email: "",
@@ -31,18 +13,12 @@ export default function EditTeacherPage({parent}) {
     name: "",
     password: "",
     phone: "",
-    sendEmail: "",
   });
   const [dropdownOpen, setDropdownOpen] = useState(null);
 
   const roleOptions = [
-    { label: "Teacher", value: "teacher" },
-    { label: "Homeroom Teacher", value: "homeroom_teacher" },
-  ];
-
-  const sendEmailOptions = [
-    { label: "Yes", value: "yes" },
-    { label: "No", value: "no" },
+    { label: "Admin", value: "admin" },
+    { label: "Super Admin", value: "super_admin" },
   ];
 
   const handleInputChange = (e) => {
@@ -65,16 +41,26 @@ export default function EditTeacherPage({parent}) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Teacher Data:", formData);
+    console.log("Admin Data:", formData);
   };
 
   return (
     <div className="space-y-8">
-      <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-10 py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
-        <h2 className="text-lg font-semibold text-gray-700 mb-6">Edit Teacher</h2>
+      {/* Welcome header */}
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          Welcome to
+        </p>
+        <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          MaktabOS
+        </h1>
+      </div>
+
+      <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
+        <h2 className="text-lg font-semibold text-gray-700 mb-6">Edit Admin</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <DropdownField
+          <SimpleDropdown
             label="Select Your Role"
             name="role"
             value={formData.role}
@@ -149,24 +135,13 @@ export default function EditTeacherPage({parent}) {
               </label>
             </div>
           </div>
-
-          <DropdownField
-            label="Send the teacher an email with updated info"
-            name="sendEmail"
-            value={formData.sendEmail}
-            options={sendEmailOptions}
-            onSelect={handleDropdownSelect}
-            isOpen={dropdownOpen === "sendEmail"}
-            onToggle={() => handleDropdownToggle("sendEmail")}
-            placeholder="Select"
-          />
         </form>
 
         <div className="flex justify-center mt-10">
           <button
             type="submit"
             onClick={handleSubmit}
-            className="rounded-full bg-[#E5EFEB] px-8 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
+            className="rounded-full bg-[#E5EFEB] px-10 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
           >
             Save Changes
           </button>
@@ -175,4 +150,3 @@ export default function EditTeacherPage({parent}) {
     </div>
   );
 }
-

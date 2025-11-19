@@ -20,7 +20,6 @@ export default function RecurringPaymentPage({ params }) {
   };
 
   const handleSetUpRecurring = () => {
-    console.log("Setting up recurring payment");
     router.push(`/dashboard/admin/finance/invoice/${params.id}/payment-done`);
   };
 

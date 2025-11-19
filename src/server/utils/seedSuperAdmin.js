@@ -17,7 +17,6 @@ const seedSuperAdmin = async () => {
       role: "Super Admin",
     });
 
-    console.log("🌱 Super Admin user created successfully");
   } catch (error) {
     console.error("❌ Error creating Super Admin:", error);
   }
