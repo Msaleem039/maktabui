@@ -86,6 +86,12 @@ export default function ClassPage() {
               <Download size={16} className="text-white" />
               Export Data
             </button>
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
           </div>
         </div>
 
@@ -99,15 +105,6 @@ export default function ClassPage() {
               className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
             />
           </label>
-        </div>
-
-        <div className="mt-4">
-          <button
-            type="button"
-            className="rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-          >
-            See All ↗
-          </button>
         </div>
 
         <div className="mt-6 overflow-x-auto">

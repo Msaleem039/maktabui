@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllParents, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 
 const ParentTable = ({
   title = "Parents",
@@ -11,88 +12,116 @@ const ParentTable = ({
   searchValue = "",
   parents = [],
 }) => {
-  const tableData = useMemo(() => {
-    if (parents.length > 0) return parents;
-
-    // Fallback demo data used in UI testing mode
-    return Array.from({ length: 9 }, (_, index) => ({
-      id: `parent-${index + 1}`,
-      name: "Abdifatah Soyal",
-      address: "1920 Portland Ave S Minneapolis MN",
-      phone: "123456789",
-      invoiceStatus:
-        index === 3 || index === 8
-          ? { label: "$650.00", tone: "overdue" }
-          : { label: "Paid", tone: "paid" },
-      spouse: "Sadiya Hassan",
-      children: [1, 3, 3, 1, 1, 1, 5, 3, 2][index],
-    }));
-  }, [parents]);
+  const dispatch = useDispatch();
+  const { parents: reduxParents, pagination, status, error } = useSelector((state) => state.getAllParents);
 
   const [selectedId, setSelectedId] = useState(null);
+  const [localSearch, setLocalSearch] = useState(searchValue);
   const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
-  const [commentParent, setCommentParent] = useState(null);
-  const [commentText, setCommentText] = useState("");
-  const router = useRouter();
+
+  useEffect(() => {
+    dispatch(getAllParents({
+      page: 1,
+      limit: 10,
+      search: localSearch,
+      sortBy: "createdAt",
+      sortOrder: "desc"
+    }));
+
+    return () => {
+      dispatch(resetAllParentsState());
+    };
+  }, [dispatch, localSearch]);
 
   const handleSearchChange = (event) => {
-    onSearchChange?.(event.target.value);
+    const value = event.target.value;
+    setLocalSearch(value);
+    onSearchChange?.(value);
   };
 
   const handleRowSelect = (parentId) => {
     setSelectedId(parentId);
   };
 
-  useEffect(() => {
-    const handleClickOutside = () => setActionMenu({ id: null, openUp: false });
-    if (actionMenu.id) {
-      document.addEventListener("click", handleClickOutside);
-    }
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [actionMenu.id]);
-
   const toggleActionMenu = (event, parentId) => {
     event.stopPropagation();
-    const buttonRect = event.currentTarget.getBoundingClientRect();
-    const menuHeight = 220;
-    const openUp = buttonRect.bottom + menuHeight > window.innerHeight;
-    setActionMenu((prev) =>
-      prev.id === parentId ? { id: null, openUp: false } : { id: parentId, openUp }
-    );
+    
+    // Calculate if menu should open upwards (if near bottom of viewport)
+    const buttonRect = event.target.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const menuHeight = 200; // Approximate menu height
+    
+    setActionMenu(prev => ({
+      id: prev.id === parentId ? null : parentId,
+      openUp: spaceBelow < menuHeight
+    }));
   };
 
   const handleViewProfile = (event, parentId) => {
     event.stopPropagation();
+    // Implement view profile logic
+    console.log("View profile:", parentId);
     setActionMenu({ id: null, openUp: false });
-    router.push(`/dashboard/parent/${parentId}`);
   };
 
   const handleEdit = (event, parentId) => {
     event.stopPropagation();
+    // Implement edit logic
+    console.log("Edit:", parentId);
     setActionMenu({ id: null, openUp: false });
-    router.push(`/dashboard/parent/${parentId}/edit`);
   };
 
   const handleComment = (event, parent) => {
     event.stopPropagation();
-    setCommentParent(parent);
-    setCommentText("");
+    // Implement comment logic
+    console.log("Comment:", parent);
     setActionMenu({ id: null, openUp: false });
   };
 
   const handleRemove = (event, parent) => {
     event.stopPropagation();
+    // Implement remove logic
+    console.log("Remove:", parent);
     setActionMenu({ id: null, openUp: false });
-    if (window.confirm(`Remove ${parent.name} from list?`)) {
-      console.log("Removing parent from list:", parent);
-    }
   };
 
-  const handleCommentSubmit = (event) => {
-    event.preventDefault();
-    console.log("Comment submitted for parent:", commentParent?.name, commentText);
-    setCommentParent(null);
-    setCommentText("");
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActionMenu({ id: null, openUp: false });
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const tableData = useMemo(() => {
+    if (reduxParents && reduxParents.length > 0) {
+      return reduxParents.map(parent => ({
+        id: parent._id,
+        name: parent.fullName,
+        address: parent.address,
+        phone: parent.phone,
+        spouse: parent.spouse || "-",
+        children: parent.students ? parent.students.length : 0,
+        email: parent.email,
+        identityNumber: parent.identityNumber,
+        originalData: parent
+      }));
+    }
+
+    if (parents.length > 0) return parents;
+
+    return [];
+  }, [reduxParents, parents]);
+
+  const getInvoiceStatus = (parent) => {
+    if (parent.fee && parent.fee > 0) {
+      return { label: `$${parent.fee}`, tone: "overdue" };
+    }
+    return { label: "Paid", tone: "paid" };
   };
 
   return (
@@ -122,12 +151,29 @@ const ParentTable = ({
         <label className="relative flex w-full max-w-xl items-center">
           <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
           <input
-            value={searchValue}
+            value={localSearch}
             onChange={handleSearchChange}
-            placeholder="Search..."
+            placeholder="Search by name, email, or phone..."
             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
+
+        {/* Loading State */}
+        {status === "loading" && (
+          <div className="text-sm text-[#0B4B31]">Loading parents...</div>
+        )}
+
+        {/* Error State */}
+        {status === "failed" && (
+          <div className="text-sm text-red-600">Error: {error}</div>
+        )}
+
+        {/* Results Count */}
+        {status === "succeeded" && reduxParents && (
+          <div className="text-sm text-[#0B4B31]">
+            Showing {reduxParents.length} of {pagination?.totalItems || 0} parents
+          </div>
+        )}
       </div>
 
       <div className="mt-6 overflow-x-auto">
@@ -137,7 +183,6 @@ const ParentTable = ({
               <th className="px-4 font-normal text-[#0000008C]">Primary Parent</th>
               <th className="px-4 font-normal text-[#0000008C]">Address</th>
               <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
-              <th className="px-4 font-normal text-[#0000008C]">Invoices</th>
               <th className="px-4 font-normal text-[#0000008C]">Spouse</th>
               <th className="px-4 font-normal text-[#0000008C]">Children</th>
               <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
@@ -169,28 +214,16 @@ const ParentTable = ({
                         >
                           {parent.name}
                         </Link>
-                        {/* <span className="text-xs text-[#8A928F]">
-                          Primary Parent
-                        </span> */}
+                        {parent.email && (
+                          <span className="text-xs text-[#8A928F]">
+                            {parent.email}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.address}</td>
                   <td className="px-4 py-3 font-normal text-black">{parent.phone}</td>
-                  <td className="px-4 py-3">
-                    {parent.invoiceStatus ? (
-                      <span
-                        className={`inline-flex rounded-full px-4 py-1 text-sm font-normal ${parent.invoiceStatus.tone === "overdue"
-                          ? "bg-[#C43B30E0] text-white"
-                          : "bg-[#0B4B31] text-[#71DD8C]"
-                          }`}
-                      >
-                        {parent.invoiceStatus.label}
-                      </span>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
                   <td className="px-4 py-3 text-black">{parent.spouse}</td>
                   <td className="px-4 py-3 text-black">{parent.children}</td>
                   <td className="px-4 py-3 text-right">
@@ -245,49 +278,16 @@ const ParentTable = ({
             })}
           </tbody>
         </table>
-      </div>
 
-      {commentParent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl space-y-5">
-            <div>
-              <h3 className="text-lg font-semibold text-[#0B4B31]">Add Comment</h3>
-              <p className="text-sm text-[#5E6C64]">Parent: {commentParent.name}</p>
-            </div>
-            <form onSubmit={handleCommentSubmit} className="space-y-4">
-              <textarea
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                rows={4}
-                placeholder="Write your comment..."
-                className="w-full rounded-2xl border border-[#D5E2DB] px-4 py-3 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-                required
-              />
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCommentParent(null);
-                    setCommentText("");
-                  }}
-                  className="flex-1 rounded-full border border-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                >
-                  Save Comment
-                </button>
-              </div>
-            </form>
+        {/* Empty State */}
+        {status === "succeeded" && (!tableData || tableData.length === 0) && (
+          <div className="text-center py-8 text-[#0B4B31]">
+            No parents found {localSearch && `for "${localSearch}"`}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };
 
 export default ParentTable;
-

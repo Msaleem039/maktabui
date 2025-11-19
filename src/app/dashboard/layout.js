@@ -19,19 +19,15 @@ const NavItem = ({
   children,
   subItems,
 }) => {
-  // More precise active state logic - only one item should be active at a time
   let isActive = false;
 
   if (hasSubmenu && subItems) {
-    // For items with submenus (path is empty), check if any subItem matches the current pathname
     isActive = subItems.some(
       (subItem) =>
         pathname === subItem.path ||
         (subItem.path && pathname.startsWith(subItem.path + "/"))
     );
   } else if (path) {
-    // For items without submenus, only match exact path
-    // Don't use startsWith for parent paths to avoid multiple matches
     isActive = pathname === path;
   }
 
@@ -208,7 +204,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Parents", path: "/dashboard/parent/parents" },
           { name: "Add Parent", path: `${basePath}/parent/add` },
-          { name: "Waiting List", path: `${basePath}/parent/waiting-list` },
+          { name: "Waiting List", path: `${basePath}/parent/waitlist` },
         ],
       },
       {
@@ -219,8 +215,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Student", path: "/dashboard/student" },
           { name: "Add Student", path: `${basePath}/student/add` },
-          { name: "Waiting List", path: `${basePath}/student/waiting-list` },
-          { name: "Incidents", path: `${basePath}/incidents` },
+          { name: "Waiting List", path: `${basePath}/student/waiting-list` }
         ],
       },
       {
@@ -512,7 +507,7 @@ export default function DashboardLayout({ children }) {
                 MaktabOS
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full bg-[#B4B31] border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
@@ -525,7 +520,7 @@ export default function DashboardLayout({ children }) {
               >
                 <PlusIcon size={20} /> Add Students
               </button>
-            </div>
+            </div> */}
           </div>
         )}
         {children}
