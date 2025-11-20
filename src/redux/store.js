@@ -61,6 +61,11 @@ import {
   createInvoiceReducer
 } from './slices/invoiceSlices/invoiceSlices';
 
+// Payment slices
+import {
+  getAllPaymentStatsReducer
+} from './slices/paymentSlices/paymentSlices';
+
 export const store = configureStore({
   reducer: {
     user: userReducer,
@@ -109,7 +114,10 @@ export const store = configureStore({
     // Invoice reducers
     getAllInvoices: getAllInvoicesReducer,
     getInvoicesStats: getInvoicesStatsReducer,
-    createInvoice: createInvoiceReducer
+    createInvoice: createInvoiceReducer,
+
+    // Payment reducers
+    getAllPaymentStats: getAllPaymentStatsReducer
   },
 });
 
