@@ -1,7 +1,50 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async Thunks
+export const setDefaultCard = createAsyncThunk(
+  'parent/setDefaultCard',
+  async ({ parentId, paymentMethodId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/api/parent/setDefaultCard', {
+        parentId,
+        paymentMethodId
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const removeCard = createAsyncThunk(
+  'parent/removeCard',
+  async ({ parentId, paymentMethodId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/api/parent/removeCard', {
+        parentId,
+        paymentMethodId
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const addCardDetail = createAsyncThunk(
+  'parent/addCardDetail',
+  async (cardData, { rejectWithValue }) => {
+    console.log("cardData", cardData);
+
+    try {
+      const response = await axios.post('/api/parent/addCardDetail', cardData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const addToWaitList = createAsyncThunk(
   'waitlist/add',
   async (parentId, { rejectWithValue }) => {
@@ -74,7 +117,90 @@ export const removeFromWaitList = createAsyncThunk(
   }
 );
 
-// Slices
+export const getAllParentsWithStudents = createAsyncThunk(
+  "parentsWithStudents/fetch",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/api/parent/getAllParentsWithStudents");
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+const getAllParentsWithStudentsSlice = createSlice({
+  name: "parentsWithStudents",
+  initialState: {
+    loading: false,
+    data: [],
+    error: null,
+  },
+  reducers: {
+    resetParentsWithStudents: (state) => {
+      state.loading = false;
+      state.data = [];
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getAllParentsWithStudents.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllParentsWithStudents.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(getAllParentsWithStudents.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
+
+const addCardDetailSlice = createSlice({
+  name: 'addCardDetail',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetAddCardDetail: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearCardError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(addCardDetail.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(addCardDetail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(addCardDetail.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
 const addToWaitListSlice = createSlice({
   name: 'addToWaitList',
   initialState: {
@@ -184,7 +310,7 @@ const getAllParentsSlice = createSlice({
 const getParentByIdSlice = createSlice({
   name: "parentById",
   initialState: {
-    parent: null, 
+    parent: null,
     status: "idle",
     error: null,
   },
@@ -203,7 +329,7 @@ const getParentByIdSlice = createSlice({
       })
       .addCase(getParentById.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.parent = action.payload.data; 
+        state.parent = action.payload.data;
       })
       .addCase(getParentById.rejected, (state, action) => {
         state.status = "failed";
@@ -281,12 +407,96 @@ const removeFromWaitListSlice = createSlice({
   }
 });
 
+const setDefaultCardSlice = createSlice({
+  name: 'setDefaultCard',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetSetDefaultCard: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearSetDefaultCardError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(setDefaultCard.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(setDefaultCard.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(setDefaultCard.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
+const removeCardSlice = createSlice({
+  name: 'removeCard',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetRemoveCard: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearRemoveCardError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(removeCard.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(removeCard.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(removeCard.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
 export const { resetAddWaitList } = addToWaitListSlice.actions;
 export const { resetCreateParentState } = createParentSlice.actions;
 export const { resetAllParentsState } = getAllParentsSlice.actions;
 export const { resetParentByIdState } = getParentByIdSlice.actions;
 export const { resetWaitListParentsState } = getAllWaitListParentsSlice.actions;
 export const { resetRemoveWaitList } = removeFromWaitListSlice.actions;
+export const { resetParentsWithStudents } = getAllParentsWithStudentsSlice.actions;
+export const { resetAddCardDetail, clearCardError } = addCardDetailSlice.actions;
+export const { resetSetDefaultCard, clearSetDefaultCardError } = setDefaultCardSlice.actions;
+export const { resetRemoveCard, clearRemoveCardError } = removeCardSlice.actions;
 
 // Export Reducers
 export const addToWaitListReducer = addToWaitListSlice.reducer;
@@ -295,6 +505,12 @@ export const getAllParentsReducer = getAllParentsSlice.reducer;
 export const getParentByIdReducer = getParentByIdSlice.reducer;
 export const getAllWaitListParentsReducer = getAllWaitListParentsSlice.reducer;
 export const removeFromWaitListReducer = removeFromWaitListSlice.reducer;
+export const getAllParentsWithStudentsReducer = getAllParentsWithStudentsSlice.reducer;
+export const addCardDetailReducer = addCardDetailSlice.reducer;
+export const setDefaultCardReducer = setDefaultCardSlice.reducer;
+export const removeCardReducer = removeCardSlice.reducer;
+
+export default getAllParentsWithStudentsSlice.reducer;
 
 export const parentReducer = {
   addToWaitList: addToWaitListReducer,
@@ -303,4 +519,8 @@ export const parentReducer = {
   getParentById: getParentByIdReducer,
   getAllWaitListParents: getAllWaitListParentsReducer,
   removeFromWaitList: removeFromWaitListReducer,
+  getAllParentsWithStudents: getAllParentsWithStudentsReducer,
+  addCardDetail: addCardDetailReducer,
+  setDefaultCard: setDefaultCardReducer,
+  removeCard: removeCardReducer,
 };

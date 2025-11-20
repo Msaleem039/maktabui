@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import {
   Phone,
@@ -14,10 +15,25 @@ import {
   FileSpreadsheet,
   ArrowUpRight,
   ChevronDown,
-  X
+  X,
+  Trash2
 } from "lucide-react";
 import ViewInvoiceModal from "./ViewInvoiceModal";
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements
+} from '@stripe/react-stripe-js';
+import { 
+  addCardDetail, 
+  clearCardError, 
+  setDefaultCard, 
+  removeCard 
+} from "@/redux/slices/parentSlices/parentSlice";
 
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
 const tabsConfig = [
   { key: "about", label: "About" },
   { key: "children", label: "Childrens" },
@@ -25,18 +41,149 @@ const tabsConfig = [
   { key: "payments", label: "Payments Methods" },
 ];
 
+const StripeCardInput = ({ label, className = "", onCardChange }) => {
+  return (
+    <div className={className}>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">
+        {label} *
+      </label>
+      <div className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 min-h-[50px] flex items-center">
+        <div className="w-full">
+          <CardElement
+            onChange={onCardChange}
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#0B4B31',
+                  '::placeholder': {
+                    color: '#85A598',
+                  },
+                },
+              },
+            }}
+          />
+        </div>
+      </div>
+      <p className="text-xs text-gray-500 mt-2">
+        Test card: 4242 4242 4242 4242 | Exp: 12/34 | CVC: 123 | ZIP: 12345
+      </p>
+    </div>
+  );
+};
+
+// Separate component for the payment modal to use Stripe hooks
+const PaymentCardModalContent = ({ onAddCard, loading, error, cardComplete, onCardChange, onClose }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      console.error("Stripe not loaded");
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+
+    if (!cardElement) {
+      console.error("Card element not found");
+      return;
+    }
+
+    onAddCard(cardElement, stripe);
+  };
+
+  const handleCardChange = (event) => {
+    onCardChange(event.complete);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="relative w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-[0.9375rem] font-medium text-[#0B4B31]">
+            Add Payment Method
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <StripeCardInput
+            label="Card Details"
+            onCardChange={handleCardChange}
+          />
+
+          {error && (
+            <div className="rounded-lg bg-red-50 p-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          <div className="mt-6 flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!stripe || !cardComplete || loading}
+              className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Adding Card...' : 'Add Card'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const ParentProfile = ({
   parent = {},
   tabs = tabsConfig,
   defaultTab = "about",
 }) => {
-
-  console.log("parent", parent);
+  const dispatch = useDispatch();
+  const { loading: cardLoading, error: cardError, success: cardSuccess } = useSelector(
+    state => state.addCardDetail || { loading: false, error: null, success: false }
+  );
+  const { loading: setDefaultLoading } = useSelector(
+    state => state.setDefaultCard || { loading: false }
+  );
+  const { loading: removeCardLoading } = useSelector(
+    state => state.removeCard || { loading: false }
+  );
 
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
+  const [cardComplete, setCardComplete] = useState(false);
+
+  // Reset success state when modal closes
+  useEffect(() => {
+    if (cardSuccess && showPaymentModal) {
+      setShowPaymentModal(false);
+      window.location.reload();
+    }
+  }, [cardSuccess, showPaymentModal]);
+
+  // Clear errors when modal opens/closes
+  useEffect(() => {
+    if (showPaymentModal && cardError) {
+      dispatch(clearCardError());
+    }
+  }, [showPaymentModal, cardError, dispatch]);
 
   const profile = useMemo(() => {
     const paymentCards = parent.cardDetail?.paymentMethods?.map(pm => ({
@@ -81,6 +228,12 @@ const ParentProfile = ({
       phone: parent.spousePhone || "Not Available",
     };
 
+    const quickActions = [
+      { label: "Edit Profile", icon: "UserRound" },
+      { label: "Send Message", icon: "MessageSquareText" },
+      { label: "View Reports", icon: "FileSpreadsheet" },
+    ];
+
     return {
       name: parent.fullName || "No Name",
       role: "Parent",
@@ -97,17 +250,103 @@ const ParentProfile = ({
         waitingList: parent.addToWaitList ? "Yes" : "No",
         optedOut: "No",
       },
-      quickActions: [
-        { label: "Edit Profile", icon: UserRound },
-        { label: "Send Message", icon: MessageSquareText },
-        { label: "View Reports", icon: FileSpreadsheet },
-      ],
+      quickActions,
       invoices: invoices.length > 0 ? invoices : [],
       paymentCards,
       paymentRecords,
-      ...parent,
     };
   }, [parent]);
+
+  const getIconComponent = (iconName) => {
+    const iconMap = {
+      UserRound,
+      MessageSquareText,
+      FileSpreadsheet,
+      Phone,
+      Calendar,
+      Users2,
+      Receipt,
+      CreditCard,
+      Search,
+      ArrowUpRight,
+      ChevronDown,
+      X,
+      Trash2
+    };
+    return iconMap[iconName] || null;
+  };
+
+  const handleAddCard = async (cardElement, stripe) => {
+    if (!cardElement || !stripe) {
+      console.error("Card element or Stripe not available");
+      return;
+    }
+
+    try {
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const cardData = {
+        parentId: parent._id,
+        cardData: {
+          paymentMethodId: paymentMethod.id,
+          cardBrand: paymentMethod.card.brand,
+          last4: paymentMethod.card.last4,
+          expMonth: paymentMethod.card.exp_month,
+          expYear: paymentMethod.card.exp_year,
+          stripeCustomerId: parent.cardDetail?.stripeCustomerId,
+        },
+      };
+
+      dispatch(addCardDetail(cardData));
+
+    } catch (error) {
+      console.error("Error creating payment method:", error);
+      dispatch(clearCardError());
+      dispatch(addCardDetail.rejected({ message: error.message }));
+    }
+  };
+
+  const handleRemoveCard = async (cardId) => {
+    if (!confirm('Are you sure you want to remove this card?')) return;
+
+    try {
+      await dispatch(removeCard({
+        parentId: parent._id,
+        paymentMethodId: cardId
+      })).unwrap();
+      
+      window.location.reload();
+    } catch (error) {
+      console.error('Error removing card:', error);
+    }
+  };
+
+  const handleSetDefaultCard = async (cardId) => {
+    try {
+      await dispatch(setDefaultCard({
+        parentId: parent._id,
+        paymentMethodId: cardId
+      })).unwrap();
+      
+      window.location.reload();
+    } catch (error) {
+      console.error('Error setting default card:', error);
+    }
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+    setEditingCard(null);
+    setCardComplete(false);
+    dispatch(clearCardError());
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -146,8 +385,6 @@ const ParentProfile = ({
                 value={profile.spouseDetail?.phone || "Not Available"}
               />
             </div>
-
-
           </div>
         );
       case "children":
@@ -208,10 +445,10 @@ const ParentProfile = ({
               setEditingCard(null);
               setShowPaymentModal(true);
             }}
-            onEditCard={(card) => {
-              setEditingCard(card);
-              setShowPaymentModal(true);
-            }}
+            onRemoveCard={handleRemoveCard}
+            onSetDefaultCard={handleSetDefaultCard}
+            setDefaultLoading={setDefaultLoading}
+            removeCardLoading={removeCardLoading}
           />
         );
       default:
@@ -220,107 +457,110 @@ const ParentProfile = ({
   };
 
   return (
-    <>
-      <section className="relative mx-auto max-w-4xl rounded-[28px] border border-[#E2E7E4] bg-white pb-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
-        <div className="relative h-[240px] rounded-t-[28px] overflow-hidden">
-          <Image
-            src="/parentprofile.svg"
-            alt="Parent profile background"
-            fill
-            priority
-            className="object-cover"
+    <Elements stripe={stripePromise}>
+      <>
+        <section className="relative mx-auto max-w-4xl rounded-[28px] border border-[#E2E7E4] bg-white pb-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
+          <div className="relative h-[240px] rounded-t-[28px] overflow-hidden">
+            <Image
+              src="/parentprofile.svg"
+              alt="Parent profile background"
+              fill
+              priority
+              className="object-cover"
+            />
+            <div className="absolute inset-0" />
+          </div>
+
+          {/* Profile Image */}
+          <div className="absolute left-10 top-[152px] z-30">
+            <div className="flex h-44 w-44 items-center justify-center rounded-full bg-white shadow-[0_30px_60px_-45px_rgba(0,0,0,0.7)] ring-8 ring-[#D5E2DB]">
+              <div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-[#C7D7D0] bg-white text-5xl text-[#0B4B31]">
+                <Image
+                  src="/user-icon.svg"
+                  alt="Parent profile avatar"
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="px-10 pb-8 pt-8 sm:px-12">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-3xl font-semibold text-[#0B4B31]">
+                  {profile.name}
+                </h2>
+                <p className="text-sm uppercase tracking-[0.35em] text-[#627169]">
+                  {profile.role}
+                </p>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 ">
+                <StatusCard stats={profile.stats} />
+                <QuickActionCard actions={profile.quickActions} getIconComponent={getIconComponent} />
+              </div>
+            </div>
+
+            <nav className="mt-8 flex flex-wrap items-center gap-3">
+              {tabs.map((tab) => {
+                const isActive = tab.key === activeTab;
+                const getTabStyles = () => {
+                  if (isActive) {
+                    return "bg-[#96E2D6FA] text-black font-medium";
+                  }
+                  switch (tab.key) {
+                    case "about":
+                      return "bg-[#0B4B3185] text-white font-medium";
+                    case "children":
+                      return "bg-[#0B4B3185] text-white font-medium";
+                    case "payments":
+                      return "bg-[#767D7A] text-white font-medium";
+                    default:
+                      return "bg-[#0B4B31] text-white font-medium";
+                  }
+                };
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-medium transition ${getTabStyles()}`}
+                  >
+                    <span className="text-lg">📁</span>
+                    {tab.label}
+                    <span className="ml-1 text-xs">▸</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="mt-8 space-y-6">{renderTabContent()}</div>
+          </div>
+        </section>
+
+        {selectedInvoice && (
+          <ViewInvoiceModal
+            invoice={selectedInvoice}
+            paymentRecords={profile.paymentRecords}
+            onClose={() => setSelectedInvoice(null)}
           />
-          <div className="absolute inset-0" />
-        </div>
+        )}
 
-        {/* Profile Image */}
-        <div className="absolute left-10 top-[152px] z-30">
-          <div className="flex h-44 w-44 items-center justify-center rounded-full bg-white shadow-[0_30px_60px_-45px_rgba(0,0,0,0.7)] ring-8 ring-[#D5E2DB]">
-            <div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-[#C7D7D0] bg-white text-5xl text-[#0B4B31]">
-              <Image
-                src="/user-icon.svg"
-                alt="Parent profile avatar"
-                fill
-                priority
-                className="object-cover"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="px-10 pb-8 pt-8 sm:px-12">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-3xl font-semibold text-[#0B4B31]">
-                {profile.name}
-              </h2>
-              <p className="text-sm uppercase tracking-[0.35em] text-[#627169]">
-                {profile.role}
-              </p>
-            </div>
-
-            <div className="mt-4 grid gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 ">
-              <StatusCard stats={profile.stats} />
-              <QuickActionCard actions={profile.quickActions} />
-            </div>
-          </div>
-
-          <nav className="mt-8 flex flex-wrap items-center gap-3">
-            {tabs.map((tab) => {
-              const isActive = tab.key === activeTab;
-              const getTabStyles = () => {
-                if (isActive) {
-                  return "bg-[#96E2D6FA] text-black font-medium";
-                }
-                switch (tab.key) {
-                  case "about":
-                    return "bg-[#0B4B3185] text-white font-medium";
-                  case "children":
-                    return "bg-[#0B4B3185] text-white font-medium";
-                  case "payments":
-                    return "bg-[#767D7A] text-white font-medium";
-                  default:
-                    return "bg-[#0B4B31] text-white font-medium";
-                }
-              };
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2 rounded-[18px] px-6 py-3 text-sm font-medium transition ${getTabStyles()}`}
-                >
-                  <span className="text-lg">📁</span>
-                  {tab.label}
-                  <span className="ml-1 text-xs">▸</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="mt-8 space-y-6">{renderTabContent()}</div>
-        </div>
-      </section>
-
-      {selectedInvoice && (
-        <ViewInvoiceModal
-          invoice={selectedInvoice}
-          paymentRecords={profile.paymentRecords}
-          onClose={() => setSelectedInvoice(null)}
-        />
-      )}
-
-      {/* Add/Edit Payment Card Modal */}
-      {showPaymentModal && (
-        <PaymentCardModal
-          card={editingCard}
-          onClose={() => {
-            setShowPaymentModal(false);
-            setEditingCard(null);
-          }}
-        />
-      )}
-    </>
+        {/* Add Payment Card Modal */}
+        {showPaymentModal && (
+          <PaymentCardModalContent
+            onAddCard={handleAddCard}
+            loading={cardLoading}
+            error={cardError}
+            cardComplete={cardComplete}
+            onCardChange={setCardComplete}
+            onClose={handleClosePaymentModal}
+          />
+        )}
+      </>
+    </Elements>
   );
 };
 
@@ -332,11 +572,7 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90">
-          <FileSpreadsheet size={14} />
-          Export Data
-        </button>
-        <div className="flex flex-1 items-center gap-3 sm:ml-4">
+        <div className="flex flex-1 items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
@@ -416,7 +652,14 @@ const InvoicesTab = ({ invoices = [], onViewInvoice }) => {
   );
 };
 
-const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
+const PaymentsTab = ({ 
+  cards = [], 
+  onAddCard, 
+  onRemoveCard, 
+  onSetDefaultCard, 
+  setDefaultLoading, 
+  removeCardLoading 
+}) => {
   return (
     <div className="rounded-[26px] border border-[#D2E2DB] bg-[#E5EFEB] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
@@ -424,7 +667,7 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-1 items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
@@ -433,14 +676,6 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
               className="w-full rounded-full border border-gray-200 bg-white px-10 py-2 text-sm focus:border-[#0B4B31] focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0B4B31]/90">
-            <FileSpreadsheet size={16} />
-            Export Data
-          </button>
-          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-sm font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]">
-            See All
-            <ArrowUpRight size={16} />
-          </button>
         </div>
         <div className="flex gap-3">
           <button
@@ -449,10 +684,6 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
           >
             <CreditCard size={16} />
             Add New Card
-          </button>
-          <button className="flex items-center gap-2 rounded-full bg-[#B9F2E3] px-4 py-2 text-xs font-medium text-[#0B4B31] transition hover:bg-[#A8E8D5]">
-            <CreditCard size={16} />
-            Add New Bank
           </button>
         </div>
       </div>
@@ -474,7 +705,7 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
                 Default
               </th>
               <th className="pb-3 text-left text-sm font-normal text-[#0000008C]">
-                Action
+                Actions
               </th>
             </tr>
           </thead>
@@ -502,13 +733,25 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
                     </span>
                   </td>
                   <td className="py-4">
-                    <button
-                      onClick={() => onEditCard(card)}
-                      className="flex items-center gap-1 rounded-full bg-[#0B4B31] px-3 py-1.5 text-sm font-normal text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
-                    >
-                      Take Action
-                      <ChevronDown size={14} />
-                    </button>
+                    <div className="flex gap-2">
+                      {!card.isDefault && (
+                        <button
+                          onClick={() => onSetDefaultCard(card.id)}
+                          disabled={setDefaultLoading}
+                          className="rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-normal text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {setDefaultLoading ? 'Setting...' : 'Set Default'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onRemoveCard(card.id)}
+                        disabled={removeCardLoading}
+                        className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-normal text-white transition hover:bg-red-700 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 size={12} />
+                        {removeCardLoading ? 'Removing...' : 'Remove'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -524,77 +767,6 @@ const PaymentsTab = ({ cards = [], onAddCard, onEditCard }) => {
             )}
           </tbody>
         </table>
-      </div>
-    </div>
-  );
-};
-
-const PaymentCardModal = ({ card, onClose }) => {
-  const isEditing = !!card;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-[0.9375rem] font-medium text-[#0B4B31]">
-            {isEditing ? "Edit Payment Method" : "Add Payment Method"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
-              Card Number
-            </label>
-            <input
-              type="text"
-              defaultValue={card?.cardEnding ? `**** ${card.cardEnding}` : "4242 XXXX XXXX XXXX"}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-[#0B4B31] focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
-              Expiration
-            </label>
-            <input
-              type="text"
-              defaultValue={card?.expiringDate || "MM/YY"}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-[#0B4B31] focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[#0B4B31]">
-              CVC
-            </label>
-            <input
-              type="text"
-              placeholder="XXX"
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-[#0B4B31] focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="mt-6 flex gap-3">
-          {isEditing && (
-            <button className="flex-1 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-200">
-              Remove
-            </button>
-          )}
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
-            Save Changes
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -655,25 +827,28 @@ const StatusRow = ({ label, value }) => (
   </div>
 );
 
-const QuickActionCard = ({ actions = [] }) => (
+const QuickActionCard = ({ actions = [], getIconComponent }) => (
   <div className="rounded-[26px] bg-gradient-to-br from-[#114F36] via-[#1C6A45] to-[#3E9A74] py-5 px-10 text-white shadow-[0_24px_60px_-45px_rgba(0,0,0,0.6)] backdrop-blur">
     <h3 className="text-base font-extrabold text-center text-white">
       Quick Action
     </h3>
     <div className="mt-4 space-y-3">
-      {actions.map(({ label, icon: Icon }, index) => (
-        <button
-          key={`${label}-${index}`}
-          type="button"
-          className="flex w-full items-center justify-between rounded-[16px] bg-[#F8F8F8] px-4 py-3 text-[0.6875rem] font-normal text-black transition"
-        >
-          <span className="flex items-center gap-2">
-            {Icon ? <Icon size={14} /> : null}
-            {label}
-          </span>
-          <span>↗</span>
-        </button>
-      ))}
+      {actions.map(({ label, icon }, index) => {
+        const IconComponent = getIconComponent(icon);
+        return (
+          <button
+            key={`${label}-${index}`}
+            type="button"
+            className="flex w-full items-center justify-between rounded-[16px] bg-[#F8F8F8] px-4 py-3 text-[0.6875rem] font-normal text-black transition"
+          >
+            <span className="flex items-center gap-2">
+              {IconComponent ? <IconComponent size={14} /> : null}
+              {label}
+            </span>
+            <span>↗</span>
+          </button>
+        );
+      })}
     </div>
   </div>
 );

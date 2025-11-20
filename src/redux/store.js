@@ -1,16 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './slices/authSlices/userLoginSlice';
 
-// Parent Slices
+// Parent slices
 import {
   addToWaitListReducer,
   createParentReducer,
   getAllParentsReducer,
   getParentByIdReducer,
   getAllWaitListParentsReducer,
-  removeFromWaitListReducer
+  removeFromWaitListReducer,
+  getAllParentsWithStudentsReducer,
+  addCardDetailReducer
 } from './slices/parentSlices/parentSlice';
 
+// Student slices
 import {
   createStudentReducer,
   getAllStudentsReducer,
@@ -20,12 +23,14 @@ import {
   removeFromWaitlistStudentReducer
 } from './slices/studentSlices/studentSlices';
 
+// Class slices
 import {
   createClassReducer,
   getAllClassesReducer,
   getAllClassesNameReducer
 } from './slices/classSlices/classSlice';
 
+// Teacher slices
 import {
   createTeacherReducer,
   getAllTeachersReducer,
@@ -35,6 +40,7 @@ import {
   getTeachersNameReducer
 } from './slices/teacherSlices/teacherSlices';
 
+// Admin slices
 import {
   createAdminReducer,
   getAllAdminsReducer,
@@ -42,24 +48,34 @@ import {
   updateAdminReducer
 } from './slices/adminSlices/adminSlices';
 
+// Timetable slices
 import {
   createTimetableReducer,
   getAllTimetablesReducer
 } from './slices/timetableSlices/timetableSlices';
 
+// Invoice slices
+import {
+  getAllInvoicesReducer,
+  getInvoicesStatsReducer,
+  createInvoiceReducer
+} from './slices/invoiceSlices/invoiceSlices';
+
 export const store = configureStore({
   reducer: {
     user: userReducer,
 
-    // Parent
+    // Parent reducers
     createParent: createParentReducer,
     getAllParents: getAllParentsReducer,
     getParentById: getParentByIdReducer,
     waitlistParents: getAllWaitListParentsReducer,
     addToWaitList: addToWaitListReducer,
     removeFromWaitList: removeFromWaitListReducer,
+    getAllParentsWithStudents: getAllParentsWithStudentsReducer,
+    addCardDetail: addCardDetailReducer,
 
-    // Student
+    // Student reducers
     createStudent: createStudentReducer,
     getAllStudents: getAllStudentsReducer,
     getStudentById: getStudentByIdReducer,
@@ -67,12 +83,12 @@ export const store = configureStore({
     addToWaitlistStudent: addToWaitlistStudentReducer,
     removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
 
-    // Class
+    // Class reducers
     createClass: createClassReducer,
     getAllClasses: getAllClassesReducer,
     getAllClassesName: getAllClassesNameReducer,
 
-    // Teacher
+    // Teacher reducers
     createTeacher: createTeacherReducer,
     getAllTeachers: getAllTeachersReducer,
     getTeacherById: getTeacherByIdReducer,
@@ -80,15 +96,20 @@ export const store = configureStore({
     deleteTeacher: deleteTeacherReducer,
     getTeachersName: getTeachersNameReducer,
 
-    // ⭐ Admin
+    // Admin reducers
     createAdmin: createAdminReducer,
     getAllAdmins: getAllAdminsReducer,
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
 
-    // Timetable
+    // Timetable reducers
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
+
+    // Invoice reducers
+    getAllInvoices: getAllInvoicesReducer,
+    getInvoicesStats: getInvoicesStatsReducer,
+    createInvoice: createInvoiceReducer
   },
 });
 

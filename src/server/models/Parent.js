@@ -15,6 +15,12 @@ const cardSchema = new mongoose.Schema({
   ],
 }, { timestamps: true });
 
+const recurringPaymentSchema = new mongoose.Schema({
+  enabled: { type: Boolean, default: false },        
+  nextPaymentDate: { type: Date },                   
+  frequency: { type: String, enum: ['weekly','monthly','quarterly'], default: 'monthly' },
+}, { _id: false });
+
 const parentSchema = new mongoose.Schema({
   fullName: { type: String, required: true, trim: true },
   address: { type: String, required: true },
@@ -30,6 +36,7 @@ const parentSchema = new mongoose.Schema({
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   cardDetail: { type: cardSchema, default: {} },
+  recurringPayment: { type: recurringPaymentSchema, default: {} },
 }, { timestamps: true });
 
 export default mongoose.models.Parent || mongoose.model("Parent", parentSchema);

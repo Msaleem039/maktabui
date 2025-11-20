@@ -1,24 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getParentById, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 import ParentProfile from "@/components/dashboard/parents/ParentProfile";
 
 export default function ParentDetailPage({ params }) {
   const dispatch = useDispatch();
-  
   const { parent, status, error } = useSelector((state) => state.getParentById);
+  
+  // Unwrap the params promise using React.use()
+  const resolvedParams = use(params);
+  const parentId = resolvedParams.id;
 
   useEffect(() => {
-    if (params?.id) {
-      dispatch(getParentById(params.id));
+    if (parentId) {
+      dispatch(getParentById(parentId));
     }
 
     return () => {
       dispatch(resetAllParentsState());
     };
-  }, [params?.id, dispatch]);
+  }, [parentId, dispatch]);
 
   return (
     <div className="space-y-8">

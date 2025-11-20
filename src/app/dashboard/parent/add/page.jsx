@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Calendar, CreditCard } from "lucide-react";
+import { Trash2, Calendar, CreditCard, Repeat } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 import { loadStripe } from "@stripe/stripe-js";
@@ -57,7 +57,6 @@ const FormInput = ({ label, name, type = "text", value, onChange, placeholder, r
 const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Find the selected option label for display
   const selectedOption = options.find(option => option.value === value);
 
   return (
@@ -123,7 +122,6 @@ function AddParentFormContent() {
   const elements = useElements();
   const { status, error, parent, student } = useSelector((state) => state.createParent);
 
-  // Add selector for classes
   const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
 
   const [parentData, setParentData] = useState({
@@ -137,6 +135,8 @@ function AddParentFormContent() {
     password: "",
     identityNumber: "",
     addToWaitList: false,
+    recurringEnabled: false,
+    recurringFrequency: "monthly",
   });
 
   const [children, setChildren] = useState([
@@ -161,18 +161,23 @@ function AddParentFormContent() {
   const [cardDetails, setCardDetails] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Fetch classes on component mount
   useEffect(() => {
     dispatch(getAllClassesNameAction());
   }, [dispatch]);
 
-  // Transform classNames to dropdown options
   const classOptions = Array.isArray(classNames)
     ? classNames.map(classItem => ({
       label: classItem.name || classItem.className || 'Unnamed Class',
       value: classItem._id || classItem.id
     }))
     : [];
+
+  // Recurring frequency options
+  const recurringOptions = [
+    { label: "Weekly", value: "weekly" },
+    { label: "Monthly", value: "monthly" },
+    { label: "Quarterly", value: "quarterly" },
+  ];
 
   const handleParentChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -299,8 +304,6 @@ function AddParentFormContent() {
         }))
       };
 
-      console.log("Submission Data:", submissionData);
-
       const result = await dispatch(createParent(submissionData)).unwrap();
 
       if (result) {
@@ -332,6 +335,8 @@ function AddParentFormContent() {
       password: "",
       identityNumber: "",
       addToWaitList: false,
+      recurringEnabled: false,
+      recurringFrequency: "monthly",
     });
     setChildren([
       {
@@ -370,6 +375,9 @@ function AddParentFormContent() {
           {parent && (
             <p className="text-sm mt-1">
               Stripe Customer ID: {parent.stripeCustomerId}
+              {parent.recurringPayment?.enabled && (
+                <span> • Recurring: {parent.recurringPayment.frequency}</span>
+              )}
             </p>
           )}
         </div>
@@ -478,6 +486,51 @@ function AddParentFormContent() {
               onChange={handleParentChange}
               placeholder="Emergency Phone"
             />
+
+            {/* Recurring Payment Section */}
+            <div className="md:col-span-2 border-t pt-6 mt-4">
+              <div className="flex items-center gap-3 mb-4">
+                <Repeat size={20} className="text-[#0B4B31]" />
+                <h4 className="text-lg font-semibold text-gray-700">Recurring Payments</h4>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    name="recurringEnabled"
+                    checked={parentData.recurringEnabled}
+                    onChange={handleParentChange}
+                    className="rounded border-gray-300 text-[#0B4B31] focus:ring-[#0B4B31]"
+                    id="recurringEnabled"
+                  />
+                  <label htmlFor="recurringEnabled" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                    Enable Recurring Payments
+                  </label>
+                </div>
+
+                <FormDropdown
+                  label="Payment Frequency"
+                  name="recurringFrequency"
+                  value={parentData.recurringFrequency}
+                  onChange={handleParentChange}
+                  options={recurringOptions}
+                  placeholder="Select Frequency"
+                  className={!parentData.recurringEnabled ? "opacity-50 cursor-not-allowed" : ""}
+                />
+              </div>
+              
+              {parentData.recurringEnabled && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    Recurring payments will be automatically processed {parentData.recurringFrequency} 
+                    {parentData.recurringFrequency === 'weekly' && ' every week'}
+                    {parentData.recurringFrequency === 'monthly' && ' on the same day each month'}
+                    {parentData.recurringFrequency === 'quarterly' && ' every 3 months'}.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="md:col-span-2">
               <StripeCardInput

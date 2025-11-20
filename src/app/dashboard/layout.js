@@ -38,7 +38,7 @@ const NavItem = ({
 
   const collapsedClasses = "justify-center p-2 w-10 h-10 mx-auto";
   const unCollapsedClasses = "px-3 py-3";
-  console.log("get cookies data", getCookie("user"))
+  
   return (
     <div>
       <button
@@ -262,6 +262,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Invoice", path: `${basePath}/finance/invoice` },
           { name: "Invoices Report", path: `${basePath}/finance/invoice-report` },
+          { name: "Create Invoices", path: `${basePath}/finance/invoice/add` },
           { name: "Payments", path: `${basePath}/finance/payment` },
         ],
       },

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { Download } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -14,6 +15,7 @@ import {
   Title,
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
+import { getInvoicesStatsAction, setUnpaidPage, setUnpaidLimit } from "@/redux/slices/invoiceSlices/invoiceSlices";
 
 ChartJS.register(
   ArcElement,
@@ -27,27 +29,119 @@ ChartJS.register(
 
 export default function InvoiceReportPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [filterBy, setFilterBy] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  
+  // Unpaid invoices specific states
+  const [unpaidSearch, setUnpaidSearch] = useState("");
+  const [unpaidFilterBy, setUnpaidFilterBy] = useState("");
+  
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const dropdownRefs = useRef({});
 
-  const tableData = Array.from({ length: 10 }, (_, index) => ({
-    id: `invoice-${index + 1}`,
-    parentName: "Abdifatah Soyan",
-    phoneNumber: "612-636-6438",
-    dueAmount: "$700.00",
-    paymentStatus: "UNPAID",
-    fundsAction: "Payment",
-  }));
+  const { stats, unpaidInvoices, unpaidPagination, loading, error } = useSelector((state) => state.getInvoicesStats);
+
+  // Get pagination values from Redux state
+  const unpaidPage = unpaidPagination?.page || 1;
+  const unpaidLimit = unpaidPagination?.limit || 10;
+  const totalUnpaidCount = unpaidPagination?.totalUnpaidCount || 0;
+  const totalUnpaidPages = unpaidPagination?.totalUnpaidPages || 0;
+
+  useEffect(() => {
+    const filters = {
+      date: selectedDate,
+      status: selectedStatus,
+      search: searchValue,
+      filterBy: filterBy,
+      // Unpaid invoices specific filters
+      unpaidPage,
+      unpaidLimit,
+      unpaidSearch,
+      unpaidStatus: unpaidFilterBy
+    };
+    dispatch(getInvoicesStatsAction(filters));
+  }, [
+    dispatch, 
+    selectedDate, 
+    selectedStatus, 
+    searchValue, 
+    filterBy, 
+    unpaidPage, 
+    unpaidLimit, 
+    unpaidSearch, 
+    unpaidFilterBy
+  ]);
+
+  // Use the unpaidInvoices directly from Redux (already filtered and paginated by backend)
+  const tableData = unpaidInvoices?.map((invoice, index) => {
+    const dueAmount = invoice.totalAmount - (invoice.paidAmount || 0);
+    const isPartiallyPaid = invoice.paidAmount > 0 && invoice.paidAmount < invoice.totalAmount;
+    
+    let statusText = "UNPAID";
+    let statusColor = "#C43B30";
+    
+    if (invoice.status === "overdue") {
+      statusText = "OVERDUE";
+      statusColor = "#922113";
+    } else if (isPartiallyPaid) {
+      statusText = "PARTIALLY PAID";
+      statusColor = "#E67E22";
+    } else if (invoice.status === "pending") {
+      statusText = "PENDING";
+      statusColor = "#E67E22";
+    }
+
+    return {
+      id: invoice._id || `invoice-${index + 1}`,
+      parentName: invoice.parent?.fullName || "N/A",
+      phoneNumber: invoice.parent?.phone || "N/A",
+      invoiceNumber: invoice.invoiceNumber || "N/A",
+      dueAmount: `$${dueAmount.toFixed(2)}`,
+      paymentStatus: statusText,
+      statusColor: statusColor,
+      fundsAction: "Payment",
+      originalInvoice: invoice,
+      isPartiallyPaid,
+    };
+  }) || [];
+
+  const calculateChartData = () => {
+    if (!stats) {
+      return {
+        totalPaid: 0,
+        totalUnpaid: 0,
+        paymentMethods: { stripe: 0, other: 0 },
+        monthlyData: {
+          paid: Array(12).fill(0),
+          unpaid: Array(12).fill(0)
+        }
+      };
+    }
+
+    return {
+      totalPaid: stats.totalPaidAmount || 0,
+      totalUnpaid: stats.totalUnpaidAmount || 0,
+      paymentMethods: {
+        stripe: stats.stripePayments || 0,
+        other: stats.otherPayments || 0
+      },
+      monthlyData: {
+        paid: stats.monthlyPaid || Array(12).fill(0),
+        unpaid: stats.monthlyUnpaid || Array(12).fill(0)
+      }
+    };
+  };
+
+  const chartData = calculateChartData();
 
   const donutChartData = {
     labels: ["Paid", "Unpaid"],
     datasets: [
       {
-        data: [10000, 40000],
+        data: [chartData.totalPaid, chartData.totalUnpaid],
         backgroundColor: ["#0B4B31", "#CFE6DB"],
         borderWidth: 0,
       },
@@ -63,16 +157,23 @@ export default function InvoiceReportPage() {
         display: false,
       },
       tooltip: {
-        enabled: false,
+        enabled: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed;
+            return `${label}: $${value.toLocaleString()}`;
+          }
+        }
       },
     },
   };
 
   const semiCircleData = {
-    labels: ["Cash Stripe", "Cash Stripe"],
+    labels: ["Cash Stripe", "Other Methods"],
     datasets: [
       {
-        data: [60000, 20000],
+        data: [chartData.paymentMethods.stripe, chartData.paymentMethods.other],
         backgroundColor: ["#1D8C6C", "#0B4B31"],
         borderWidth: 0,
       },
@@ -90,7 +191,14 @@ export default function InvoiceReportPage() {
         display: false,
       },
       tooltip: {
-        enabled: false,
+        enabled: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed;
+            return `${label}: $${value.toLocaleString()}`;
+          }
+        }
       },
     },
   };
@@ -100,14 +208,14 @@ export default function InvoiceReportPage() {
     datasets: [
       {
         label: "Paid",
-        data: [0, 0, 0, 0, 0, 10000, 10000, 0, 0, 0, 0, 0],
+        data: chartData.monthlyData.paid,
         backgroundColor: "#A4E4CE",
         stack: "stack1",
         borderRadius: 12,
       },
       {
         label: "Unpaid",
-        data: [0, 0, 0, 0, 0, 4000, 4000, 0, 0, 0, 0, 0],
+        data: chartData.monthlyData.unpaid,
         backgroundColor: "#EF7566",
         stack: "stack1",
         borderRadius: 12,
@@ -128,7 +236,7 @@ export default function InvoiceReportPage() {
       y: {
         stacked: true,
         ticks: {
-          callback: (value) => `${value / 1000}K`,
+          callback: (value) => `$${value.toLocaleString()}`,
         },
         grid: {
           color: "#E5E7EB",
@@ -140,7 +248,14 @@ export default function InvoiceReportPage() {
         display: false,
       },
       tooltip: {
-        enabled: false,
+        enabled: true,
+        callbacks: {
+          label: function(context) {
+            const datasetLabel = context.dataset.label || '';
+            const value = context.parsed.y;
+            return `${datasetLabel}: $${value.toLocaleString()}`;
+          }
+        }
       },
     },
   };
@@ -165,7 +280,7 @@ export default function InvoiceReportPage() {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const handleActionClick = (action, id, event) => {
+  const handleActionClick = (action, id, originalInvoice, event) => {
     event.stopPropagation();
     if (action === "payment") {
       router.push(`/dashboard/finance/invoice/${id}/payment`);
@@ -176,6 +291,70 @@ export default function InvoiceReportPage() {
     }
     setOpenDropdownId(null);
   };
+
+  const handleSearchChange = (e) => {
+    setSearchValue(e.target.value);
+  };
+
+  const handleFilterChange = (e) => {
+    setFilterBy(e.target.value);
+  };
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+  };
+
+  const handleStatusChange = (e) => {
+    setSelectedStatus(e.target.value);
+  };
+
+  const handleUnpaidSearchChange = (e) => {
+    setUnpaidSearch(e.target.value);
+    dispatch(setUnpaidPage(1)); // Reset to first page when searching
+  };
+
+  const handleUnpaidFilterChange = (e) => {
+    setUnpaidFilterBy(e.target.value);
+    dispatch(setUnpaidPage(1)); // Reset to first page when filtering
+  };
+
+  const handleExportData = () => {
+    // Export functionality would go here
+    console.log("Exporting data...", unpaidInvoices);
+    // You can implement CSV export or PDF generation here
+  };
+
+  const handlePageChange = (newPage) => {
+    dispatch(setUnpaidPage(newPage));
+  };
+
+  const handleLimitChange = (e) => {
+    const newLimit = Number(e.target.value);
+    dispatch(setUnpaidLimit(newLimit));
+    dispatch(setUnpaidPage(1)); // Reset to page 1 when changing limit
+  };
+
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, unpaidPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalUnpaidPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
+
+  // Calculate display range
+  const startIndex = (unpaidPage - 1) * unpaidLimit + 1;
+  const endIndex = Math.min(unpaidPage * unpaidLimit, totalUnpaidCount);
 
   return (
     <div className="space-y-8">
@@ -188,64 +367,82 @@ export default function InvoiceReportPage() {
         </h1>
       </div>
 
-      <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-8 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10 space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-full border border-[#0B4B31] bg-white py-3 px-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-            placeholder="dd/mm/yyyy"
-          />
-          <div className="relative w-full">
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-            >
-              <option value="">Status</option>
-              <option value="paid">Paid</option>
-              <option value="unpaid">Unpaid</option>
-            </select>
-            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
-              ▾
-            </span>
-          </div>
+      {loading && (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31]"></div>
+          <p className="mt-2 text-[#0B4B31]">Loading invoice statistics...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-[36px] border border-red-300 bg-red-50 px-6 py-6 text-red-700">
+          <p>Error loading invoice statistics: {error}</p>
           <button
-            type="button"
-            className="rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90 whitespace-nowrap"
+            onClick={() => {
+              const filters = { 
+                date: selectedDate, 
+                status: selectedStatus, 
+                search: searchValue, 
+                filterBy,
+                unpaidPage,
+                unpaidLimit,
+                unpaidSearch,
+                unpaidStatus: unpaidFilterBy
+              };
+              dispatch(getInvoicesStatsAction(filters));
+            }}
+            className="mt-2 rounded-full bg-[#0B4B31] px-4 py-2 text-white"
           >
-            Manage
+            Retry
           </button>
         </div>
+      )}
 
+      <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-8 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10 space-y-8">
+
+        {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 rounded-[18px] bg-[#E5EFEB] px-8 py-6">
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">125</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+              {stats?.totalInvoices || 0}
+            </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Total Invoices</p>
           </div>
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">$48,620.00</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+              ${stats?.totalAmount?.toLocaleString() || '0.00'}
+            </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Total Amount</p>
           </div>
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">$333,090.00</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+              ${stats?.totalPaidAmount?.toLocaleString() || '0.00'}
+            </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Paid Amount</p>
           </div>
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">$47,380.00</p>
+            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+              ${stats?.totalUnpaidAmount?.toLocaleString() || '0.00'}
+            </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Unpaid Amount</p>
           </div>
         </div>
 
+        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Payment Status Distribution */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
-              <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-                <option>This month</option>
-                <option>Last month</option>
-                <option>This year</option>
+              <select 
+                value={selectedStatus}
+                onChange={handleStatusChange}
+                className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="">All Time</option>
+                <option value="this_month">This month</option>
+                <option value="last_month">Last month</option>
+                <option value="this_year">This year</option>
               </select>
             </div>
 
@@ -259,27 +456,37 @@ export default function InvoiceReportPage() {
                   <span className="inline-flex h-3 w-3 rounded-full bg-[#0B4B31]"></span>
                   <div>
                     <p className="text-[0.8125rem] font-normal text-[#979699]">Paid</p>
-                    <p className="text-[1.0625rem] font-semibold text-[#000000]">10K</p>
+                    <p className="text-[1.0625rem] font-semibold text-[#000000]">
+                      ${chartData.totalPaid.toLocaleString()}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-3 w-3 rounded-full bg-[#CFE6DB]"></span>
                   <div>
                     <p className="text-[0.8125rem] font-normal text-[#979699]">Unpaid</p>
-                    <p className="text-[1.0625rem] font-semibold text-[#000000]">40K</p>
+                    <p className="text-[1.0625rem] font-semibold text-[#000000]">
+                      ${chartData.totalUnpaid.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Payment Methods */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
-              <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-                <option>This month</option>
-                <option>Last month</option>
-                <option>This year</option>
+              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Methods</h3>
+              <select 
+                value={selectedDate}
+                onChange={handleDateChange}
+                className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="">All Time</option>
+                <option value="this_month">This month</option>
+                <option value="last_month">Last month</option>
+                <option value="this_year">This year</option>
               </select>
             </div>
 
@@ -289,25 +496,36 @@ export default function InvoiceReportPage() {
               </div>
               <div className="space-y-3 text-[0.8125rem] font-normal text-[#0000008C]">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#0B4B31" }}></span>
+                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#1D8C6C" }}></span>
                   <span className="text-[0.8125rem] font-normal text-[#0000008C]">Cash Stripe</span>
+                  <span className="text-[0.8125rem] font-semibold text-[#000000]">
+                    ${chartData.paymentMethods.stripe.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#32C66B" }}></span>
-                  <span className="text-[0.8125rem] font-normal text-[#0000008C]">Cash Stripe (Alt)</span>
+                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#0B4B31" }}></span>
+                  <span className="text-[0.8125rem] font-normal text-[#0000008C]">Other Methods</span>
+                  <span className="text-[0.8125rem] font-semibold text-[#000000]">
+                    ${chartData.paymentMethods.other.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Monthly Revenue Chart */}
         <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
-            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-              <option>This month</option>
-              <option>Last month</option>
-              <option>This year</option>
+            <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Monthly Revenue</h3>
+            <select 
+              value={filterBy}
+              onChange={handleFilterChange}
+              className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+            >
+              <option value="">All Time</option>
+              <option value="this_year">This Year</option>
+              <option value="last_year">Last Year</option>
             </select>
           </div>
 
@@ -320,78 +538,72 @@ export default function InvoiceReportPage() {
                 <span className="inline-flex h-3 w-3 rounded-full bg-[#A4E4CE]"></span>
                 <div>
                   <p className="text-[0.8125rem] font-normal text-[#0000008C]">Paid</p>
-                  <p className="text-xl font-bold text-[#1B1464]">10K</p>
+                  <p className="text-xl font-bold text-[#1B1464]">
+                    ${chartData.totalPaid.toLocaleString()}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-3 w-3 rounded-full bg-[#EF7566]"></span>
                 <div>
                   <p className="text-[0.8125rem] font-normal text-[#0000008C]">Unpaid</p>
-                  <p className="text-xl font-bold text-[#1B1464]">4K</p>
+                  <p className="text-xl font-bold text-[#1B1464]">
+                    ${chartData.totalUnpaid.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Unpaid Invoices Report Section */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">Unpaid Invoices Report</h2>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition"
+            onClick={handleExportData}
+            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0a3f27]"
           >
             <Download size={16} />
             Export Data
           </button>
         </div>
 
+        {/* Unpaid Invoices Filters */}
         <div className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <label className="text-sm font-normal text-[#0B4B31] whitespace-nowrap">
-              Filter By :
+              Filter By Status:
             </label>
             <div className="relative flex-1">
               <select
-                value={filterBy}
-                onChange={(e) => setFilterBy(e.target.value)}
+                value={unpaidFilterBy}
+                onChange={handleUnpaidFilterChange}
                 className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
               >
-                <option value="">All</option>
-                <option value="paid">Paid</option>
-                <option value="unpaid">Unpaid</option>
+                <option value="">All Unpaid</option>
+                <option value="pending">Pending</option>
+                <option value="overdue">Overdue</option>
+                <option value="partially_paid">Partially Paid</option>
               </select>
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
                 ▾
               </span>
             </div>
-            <button
-              type="button"
-              className="rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
-            >
-              Search
-            </button>
           </div>
 
           <label className="relative flex w-full items-center">
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Search..."
+              value={unpaidSearch}
+              onChange={handleUnpaidSearchChange}
+              placeholder="Search by parent name, phone, or invoice number..."
               className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
             />
           </label>
-
-          <div>
-            <button
-              type="button"
-              className="rounded-full border border-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B3138]"
-            >
-              See All ↗
-            </button>
-          </div>
         </div>
 
+        {/* Unpaid Invoices Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
@@ -400,17 +612,17 @@ export default function InvoiceReportPage() {
                 <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
                 <th className="px-4 font-normal text-[#0000008C]">Due Amount</th>
                 <th className="px-4 font-normal text-[#0000008C]">Status</th>
-                <th className="px-4 font-normal text-[#0000008C]">Status</th>
-                <th className="px-4 font-normal text-[#0000008C]">Status</th>
+                <th className="px-4 font-normal text-[#0000008C]">Action</th>
+                <th className="px-4 font-normal text-[#0000008C]">More</th>
               </tr>
             </thead>
             <tbody>
-              {tableData.map((invoice) => {
+              {tableData.length > 0 ? tableData.map((invoice) => {
                 const isDropdownOpen = openDropdownId === invoice.id;
                 return (
                   <tr
                     key={invoice.id}
-                    className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
+                    className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm hover:bg-[#F3F6F5] transition-colors"
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -421,13 +633,16 @@ export default function InvoiceReportPage() {
                     <td className="px-4 py-3 font-normal text-[#1e1e1e]">{invoice.phoneNumber}</td>
                     <td className="px-4 py-3 font-medium text-[#1e1e1e]">{invoice.dueAmount}</td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center rounded-full bg-[#C43B30] px-4 py-2 text-sm font-normal text-white">
+                      <span 
+                        className="inline-flex items-center rounded-full px-4 py-2 text-sm font-normal text-white"
+                        style={{ backgroundColor: invoice.statusColor }}
+                      >
                         {invoice.paymentStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={(e) => handleActionClick("payment", invoice.id, e)}
+                        onClick={(e) => handleActionClick("payment", invoice.id, invoice.originalInvoice, e)}
                         className="inline-flex items-center rounded-full bg-[#C43B30] px-4 py-2 text-sm font-normal text-[#FFFFFF] transition hover:bg-[#a03024]"
                       >
                         {invoice.fundsAction}
@@ -451,14 +666,14 @@ export default function InvoiceReportPage() {
                           >
                             <button
                               type="button"
-                              onClick={(e) => handleActionClick("view", invoice.id, e)}
+                              onClick={(e) => handleActionClick("view", invoice.id, invoice.originalInvoice, e)}
                               className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               View Details
                             </button>
                             <button
                               type="button"
-                              onClick={(e) => handleActionClick("edit", invoice.id, e)}
+                              onClick={(e) => handleActionClick("edit", invoice.id, invoice.originalInvoice, e)}
                               className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#E2E7E4] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               Edit
@@ -469,36 +684,60 @@ export default function InvoiceReportPage() {
                     </td>
                   </tr>
                 );
-              })}
+              }) : (
+                <tr>
+                  <td colSpan="6" className="px-4 py-8 text-center text-[#0000008C]">
+                    {loading ? "Loading unpaid invoices..." : "No unpaid invoices found"}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
+        {/* Pagination */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm font-normal text-[#0000008C]">Showing 1 to 10 of 50 entries</div>
+          <div className="text-sm font-normal text-[#0000008C]">
+            Showing {startIndex} to {endIndex} of {totalUnpaidCount} entries
+          </div>
           <div className="flex items-center gap-3">
-            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-              <option>Display 10</option>
-              <option>Display 20</option>
-              <option>Display 50</option>
+            <select 
+              value={unpaidLimit}
+              onChange={handleLimitChange}
+              className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+            >
+              <option value={10}>Display 10</option>
+              <option value={20}>Display 20</option>
+              <option value={50}>Display 50</option>
             </select>
             <div className="flex items-center gap-2">
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+              <button 
+                onClick={() => handlePageChange(Math.max(unpaidPage - 1, 1))}
+                disabled={unpaidPage === 1}
+                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 ‹
               </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                1
-              </button>
-              <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                2
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                3
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                4
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+              
+              {generatePageNumbers().map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`rounded-full px-4 py-2 text-sm transition ${
+                    unpaidPage === pageNum
+                      ? "bg-[#0B4B31] text-white"
+                      : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+              
+              <button 
+                onClick={() => handlePageChange(Math.min(unpaidPage + 1, totalUnpaidPages))}
+                disabled={unpaidPage === totalUnpaidPages || totalUnpaidPages === 0}
+                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 ›
               </button>
             </div>
@@ -508,5 +747,3 @@ export default function InvoiceReportPage() {
     </div>
   );
 }
-
-
