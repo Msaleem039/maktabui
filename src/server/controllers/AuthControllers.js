@@ -32,7 +32,6 @@ const login = async (req) => {
         const { email, password, role } = body;
 
         const user = await User.findOne({ email });
-        console.log("user",user);
         
         if (!user) {
             return new Response(JSON.stringify({ message: "Invalid credentials" }), { status: 400 });

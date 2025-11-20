@@ -34,10 +34,10 @@ export default function QuranTrackerDetailPage({ params }) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[2.5rem] font-semibold  text-[#0B4B31]">
+          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
             Welcome to
           </p>
-          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
+          <h1 className="font-medium text-[#000000]  text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
@@ -144,7 +144,7 @@ export default function QuranTrackerDetailPage({ params }) {
               </h3>
               <button
                 onClick={handleAddNewLesson}
-                className="w-full rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                className="w-full rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
               >
                 ADD NEW LESSON
               </button>
@@ -159,7 +159,7 @@ export default function QuranTrackerDetailPage({ params }) {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-white transition bg-[#0B4B31]"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -174,7 +174,7 @@ export default function QuranTrackerDetailPage({ params }) {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Q Search..."
-              className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              className="w-full rounded-full border-2 border-white bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
           </label>
         </div>
@@ -213,12 +213,12 @@ export default function QuranTrackerDetailPage({ params }) {
                     key={item.id}
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.date}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.chapterNo}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.verses}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.comment}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.dueDate}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{item.status}</td>
+                    <td className="px-4 py-3 font-normal text-[#0B4B31]">{item.date}</td>
+                    <td className="px-4 py-3 font-normal text-[#0B4B31]">{item.chapterNo}</td>
+                    <td className="px-4 py-3 font-normal text-[#0B4B31]">{item.verses}</td>
+                    <td className="px-4 py-3 font-normal text-[#0B4B31]">{item.comment}</td>
+                    <td className="px-4 py-3 font-normal text-[#0B4B31]">{item.dueDate}</td>
+                    <td className="px-4 py-3 font-normal text-[#0B4B31]">{item.status}</td>
                   </tr>
                 ))
               )}
@@ -229,5 +229,4 @@ export default function QuranTrackerDetailPage({ params }) {
     </div>
   );
 }
-
 

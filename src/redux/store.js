@@ -11,7 +11,6 @@ import {
   removeFromWaitListReducer
 } from './slices/parentSlices/parentSlice';
 
-// Student Slices
 import {
   createStudentReducer,
   getAllStudentsReducer,
@@ -21,14 +20,12 @@ import {
   removeFromWaitlistStudentReducer
 } from './slices/studentSlices/studentSlices';
 
-// Class Slices
 import {
   createClassReducer,
   getAllClassesReducer,
   getAllClassesNameReducer
 } from './slices/classSlices/classSlice';
 
-// Teacher Slices
 import {
   createTeacherReducer,
   getAllTeachersReducer,
@@ -37,6 +34,18 @@ import {
   deleteTeacherReducer,
   getTeachersNameReducer
 } from './slices/teacherSlices/teacherSlices';
+
+import {
+  createAdminReducer,
+  getAllAdminsReducer,
+  getAdminByIdReducer,
+  updateAdminReducer
+} from './slices/adminSlices/adminSlices';
+
+import {
+  createTimetableReducer,
+  getAllTimetablesReducer
+} from './slices/timetableSlices/timetableSlices';
 
 export const store = configureStore({
   reducer: {
@@ -70,6 +79,16 @@ export const store = configureStore({
     updateTeacher: updateTeacherReducer,
     deleteTeacher: deleteTeacherReducer,
     getTeachersName: getTeachersNameReducer,
+
+    // ⭐ Admin
+    createAdmin: createAdminReducer,
+    getAllAdmins: getAllAdminsReducer,
+    getAdminById: getAdminByIdReducer,
+    updateAdmin: updateAdminReducer,
+
+    // Timetable
+    createTimetable: createTimetableReducer,
+    getAllTimetables: getAllTimetablesReducer,
   },
 });
 

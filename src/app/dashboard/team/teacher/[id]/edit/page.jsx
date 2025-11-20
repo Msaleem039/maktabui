@@ -13,7 +13,6 @@ export default function EditTeacherPage(props) {
   const dispatch = useDispatch();
 
   const { teacher, status, error } = useSelector((state) => state.getTeacherById);
-  console.log("teacher",teacher);
 
   useEffect(() => {
     if (id) {

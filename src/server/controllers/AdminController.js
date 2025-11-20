@@ -78,3 +78,76 @@ export const getAllAdmin = async (req) => {
     );
   }
 }
+
+export const getAdminById = async (req) => {
+  try {
+    const { id } = await req.json();
+
+    const admin = await Admin.findById(id).select("-password");
+
+    if (!admin) {
+      return new Response(
+        JSON.stringify({ message: "Admin not found" }),
+        { status: 404 }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        message: "Admin fetched successfully", 
+        admin 
+      }),
+      { status: 200 }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ message: error.message }),
+      { status: 500 }
+    );
+  }
+};
+
+export const updateAdmin = async (req) => {
+  try {
+    const { id, name, address, phone, photo } = await req.json();
+
+    const admin = await Admin.findById(id);
+
+    if (!admin) {
+      return new Response(
+        JSON.stringify({ message: "Admin not found" }),
+        { status: 404 }
+      );
+    }
+
+    admin.name = name || admin.name;
+    admin.address = address || admin.address;
+    admin.phone = phone || admin.phone;
+    admin.photo = photo || admin.photo;
+
+    const updatedAdmin = await admin.save();
+
+    return new Response(
+      JSON.stringify({
+        message: "Admin updated successfully",
+        admin: {
+          id: updatedAdmin._id,
+          name: updatedAdmin.name,
+          email: updatedAdmin.email,
+          phone: updatedAdmin.phone,
+          address: updatedAdmin.address,
+          photo: updatedAdmin.photo
+        },
+      }),
+      { status: 200 }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ message: error.message }),
+      { status: 500 }
+    );
+  }
+};
+

@@ -1,9 +1,8 @@
 "use client";
 
-import SuperAdminTeacherPage from "../../super-admin/team/teacher/page";
+import TeacherPage from "@/components/dashboard/team/TeacherPage";
+
 
 export default function TeamTeacherPage(props) {
-  return <SuperAdminTeacherPage {...props} />;
+  return <TeacherPage {...props} />;
 }
-
-

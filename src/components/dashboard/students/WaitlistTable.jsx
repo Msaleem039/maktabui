@@ -8,29 +8,26 @@ import { getAllWaitlistStudents } from "@/redux/slices/studentSlices/studentSlic
 export default function WaitlistTable() {
   const [searchValue, setSearchValue] = useState("");
   const dispatch = useDispatch();
-  
+
   const { students, status, error } = useSelector((state) => state.waitlistStudents);
-  console.log("students", students);
 
   useEffect(() => {
     dispatch(getAllWaitlistStudents());
   }, [dispatch]);
 
-  // Calculate age from dateOfBirth
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return 'N/A';
     const birthDate = new Date(dateOfBirth);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
     return age;
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -51,7 +48,6 @@ export default function WaitlistTable() {
     );
   });
 
-  // Loading state
   if (status === "loading") {
     return (
       <div className="space-y-8">
@@ -64,7 +60,6 @@ export default function WaitlistTable() {
     );
   }
 
-  // Error state
   if (status === "failed") {
     return (
       <div className="space-y-8">
@@ -92,11 +87,11 @@ export default function WaitlistTable() {
               Export Data
             </button>
             <button
-            type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          >
-            See All ↗
-          </button>
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
           </div>
         </div>
 
@@ -173,7 +168,6 @@ export default function WaitlistTable() {
           </table>
         </div>
 
-        {/* Pagination */}
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-[#8A928F]">
             Showing {filteredStudents.length} of {students.length} entries

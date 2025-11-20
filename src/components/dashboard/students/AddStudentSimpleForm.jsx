@@ -146,13 +146,11 @@ export default function AddStudentSimpleForm() {
     }
   };
 
-  // Handle dropdown selection
   const handleDropdownSelect = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setDropdownStates((prev) => ({ ...prev, [name]: false }));
   };
 
-  // Toggle dropdown
   const toggleDropdown = (name) => {
     setDropdownStates((prev) => ({ 
       ...prev, 

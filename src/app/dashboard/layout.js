@@ -38,7 +38,7 @@ const NavItem = ({
 
   const collapsedClasses = "justify-center p-2 w-10 h-10 mx-auto";
   const unCollapsedClasses = "px-3 py-3";
-  
+  console.log("get cookies data", getCookie("user"))
   return (
     <div>
       <button
@@ -202,7 +202,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         path: "",
         hasSubmenu: true,
         subItems: [
-          { name: "Parents", path: "/dashboard/parent/parents" },
+          { name: "Parents", path: "/dashboard/parent" },
           { name: "Add Parent", path: `${basePath}/parent/add` },
           { name: "Waiting List", path: `${basePath}/parent/waitlist` },
         ],
@@ -225,8 +225,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Class", path: `${basePath}/class` },
-          { name: "Add Class", path: `${basePath}/class/createClass` },
-        ],
+          { name: "Create Class", path: `${basePath}/class/createClass` },
+          { name: "Timetable", path: `${basePath}/class/timetable` }],
       },
       {
         name: "Learning",
@@ -237,6 +237,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Learning", path: `${basePath}/learning` },
           { name: "Quran Tracker", path: `${basePath}/learning/quran-tracker` },
         ],
+      },
+      {
+        name: "Settings",
+        icon: "/window.svg",
+        path: `${basePath}/settings`,
+        hasSubmenu: false,
       },
       {
         name: "Attendance",
@@ -289,7 +295,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Admin", path: `${basePath}/team/admin` },
-          { name: "Staff", path: `${basePath}/team/staff` },
           { name: "Teachers", path: `${basePath}/team/teacher` },
           { name: "Permission", path: `${basePath}/team/permission` },
         ],
@@ -496,7 +501,7 @@ export default function DashboardLayout({ children }) {
       </button>
 
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10">
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10 pb-16 sm:pb-20">
         {showStudentHeader && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>

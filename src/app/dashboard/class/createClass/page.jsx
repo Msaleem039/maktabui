@@ -1,9 +1,7 @@
 "use client";
 
-import SuperAdminCreateClassPage from "../../super-admin/class/createClass/page";
+import CreateClass from "@/components/dashboard/classes/CreateClass";
 
 export default function CreateClassPage(props) {
-  return <SuperAdminCreateClassPage {...props} />;
+    return <CreateClass {...props} />;
 }
-
-

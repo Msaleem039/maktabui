@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Calendar, CreditCard } from "lucide-react";
+import { Trash2, CreditCard } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 import { loadStripe } from "@stripe/stripe-js";
@@ -11,7 +11,7 @@ import {
   useElements,
   CardElement,
 } from "@stripe/react-stripe-js";
-import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
+import CustomDatePicker from "@/components/DatePicker";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
 
@@ -57,9 +57,6 @@ const FormInput = ({ label, name, type = "text", value, onChange, placeholder, r
 const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Find the selected option label for display
-  const selectedOption = options.find(option => option.value === value);
-
   return (
     <div className={`relative ${className}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -70,7 +67,7 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-          {selectedOption ? selectedOption.label : placeholder}
+          {value || placeholder}
         </span>
         <span className="text-[#0B4B31]">▾</span>
       </div>
@@ -78,42 +75,20 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
         <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
           {options.map((option) => (
             <div
-              key={option.value}
+              key={option.value || option}
               onClick={() => {
-                onChange({ target: { name, value: option.value } });
+                onChange({ target: { name, value: option.value || option } });
                 setIsOpen(false);
               }}
               className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
-                value === option.value ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
+                value === (option.value || option) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
               }`}
             >
-              {option.label}
+              {option.label || option}
             </div>
           ))}
         </div>
       )}
-    </div>
-  );
-};
-
-const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <div className="relative">
-        <input
-          type="date"
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          required={required}
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 appearance-none"
-          style={{ WebkitAppearance: "none", MozAppearance: "textfield" }}
-        />
-      </div>
     </div>
   );
 };
@@ -123,9 +98,6 @@ function AddParentFormContent() {
   const stripe = useStripe();
   const elements = useElements();
   const { status, error, parent, student } = useSelector((state) => state.createParent);
-  
-  // Add selector for classes
-  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
 
   const [parentData, setParentData] = useState({
     fullName: "",
@@ -161,19 +133,6 @@ function AddParentFormContent() {
   const [stripeError, setStripeError] = useState("");
   const [cardDetails, setCardDetails] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // Fetch classes on component mount
-  useEffect(() => {
-    dispatch(getAllClassesNameAction());
-  }, [dispatch]);
-
-  // Transform classNames to dropdown options
-  const classOptions = Array.isArray(classNames) 
-    ? classNames.map(classItem => ({
-        label: classItem.name || classItem.className || 'Unnamed Class',
-        value: classItem._id || classItem.id
-      }))
-    : [];
 
   const handleParentChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -390,20 +349,6 @@ function AddParentFormContent() {
         </div>
       )}
 
-      {/* Classes Loading/Error Messages */}
-      {classesLoading && (
-        <div className="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
-          <p className="font-semibold">Loading classes...</p>
-        </div>
-      )}
-
-      {classesError && (
-        <div className="mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
-          <p className="font-semibold">Warning:</p>
-          <p>Could not load classes - {classesError}</p>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <h3 className="text-lg font-semibold text-gray-700">Parent/Guardian</h3>
@@ -568,12 +513,13 @@ function AddParentFormContent() {
                 placeholder="Student Address"
                 required
               />
-              <DateInput
+              <CustomDatePicker
                 label="Date of Birth"
                 name="dateOfBirth"
                 value={child.dateOfBirth}
                 onChange={(e) => handleChildChange(index, e)}
                 placeholder="Select Date"
+                maxDate={new Date()}
               />
               <FormDropdown
                 label="Gender"
@@ -587,7 +533,7 @@ function AddParentFormContent() {
                 ]}
                 placeholder="Select Gender"
               />
-              <DateInput
+              <CustomDatePicker
                 label="Enroll Date"
                 name="enrollDate"
                 value={child.enrollDate}
@@ -607,9 +553,12 @@ function AddParentFormContent() {
                 name="class"
                 value={child.class}
                 onChange={(e) => handleChildChange(index, e)}
-                options={classOptions}
-                placeholder={classesLoading ? "Loading classes..." : "Select Class"}
-                className={classesLoading ? "opacity-50 cursor-not-allowed" : ""}
+                options={[
+                  { label: "Class Name 1", value: "class1" },
+                  { label: "Class Name 2", value: "class2" },
+                  { label: "Class Name 3", value: "class3" },
+                ]}
+                placeholder="Select Class"
               />
               <div className="flex items-center gap-2 md:col-span-2">
                 <input
@@ -637,7 +586,7 @@ function AddParentFormContent() {
           </button>
           <button
             type="submit"
-            disabled={status === "loading" || !stripe || !cardComplete || isProcessing || classesLoading}
+            disabled={status === "loading" || !stripe || !cardComplete || isProcessing}
             className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isProcessing ? "Processing Payment..." : 

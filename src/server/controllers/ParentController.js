@@ -3,6 +3,7 @@ import Parent from "../models/Parent.js";
 import Student from "../models/Student.js";
 import User from "../models/User.js";
 import stripe from "../utils/stripe.js";
+import Invoice from "../models/Invoice.js";
 const mongoose = require("mongoose");
 
 export const createParent = async (req) => {
@@ -10,10 +11,7 @@ export const createParent = async (req) => {
 
   try {
     const body = await req.json();
-    const {
-      parent: parentData,
-      children: childrenData
-    } = body;
+    const { parent: parentData, children: childrenData } = body;
 
     if (!parentData || !childrenData || childrenData.length === 0) {
       return new Response(
@@ -52,42 +50,18 @@ export const createParent = async (req) => {
       class: studentClass,
     } = firstChild;
 
-    if (!parentPassword) {
+    if (!parentPassword || !studentPassword || !paymentMethodId) {
       return new Response(
-        JSON.stringify({ message: "Parent password is required" }),
-        { status: 400 }
-      );
-    }
-
-    if (!studentPassword) {
-      return new Response(
-        JSON.stringify({ message: "Student password is required" }),
-        { status: 400 }
-      );
-    }
-
-    if (!paymentMethodId) {
-      return new Response(
-        JSON.stringify({ message: "Payment method is required" }),
+        JSON.stringify({ message: "Parent & student passwords and payment method are required" }),
         { status: 400 }
       );
     }
 
     const existingParent = await Parent.findOne({ email: parentEmail });
-    if (existingParent) {
-      return new Response(
-        JSON.stringify({ message: "Parent email already exists" }),
-        { status: 400 }
-      );
-    }
+    if (existingParent) return new Response(JSON.stringify({ message: "Parent email exists" }), { status: 400 });
 
     const existingStudent = await Student.findOne({ email: studentEmail });
-    if (existingStudent) {
-      return new Response(
-        JSON.stringify({ message: "Student email already exists" }),
-        { status: 400 }
-      );
-    }
+    if (existingStudent) return new Response(JSON.stringify({ message: "Student email exists" }), { status: 400 });
 
     const hashedParentPassword = await bcrypt.hash(parentPassword, 10);
     const hashedStudentPassword = await bcrypt.hash(studentPassword, 10);
@@ -96,44 +70,23 @@ export const createParent = async (req) => {
       stripeCustomer = await stripe.customers.create({
         name: fullName,
         email: parentEmail,
-        phone: phone,
-        address: {
-          line1: address,
-        },
-        metadata: {
-          parentIdentity: identityNumber,
-        }
+        phone,
+        address: { line1: address },
+        metadata: { parentIdentity: identityNumber },
       });
 
-      await stripe.paymentMethods.attach(paymentMethodId, {
-        customer: stripeCustomer.id,
-      });
+      await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomer.id });
 
       await stripe.customers.update(stripeCustomer.id, {
-        invoice_settings: {
-          default_payment_method: paymentMethodId,
-        },
+        invoice_settings: { default_payment_method: paymentMethodId },
       });
-
     } catch (stripeError) {
       console.error("Stripe error:", stripeError);
-      return new Response(
-        JSON.stringify({ message: `Stripe error: ${stripeError.message}` }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ message: `Stripe error: ${stripeError.message}` }), { status: 400 });
     }
 
-    const parentUser = await User.create({
-      email: parentEmail,
-      password: hashedParentPassword,
-      role: "Parent",
-    });
-
-    const studentUser = await User.create({
-      email: studentEmail,
-      password: hashedStudentPassword,
-      role: "Student",
-    });
+    const parentUser = await User.create({ email: parentEmail, password: hashedParentPassword, role: "Parent" });
+    const studentUser = await User.create({ email: studentEmail, password: hashedStudentPassword, role: "Student" });
 
     const parent = new Parent({
       fullName,
@@ -151,16 +104,15 @@ export const createParent = async (req) => {
         stripeCustomerId: stripeCustomer.id,
         defaultPaymentMethodId: paymentMethodId,
         paymentMethods: [{
-          paymentMethodId: paymentMethodId,
+          paymentMethodId,
           cardBrand: cardDetails.brand,
           last4: cardDetails.last4,
           expMonth: cardDetails.expMonth,
           expYear: cardDetails.expYear,
-          isDefault: true
-        }]
-      }
+          isDefault: true,
+        }],
+      },
     });
-
     await parent.save();
 
     const student = new Student({
@@ -178,50 +130,73 @@ export const createParent = async (req) => {
       parent: parent._id,
       user: studentUser._id,
     });
-
     await student.save();
 
     parent.students.push(student._id);
     await parent.save();
 
+    const invoice = new Invoice({
+      parent: parent._id,
+      student: student._id,
+      invoiceNumber: `INV-${Date.now()}`,
+      items: [
+        {
+          description: `Fee for ${studentName}`,
+          amount: fee * 100,
+          quantity: 1,
+        },
+      ],
+      totalAmount: fee * 100,
+      currency: "USD",
+      paymentMethod: parent.cardDetail.paymentMethods[0]._id,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      notes: "Initial enrollment fee",
+    });
+
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: fee * 100,
+        currency: "USD",
+        customer: stripeCustomer.id,
+        payment_method: paymentMethodId,
+        off_session: true,
+        confirm: true,
+      });
+
+      invoice.paidAmount = fee * 100;
+      invoice.status = "paid";
+      invoice.paidAt = new Date();
+    } catch (stripePaymentError) {
+      console.error("Stripe payment error:", stripePaymentError);
+      invoice.status = "pending";
+      invoice.paidAmount = 0;
+    }
+
+    await invoice.save();
+
     return new Response(
       JSON.stringify({
-        message: "Parent and Student created successfully.",
-        parent: {
-          id: parent._id,
-          fullName: parent.fullName,
-          email: parent.email,
-          stripeCustomerId: parent.cardDetail.stripeCustomerId
-        },
-        student: {
-          id: student._id,
-          studentName: student.studentName,
-          email: student.email
-        },
+        message: "Parent, Student, and Invoice created successfully.",
+        parent: { id: parent._id, fullName: parent.fullName, email: parent.email, stripeCustomerId: parent.cardDetail.stripeCustomerId },
+        student: { id: student._id, studentName: student.studentName, email: student.email },
+        invoice: { id: invoice._id, invoiceNumber: invoice.invoiceNumber, totalAmount: invoice.totalAmount, status: invoice.status },
       }),
       { status: 201 }
     );
   } catch (error) {
     console.error("❌ Error creating parent:", error);
-
     if (stripeCustomer && stripeCustomer.id) {
-      try {
-        await stripe.customers.del(stripeCustomer.id);
-      } catch (cleanupError) {
-        console.error("Error cleaning up Stripe customer:", cleanupError);
-      }
+      try { await stripe.customers.del(stripeCustomer.id); }
+      catch (cleanupError) { console.error("Stripe cleanup error:", cleanupError); }
     }
-
-    return new Response(JSON.stringify({ message: error.message }), {
-      status: 500,
-    });
+    return new Response(JSON.stringify({ message: error.message }), { status: 500 });
   }
 };
 
 export const getAllParents = async (req) => {
   try {
     const params = req.body;
-    
+
     const {
       page = 1,
       limit = 10,
@@ -274,9 +249,9 @@ export const getAllParents = async (req) => {
   } catch (error) {
     console.error("Error fetching parents:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: "Internal server error" 
+      JSON.stringify({
+        success: false,
+        message: "Internal server error"
       }),
       { status: 500 }
     );
@@ -286,7 +261,7 @@ export const getAllParents = async (req) => {
 export const getAllWaitlistParents = async (req) => {
   try {
     const params = req.body;
-    
+
     const {
       page = 1,
       limit = 10,
@@ -339,9 +314,9 @@ export const getAllWaitlistParents = async (req) => {
   } catch (error) {
     console.error("Error fetching waitlist parents:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: "Internal server error" 
+      JSON.stringify({
+        success: false,
+        message: "Internal server error"
       }),
       { status: 500 }
     );
@@ -360,7 +335,7 @@ export const getParentById = async (req) => {
     }
 
     const parent = await Parent.findById(id)
-      .populate("students") 
+      .populate("students")
       .select("-password");
 
     if (!parent) {
@@ -415,8 +390,8 @@ export const addToWaitList = async (req) => {
     await parent.save();
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: "Parent and associated students added to waitlist successfully",
         data: {
           id: parent._id,
@@ -431,9 +406,9 @@ export const addToWaitList = async (req) => {
   } catch (error) {
     console.error("Error adding parent to waitlist:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: "Internal server error" 
+      JSON.stringify({
+        success: false,
+        message: "Internal server error"
       }),
       { status: 500 }
     );
@@ -469,10 +444,10 @@ export const removeFromWaitList = async (req) => {
 
     parent.addToWaitList = false;
     await parent.save();
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: "Parent and associated students removed from waitlist successfully",
         data: {
           id: parent._id,
@@ -487,9 +462,9 @@ export const removeFromWaitList = async (req) => {
   } catch (error) {
     console.error("Error removing parent from waitlist:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: "Internal server error" 
+      JSON.stringify({
+        success: false,
+        message: "Internal server error"
       }),
       { status: 500 }
     );

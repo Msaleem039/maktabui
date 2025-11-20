@@ -11,7 +11,6 @@ const StudentTable = ({
   searchValue = "",
   students = [],
 }) => {
-  console.log("students", students);
 
   const router = useRouter();
 

@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createAdminAction } from "@/redux/slices/adminSlices/adminSlices";
 import { FormInput } from "@/components/FormInput";
-import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { useRouter } from "next/navigation";
 
 export default function CreateAdmin() {
+  const dispatch = useDispatch();
+  const { loading, admin, error } = useSelector((state) => state.createAdmin);
+
   const [formData, setFormData] = useState({
-    role: "",
     email: "",
     address: "",
     photo: null,
@@ -14,39 +18,107 @@ export default function CreateAdmin() {
     password: "",
     phone: "",
   });
-  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const router = useRouter();
 
-  const roleOptions = [
-    { label: "Admin", value: "admin" },
-    { label: "Super Admin", value: "super_admin" },
-  ];
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDropdownToggle = (name) => {
-    setDropdownOpen((prev) => (prev === name ? null : name));
+  const uploadImageToSupabase = async (file) => {
+    const SUPABASE_URL = "https://rixdrbokebnvidwyzvzo.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpeGRyYm9rZWJudmlkd3l6dnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MjMzMzIsImV4cCI6MjA0ODE5OTMzMn0.Zhnz5rLRoIhtHyF52pFjzYijNdxgZBvEr9LtOxR2Lhw";
+    const fileName = `${Date.now()}_${file.name}`;
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    return new Promise((resolve, reject) => {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open(
+          "POST",
+          `${SUPABASE_URL}/storage/v1/object/maktab-system/${fileName}`
+        );
+        xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round(
+              (event.loaded / event.total) * 100
+            );
+            setUploadProgress(percentComplete);
+          }
+        };
+
+        xhr.onload = () => {
+          setUploading(false);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(
+              `${SUPABASE_URL}/storage/v1/object/public/maktab-system/${fileName}`
+            );
+          } else {
+            reject(new Error("Upload failed"));
+          }
+        };
+
+        xhr.onerror = () => {
+          setUploading(false);
+          reject(new Error("Upload failed"));
+        };
+
+        xhr.send(formDataUpload);
+      } catch (error) {
+        setUploading(false);
+        reject(error);
+      }
+    });
   };
 
-  const handleDropdownSelect = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setDropdownOpen(null);
-  };
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const handleFileChange = (e) => {
-    setFormData((prev) => ({ ...prev, photo: e.target.files[0] }));
+    try {
+      const url = await uploadImageToSupabase(file);
+      setFormData((prev) => ({ ...prev, photo: url }));
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Admin Data:", formData);
+    dispatch(createAdminAction(formData));
+
+    setTimeout(() => {
+      router.push("/dashboard/team/admin")
+    }, 3000)
+
   };
+
+  useEffect(() => {
+    if (admin) {
+      setFormData({
+        email: "",
+        address: "",
+        photo: null,
+        name: "",
+        password: "",
+        phone: "",
+      });
+      setUploadProgress(0);
+    }
+  }, [admin]);
 
   return (
     <div className="space-y-8">
-      {/* Welcome header */}
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
           Welcome to
@@ -57,20 +129,9 @@ export default function CreateAdmin() {
       </div>
 
       <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
-        <h2 className="text-lg font-semibold text-gray-700 mb-6">Edit Admin</h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-6">Add Admin</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SimpleDropdown
-            label="Select Your Role"
-            name="role"
-            value={formData.role}
-            options={roleOptions}
-            onSelect={handleDropdownSelect}
-            isOpen={dropdownOpen === "role"}
-            onToggle={() => handleDropdownToggle("role")}
-            placeholder="Select"
-          />
-
           <FormInput
             label="Name"
             name="name"
@@ -114,13 +175,17 @@ export default function CreateAdmin() {
           />
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Upload Photo</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Upload Photo
+            </label>
             <div className="w-full bg-[#D5E2DB] rounded-full px-4 py-3 flex items-center gap-3">
               <button
                 type="button"
                 className="bg-[#0B4B31] text-white px-4 py-2 rounded-full text-sm font-semibold"
+                onClick={() => document.getElementById("photo-upload").click()}
+                disabled={uploading}
               >
-                Choose File
+                {uploading ? `Uploading ${uploadProgress}%` : "Choose File"}
               </button>
               <input
                 type="file"
@@ -130,9 +195,9 @@ export default function CreateAdmin() {
                 className="hidden"
                 id="photo-upload"
               />
-              <label htmlFor="photo-upload" className="text-[#0B4B31]/60 text-sm cursor-pointer">
-                {formData.photo ? formData.photo.name : "No file chosen"}
-              </label>
+              <span className="text-[#0B4B31]/60 text-sm">
+                {formData.photo ? "File uploaded" : "No file chosen"}
+              </span>
             </div>
           </div>
         </form>
@@ -141,9 +206,10 @@ export default function CreateAdmin() {
           <button
             type="submit"
             onClick={handleSubmit}
-            className="rounded-full bg-[#E5EFEB] px-10 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
+            disabled={loading || uploading}
+            className="rounded-full bg-[#E5EFEB] px-10 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] disabled:opacity-50"
           >
-            Save Changes
+            {loading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>

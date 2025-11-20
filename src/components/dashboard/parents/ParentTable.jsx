@@ -45,12 +45,12 @@ const ParentTable = ({
 
   const toggleActionMenu = (event, parentId) => {
     event.stopPropagation();
-    
+
     // Calculate if menu should open upwards (if near bottom of viewport)
     const buttonRect = event.target.getBoundingClientRect();
     const spaceBelow = window.innerHeight - buttonRect.bottom;
     const menuHeight = 200; // Approximate menu height
-    
+
     setActionMenu(prev => ({
       id: prev.id === parentId ? null : parentId,
       openUp: spaceBelow < menuHeight
@@ -66,26 +66,19 @@ const ParentTable = ({
 
   const handleEdit = (event, parentId) => {
     event.stopPropagation();
-    // Implement edit logic
-    console.log("Edit:", parentId);
     setActionMenu({ id: null, openUp: false });
   };
 
   const handleComment = (event, parent) => {
     event.stopPropagation();
-    // Implement comment logic
-    console.log("Comment:", parent);
     setActionMenu({ id: null, openUp: false });
   };
 
   const handleRemove = (event, parent) => {
     event.stopPropagation();
-    // Implement remove logic
-    console.log("Remove:", parent);
     setActionMenu({ id: null, openUp: false });
   };
 
-  // Close action menu when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
       setActionMenu({ id: null, openUp: false });

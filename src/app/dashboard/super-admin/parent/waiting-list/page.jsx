@@ -6,7 +6,7 @@ import { Download } from "lucide-react";
 export default function ParentsWaitingListPage() {
   const [searchValue, setSearchValue] = useState("");
 
-  const tableData = []; // Empty for now as shown in screenshot
+  const tableData = [];
 
   return (
     <div className="space-y-8">

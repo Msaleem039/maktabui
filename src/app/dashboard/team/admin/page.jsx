@@ -1,9 +1,8 @@
 "use client";
 
-import SuperAdminTeamAdminPage from "../../super-admin/team/admin/page";
+import AdminPage from "@/components/dashboard/team/AdminPage";
 
-export default function TeamAdminPage(props) {
-  return <SuperAdminTeamAdminPage {...props} />;
+
+export default function Page(props) {
+  return <AdminPage {...props} />;
 }
-
-

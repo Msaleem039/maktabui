@@ -63,3 +63,29 @@ export const createTimetable = async (req) => {
     );
   }
 };
+
+export const getAllTimetables = async () => {
+  try {
+    const timetables = await Timetable.find()
+      .populate({
+        path: "class",
+        select: "name code subject",
+      })
+      .populate({
+        path: "teacher",
+        select: "fullName email phone",
+      })
+      .sort({ dayOfWeek: 1, startTime: 1 });
+
+    return new Response(
+      JSON.stringify({ message: "Timetables fetched successfully", timetables }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching timetables:", error);
+    return new Response(
+      JSON.stringify({ message: "Server error", error: error.message }),
+      { status: 500 }
+    );
+  }
+};

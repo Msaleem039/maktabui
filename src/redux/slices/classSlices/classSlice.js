@@ -6,8 +6,7 @@ export const createClassAction = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const res = await axios.post("/api/teacher/createClass", formData);
-      // Axios automatically parses JSON
-      return res.data.class; // use res.data instead of res.json()
+      return res.data.class;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
