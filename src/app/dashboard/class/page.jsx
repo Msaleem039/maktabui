@@ -66,9 +66,15 @@ export default function ClassPage() {
   const handleActionClick = (action, id, event) => {
     event.stopPropagation();
     if (action === "view") {
-      router.push(`/dashboard/super-admin/class/${id}`);
-    } else {
-      console.log(`${action} clicked for class ${id}`);
+      router.push(`/dashboard/class/${id}`);
+    } else if (action === "edit") {
+      router.push(`/dashboard/class/${id}/edit`);
+    } else if (action === "remove") {
+      // TODO: Implement remove functionality with confirmation
+      if (confirm("Are you sure you want to remove this class?")) {
+        console.log(`Remove class ${id}`);
+        // TODO: Add API call to delete class
+      }
     }
     setOpenDropdownId(null);
   };
@@ -127,7 +133,7 @@ export default function ClassPage() {
             </h1>
           </div>
           <Link
-            href="/dashboard/super-admin/class/createClass"
+            href="/dashboard/class/createClass"
             className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
           >
             <span className="text-lg">+</span>
@@ -164,7 +170,7 @@ export default function ClassPage() {
           </h1>
         </div>
         <Link
-          href="/dashboard/super-admin/class/createClass"
+          href="/dashboard/class/createClass"
           className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
         >
           <span className="text-lg">+</span>

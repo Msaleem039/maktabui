@@ -34,26 +34,26 @@ export default function QuranTrackerDetailPage({ params }) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="font-medium text-[#000000]  text-[1.75rem]">
+          <h1 className="text-[1.75rem] font-medium text-[#000000]">
             MaktabOS
           </h1>
         </div>
       </div>
 
+      {/* Quran Tracker Header */}
+      <div>
+        <h2 className="text-2xl font-semibold text-[#104D2E] mb-2">Quran Tracker</h2>
+        <p className="text-sm font-normal text-[#0000008C]">
+          Monitor and manage student Quran progress with ease.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Quran Tracker Header */}
-          <div>
-            <h2 className="text-lg font-semibold text-[#104D2E]">Quran Tracker</h2>
-            <p className="text-sm font-normal text-[#0000008C]">
-              Monitor and manage student Quran progress with ease.
-            </p>
-          </div>
-
           {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
@@ -129,7 +129,7 @@ export default function QuranTrackerDetailPage({ params }) {
 
         {/* User Profile Card */}
         <div className="lg:col-span-1">
-          <div className="rounded-[18px] border border-[#E2E7E4] bg-[#E5EFEB] px-6 py-8 shadow-sm">
+          <div className="rounded-[18px] border border-[#E2E7E4] bg-[#E5EFEB] px-6 py-8 shadow-sm h-fit">
             <div className="flex flex-col items-center">
               <div className="relative h-24 w-24 mb-4">
                 <Image
@@ -144,7 +144,7 @@ export default function QuranTrackerDetailPage({ params }) {
               </h3>
               <button
                 onClick={handleAddNewLesson}
-                className="w-full rounded-full bg-[#0B4B3138] px-6 py-3 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
+                className="w-full rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
               >
                 ADD NEW LESSON
               </button>
@@ -159,7 +159,7 @@ export default function QuranTrackerDetailPage({ params }) {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
             >
               <Download size={16} className="text-white" />
               Export Data
@@ -173,8 +173,8 @@ export default function QuranTrackerDetailPage({ params }) {
             <input
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Q Search..."
-              className="w-full rounded-full border-2 border-white bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              placeholder="Search..."
+              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
           </label>
         </div>

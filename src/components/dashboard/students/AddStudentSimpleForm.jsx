@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createStudent, resetCreateStudentState } from "../../../redux/slices/studentSlices/studentSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { FormInput } from "@/components/FormInput";
 import { FormCheckbox } from "@/components/FormCheckbox";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import CustomDatePicker from "@/components/DatePicker";
 
 const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
   const formatDateForDisplay = (dateString) => {
@@ -189,9 +189,9 @@ export default function AddStudentSimpleForm() {
       studentPhone: formData.studentPhone,
       studentAddress: formData.studentAddress,
       addToWaitList: formData.studentAddToWaitList ? "yes" : "no",
-      dateOfBirth: convertToISODate(formData.dateOfBirth),
+      dateOfBirth: formData.dateOfBirth || null,
       gender: formData.gender,
-      enrollDate: convertToISODate(formData.enrollDate),
+      enrollDate: formData.enrollDate || null,
       fee: formData.fee,
       studentEmail: formData.studentEmail,
       studentPassword: formData.studentPassword,
@@ -380,20 +380,29 @@ export default function AddStudentSimpleForm() {
             onChange={handleChange}
             placeholder="Student Address"
           />
-          <DateInput
+          <CustomDatePicker
             label="Date of Birth"
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleChange}
-            placeholder="MM-DD-YYYY"
+            placeholder="Select date of birth"
             required
+            maxDate={new Date()}
+            showYearDropdown
+            showMonthDropdown
+            dropdownMode="select"
+            dateFormat="MM/dd/yyyy"
           />
-          <DateInput
+          <CustomDatePicker
             label="Enroll Date"
             name="enrollDate"
             value={formData.enrollDate}
             onChange={handleChange}
-            placeholder="MM-DD-YYYY"
+            placeholder="Select enroll date"
+            showYearDropdown
+            showMonthDropdown
+            dropdownMode="select"
+            dateFormat="MM/dd/yyyy"
           />
           <FormInput
             label="Fee"

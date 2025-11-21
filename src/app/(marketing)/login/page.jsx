@@ -22,6 +22,7 @@ const Page = () => {
         { value: "Super Admin", label: "Super Admin" },
         { value: "Admin", label: "Admin" },
         { value: "Teacher", label: "Teacher" },
+        { value: "Parent", label: "Parent" },
         { value: "Student", label: "Student" }
     ];
 
@@ -50,7 +51,15 @@ const Page = () => {
                     id: resultAction.payload.id || ''
                 }), tokenOptions);
 
-                router.push('/dashboard');
+                // Redirect based on role
+                const userRole = resultAction.payload.role;
+                if (userRole === 'Parent') {
+                    router.push('/dashboard/parent/dashboard');
+                } else if (userRole === 'Student') {
+                    router.push('/dashboard/student/dashboard');
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 setError(resultAction.payload || 'Login failed');
             }

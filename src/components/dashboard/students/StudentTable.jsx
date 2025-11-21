@@ -79,29 +79,48 @@ const StudentTable = ({
   };
 
   const handleActionClick = (action, studentId, event) => {
+    event.preventDefault();
     event.stopPropagation();
+    
+    // Close dropdown first
     setActionMenu({ id: null, openUp: false });
 
-    if (action === "view") {
-      router.push(`/dashboard/student/${studentId}`);
-    } else if (action === "edit") {
-      router.push(`/dashboard/student/${studentId}/edit`);
-    } else if (action === "comment") {
-      setCommentStudentId(studentId);
-      setCommentText("");
-    } else if (action === "remove") {
-      if (confirm("Are you sure you want to remove this student?")) {
-        console.log("Remove student:", studentId);
+    // Use setTimeout to ensure dropdown closes before navigation
+    setTimeout(() => {
+      if (action === "view") {
+        router.push(`/dashboard/student/${studentId}`);
+      } else if (action === "edit") {
+        router.push(`/dashboard/student/${studentId}/edit`);
+      } else if (action === "comment") {
+        setCommentStudentId(studentId);
+        setCommentText("");
+      } else if (action === "remove") {
+        if (confirm("Are you sure you want to remove this student?")) {
+          console.log("Remove student:", studentId);
+          // Add your remove student logic here
+        }
+      } else {
+        console.log(`${action} clicked for student ${studentId}`);
       }
-    } else {
-      console.log(`${action} clicked for student ${studentId}`);
-    }
+    }, 0);
   };
 
   useEffect(() => {
-    const handleClickOutside = () => setActionMenu({ id: null, openUp: false });
+    const handleClickOutside = (event) => {
+      // Check if click is outside the dropdown menu and action button
+      const dropdown = event.target.closest('[data-dropdown-menu]');
+      const actionButton = event.target.closest('[data-action-button]');
+      
+      if (!dropdown && !actionButton && actionMenu.id) {
+        setActionMenu({ id: null, openUp: false });
+      }
+    };
+    
     if (actionMenu.id) {
-      document.addEventListener("mousedown", handleClickOutside);
+      // Use a small delay to allow action clicks to process first
+      setTimeout(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+      }, 0);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -219,6 +238,7 @@ const StudentTable = ({
                     <div className="relative inline-block text-left">
                       <button
                         type="button"
+                        data-action-button
                         onClick={(e) => toggleDropdown(student.id, e)}
                         className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
                       >
@@ -228,7 +248,9 @@ const StudentTable = ({
 
                       {isDropdownOpen && (
                         <div
+                          data-dropdown-menu
                           className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "mt-3"} z-50 min-w-[200px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden`}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {actionMenuItems.map((item, index) => {
                             const Icon = item.icon;
@@ -236,10 +258,12 @@ const StudentTable = ({
                               <button
                                 key={item.action}
                                 type="button"
-                                onClick={(e) =>
-                                  handleActionClick(item.action, student.id, e)
-                                }
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${index === 0
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleActionClick(item.action, student.id, e);
+                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
+                                  index === 0
                                     ? ""
                                     : "border-t border-[#E2E7E4]"
                                   } hover:bg-[#E5EFEB]`}
@@ -304,19 +328,31 @@ const StudentTable = ({
       </div>
 
       {commentStudentId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setCommentStudentId(null);
+              setCommentText("");
+            }
+          }}
+        >
+          <div 
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="mb-3 text-lg font-semibold text-[#0B4B31]">
               Add Comment
             </h3>
             <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-[#799086]">
-              {commentStudentId}
+              Student ID: {commentStudentId}
             </p>
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Write a comment about this student..."
               className="mb-4 h-32 w-full resize-none rounded-xl border border-[#C5D2CD] bg-[#F7FAF8] p-3 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              autoFocus
             />
             <div className="flex justify-end gap-3">
               <button

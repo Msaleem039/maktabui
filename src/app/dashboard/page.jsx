@@ -36,10 +36,10 @@ export default function Page() {
         router.push("/dashboard/dashboard");
         break;
       case "Student":
-        router.push("/dashboard/student");
+        router.push("/dashboard/student/dashboard");
         break;
       case "Parent":
-        router.push("/dashboard/parent");
+        router.push("/dashboard/parent/dashboard");
         break;
       default:
         router.push("/login");

@@ -22,7 +22,7 @@ export default function ClassDetailPage({ params }) {
   }, [params?.id]);
 
   const handleAddLesson = () => {
-    router.push(`/dashboard/super-admin/class/${classData.id}/add-lesson`);
+    router.push(`/dashboard/class/${classData.id}/add-lesson`);
   };
 
   return (

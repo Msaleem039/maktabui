@@ -226,6 +226,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Class", path: `${basePath}/class` },
           { name: "Create Class", path: `${basePath}/class/createClass` },
+          { name: "Subject", path: `${basePath}/subject` },
           { name: "Timetable", path: `${basePath}/class/timetable` }],
       },
       {
@@ -485,10 +486,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
 export default function DashboardLayout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
-
-  // Only show header and action buttons on Parent and Student pages
-  const showStudentHeader = pathname?.includes("/parent") || pathname?.includes("/student") || pathname === "/dashboard/student";
 
   return (
     <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -502,33 +499,7 @@ export default function DashboardLayout({ children }) {
       </button>
 
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10 pb-16 sm:pb-20">
-        {showStudentHeader && (
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
-            <div>
-              <p className="text-[2.5rem] font-[600]  text-[#0B4B31]">
-                Welcome to
-              </p>
-              <p className="text-[1.75rem] font-[500] text-black ">
-                MaktabOS
-              </p>
-            </div>
-            {/* <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#B4B31] border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-              >
-                Archived Students
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/85"
-              >
-                <PlusIcon size={20} /> Add Students
-              </button>
-            </div> */}
-          </div>
-        )}
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen">
         {children}
       </main>
       <Chatbot />
