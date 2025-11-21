@@ -319,7 +319,7 @@ export const getStudentById = async (req) => {
             {
               $match: {
                 $expr: {
-                  $in: ["$$studentId", "$records.student"]
+                  $in: ["$$studentId", "$records.studentId"]
                 }
               }
             },
@@ -329,14 +329,14 @@ export const getStudentById = async (req) => {
             {
               $match: {
                 $expr: {
-                  $eq: ["$records.student", "$$studentId"]
+                  $eq: ["$records.studentId", "$$studentId"]
                 }
               }
             },
             {
               $lookup: {
                 from: "classes",
-                localField: "class",
+                localField: "classId",
                 foreignField: "_id",
                 as: "classInfo"
               }
@@ -344,7 +344,7 @@ export const getStudentById = async (req) => {
             {
               $lookup: {
                 from: "teachers",
-                localField: "teacher",
+                localField: "teacherId",
                 foreignField: "_id",
                 as: "teacherInfo"
               }
@@ -418,6 +418,86 @@ export const getStudentById = async (req) => {
         }
       },
 
+      // Calculate attendance stats
+      {
+        $addFields: {
+          attendanceStats: {
+            $let: {
+              vars: {
+                attendanceRecords: "$attendance"
+              },
+              in: {
+                total: { $size: "$$attendanceRecords" },
+                present: {
+                  $size: {
+                    $filter: {
+                      input: "$$attendanceRecords",
+                      as: "record",
+                      cond: { $eq: ["$$record.status", "Present"] }
+                    }
+                  }
+                },
+                absent: {
+                  $size: {
+                    $filter: {
+                      input: "$$attendanceRecords",
+                      as: "record",
+                      cond: { $eq: ["$$record.status", "Absent"] }
+                    }
+                  }
+                },
+                late: {
+                  $size: {
+                    $filter: {
+                      input: "$$attendanceRecords",
+                      as: "record",
+                      cond: { $eq: ["$$record.status", "Late"] }
+                    }
+                  }
+                },
+                excused: {
+                  $size: {
+                    $filter: {
+                      input: "$$attendanceRecords",
+                      as: "record",
+                      cond: { $eq: ["$$record.status", "Excused"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      // Calculate percentage
+      {
+        $addFields: {
+          "attendanceStats.percentage": {
+            $cond: {
+              if: { $gt: ["$attendanceStats.total", 0] },
+              then: {
+                $round: [
+                  {
+                    $multiply: [
+                      {
+                        $divide: [
+                          "$attendanceStats.present",
+                          "$attendanceStats.total"
+                        ]
+                      },
+                      100
+                    ]
+                  },
+                  0
+                ]
+              },
+              else: 0
+            }
+          }
+        }
+      },
+
       {
         $project: {
           _id: 1,
@@ -440,8 +520,9 @@ export const getStudentById = async (req) => {
           },
           attendance: 1,
           assignments: 1,
-          enrollDate: 1, // Added enrollDate
-          fee: 1, // Added fee
+          attendanceStats: 1, // Include the calculated stats
+          enrollDate: 1,
+          fee: 1,
           createdAt: 1,
           updatedAt: 1
         }
@@ -464,6 +545,33 @@ export const getStudentById = async (req) => {
     );
   } catch (error) {
     console.error("❌ Error fetching student by ID:", error);
+    return new Response(JSON.stringify({ message: error.message }), {
+      status: 500,
+    });
+  }
+};
+
+export const getStudentNamesWithIds = async (req) => {
+  try {
+    const students = await Student.find()
+      .select('studentName _id')
+      .sort({ studentName: 1 }); 
+
+    const studentList = students.map(student => ({
+      id: student._id,
+      name: student.studentName
+    }));
+
+    return new Response(
+      JSON.stringify({
+        message: "Student names with IDs fetched successfully.",
+        students: studentList,
+        count: studentList.length
+      }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("❌ Error fetching student names:", error);
     return new Response(JSON.stringify({ message: error.message }), {
       status: 500,
     });

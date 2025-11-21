@@ -74,6 +74,19 @@ export const getTeachersName = createAsyncThunk(
   }
 );
 
+export const getTeacherDetail = createAsyncThunk(
+  "teacher/getTeacherDetail",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/api/teacher/getTeacherDetail", { id });
+      return response.data.teacher;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+
 const createTeacherSlice = createSlice({
   name: "createTeacher",
   initialState: {
@@ -260,12 +273,45 @@ const getTeachersNameSlice = createSlice({
   },
 });
 
+const getTeacherDetailSlice = createSlice({
+  name: "teacherDetail",
+  initialState: {
+    detail: null,
+    status: "idle",
+    error: null,
+  },
+  reducers: {
+    resetTeacherDetailState: (state) => {
+      state.detail = null;
+      state.status = "idle";
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getTeacherDetail.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(getTeacherDetail.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.detail = action.payload;   // ✅ FIXED
+      })
+      .addCase(getTeacherDetail.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Something went wrong";
+      });
+  },
+});
+
+
 export const { resetCreateTeacherState } = createTeacherSlice.actions;
 export const { resetAllTeachersState } = getAllTeachersSlice.actions;
 export const { resetTeacherByIdState } = getTeacherByIdSlice.actions;
 export const { resetUpdateTeacherState } = updateTeacherSlice.actions;
 export const { resetDeleteTeacherState } = deleteTeacherSlice.actions;
 export const { resetTeachersNameState } = getTeachersNameSlice.actions;
+export const { resetTeacherDetailState } = getTeacherDetailSlice.actions;
 
 export const createTeacherReducer = createTeacherSlice.reducer;
 export const getAllTeachersReducer = getAllTeachersSlice.reducer;
@@ -273,3 +319,4 @@ export const getTeacherByIdReducer = getTeacherByIdSlice.reducer;
 export const updateTeacherReducer = updateTeacherSlice.reducer;
 export const deleteTeacherReducer = deleteTeacherSlice.reducer;
 export const getTeachersNameReducer = getTeachersNameSlice.reducer;
+export const getTeacherDetailReducer = getTeacherDetailSlice.reducer;

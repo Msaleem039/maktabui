@@ -20,7 +20,8 @@ import {
   getStudentByIdReducer,
   getAllWaitlistStudentsReducer,
   addToWaitlistStudentReducer,
-  removeFromWaitlistStudentReducer
+  removeFromWaitlistStudentReducer,
+  getStudentNamesWithIdsReducer
 } from './slices/studentSlices/studentSlices';
 
 // Class slices
@@ -37,7 +38,8 @@ import {
   getTeacherByIdReducer,
   updateTeacherReducer,
   deleteTeacherReducer,
-  getTeachersNameReducer
+  getTeachersNameReducer,
+  getTeacherDetailReducer
 } from './slices/teacherSlices/teacherSlices';
 
 // Admin slices
@@ -66,6 +68,12 @@ import {
   getAllPaymentStatsReducer
 } from './slices/paymentSlices/paymentSlices';
 
+// Dashboard
+import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
+
+// Attendance slice
+import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
+
 export const store = configureStore({
   reducer: {
     user: userReducer,
@@ -87,6 +95,7 @@ export const store = configureStore({
     waitlistStudents: getAllWaitlistStudentsReducer,
     addToWaitlistStudent: addToWaitlistStudentReducer,
     removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
+    getStudentNamesWithIds: getStudentNamesWithIdsReducer,
 
     // Class reducers
     createClass: createClassReducer,
@@ -100,6 +109,7 @@ export const store = configureStore({
     updateTeacher: updateTeacherReducer,
     deleteTeacher: deleteTeacherReducer,
     getTeachersName: getTeachersNameReducer,
+    getTeacherDetail: getTeacherDetailReducer,
 
     // Admin reducers
     createAdmin: createAdminReducer,
@@ -117,7 +127,13 @@ export const store = configureStore({
     createInvoice: createInvoiceReducer,
 
     // Payment reducers
-    getAllPaymentStats: getAllPaymentStatsReducer
+    getAllPaymentStats: getAllPaymentStatsReducer,
+
+    // Dashboard
+    dashboard: dashboardReducer,
+
+    // Attendance
+    attendance: attendanceReducer,
   },
 });
 

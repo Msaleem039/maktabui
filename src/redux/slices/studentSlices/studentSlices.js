@@ -14,6 +14,18 @@ export const createStudent = createAsyncThunk(
   }
 );
 
+export const getStudentNamesWithIds = createAsyncThunk(
+  "students/getStudentNamesWithIds",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/api/student/getStudentsName");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const getAllStudents = createAsyncThunk(
   "students/getAllStudents",
   async (_, { rejectWithValue }) => {
@@ -305,6 +317,41 @@ const removeFromWaitlistStudentSlice = createSlice({
   }
 });
 
+
+const getStudentNamesWithIdsSlice = createSlice({
+  name: "studentNamesWithIds",
+  initialState: {
+    students: [],
+    status: "idle",
+    error: null,
+  },
+  reducers: {
+    resetStudentNamesState: (state) => {
+      state.students = [];
+      state.status = "idle";
+      state.error = null;
+    },
+    clearStudentNamesError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getStudentNamesWithIds.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(getStudentNamesWithIds.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.students = action.payload.students || [];
+      })
+      .addCase(getStudentNamesWithIds.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Something went wrong";
+      });
+  },
+});
+
 // Export Actions
 export const { resetCreateStudentState } = createStudentSlice.actions;
 export const { resetAllStudentsState } = getAllStudentsSlice.actions;
@@ -312,6 +359,7 @@ export const { resetStudentByIdState } = getStudentByIdSlice.actions;
 export const { resetWaitlistStudentsState } = getAllWaitlistStudentsSlice.actions;
 export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;
 export const { resetRemoveWaitlistStudent } = removeFromWaitlistStudentSlice.actions;
+export const { resetStudentNamesState, clearStudentNamesError } = getStudentNamesWithIdsSlice.actions;
 
 // Export Reducers
 export const createStudentReducer = createStudentSlice.reducer;
@@ -320,6 +368,7 @@ export const getStudentByIdReducer = getStudentByIdSlice.reducer;
 export const getAllWaitlistStudentsReducer = getAllWaitlistStudentsSlice.reducer;
 export const addToWaitlistStudentReducer = addToWaitlistStudentSlice.reducer;
 export const removeFromWaitlistStudentReducer = removeFromWaitlistStudentSlice.reducer;
+export const getStudentNamesWithIdsReducer = getStudentNamesWithIdsSlice.reducer;
 
 // Combined Reducer
 export const studentReducer = {
@@ -329,4 +378,5 @@ export const studentReducer = {
   waitlistStudents: getAllWaitlistStudentsReducer,
   addToWaitlistStudent: addToWaitlistStudentReducer,
   removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
+  getStudentNamesWithIds: getStudentNamesWithIdsReducer
 };

@@ -251,8 +251,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         path: "",
         hasSubmenu: true,
         subItems: [
-          { name: "Attendance", path: `${basePath}/attendance` },
-          { name: "Report By Class", path: `${basePath}/attendance/report-by-class` },
+          { name: "Mark Attendance", path: `${basePath}/attendance` },
         ],
       },
       {

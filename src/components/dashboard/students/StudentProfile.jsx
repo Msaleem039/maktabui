@@ -19,39 +19,45 @@ import {
 const tabsConfig = [
   { key: "about", label: "About" },
   { key: "attendance", label: "Attendance" },
-  { key: "assignments", label: "Assignments" },
-  { key: "files", label: "Student files" },
-  { key: "comments", label: "Comments" },
+  { key: "assignments", label: "Assignments" }
 ];
 
 const StudentProfile = ({
   student = {},
+  attendanceStats,
+  assignmentStats,
   tabs = tabsConfig,
   defaultTab = "about",
 }) => {
+  console.log("student", student);
+  console.log("attendanceStats", attendanceStats);
+  console.log("assignmentStats", assignmentStats);
+
   const [activeTab, setActiveTab] = useState(defaultTab);
 
-  const profile = useMemo(
-    () => ({
-      name: "Abdiqadir Abdikadir",
+  const profile = useMemo(() => {
+    // Extract parent data from student object
+    const parentData = student.parent ? [
+      {
+        name: student.parent.name || "Not specified",
+        phone: student.parent.phone || "Not specified",
+        email: student.parent.email || "Not specified"
+      }
+    ] : [];
+
+    return {
+      name: student.name || "Not specified",
       role: "Student",
-      class: "202 Mohamed Karie Class",
-      gender: "male",
-      dob: "Not specified",
-      parents: [
-        {
-          name: "Safiya Ali",
-          phone: "612-636-1149",
-        },
-        {
-          name: "Abukar Ali Bolay",
-          phone: "612-636-1149",
-        },
-      ],
+      class: student.class || "Not specified",
+      gender: student.gender || "Not specified",
+      dob: student.dob || "Not specified",
+      email: student.email || "Not specified",
+      phone: student.phone || "Not specified",
+      parents: parentData,
       stats: {
-        status: "Active",
-        attendance: "95%",
-        assignments: "8/10",
+        status: student.status || "Active",
+        attendance: `${attendanceStats?.percentage || 0}%`,
+        assignments: `${assignmentStats?.completed || 0}/${assignmentStats?.total || 0}`,
       },
       quickActions: [
         { label: "Edit Profile", icon: UserRound },
@@ -59,9 +65,8 @@ const StudentProfile = ({
         { label: "View Attendance", icon: Calendar },
       ],
       ...student,
-    }),
-    [student]
-  );
+    };
+  }, [student, attendanceStats, assignmentStats]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -78,66 +83,152 @@ const StudentProfile = ({
                 />
                 <InfoItem icon={User} label="Gender" value={profile.gender} />
                 <InfoItem icon={Calendar} label="DOB" value={profile.dob} />
+                {profile.email && (
+                  <InfoItem icon={Mail} label="Email" value={profile.email} />
+                )}
+                {profile.phone && (
+                  <InfoItem icon={Phone} label="Phone" value={profile.phone} />
+                )}
               </div>
             </div>
 
-            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
-              <SectionTitle>Parent/Guardian Info</SectionTitle>
-              <div className="mt-5 space-y-4">
-                {profile.parents.map((parent, index) => (
-                  <div
-                    key={index}
-                    className="rounded-[18px] bg-white p-4 shadow-sm"
-                  >
-                    <div className="grid gap-4 text-sm text-[#123629] sm:grid-cols-2">
-                      <InfoItem
-                        icon={User}
-                        label="Name"
-                        value={parent.name}
-                      />
-                      <InfoItem
-                        icon={Phone}
-                        label="Phone"
-                        value={parent.phone}
-                      />
+            {profile.parents && profile.parents.length > 0 && (
+              <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
+                <SectionTitle>Parent/Guardian Info</SectionTitle>
+                <div className="mt-5 space-y-4">
+                  {profile.parents.map((parent, index) => (
+                    <div
+                      key={index}
+                      className="rounded-[18px] bg-white p-4 shadow-sm"
+                    >
+                      <div className="grid gap-4 text-sm text-[#123629] sm:grid-cols-2 lg:grid-cols-3">
+                        <InfoItem
+                          icon={User}
+                          label="Name"
+                          value={parent.name}
+                        />
+                        <InfoItem
+                          icon={Phone}
+                          label="Phone"
+                          value={parent.phone}
+                        />
+                        {parent.email && (
+                          <InfoItem
+                            icon={Mail}
+                            label="Email"
+                            value={parent.email}
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         );
       case "attendance":
         return (
-          <PlaceholderCard
-            icon={Calendar}
-            title="Attendance"
-            description="Attendance records and statistics will appear here."
-          />
+          <div className="space-y-6">
+            {/* Attendance Statistics */}
+            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
+              <SectionTitle>Attendance Overview</SectionTitle>
+              <div className="mt-5 grid gap-4 text-sm text-[#123629] sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  label="Total Days"
+                  value={attendanceStats?.total || 0}
+                  color="bg-blue-100 text-blue-800"
+                />
+                <StatCard
+                  label="Present"
+                  value={attendanceStats?.present || 0}
+                  color="bg-green-100 text-green-800"
+                />
+                <StatCard
+                  label="Absent"
+                  value={attendanceStats?.absent || 0}
+                  color="bg-red-100 text-red-800"
+                />
+                <StatCard
+                  label="Late"
+                  value={attendanceStats?.late || 0}
+                  color="bg-yellow-100 text-yellow-800"
+                />
+              </div>
+              {attendanceStats?.percentage !== undefined && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-[#123629]">Overall Attendance Rate</span>
+                    <span className="font-bold text-[#0B4B31]">{attendanceStats.percentage}%</span>
+                  </div>
+                  <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                    <div
+                      className="h-2 rounded-full bg-[#0B4B31] transition-all duration-300"
+                      style={{ width: `${attendanceStats.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Attendance Details Placeholder */}
+            <PlaceholderCard
+              icon={Calendar}
+              title="Attendance Details"
+              description="Detailed attendance records and history will appear here."
+            />
+          </div>
         );
       case "assignments":
         return (
-          <PlaceholderCard
-            icon={ClipboardList}
-            title="Assignments"
-            description="Student assignments and submissions will appear here."
-          />
-        );
-      case "files":
-        return (
-          <PlaceholderCard
-            icon={FileText}
-            title="Student Files"
-            description="Uploaded files and documents will appear here."
-          />
-        );
-      case "comments":
-        return (
-          <PlaceholderCard
-            icon={MessageSquareText}
-            title="Comments"
-            description="Internal comments and notes will appear here."
-          />
+          <div className="space-y-6">
+            {/* Assignment Statistics */}
+            <div className="rounded-[30px] border border-[#D2E2DB] bg-[#CEDBD6] p-6">
+              <SectionTitle>Assignment Overview</SectionTitle>
+              <div className="mt-5 grid gap-4 text-sm text-[#123629] sm:grid-cols-2 lg:grid-cols-3">
+                <StatCard
+                  label="Total Assignments"
+                  value={assignmentStats?.total || 0}
+                  color="bg-purple-100 text-purple-800"
+                />
+                <StatCard
+                  label="Pending"
+                  value={assignmentStats?.pending || 0}
+                  color="bg-yellow-100 text-yellow-800"
+                />
+                <StatCard
+                  label="Overdue"
+                  value={assignmentStats?.overdue || 0}
+                  color="bg-red-100 text-red-800"
+                />
+              </div>
+              {assignmentStats?.total > 0 && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-[#123629]">Completion Rate</span>
+                    <span className="font-bold text-[#0B4B31]">
+                      {Math.round(((assignmentStats.total - assignmentStats.pending - assignmentStats.overdue) / assignmentStats.total) * 100)}%
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                    <div
+                      className="h-2 rounded-full bg-[#0B4B31] transition-all duration-300"
+                      style={{
+                        width: `${Math.round(((assignmentStats.total - assignmentStats.pending - assignmentStats.overdue) / assignmentStats.total) * 100)}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Assignment Details Placeholder */}
+            <PlaceholderCard
+              icon={ClipboardList}
+              title="Assignment Details"
+              description="Detailed assignment submissions and grades will appear here."
+            />
+          </div>
         );
       default:
         return null;
@@ -145,7 +236,7 @@ const StudentProfile = ({
   };
 
   return (
-    <section className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white pb-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
+    <section className="relative mx-auto max-w-4xl rounded-[28px] border border-[#E2E7E4] bg-white pb-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
       <div className="relative h-[240px] rounded-t-[28px] overflow-hidden">
         <Image
           src="/parentprofile.svg"
@@ -157,7 +248,7 @@ const StudentProfile = ({
         <div className="absolute inset-0" />
       </div>
 
-      {/* Profile Image - positioned outside overflow-hidden container */}
+      {/* Profile Image */}
       <div className="absolute left-10 top-[152px] z-30">
         <div className="flex h-44 w-44 items-center justify-center rounded-full bg-white shadow-[0_30px_60px_-45px_rgba(0,0,0,0.7)] ring-8 ring-[#D5E2DB]">
           <div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-[#C7D7D0] bg-white text-5xl text-[#0B4B31]">
@@ -182,6 +273,25 @@ const StudentProfile = ({
               {profile.role}
             </p>
           </div>
+
+          {/* Quick Stats */}
+          <div className="mt-4 flex flex-wrap gap-4">
+            <div className="rounded-[18px] bg-[#E1F4EC] px-4 py-2">
+              <span className="text-sm font-medium text-[#0B4B31]">
+                Status: {profile.stats.status}
+              </span>
+            </div>
+            <div className="rounded-[18px] bg-[#E1F4EC] px-4 py-2">
+              <span className="text-sm font-medium text-[#0B4B31]">
+                Attendance: {profile.stats.attendance}
+              </span>
+            </div>
+            <div className="rounded-[18px] bg-[#E1F4EC] px-4 py-2">
+              <span className="text-sm font-medium text-[#0B4B31]">
+                Assignments: {profile.stats.assignments}
+              </span>
+            </div>
+          </div>
         </div>
 
         <nav className="mt-8 flex flex-wrap items-center gap-3">
@@ -190,7 +300,6 @@ const StudentProfile = ({
 
             const getTabStyles = () => {
               if (isActive) {
-                // Active tab styling aligned with ParentProfile
                 return "bg-[#96E2D6FA] text-black font-medium";
               }
 
@@ -254,7 +363,16 @@ const InfoItem = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-// Status and quick action cards removed as per updated design
+const StatCard = ({ label, value, color }) => (
+  <div className="rounded-[18px] bg-white p-4 shadow-sm">
+    <div className="text-center">
+      <div className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${color}`}>
+        {value}
+      </div>
+      <p className="mt-2 text-sm font-medium text-[#123629]">{label}</p>
+    </div>
+  </div>
+);
 
 const PlaceholderCard = ({ icon: Icon, title, description }) => (
   <div className="flex flex-col items-start gap-4 rounded-[26px] border border-[#D2E2DB] bg-white/85 p-6 shadow-sm">
@@ -274,4 +392,3 @@ const PlaceholderCard = ({ icon: Icon, title, description }) => (
 );
 
 export default StudentProfile;
-

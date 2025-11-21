@@ -9,9 +9,6 @@ export default function StudentDetailPage({ params }) {
   const dispatch = useDispatch();
 
   const { student, attendance, assignments, status, error } = useSelector((state) => state.getStudentById);
-  console.log("student from Slice", student);
-  console.log("attendance from Slice", attendance);
-  console.log("assignments from Slice", assignments);
 
   useEffect(() => {
     if (params?.id) {

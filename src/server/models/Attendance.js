@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const attendanceSchema = new mongoose.Schema(
   {
-    class: {
+    classId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Class",
       required: true,
     },
-    teacher: {
+    teacherId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Teacher",
       required: true,
@@ -18,7 +18,7 @@ const attendanceSchema = new mongoose.Schema(
     },
     records: [
       {
-        student: {
+        studentId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Student",
           required: true,
@@ -38,4 +38,4 @@ const attendanceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default  mongoose.models.Attendance || mongoose.model("Attendance", attendanceSchema);
+export default mongoose.models.Attendance || mongoose.model("Attendance", attendanceSchema);

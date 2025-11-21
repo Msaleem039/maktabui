@@ -6,6 +6,7 @@ import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { createTeacher, resetCreateTeacherState } from "@/redux/slices/teacherSlices/teacherSlices";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { MultiSelectDropdown } from "@/components/MultiSelectDropdown";
 
 const CreateTeacher = () => {
     const dispatch = useDispatch();

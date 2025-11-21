@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import Teacher from "../models/Teacher.js";
 import User from "../models/User.js";
-import Class from "../models/Class.js";
+const mongoose = require("mongoose");
+import Class from "../models/Class";
 
 export const createTeacher = async (req) => {
   try {
@@ -325,3 +326,86 @@ export const getTeachersName = async (req) => {
     );
   }
 };
+
+export const getTeacherDetail = async (req) => {
+  try {
+    const body = await req.json();
+    const { id } = body;
+    console.log("id", id);
+
+    if (!id) {
+      return new Response(
+        JSON.stringify({ message: "Teacher ID is required." }),
+        { status: 400 }
+      );
+    }
+
+    const teacherDetail = await Teacher.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) }
+      },
+
+      {
+        $lookup: {
+          from: "classes",
+          localField: "assignedClasses",
+          foreignField: "_id",
+          as: "assignedClasses"
+        }
+      },
+
+      {
+        $lookup: {
+          from: "students",
+          let: { classes: "$assignedClasses._id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ["$class", "$$classes"] }
+              }
+            },
+            {
+              $project: {
+                studentName: 1,
+                email: 1,
+                phone: 1,
+                class: 1,
+                address: 1
+              }
+            }
+          ],
+          as: "students"
+        }
+      },
+
+      {
+        $project: {
+          password: 0
+        }
+      }
+    ]);
+
+    if (!teacherDetail.length) {
+      return new Response(
+        JSON.stringify({ message: "Teacher not found." }),
+        { status: 404 }
+      );
+    }
+    
+    return new Response(
+      JSON.stringify({
+        message: "Teacher detail fetched successfully.",
+        teacher: teacherDetail[0]
+      }),
+      { status: 200 }
+    );
+
+  } catch (error) {
+    console.error("❌ Error fetching teacher detail:", error);
+    return new Response(
+      JSON.stringify({ message: error.message }),
+      { status: 500 }
+    );
+  }
+};
+
