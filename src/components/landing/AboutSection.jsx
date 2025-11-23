@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Landing1 from "@/utils/icons/landing1";
+import Landing1 from "@/utils/icons/Landing1";
 import Mosque from "@/utils/icons/Mosque";
 
 const AboutSection = () => {
