@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const createClassAction = createAsyncThunk(
-  "classes/createClass",
+  `classes/createClass`,
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/teacher/createClass", formData);
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createClass`, formData);
       return res.data.class;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -14,10 +14,10 @@ export const createClassAction = createAsyncThunk(
 );
 
 export const getAllClassesAction = createAsyncThunk(
-  "classes/getAllClasses",
+  `classes/getAllClasses`,
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/teacher/getAllClasses");
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClasses`);
       return res.data.classes;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -26,10 +26,10 @@ export const getAllClassesAction = createAsyncThunk(
 );
 
 export const getAllClassesNameAction = createAsyncThunk(
-  "classes/getAllClassesName",
+  `classes/getAllClassesName`,
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/teacher/getAllClassesName");
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClassesName`);
       return res.data.classes;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

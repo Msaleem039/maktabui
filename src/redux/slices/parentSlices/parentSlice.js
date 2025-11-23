@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 export const setDefaultCard = createAsyncThunk(
-  'parent/setDefaultCard',
+  `parent/setDefaultCard`,
   async ({ parentId, paymentMethodId }, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/parent/setDefaultCard', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/setDefaultCard`, {
         parentId,
         paymentMethodId
       });
@@ -17,10 +17,10 @@ export const setDefaultCard = createAsyncThunk(
 );
 
 export const removeCard = createAsyncThunk(
-  'parent/removeCard',
+  `parent/removeCard`,
   async ({ parentId, paymentMethodId }, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/parent/removeCard', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeCard`, {
         parentId,
         paymentMethodId
       });
@@ -32,12 +32,12 @@ export const removeCard = createAsyncThunk(
 );
 
 export const addCardDetail = createAsyncThunk(
-  'parent/addCardDetail',
+  `parent/addCardDetail`,
   async (cardData, { rejectWithValue }) => {
-    console.log("cardData", cardData);
+    console.log(`cardData`, cardData);
 
     try {
-      const response = await axios.post('/api/parent/addCardDetail', cardData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/addCardDetail`, cardData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -46,10 +46,10 @@ export const addCardDetail = createAsyncThunk(
 );
 
 export const addToWaitList = createAsyncThunk(
-  'waitlist/add',
+  `waitlist/add`,
   async (parentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/parent/addWaitlist', { id: parentId });
+      const response = await axios.post(`/api/parent/addWaitlist`, { id: parentId });
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -58,10 +58,10 @@ export const addToWaitList = createAsyncThunk(
 );
 
 export const createParent = createAsyncThunk(
-  "parent/createParent",
+  `parent/createParent`,
   async (parentData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/parent/createParent", parentData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createParent`, parentData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -70,10 +70,10 @@ export const createParent = createAsyncThunk(
 );
 
 export const getAllParents = createAsyncThunk(
-  "parents/getAllParents",
+  `parents/getAllParents`,
   async (parentData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/parent/getAllParents", parentData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllParents`, parentData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -82,10 +82,10 @@ export const getAllParents = createAsyncThunk(
 );
 
 export const getParentById = createAsyncThunk(
-  "parent/getParentById",
+  `parent/getParentById`,
   async (parentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/parent/getParentById", { id: parentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getParentById`, { id: parentId });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -94,10 +94,10 @@ export const getParentById = createAsyncThunk(
 );
 
 export const getAllWaitListParents = createAsyncThunk(
-  "parent/getAllWaitListParents",
+  `parent/getAllWaitListParents`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/parent/getAllWaitListParents");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitListParents`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -106,10 +106,10 @@ export const getAllWaitListParents = createAsyncThunk(
 );
 
 export const removeFromWaitList = createAsyncThunk(
-  'waitlist/remove',
+  `waitlist/remove`,
   async (parentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/parent/removeWaitlist', { id: parentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeWaitlist`, { id: parentId });
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -118,10 +118,10 @@ export const removeFromWaitList = createAsyncThunk(
 );
 
 export const getAllParentsWithStudents = createAsyncThunk(
-  "parentsWithStudents/fetch",
+  `parentsWithStudents/fetch`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/parent/getAllParentsWithStudents");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllParentsWithStudents`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

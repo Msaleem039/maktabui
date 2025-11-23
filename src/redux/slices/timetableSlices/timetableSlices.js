@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const createTimetableAction = createAsyncThunk(
-  "timetables/createTimetable",
+  `timetables/createTimetable`,
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/teacher/createTimeTable", formData);
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createTimeTable`, formData);
       return res.data.timetable;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -14,10 +14,10 @@ export const createTimetableAction = createAsyncThunk(
 );
 
 export const getAllTimetablesAction = createAsyncThunk(
-  "timetables/getAllTimetables",
+  `timetables/getAllTimetables`,
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/teacher/getAllTimetables");
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllTimetables`);
       return res.data.timetables;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

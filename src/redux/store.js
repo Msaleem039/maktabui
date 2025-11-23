@@ -74,6 +74,12 @@ import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
 // Attendance slice
 import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
 
+// Grade slice
+import gradeReducer from './slices/gradeSlices/gradeSlices';
+
+// Assignment slice
+import assignmentReducer from './slices/assignmentSlices/assignmentSlices';
+
 export const store = configureStore({
   reducer: {
     user: userReducer,
@@ -134,6 +140,12 @@ export const store = configureStore({
 
     // Attendance
     attendance: attendanceReducer,
+
+    // Grade
+    grade: gradeReducer,
+
+    // Assignment
+    assignment: assignmentReducer,
   },
 });
 

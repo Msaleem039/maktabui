@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async Thunks
 export const createStudent = createAsyncThunk(
-  "student/createStudent",
+  `student/createStudent`,
   async (studentData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/createStudent", studentData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createStudent`, studentData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -15,10 +14,10 @@ export const createStudent = createAsyncThunk(
 );
 
 export const getStudentNamesWithIds = createAsyncThunk(
-  "students/getStudentNamesWithIds",
+  `students/getStudentNamesWithIds`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/getStudentsName");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentNamesWithIds`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -27,10 +26,10 @@ export const getStudentNamesWithIds = createAsyncThunk(
 );
 
 export const getAllStudents = createAsyncThunk(
-  "students/getAllStudents",
+  `students/getAllStudents`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/getAllStudents");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllStudents`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -39,10 +38,10 @@ export const getAllStudents = createAsyncThunk(
 );
 
 export const getStudentById = createAsyncThunk(
-  "student/getStudentById",
+  `student/getStudentById`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/getStudentById", { studentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentById`, { studentId });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -51,10 +50,10 @@ export const getStudentById = createAsyncThunk(
 );
 
 export const getAllWaitlistStudents = createAsyncThunk(
-  "student/getAllWaitlistStudents",
+  `student/getAllWaitlistStudents`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/getAllWaitlistStudents");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitlistStudents`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -63,10 +62,10 @@ export const getAllWaitlistStudents = createAsyncThunk(
 );
 
 export const addToWaitlistStudent = createAsyncThunk(
-  'student/waitlist/add',
+  `student/waitlist/add`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/addToWaitlist", { studentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/addToWaitlist`, { studentId });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -75,10 +74,10 @@ export const addToWaitlistStudent = createAsyncThunk(
 );
 
 export const removeFromWaitlistStudent = createAsyncThunk(
-  'student/waitlist/remove',
+  `student/waitlist/remove`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/student/removeFromWaitlist", { studentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeFromWaitlist`, { studentId });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -316,7 +315,6 @@ const removeFromWaitlistStudentSlice = createSlice({
       });
   }
 });
-
 
 const getStudentNamesWithIdsSlice = createSlice({
   name: "studentNamesWithIds",

@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Pass 'year' as an argument
 export const getDashboardStatsAction = createAsyncThunk(
-  "dashboard/getStats",
+  `dashboard/getStats`,
   async (year, { rejectWithValue }) => {
     try {
-      // POST request with year in the body
-      const res = await axios.post("/api/super-admin/getDashboardStats", { year });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getDashboardStats`, { year });
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

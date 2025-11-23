@@ -3,10 +3,10 @@ import axios from 'axios';
 
 
 export const createTeacher = createAsyncThunk(
-  "teacher/createTeacher",
+  `teacher/createTeacher`,
   async (teacherData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/createTeacher", teacherData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createTeacher`, teacherData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -15,10 +15,10 @@ export const createTeacher = createAsyncThunk(
 );
 
 export const getAllTeachers = createAsyncThunk(
-  "teacher/getAllTeachers",
+  `teacher/getAllTeachers`,
   async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/getAllTeachers", params);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllTeachers`, params);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -27,10 +27,10 @@ export const getAllTeachers = createAsyncThunk(
 );
 
 export const getTeacherById = createAsyncThunk(
-  "teacher/getTeacherById",
+  `teacher/getTeacherById`,
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/getTeacherById", { id });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getTeacherById`, { id });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -39,10 +39,10 @@ export const getTeacherById = createAsyncThunk(
 );
 
 export const updateTeacher = createAsyncThunk(
-  "teacher/updateTeacher",
+  `teacher/updateTeacher`,
   async (teacherData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/updateTeacher", teacherData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateTeacher`, teacherData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -51,10 +51,10 @@ export const updateTeacher = createAsyncThunk(
 );
 
 export const deleteTeacher = createAsyncThunk(
-  "teacher/deleteTeacher",
+  `teacher/deleteTeacher`,
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/deleteTeacher", { id });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteTeacher`, { id });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -63,10 +63,10 @@ export const deleteTeacher = createAsyncThunk(
 );
 
 export const getTeachersName = createAsyncThunk(
-  "teacher/getTeachersName",
+  `teacher/getTeachersName`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/getTeachersName");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getTeachersName`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -75,10 +75,10 @@ export const getTeachersName = createAsyncThunk(
 );
 
 export const getTeacherDetail = createAsyncThunk(
-  "teacher/getTeacherDetail",
+  `teacher/getTeacherDetail`,
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/teacher/getTeacherDetail", { id });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getTeacherDetail`, { id });
       return response.data.teacher;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

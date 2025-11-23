@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const markAttendance = createAsyncThunk(
-  "attendance/markAttendance",
+  `attendance/markAttendance`,
   async (attendanceData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/attendance/markAttendance", attendanceData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/markAttendance`, attendanceData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

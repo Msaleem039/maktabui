@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronDown, PlusIcon } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
 import Chatbot from "@/components/dashboard/Chatbot";
+
 const NavItem = ({
   name,
   Icon,
@@ -38,7 +39,7 @@ const NavItem = ({
 
   const collapsedClasses = "justify-center p-2 w-10 h-10 mx-auto";
   const unCollapsedClasses = "px-3 py-3";
-  
+
   return (
     <div>
       <button
@@ -228,6 +229,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Create Class", path: `${basePath}/class/createClass` },
           { name: "Subject", path: `${basePath}/subject` },
           { name: "Timetable", path: `${basePath}/class/timetable` }],
+      },
+      {
+        name: "Assignment",
+        icon: "/Classroom.png",
+        path: "",
+        hasSubmenu: true,
+        subItems: [
+          { name: "Assignments", path: `${basePath}/assignment` },
+          { name: "Create Assignment", path: `${basePath}/assignment/add` },
+          { name: "Grade", path: `${basePath}/grade` }],
       },
       {
         name: "Learning",
@@ -485,6 +496,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
 export default function DashboardLayout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  const showStudentHeader = pathname?.includes("/parent") || pathname?.includes("/student") || pathname === "/dashboard/student";
 
   return (
     <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -498,7 +512,33 @@ export default function DashboardLayout({ children }) {
       </button>
 
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen">
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-10 pb-16 sm:pb-20">
+        {showStudentHeader && (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
+            <div>
+              <p className="text-[2.5rem] font-[600]  text-[#0B4B31]">
+                Welcome to
+              </p>
+              <p className="text-[1.75rem] font-[500] text-black ">
+                MaktabOS
+              </p>
+            </div>
+            {/* <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full bg-[#B4B31] border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+              >
+                Archived Students
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/85"
+              >
+                <PlusIcon size={20} /> Add Students
+              </button>
+            </div> */}
+          </div>
+        )}
         {children}
       </main>
       <Chatbot />

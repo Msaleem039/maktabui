@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const getAllPaymentStatsAction = createAsyncThunk(
-    "payments/getAllPaymentStats",
+    `payments/getAllPaymentStats`,
     async (filters = {}, { rejectWithValue }) => {
         try {
             const payload = {
@@ -16,7 +16,7 @@ export const getAllPaymentStatsAction = createAsyncThunk(
                 paymentMethod: filters.paymentMethod || ""
             };
 
-            const res = await axios.post("/api/payment/getAllPaymentStats", payload);
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllPaymentStats`, payload);
             return res.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);

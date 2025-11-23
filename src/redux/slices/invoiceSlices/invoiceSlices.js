@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const getAllInvoicesAction = createAsyncThunk(
-    "invoices/getAllInvoices",
+    `invoices/getAllInvoices`,
     async (_, { rejectWithValue }) => {
         try {
-            const res = await axios.post("/api/invoices/getAllInvoices");
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllInvoices`);
             return res.data.invoices;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
@@ -14,10 +14,9 @@ export const getAllInvoicesAction = createAsyncThunk(
 );
 
 export const getInvoicesStatsAction = createAsyncThunk(
-    "invoices/getInvoicesStats",
+    `invoices/getInvoicesStats`,
     async (filters = {}, { rejectWithValue }) => {
         try {
-            // Default parameters for unpaid invoices pagination
             const payload = {
                 page: filters.page || 1,
                 limit: filters.limit || 10,
@@ -27,14 +26,13 @@ export const getInvoicesStatsAction = createAsyncThunk(
                 status: filters.status || "",
                 date: filters.date || "",
                 filterBy: filters.filterBy || "",
-                // Unpaid invoices specific parameters
                 unpaidPage: filters.unpaidPage || 1,
                 unpaidLimit: filters.unpaidLimit || 10,
                 unpaidSearch: filters.unpaidSearch || "",
                 unpaidStatus: filters.unpaidStatus || ""
             };
 
-            const res = await axios.post("/api/invoices/getInvoicesStats", payload);
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getInvoicesStats`, payload);
             return res.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
@@ -43,12 +41,12 @@ export const getInvoicesStatsAction = createAsyncThunk(
 );
 
 export const createInvoiceAction = createAsyncThunk(
-    "invoices/createInvoice",
+    `invoices/createInvoice`,
     async (invoiceData, { rejectWithValue }) => {
-        console.log("invoiceData",invoiceData);
+        console.log(`invoiceData`, invoiceData);
         
         try {
-            const res = await axios.post("/api/invoices/createInvoice", invoiceData);
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createInvoice`, invoiceData);
             return res.data.invoice; 
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);

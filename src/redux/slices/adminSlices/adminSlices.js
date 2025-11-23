@@ -5,7 +5,7 @@ export const createAdminAction = createAsyncThunk(
   "admins/createAdmin",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/admin/createAdmin", formData);
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createAdmin`, formData);
       return res.data.admin;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -17,7 +17,7 @@ export const getAllAdminsAction = createAsyncThunk(
   "admins/getAllAdmins",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/admin/getAllAdmin");
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllAdmin`);
       return res.data.admins;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -29,7 +29,7 @@ export const getAdminByIdAction = createAsyncThunk(
   "admins/getAdminById",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/admin/getAdminById", { id });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAdminById`, { id });
       return res.data.admin;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -41,7 +41,7 @@ export const updateAdminAction = createAsyncThunk(
   "admins/updateAdmin",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/api/admin/updateAdmin", formData);
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateAdmin`, formData);
       return res.data.admin;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
