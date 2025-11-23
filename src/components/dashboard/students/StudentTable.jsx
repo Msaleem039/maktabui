@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, MessageSquare, Trash2, ChevronDown } from "lucide-react";
 
 const StudentTable = ({
   title = "Students (All Classes)",
@@ -188,8 +188,8 @@ const StudentTable = ({
               <th className="px-4 font-normal text-[#0000008C]">Student Name</th>
               <th className="px-4 font-normal text-[#0000008C]">Parent Name</th>
               <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
-              <th className="px-4 font-normal text-[#0000008C]">Class</th>
-              <th className="px-4 font-normal text-[#0000008C]">Email</th>
+              <th className="px-2 pr-1 font-normal text-[#0000008C]">Class</th>
+              <th className="px-2 pl-1 font-normal text-[#0000008C]">Email</th>
               <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
             </tr>
           </thead>
@@ -239,20 +239,23 @@ const StudentTable = ({
                     </div>
                   </td>
                   <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.phone}</td>
-                  <td className="px-4 py-3 text-[#000000] font-medium text-sm">{student.class}</td>
-                  <td className="px-4 py-3 text-[#000000] font-medium text-sm text-xs">
+                  <td className="px-2 pr-1 py-3 text-[#000000] font-medium text-sm">{student.class}</td>
+                  <td className="px-2 pl-1 py-3 text-[#000000] font-medium text-sm text-xs">
                     {student.email}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="relative inline-block text-left">
+                    <div className="relative inline-block">
                       <button
                         type="button"
                         data-action-button
                         onClick={(e) => toggleDropdown(student.id, e)}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
                       >
-                        Take Action
-                        <span>▾</span>
+                        <div className="flex flex-col items-start leading-tight">
+                          <span>Take</span>
+                          <span>Action</span>
+                        </div>
+                        <ChevronDown size={12} className="mt-0.5" />
                       </button>
 
                       {isDropdownOpen && (
