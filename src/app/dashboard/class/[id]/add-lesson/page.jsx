@@ -186,7 +186,6 @@ export default function AddLessonPage({ params }) {
           </button>
         </div>
       </div>
-      </div>
     </div>
   );
 }
