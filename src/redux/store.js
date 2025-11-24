@@ -1,4 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
+
+// Auth slice
 import userReducer from './slices/authSlices/userLoginSlice';
 
 // Parent slices
@@ -10,7 +12,10 @@ import {
   getAllWaitListParentsReducer,
   removeFromWaitListReducer,
   getAllParentsWithStudentsReducer,
-  addCardDetailReducer
+  addCardDetailReducer,
+  setDefaultCardReducer,
+  removeCardReducer,
+  parentDashboardReducer
 } from './slices/parentSlices/parentSlice';
 
 // Student slices
@@ -21,7 +26,8 @@ import {
   getAllWaitlistStudentsReducer,
   addToWaitlistStudentReducer,
   removeFromWaitlistStudentReducer,
-  getStudentNamesWithIdsReducer
+  getStudentNamesWithIdsReducer,
+  getStudentDashboardStatsReducer
 } from './slices/studentSlices/studentSlices';
 
 // Class slices
@@ -71,20 +77,17 @@ import {
 // Dashboard
 import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
 
-// Attendance slice
+// Other slices
 import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
-
-// Grade slice
 import gradeReducer from './slices/gradeSlices/gradeSlices';
-
-// Assignment slice
 import assignmentReducer from './slices/assignmentSlices/assignmentSlices';
 
 export const store = configureStore({
   reducer: {
+    // Authentication
     user: userReducer,
 
-    // Parent reducers
+    // Parent management
     createParent: createParentReducer,
     getAllParents: getAllParentsReducer,
     getParentById: getParentByIdReducer,
@@ -93,8 +96,11 @@ export const store = configureStore({
     removeFromWaitList: removeFromWaitListReducer,
     getAllParentsWithStudents: getAllParentsWithStudentsReducer,
     addCardDetail: addCardDetailReducer,
+    setDefaultCard: setDefaultCardReducer,
+    removeCard: removeCardReducer,
+    parentDashboard: parentDashboardReducer,
 
-    // Student reducers
+    // Student management
     createStudent: createStudentReducer,
     getAllStudents: getAllStudentsReducer,
     getStudentById: getStudentByIdReducer,
@@ -102,13 +108,14 @@ export const store = configureStore({
     addToWaitlistStudent: addToWaitlistStudentReducer,
     removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
     getStudentNamesWithIds: getStudentNamesWithIdsReducer,
+    getStudentDashboardStats: getStudentDashboardStatsReducer,
 
-    // Class reducers
+    // Class management
     createClass: createClassReducer,
     getAllClasses: getAllClassesReducer,
     getAllClassesName: getAllClassesNameReducer,
 
-    // Teacher reducers
+    // Teacher management
     createTeacher: createTeacherReducer,
     getAllTeachers: getAllTeachersReducer,
     getTeacherById: getTeacherByIdReducer,
@@ -117,35 +124,27 @@ export const store = configureStore({
     getTeachersName: getTeachersNameReducer,
     getTeacherDetail: getTeacherDetailReducer,
 
-    // Admin reducers
+    // Admin management
     createAdmin: createAdminReducer,
     getAllAdmins: getAllAdminsReducer,
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
 
-    // Timetable reducers
+    // Academic management
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
+    attendance: attendanceReducer,
+    grade: gradeReducer,
+    assignment: assignmentReducer,
 
-    // Invoice reducers
+    // Financial management
     getAllInvoices: getAllInvoicesReducer,
     getInvoicesStats: getInvoicesStatsReducer,
     createInvoice: createInvoiceReducer,
-
-    // Payment reducers
     getAllPaymentStats: getAllPaymentStatsReducer,
 
     // Dashboard
     dashboard: dashboardReducer,
-
-    // Attendance
-    attendance: attendanceReducer,
-
-    // Grade
-    grade: gradeReducer,
-
-    // Assignment
-    assignment: assignmentReducer,
   },
 });
 

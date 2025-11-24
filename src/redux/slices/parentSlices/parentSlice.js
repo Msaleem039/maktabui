@@ -129,6 +129,21 @@ export const getAllParentsWithStudents = createAsyncThunk(
   }
 );
 
+export const getParentDashboard = createAsyncThunk(
+  'dashboard/getParentDashboard',
+  async (parentId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getParentDashboardStats`,
+        { parentId }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const getAllParentsWithStudentsSlice = createSlice({
   name: "parentsWithStudents",
   initialState: {
@@ -487,18 +502,302 @@ const removeCardSlice = createSlice({
   }
 });
 
-export const { resetAddWaitList } = addToWaitListSlice.actions;
-export const { resetCreateParentState } = createParentSlice.actions;
-export const { resetAllParentsState } = getAllParentsSlice.actions;
-export const { resetParentByIdState } = getParentByIdSlice.actions;
-export const { resetWaitListParentsState } = getAllWaitListParentsSlice.actions;
-export const { resetRemoveWaitList } = removeFromWaitListSlice.actions;
-export const { resetParentsWithStudents } = getAllParentsWithStudentsSlice.actions;
-export const { resetAddCardDetail, clearCardError } = addCardDetailSlice.actions;
-export const { resetSetDefaultCard, clearSetDefaultCardError } = setDefaultCardSlice.actions;
-export const { resetRemoveCard, clearRemoveCardError } = removeCardSlice.actions;
+const dashboardSlice = createSlice({
+  name: 'dashboard',
+  initialState: {
+    keyMetrics: {
+      myChildren: 0,
+      pendingFees: 0,
+      attendanceRate: 0,
+      eventsCount: 0,
+      loading: false,
+      error: null
+    },
 
-// Export Reducers
+    monthlyAttendance: {
+      data: [],
+      selectedYear: new Date().getFullYear(),
+      loading: false,
+      error: null
+    },
+
+    feeStats: {
+      totalFeesPaid: 0,
+      pendingFees: 0,
+      nextDueDate: null,
+      loading: false,
+      error: null
+    },
+
+    upcomingEvents: {
+      data: [],
+      loading: false,
+      error: null
+    },
+
+    recentPayments: {
+      data: [],
+      loading: false,
+      error: null
+    },
+
+    pendingPayments: {
+      data: [],
+      loading: false,
+      error: null
+    },
+
+    // ADD CHILD ATTENDANCE STATE
+    childAttendance: {
+      data: [],
+      loading: false,
+      error: null
+    },
+
+    parentInfo: {
+      fullName: '',
+      email: '',
+      children: []
+    },
+
+    loading: false,
+    error: null,
+    lastUpdated: null
+  },
+  reducers: {
+    resetDashboard: (state) => {
+      state.keyMetrics = {
+        myChildren: 0,
+        pendingFees: 0,
+        attendanceRate: 0,
+        eventsCount: 0,
+        loading: false,
+        error: null
+      };
+      state.monthlyAttendance = {
+        data: [],
+        selectedYear: new Date().getFullYear(),
+        loading: false,
+        error: null
+      };
+      state.feeStats = {
+        totalFeesPaid: 0,
+        pendingFees: 0,
+        nextDueDate: null,
+        loading: false,
+        error: null
+      };
+      state.upcomingEvents = {
+        data: [],
+        loading: false,
+        error: null
+      };
+      state.recentPayments = {
+        data: [],
+        loading: false,
+        error: null
+      };
+      state.pendingPayments = {
+        data: [],
+        loading: false,
+        error: null
+      };
+      // RESET CHILD ATTENDANCE
+      state.childAttendance = {
+        data: [],
+        loading: false,
+        error: null
+      };
+      state.parentInfo = {
+        fullName: '',
+        email: '',
+        children: []
+      };
+      state.loading = false;
+      state.error = null;
+      state.lastUpdated = null;
+    },
+
+    setAttendanceYear: (state, action) => {
+      state.monthlyAttendance.selectedYear = action.payload;
+    },
+
+    clearDashboardError: (state) => {
+      state.error = null;
+      state.keyMetrics.error = null;
+      state.monthlyAttendance.error = null;
+      state.feeStats.error = null;
+      state.upcomingEvents.error = null;
+      state.recentPayments.error = null;
+      state.pendingPayments.error = null;
+      state.childAttendance.error = null; // ADD THIS
+    },
+
+    updateMetrics: (state, action) => {
+      if (action.payload.myChildren !== undefined) {
+        state.keyMetrics.myChildren = action.payload.myChildren;
+      }
+      if (action.payload.pendingFees !== undefined) {
+        state.keyMetrics.pendingFees = action.payload.pendingFees;
+        state.feeStats.pendingFees = action.payload.pendingFees;
+      }
+      if (action.payload.attendanceRate !== undefined) {
+        state.keyMetrics.attendanceRate = action.payload.attendanceRate;
+      }
+      if (action.payload.eventsCount !== undefined) {
+        state.keyMetrics.eventsCount = action.payload.eventsCount;
+      }
+      if (action.payload.totalFeesPaid !== undefined) {
+        state.feeStats.totalFeesPaid = action.payload.totalFeesPaid;
+      }
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getParentDashboard.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.keyMetrics.loading = true;
+        state.monthlyAttendance.loading = true;
+        state.feeStats.loading = true;
+        state.upcomingEvents.loading = true;
+        state.recentPayments.loading = true;
+        state.pendingPayments.loading = true;
+        state.childAttendance.loading = true; // ADD THIS
+      })
+      .addCase(getParentDashboard.fulfilled, (state, action) => {
+        state.loading = false;
+        state.lastUpdated = new Date().toISOString();
+
+        state.keyMetrics = {
+          ...state.keyMetrics,
+          myChildren: action.payload.keyMetrics.myChildren,
+          pendingFees: action.payload.keyMetrics.pendingFees,
+          attendanceRate: action.payload.keyMetrics.attendanceRate,
+          eventsCount: action.payload.keyMetrics.eventsCount,
+          loading: false,
+          error: null
+        };
+
+        state.monthlyAttendance = {
+          ...state.monthlyAttendance,
+          data: action.payload.monthlyAttendance,
+          loading: false,
+          error: null
+        };
+
+        state.feeStats = {
+          ...state.feeStats,
+          totalFeesPaid: action.payload.feeStats.totalFeesPaid,
+          pendingFees: action.payload.feeStats.pendingFees,
+          nextDueDate: action.payload.feeStats.nextDueDate,
+          loading: false,
+          error: null
+        };
+
+        state.upcomingEvents = {
+          ...state.upcomingEvents,
+          data: action.payload.upcomingEvents,
+          loading: false,
+          error: null
+        };
+
+        state.recentPayments = {
+          ...state.recentPayments,
+          data: action.payload.recentPayments,
+          loading: false,
+          error: null
+        };
+
+        state.pendingPayments = {
+          ...state.pendingPayments,
+          data: action.payload.pendingPayments,
+          loading: false,
+          error: null
+        };
+
+        // ADD CHILD ATTENDANCE DATA
+        state.childAttendance = {
+          ...state.childAttendance,
+          data: action.payload.childAttendance || [],
+          loading: false,
+          error: null
+        };
+
+        state.parentInfo = action.payload.parentInfo;
+      })
+      .addCase(getParentDashboard.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.keyMetrics.loading = false;
+        state.monthlyAttendance.loading = false;
+        state.feeStats.loading = false;
+        state.upcomingEvents.loading = false;
+        state.recentPayments.loading = false;
+        state.pendingPayments.loading = false;
+        state.childAttendance.loading = false; // ADD THIS
+
+        state.keyMetrics.error = action.payload;
+        state.monthlyAttendance.error = action.payload;
+        state.feeStats.error = action.payload;
+        state.upcomingEvents.error = action.payload;
+        state.recentPayments.error = action.payload;
+        state.pendingPayments.error = action.payload;
+        state.childAttendance.error = action.payload; // ADD THIS
+      });
+  }
+});
+
+export const {
+  resetAddWaitList,
+} = addToWaitListSlice.actions;
+
+export const {
+  resetCreateParentState,
+} = createParentSlice.actions;
+
+export const {
+  resetAllParentsState,
+} = getAllParentsSlice.actions;
+
+export const {
+  resetParentByIdState,
+} = getParentByIdSlice.actions;
+
+export const {
+  resetWaitListParentsState,
+} = getAllWaitListParentsSlice.actions;
+
+export const {
+  resetRemoveWaitList,
+} = removeFromWaitListSlice.actions;
+
+export const {
+  resetParentsWithStudents,
+} = getAllParentsWithStudentsSlice.actions;
+
+export const {
+  resetAddCardDetail,
+  clearCardError,
+} = addCardDetailSlice.actions;
+
+export const {
+  resetSetDefaultCard,
+  clearSetDefaultCardError,
+} = setDefaultCardSlice.actions;
+
+export const {
+  resetRemoveCard,
+  clearRemoveCardError,
+} = removeCardSlice.actions;
+
+export const {
+  resetDashboard,
+  setAttendanceYear,
+  clearDashboardError,
+  updateMetrics,
+} = dashboardSlice.actions;
+
 export const addToWaitListReducer = addToWaitListSlice.reducer;
 export const createParentReducer = createParentSlice.reducer;
 export const getAllParentsReducer = getAllParentsSlice.reducer;
@@ -509,6 +808,7 @@ export const getAllParentsWithStudentsReducer = getAllParentsWithStudentsSlice.r
 export const addCardDetailReducer = addCardDetailSlice.reducer;
 export const setDefaultCardReducer = setDefaultCardSlice.reducer;
 export const removeCardReducer = removeCardSlice.reducer;
+export const parentDashboardReducer = dashboardSlice.reducer;
 
 export default getAllParentsWithStudentsSlice.reducer;
 
@@ -523,4 +823,5 @@ export const parentReducer = {
   addCardDetail: addCardDetailReducer,
   setDefaultCard: setDefaultCardReducer,
   removeCard: removeCardReducer,
+  dashboard: parentDashboardReducer,
 };

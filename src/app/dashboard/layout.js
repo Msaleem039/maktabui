@@ -241,13 +241,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Grade", path: `${basePath}/grade` }],
       },
       {
-        name: "Learning",
+        name: "Notification",
         icon: "/Literature.png",
         path: "",
         hasSubmenu: true,
         subItems: [
-          { name: "Learning", path: `${basePath}/learning` },
-          { name: "Quran Tracker", path: `${basePath}/learning/quran-tracker` },
+          { name: "Notifications", path: `${basePath}/notifications` },
         ],
       },
       {

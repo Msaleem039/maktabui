@@ -1,9 +1,85 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
-import { Search, Grid, Moon, ChevronDown, FileText, FolderCheck, UserCheck, GraduationCap, Clock } from "lucide-react";
+import { Search, Grid, Moon, ChevronDown, FileText, FolderCheck, UserCheck, GraduationCap, Clock, Calendar } from "lucide-react";
+import { useSelector, useDispatch } from 'react-redux';
+import { getStudentDashboardStats, resetDashboardStatsState } from '@/redux/slices/studentSlices/studentSlices';
 
 const Page = () => {
+  const dispatch = useDispatch();
+
+  const { data, status, error } = useSelector(state => state.getStudentDashboardStats);
+  console.log("data", data);
+
+  const studentId = "691f9111502b1d990b46066c";
+
+  useEffect(() => {
+    if (studentId) {
+      dispatch(getStudentDashboardStats(studentId));
+    }
+
+    return () => {
+      dispatch(resetDashboardStatsState());
+    };
+  }, [dispatch, studentId]);
+
+  const {
+    keyMetrics = {
+      todaysClasses: 0,
+      assignmentsDue: 0,
+      attendancePercentage: 0,
+      upcomingExams: 0
+    },
+    monthlyAttendance = [],
+    studentAttendance = {
+      attendance: {
+        present: 0,
+        absent: 0,
+        late: 0,
+        total: 0,
+        percentage: 0
+      },
+      status: "N/A",
+      yearlyStats: {
+        present: 0,
+        absent: 0,
+        late: 0,
+        total: 0,
+        percentage: 0
+      }
+    },
+    academicPerformance = {
+      currentGrade: "N/A",
+      classRank: "N/A",
+      totalSubjects: 0,
+      gpa: "0.0"
+    },
+    classSchedule = [],
+    topStudents = [],
+    assignmentsDueSoon = [],
+    studentInfo = {
+      name: "Student",
+      class: "Not Assigned",
+      email: ""
+    }
+  } = data || {};
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-[#0B4B31]">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
       {/* Header */}
@@ -25,7 +101,7 @@ const Page = () => {
             <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
               <Moon size={18} className="text-[#0B4B31]" />
             </button>
-            <div className="flex items-center gap-2 bg-white border border-[#0B4B31 rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+            <div className="flex items-center gap-2 bg-white border border-[#0B4B31] rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
               <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
                 <Image
                   src="/main-dashboard.jpg"
@@ -36,16 +112,14 @@ const Page = () => {
                   priority
                 />
               </div>
-              <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">Ahmed J.</span>
+              <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
+                {studentInfo.name}
+              </span>
               <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
           </div>
         </div>
       </header>
-
-      {/* Welcome */}
-      <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</h1>
-      <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
 
       {/* Key Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -53,7 +127,7 @@ const Page = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Today's Classes</p>
-              <p className="text-3xl font-bold text-[#0B4B31]">05</p>
+              <p className="text-3xl font-bold text-[#0B4B31]">{keyMetrics.todaysClasses}</p>
             </div>
             <div className="w-12 h-12 rounded-full bg-[#E5EFEB] flex items-center justify-center">
               <FileText size={24} className="text-[#0B4B31]" />
@@ -65,7 +139,7 @@ const Page = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Assignments Due</p>
-              <p className="text-3xl font-bold text-[#0B4B31]">03</p>
+              <p className="text-3xl font-bold text-[#0B4B31]">{keyMetrics.assignmentsDue}</p>
             </div>
             <div className="w-12 h-12 rounded-full bg-[#E5EFEB] flex items-center justify-center">
               <FolderCheck size={24} className="text-[#0B4B31]" />
@@ -77,7 +151,7 @@ const Page = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Attendance</p>
-              <p className="text-3xl font-bold text-[#0B4B31]">90%</p>
+              <p className="text-3xl font-bold text-[#0B4B31]">{keyMetrics.attendancePercentage}%</p>
             </div>
             <div className="w-12 h-12 rounded-full bg-[#E5EFEB] flex items-center justify-center">
               <UserCheck size={24} className="text-[#0B4B31]" />
@@ -89,7 +163,7 @@ const Page = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Upcoming Exams</p>
-              <p className="text-3xl font-bold text-[#0B4B31]">04</p>
+              <p className="text-3xl font-bold text-[#0B4B31]">{keyMetrics.upcomingExams}</p>
             </div>
             <div className="w-12 h-12 rounded-full bg-[#E5EFEB] flex items-center justify-center">
               <GraduationCap size={24} className="text-[#0B4B31]" />
@@ -101,60 +175,53 @@ const Page = () => {
       {/* Stats & Charts */}
       <div className="flex flex-col xl:flex-row gap-6 pb-6">
         <div className="flex-1 flex flex-col gap-6">
-          {/* Monthly Attendance Chart */}
-          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
+          {/* Student Attendance Overview Card */}
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
               <h3 className="font-semibold text-[#0B4B31] text-[14px] leading-[20px]">
-                Monthly Attendance
+                My Attendance Overview
               </h3>
-
-              <select className="border border-gray-200 rounded-lg px-3 py-1 text-sm text-gray-600 focus:outline-none focus:ring-emerald-500">
-                <option>2025</option>
-                <option>2024</option>
-                <option>2023</option>
-              </select>
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                studentAttendance.status === "Good" ? "bg-green-100 text-green-800" :
+                studentAttendance.status === "Average" ? "bg-yellow-100 text-yellow-800" :
+                "bg-red-100 text-red-800"
+              }`}>
+                Status: {studentAttendance.status}
+              </div>
             </div>
 
-            <div className="flex items-end justify-between h-48 min-w-[600px] sm:min-w-full overflow-x-auto">
-              {[
-                { m: "Jan", present: 85, absent: 15 },
-                { m: "Feb", present: 90, absent: 10 },
-                { m: "Mar", present: 88, absent: 12 },
-                { m: "Apr", present: 92, absent: 8 },
-                { m: "May", present: 87, absent: 13 },
-                { m: "Jun", present: 90, absent: 10 },
-                { m: "Jul", present: 85, absent: 15 },
-                { m: "Aug", present: 88, absent: 12 },
-                { m: "Sep", present: 90, absent: 10 },
-                { m: "Oct", present: 92, absent: 8 },
-                { m: "Nov", present: 88, absent: 12 },
-                { m: "Dec", present: 90, absent: 10 },
-              ].map((month, i) => (
-                <div key={i} className="flex flex-col items-center mx-1">
-                  <div className="w-4 relative" style={{ height: "100%" }}>
-                    <div
-                      className="absolute bottom-0 w-full bg-[#0B4B31] rounded-t"
-                      style={{ height: `${month.present}%` }}
-                    ></div>
-                    <div
-                      className="absolute top-0 w-full bg-red-500 rounded-b"
-                      style={{ height: `${month.absent}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-400 mt-1">{month.m}</span>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <p className="text-2xl font-bold text-green-700">{studentAttendance.attendance.present}</p>
+                <p className="text-sm text-green-600">Present</p>
+              </div>
+              <div className="text-center p-4 bg-red-50 rounded-lg">
+                <p className="text-2xl font-bold text-red-700">{studentAttendance.attendance.absent}</p>
+                <p className="text-sm text-red-600">Absent</p>
+              </div>
+              <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                <p className="text-2xl font-bold text-yellow-700">{studentAttendance.attendance.late}</p>
+                <p className="text-sm text-yellow-600">Late</p>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-2xl font-bold text-blue-700">{studentAttendance.attendance.total}</p>
+                <p className="text-sm text-blue-600">Total Days</p>
+              </div>
             </div>
 
-            <div className="flex justify-center gap-4 sm:gap-8 mt-6 text-sm text-gray-500 flex-wrap">
-              <span className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#0B4B31] rounded-full"></span> Present (52.1%)
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-red-500 rounded-full"></span> Absent (13.9%)
-              </span>
+            <div className="flex justify-between items-center text-sm">
+              <div>
+                <span className="text-gray-600">Current Month: </span>
+                <span className="font-semibold text-[#0B4B31]">{studentAttendance.attendance.percentage}%</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Yearly: </span>
+                <span className="font-semibold text-[#0B4B31]">{studentAttendance.yearlyStats.percentage}%</span>
+              </div>
             </div>
           </div>
+
+
         </div>
 
         {/* Right Cards */}
@@ -171,24 +238,24 @@ const Page = () => {
             <div className="space-y-3 text-white">
               <div className="flex justify-between">
                 <span className="text-sm opacity-90">Current Grade:</span>
-                <span className="font-bold">A</span>
+                <span className="font-bold">{academicPerformance.currentGrade}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm opacity-90">Class Rank:</span>
-                <span className="font-bold">5th</span>
+                <span className="font-bold">{academicPerformance.classRank}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm opacity-90">Total Subjects:</span>
-                <span className="font-bold">8</span>
+                <span className="font-bold">{academicPerformance.totalSubjects}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm opacity-90">GPA:</span>
-                <span className="font-bold">3.8/4.0</span>
+                <span className="font-bold">{academicPerformance.gpa}/4.0</span>
               </div>
             </div>
           </div>
 
-          {/* Academic Performance Card 2 - Schedule */}
+          {/* Class Schedule Card */}
           <div
             className="rounded-2xl p-4 sm:p-6 text-white shadow-md flex-shrink-0"
             style={{
@@ -196,37 +263,28 @@ const Page = () => {
                 "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%, #FFFFFF 99.3%)",
             }}
           >
-            <h3 className="font-outfit font-extrabold text-[18px] leading-[100%] mb-1">Academic Performance</h3>
+            <h3 className="font-outfit font-extrabold text-[18px] leading-[100%] mb-1">Today's Schedule</h3>
             <p className="text-xs opacity-80 mb-4">Your daily class schedule</p>
 
             <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock size={14} className="opacity-80" />
-                <span className="opacity-90">08:00 AM</span>
-                <span className="ml-auto font-semibold">Mathematics</span>
-              </div>
-              <div className="text-xs opacity-70 pl-6">Mr. Smith | Room 101</div>
-              
-              <div className="flex items-center gap-2">
-                <Clock size={14} className="opacity-80" />
-                <span className="opacity-90">09:30 AM</span>
-                <span className="ml-auto font-semibold">Science</span>
-              </div>
-              <div className="text-xs opacity-70 pl-6">Ms. Johnson | Lab 2</div>
-              
-              <div className="flex items-center gap-2">
-                <Clock size={14} className="opacity-80" />
-                <span className="opacity-90">11:00 AM</span>
-                <span className="ml-auto font-semibold">English</span>
-              </div>
-              <div className="text-xs opacity-70 pl-6">Mrs. Davis | Room 205</div>
-              
-              <div className="flex items-center gap-2">
-                <Clock size={14} className="opacity-80" />
-                <span className="opacity-90">01:00 PM</span>
-                <span className="ml-auto font-semibold">History</span>
-              </div>
-              <div className="text-xs opacity-70 pl-6">Mr. Brown | Room 303</div>
+              {classSchedule.length > 0 ? (
+                classSchedule.map((session, index) => (
+                  <div key={index}>
+                    <div className="flex items-center gap-2">
+                      <Clock size={14} className="opacity-80" />
+                      <span className="opacity-90">{session.time}</span>
+                      <span className="ml-auto font-semibold">{session.subject}</span>
+                    </div>
+                    <div className="text-xs opacity-70 pl-6">
+                      {session.teacher} | {session.room}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-sm opacity-80 py-4">
+                  No classes scheduled for today
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -252,23 +310,30 @@ const Page = () => {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { name: "Milad Hersi", date: "06 Jun, 2025", gpa: "3.98" },
-                  { name: "Milad Hersi", date: "04 Jun, 2025", gpa: "3.97" },
-                  { name: "Milad Hersi", date: "03 Jun, 2025", gpa: "3.81" },
-                  { name: "Milad Hersi", date: "02 Jun, 2025", gpa: "3.80" },
-                ].map((row, idx) => (
-                  <tr key={idx} className="border-b border-gray-100">
-                    <td className="py-3 px-3 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-xs text-gray-600">👤</span>
-                      </div>
-                      {row.name}
+                {topStudents.length > 0 ? (
+                  topStudents.map((student, idx) => (
+                    <tr key={idx} className="border-b border-gray-100">
+                      <td className="py-3 px-3 flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-xs text-gray-600">👤</span>
+                        </div>
+                        {student.name}
+                      </td>
+                      <td className="py-3 px-3">{student.date}</td>
+                      <td className="py-3 px-3 text-right font-medium text-[#0B4B31]">{student.gpa}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="border-b border-gray-100">
+                    <td
+                      colSpan={3}
+                      className="py-3 px-3 text-center py-4 text-gray-500"
+                    >
+                      No Data
                     </td>
-                    <td className="py-3 px-3">{row.date}</td>
-                    <td className="py-3 px-3 text-right font-medium text-[#0B4B31]">{row.gpa}</td>
+
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -292,26 +357,31 @@ const Page = () => {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { subject: "202 Mohamed Karie Class", assignment: "Chapter 5 Quiz", date: "10 Jan, 2025", isUrgent: false },
-                  { subject: "202 Mohamed Karie Class", assignment: "Chapter 5 Quiz", date: "20 Jan, 2025", isUrgent: true },
-                  { subject: "202 Mohamed Karie Class", assignment: "Chapter 5 Quiz", date: "20 Jan, 2025", isUrgent: true },
-                  { subject: "202 Mohamed Karie Class", assignment: "Chapter 5 Quiz", date: "20 Jan, 2025", isUrgent: true },
-                ].map((row, idx) => (
-                  <tr key={idx} className="border-b border-gray-100">
-                    <td className="py-3 px-3">{row.subject}</td>
-                    <td className="py-3 px-3">{row.assignment}</td>
-                    <td className={`py-3 px-3 text-right font-medium ${row.isUrgent ? "text-red-500" : "text-[#0B4B31]"}`}>{row.date}</td>
+                {assignmentsDueSoon.length > 0 ? (
+                  assignmentsDueSoon.map((assignment, idx) => (
+                    <tr key={idx} className="border-b border-gray-100">
+                      <td className="py-3 px-3">{assignment.subject}</td>
+                      <td className="py-3 px-3">{assignment.assignment}</td>
+                      <td className={`py-3 px-3 text-right font-medium ${assignment.isUrgent ? "text-red-500" : "text-[#0B4B31]"}`}>
+                        {assignment.date}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="border-b border-gray-100">
+                    <td colSpan={3} className="text-center py-4 text-gray-500">
+                      No Data
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
     </div>
   );
 };
 
 export default Page;
-

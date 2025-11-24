@@ -85,6 +85,18 @@ export const removeFromWaitlistStudent = createAsyncThunk(
   }
 );
 
+export const getStudentDashboardStats = createAsyncThunk(
+  `student/getStudentDashboardStats`,
+  async (studentId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentDashboardStats`, { studentId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 // Slices
 const createStudentSlice = createSlice({
   name: "createStudent",
@@ -350,7 +362,93 @@ const getStudentNamesWithIdsSlice = createSlice({
   },
 });
 
-// Export Actions
+const getStudentDashboardStatsSlice = createSlice({
+  name: "studentDashboardStats",
+  initialState: {
+    data: null,
+    status: "idle",
+    error: null,
+  },
+  reducers: {
+    resetDashboardStatsState: (state) => {
+      state.data = null;
+      state.status = "idle";
+      state.error = null;
+    },
+    clearDashboardStatsError: (state) => {
+      state.error = null;
+    },
+    updateDashboardStats: (state, action) => {
+      if (state.data) {
+        state.data = { ...state.data, ...action.payload };
+      }
+    },
+    updateAttendanceData: (state, action) => {
+      if (state.data && state.data.studentAttendance) {
+        state.data.studentAttendance = {
+          ...state.data.studentAttendance,
+          ...action.payload
+        };
+      }
+    },
+    updateAcademicPerformance: (state, action) => {
+      if (state.data && state.data.academicPerformance) {
+        state.data.academicPerformance = {
+          ...state.data.academicPerformance,
+          ...action.payload
+        };
+      }
+    },
+    updateKeyMetrics: (state, action) => {
+      if (state.data && state.data.keyMetrics) {
+        state.data.keyMetrics = {
+          ...state.data.keyMetrics,
+          ...action.payload
+        };
+      }
+    },
+    addNewAssignment: (state, action) => {
+      if (state.data && state.data.assignmentsDueSoon) {
+        state.data.assignmentsDueSoon.push(action.payload);
+      }
+    },
+    removeAssignment: (state, action) => {
+      if (state.data && state.data.assignmentsDueSoon) {
+        state.data.assignmentsDueSoon = state.data.assignmentsDueSoon.filter(
+          assignment => assignment._id !== action.payload
+        );
+      }
+    },
+    markAssignmentCompleted: (state, action) => {
+      if (state.data && state.data.assignmentsDueSoon) {
+        const assignment = state.data.assignmentsDueSoon.find(
+          assignment => assignment._id === action.payload
+        );
+        if (assignment) {
+          assignment.completed = true;
+        }
+      }
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getStudentDashboardStats.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(getStudentDashboardStats.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.data = action.payload.data;
+        state.error = null;
+      })
+      .addCase(getStudentDashboardStats.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Something went wrong";
+        state.data = null;
+      });
+  },
+});
+
 export const { resetCreateStudentState } = createStudentSlice.actions;
 export const { resetAllStudentsState } = getAllStudentsSlice.actions;
 export const { resetStudentByIdState } = getStudentByIdSlice.actions;
@@ -358,8 +456,8 @@ export const { resetWaitlistStudentsState } = getAllWaitlistStudentsSlice.action
 export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;
 export const { resetRemoveWaitlistStudent } = removeFromWaitlistStudentSlice.actions;
 export const { resetStudentNamesState, clearStudentNamesError } = getStudentNamesWithIdsSlice.actions;
+export const { resetDashboardStatsState, clearDashboardStatsError, updateDashboardStats } = getStudentDashboardStatsSlice.actions;
 
-// Export Reducers
 export const createStudentReducer = createStudentSlice.reducer;
 export const getAllStudentsReducer = getAllStudentsSlice.reducer;
 export const getStudentByIdReducer = getStudentByIdSlice.reducer;
@@ -367,8 +465,8 @@ export const getAllWaitlistStudentsReducer = getAllWaitlistStudentsSlice.reducer
 export const addToWaitlistStudentReducer = addToWaitlistStudentSlice.reducer;
 export const removeFromWaitlistStudentReducer = removeFromWaitlistStudentSlice.reducer;
 export const getStudentNamesWithIdsReducer = getStudentNamesWithIdsSlice.reducer;
+export const getStudentDashboardStatsReducer = getStudentDashboardStatsSlice.reducer;
 
-// Combined Reducer
 export const studentReducer = {
   createStudent: createStudentReducer,
   getAllStudents: getAllStudentsReducer,
@@ -376,5 +474,6 @@ export const studentReducer = {
   waitlistStudents: getAllWaitlistStudentsReducer,
   addToWaitlistStudent: addToWaitlistStudentReducer,
   removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
-  getStudentNamesWithIds: getStudentNamesWithIdsReducer
+  getStudentNamesWithIds: getStudentNamesWithIdsReducer,
+  getStudentDashboardStats: getStudentDashboardStatsReducer
 };
