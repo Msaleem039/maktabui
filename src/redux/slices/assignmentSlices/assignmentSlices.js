@@ -55,10 +55,11 @@ export const getAssignment = createAsyncThunk(
 
 export const getAllAssignment = createAsyncThunk(
   'assignment/getAllAssignment',
-  async (_, { rejectWithValue }) => {
+  async (requestData = {}, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllAssignment`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllAssignment`,
+        requestData
       );
       return res.data;
     } catch (err) {

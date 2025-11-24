@@ -20,11 +20,6 @@ export default function CreateInvoice() {
         (state) => state.getAllParentsWithStudents
     );
 
-
-    console.log("parentsWithStudents", parentsWithStudents);
-
-
-    // Form state
     const [formData, setFormData] = useState({
         parentId: "",
         studentId: "",

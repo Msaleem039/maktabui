@@ -34,11 +34,11 @@ export default function InvoiceReportPage() {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [filterBy, setFilterBy] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  
+
   // Unpaid invoices specific states
   const [unpaidSearch, setUnpaidSearch] = useState("");
   const [unpaidFilterBy, setUnpaidFilterBy] = useState("");
-  
+
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const dropdownRefs = useRef({});
 
@@ -64,14 +64,14 @@ export default function InvoiceReportPage() {
     };
     dispatch(getInvoicesStatsAction(filters));
   }, [
-    dispatch, 
-    selectedDate, 
-    selectedStatus, 
-    searchValue, 
-    filterBy, 
-    unpaidPage, 
-    unpaidLimit, 
-    unpaidSearch, 
+    dispatch,
+    selectedDate,
+    selectedStatus,
+    searchValue,
+    filterBy,
+    unpaidPage,
+    unpaidLimit,
+    unpaidSearch,
     unpaidFilterBy
   ]);
 
@@ -79,10 +79,10 @@ export default function InvoiceReportPage() {
   const tableData = unpaidInvoices?.map((invoice, index) => {
     const dueAmount = invoice.totalAmount - (invoice.paidAmount || 0);
     const isPartiallyPaid = invoice.paidAmount > 0 && invoice.paidAmount < invoice.totalAmount;
-    
+
     let statusText = "UNPAID";
     let statusColor = "#C43B30";
-    
+
     if (invoice.status === "overdue") {
       statusText = "OVERDUE";
       statusColor = "#922113";
@@ -159,7 +159,7 @@ export default function InvoiceReportPage() {
       tooltip: {
         enabled: true,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const label = context.label || '';
             const value = context.parsed;
             return `${label}: $${value.toLocaleString()}`;
@@ -193,7 +193,7 @@ export default function InvoiceReportPage() {
       tooltip: {
         enabled: true,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const label = context.label || '';
             const value = context.parsed;
             return `${label}: $${value.toLocaleString()}`;
@@ -250,7 +250,7 @@ export default function InvoiceReportPage() {
       tooltip: {
         enabled: true,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const datasetLabel = context.dataset.label || '';
             const value = context.parsed.y;
             return `${datasetLabel}: $${value.toLocaleString()}`;
@@ -315,13 +315,11 @@ export default function InvoiceReportPage() {
 
   const handleUnpaidFilterChange = (e) => {
     setUnpaidFilterBy(e.target.value);
-    dispatch(setUnpaidPage(1)); // Reset to first page when filtering
+    dispatch(setUnpaidPage(1));
   };
 
   const handleExportData = () => {
-    // Export functionality would go here
     console.log("Exporting data...", unpaidInvoices);
-    // You can implement CSV export or PDF generation here
   };
 
   const handlePageChange = (newPage) => {
@@ -337,18 +335,18 @@ export default function InvoiceReportPage() {
   const generatePageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     let startPage = Math.max(1, unpaidPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalUnpaidPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   };
 
@@ -379,10 +377,10 @@ export default function InvoiceReportPage() {
           <p>Error loading invoice statistics: {error}</p>
           <button
             onClick={() => {
-              const filters = { 
-                date: selectedDate, 
-                status: selectedStatus, 
-                search: searchValue, 
+              const filters = {
+                date: selectedDate,
+                status: selectedStatus,
+                search: searchValue,
                 filterBy,
                 unpaidPage,
                 unpaidLimit,
@@ -434,7 +432,7 @@ export default function InvoiceReportPage() {
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Status Distribution</h3>
-              <select 
+              <select
                 value={selectedStatus}
                 onChange={handleStatusChange}
                 className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
@@ -478,7 +476,7 @@ export default function InvoiceReportPage() {
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Payment Methods</h3>
-              <select 
+              <select
                 value={selectedDate}
                 onChange={handleDateChange}
                 className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
@@ -518,7 +516,7 @@ export default function InvoiceReportPage() {
         <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Monthly Revenue</h3>
-            <select 
+            <select
               value={filterBy}
               onChange={handleFilterChange}
               className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
@@ -633,7 +631,7 @@ export default function InvoiceReportPage() {
                     <td className="px-4 py-3 font-normal text-[#1e1e1e]">{invoice.phoneNumber}</td>
                     <td className="px-4 py-3 font-medium text-[#1e1e1e]">{invoice.dueAmount}</td>
                     <td className="px-4 py-3">
-                      <span 
+                      <span
                         className="inline-flex items-center rounded-full px-4 py-2 text-sm font-normal text-white"
                         style={{ backgroundColor: invoice.statusColor }}
                       >
@@ -701,7 +699,7 @@ export default function InvoiceReportPage() {
             Showing {startIndex} to {endIndex} of {totalUnpaidCount} entries
           </div>
           <div className="flex items-center gap-3">
-            <select 
+            <select
               value={unpaidLimit}
               onChange={handleLimitChange}
               className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
@@ -711,29 +709,28 @@ export default function InvoiceReportPage() {
               <option value={50}>Display 50</option>
             </select>
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => handlePageChange(Math.max(unpaidPage - 1, 1))}
                 disabled={unpaidPage === 1}
                 className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ‹
               </button>
-              
+
               {generatePageNumbers().map((pageNum) => (
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    unpaidPage === pageNum
+                  className={`rounded-full px-4 py-2 text-sm transition ${unpaidPage === pageNum
                       ? "bg-[#0B4B31] text-white"
                       : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
-                  }`}
+                    }`}
                 >
                   {pageNum}
                 </button>
               ))}
-              
-              <button 
+
+              <button
                 onClick={() => handlePageChange(Math.min(unpaidPage + 1, totalUnpaidPages))}
                 disabled={unpaidPage === totalUnpaidPages || totalUnpaidPages === 0}
                 className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"

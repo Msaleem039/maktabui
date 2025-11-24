@@ -227,7 +227,6 @@ const Page = () => {
         student: formData.student 
       };
 
-      console.log("Submitting assignment data:", assignmentData);
       dispatch(createAssignment(assignmentData));
 
     } catch (error) {

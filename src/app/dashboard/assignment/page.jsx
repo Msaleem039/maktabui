@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2, Upload, X, Star } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllAssignment, uploadSolution } from "@/redux/slices/assignmentSlices/assignmentSlices";
 import { createGrade } from "@/redux/slices/gradeSlices/gradeSlices";
+import { getCookie } from "cookies-next";
 
 export default function AssignmentPage() {
     const [searchValue, setSearchValue] = useState("");
@@ -28,21 +29,46 @@ export default function AssignmentPage() {
     const { assignments, status, error, uploadSolutionStatus } = useSelector((state) => state.assignment);
     const { createStatus: gradeCreateStatus } = useSelector((state) => state.grade);
 
-    // Get teacher ID from assignments
     const getTeacherId = (assignment) => {
-        return assignment.teacher?._id || "teacher"; // fallback to "teacher" if not available
+        return assignment.teacher?._id || "teacher";
     };
 
-    const actionMenuItems = [
-        { label: "View Detail", icon: Eye, action: "view" },
-        { label: "Edit", icon: Edit, action: "edit" },
-        { label: "Add Remarks", icon: Star, action: "remarks" },
-        { label: "Remove", icon: Trash2, action: "remove" },
-    ];
+    const user = useMemo(() => {
+        const userCookie = getCookie("user");
+        return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+    }, []);
+
+    // Role-based action menu items
+    const getActionMenuItems = () => {
+        const baseItems = [
+            { label: "View Detail", icon: Eye, action: "view" },
+        ];
+
+        if (user?.role === "Teacher") {
+            return [
+                ...baseItems,
+                { label: "Edit", icon: Edit, action: "edit" },
+                { label: "Add Remarks", icon: Star, action: "remarks" },
+                { label: "Remove", icon: Trash2, action: "remove" },
+            ];
+        }
+
+        return baseItems;
+    };
+
+    const actionMenuItems = getActionMenuItems();
 
     useEffect(() => {
-        dispatch(getAllAssignment());
-    }, [dispatch]);
+        let requestData = {};
+
+        if (user?.role === "Student" && user?.id) {
+            requestData = { studentId: user.id };
+        } else if (user?.role === "Teacher" && user?.id) {
+            requestData = { teacherId: user.id };
+        }
+
+        dispatch(getAllAssignment(requestData));
+    }, [dispatch, user]);
 
     useEffect(() => {
         if (assignments && assignments.length > 0) {
@@ -114,7 +140,7 @@ export default function AssignmentPage() {
         setRemarksModalOpen(true);
         setMarksObtained("");
         setFeedback("");
-        
+
         // Pre-fill existing grade if available
         if (assignment.grades && assignment.grades.length > 0) {
             const existingGrade = assignment.grades[0];
@@ -134,7 +160,7 @@ export default function AssignmentPage() {
                 'image/jpeg',
                 'image/png'
             ];
-            
+
             const maxSize = 10 * 1024 * 1024; // 10MB
 
             if (!allowedTypes.includes(file.type)) {
@@ -223,7 +249,7 @@ export default function AssignmentPage() {
             setUploadProgress(0);
 
             const fileData = await uploadFileToSupabase(uploadFile);
-            
+
             await dispatch(uploadSolution({
                 assignmentId: selectedAssignment._id,
                 studentId: studentId,
@@ -235,9 +261,9 @@ export default function AssignmentPage() {
             setUploadFile(null);
             setSelectedAssignment(null);
             setUploadProgress(0);
-            
+
             dispatch(getAllAssignment());
-            
+
         } catch (error) {
             console.error("Error uploading solution:", error);
             alert(`Failed to upload solution: ${error.message || "Please try again."}`);
@@ -279,10 +305,10 @@ export default function AssignmentPage() {
             setSelectedAssignmentForRemarks(null);
             setMarksObtained("");
             setFeedback("");
-            
+
             // Refresh assignments to show updated grades
             dispatch(getAllAssignment());
-            
+
         } catch (error) {
             console.error("Error adding remarks:", error);
             alert(`Failed to add remarks: ${error.message || "Please try again."}`);
@@ -324,7 +350,7 @@ export default function AssignmentPage() {
 
     const getSolutionStatus = (assignment) => {
         if (!assignment.solutions || !assignment.student?._id) return { text: "Not Submitted", style: "bg-gray-100 text-gray-600" };
-        
+
         const solution = assignment.solutions.find(sol => sol.student === assignment.student._id);
         if (solution) {
             return { text: "Submitted", style: "bg-green-100 text-green-600" };
@@ -336,32 +362,107 @@ export default function AssignmentPage() {
         if (!assignment.grades || assignment.grades.length === 0) {
             return { text: "No Remarks", style: "bg-gray-100 text-gray-600" };
         }
-        
+
         const grade = assignment.grades[0];
         const marks = grade.marksObtained;
         const totalMarks = assignment.totalMarks;
-        
+
         if (marks >= totalMarks * 0.8) {
-            return { 
-                text: `Excellent (${marks}/${totalMarks})`, 
-                style: "bg-green-100 text-green-600" 
+            return {
+                text: `Excellent (${marks}/${totalMarks})`,
+                style: "bg-green-100 text-green-600"
             };
         } else if (marks >= totalMarks * 0.6) {
-            return { 
-                text: `Good (${marks}/${totalMarks})`, 
-                style: "bg-blue-100 text-blue-600" 
+            return {
+                text: `Good (${marks}/${totalMarks})`,
+                style: "bg-blue-100 text-blue-600"
             };
         } else if (marks >= totalMarks * 0.4) {
-            return { 
-                text: `Average (${marks}/${totalMarks})`, 
-                style: "bg-yellow-100 text-yellow-600" 
+            return {
+                text: `Average (${marks}/${totalMarks})`,
+                style: "bg-yellow-100 text-yellow-600"
             };
         } else {
-            return { 
-                text: `Needs Improvement (${marks}/${totalMarks})`, 
-                style: "bg-red-100 text-red-600" 
+            return {
+                text: `Needs Improvement (${marks}/${totalMarks})`,
+                style: "bg-red-100 text-red-600"
             };
         }
+    };
+
+    // Show "Add New Assignment" button only for Teachers
+    const renderAddAssignmentButton = () => {
+        if (user?.role === "Teacher") {
+            return (
+                <Link
+                    href="/dashboard/assignment/add"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+                >
+                    <span className="text-lg">+</span>
+                    Add New Assignment
+                </Link>
+            );
+        }
+        return null;
+    };
+
+    // Show Upload Solution button only for Students
+    const renderUploadSolutionButton = (assignment) => {
+        if (user?.role === "Student") {
+            return (
+                <button
+                    type="button"
+                    onClick={(e) => handleUploadSolution(assignment, e)}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                >
+                    <Upload size={16} />
+                    Upload Solution
+                </button>
+            );
+        }
+        return null;
+    };
+
+    // Show Action dropdown only for Teachers
+    const renderActionDropdown = (assignment) => {
+        if (user?.role === "Teacher") {
+            return (
+                <div className="relative inline-block">
+                    <button
+                        type="button"
+                        onClick={(e) => toggleDropdown(assignment._id, e)}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
+                    >
+                        Actions
+                        <span>▾</span>
+                    </button>
+
+                    {openDropdownId === assignment._id && (
+                        <div
+                            ref={(el) => (dropdownRefs.current[assignment._id] = el)}
+                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                        >
+                            {actionMenuItems.map((item, idx) => {
+                                const Icon = item.icon;
+                                return (
+                                    <button
+                                        key={item.action}
+                                        type="button"
+                                        onClick={(e) => handleActionClick(item.action, assignment._id, e)}
+                                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                            } hover:bg-[#E5EFEB]`}
+                                    >
+                                        <Icon size={16} className="text-[#0B4B31]" />
+                                        <span>{item.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        return null;
     };
 
     if (status === 'loading') {
@@ -376,10 +477,7 @@ export default function AssignmentPage() {
                             MaktabOS
                         </h1>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition opacity-50">
-                        <span className="text-lg">+</span>
-                        Add New Assignment
-                    </div>
+                    {renderAddAssignmentButton()}
                 </div>
 
                 <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -406,13 +504,7 @@ export default function AssignmentPage() {
                             MaktabOS
                         </h1>
                     </div>
-                    <Link
-                        href="/dashboard/assignment/add"
-                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-                    >
-                        <span className="text-lg">+</span>
-                        Add New Assignment
-                    </Link>
+                    {renderAddAssignmentButton()}
                 </div>
 
                 <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -443,13 +535,7 @@ export default function AssignmentPage() {
                         MaktabOS
                     </h1>
                 </div>
-                <Link
-                    href="/dashboard/assignment/add"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-                >
-                    <span className="text-lg">+</span>
-                    Add New Assignment
-                </Link>
+                {renderAddAssignmentButton()}
             </div>
 
             <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -506,7 +592,7 @@ export default function AssignmentPage() {
                                     const statusBadge = getStatusBadge(assignment.dueDate);
                                     const solutionStatus = getSolutionStatus(assignment);
                                     const gradeStatus = getGradeStatus(assignment);
-                                    
+
                                     return (
                                         <tr
                                             key={assignment._id}
@@ -544,50 +630,8 @@ export default function AssignmentPage() {
                                             </td>
                                             <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    {/* Upload Solution Button */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => handleUploadSolution(assignment, e)}
-                                                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                                                    >
-                                                        <Upload size={16} />
-                                                        Upload Solution
-                                                    </button>
-
-                                                    {/* Action Dropdown */}
-                                                    <div className="relative inline-block">
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => toggleDropdown(assignment._id, e)}
-                                                            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
-                                                        >
-                                                            Actions
-                                                            <span>▾</span>
-                                                        </button>
-
-                                                        {openDropdownId === assignment._id && (
-                                                            <div
-                                                                ref={(el) => (dropdownRefs.current[assignment._id] = el)}
-                                                                className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
-                                                            >
-                                                                {actionMenuItems.map((item, idx) => {
-                                                                    const Icon = item.icon;
-                                                                    return (
-                                                                        <button
-                                                                            key={item.action}
-                                                                            type="button"
-                                                                            onClick={(e) => handleActionClick(item.action, assignment._id, e)}
-                                                                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                                                                } hover:bg-[#E5EFEB]`}
-                                                                        >
-                                                                            <Icon size={16} className="text-[#0B4B31]" />
-                                                                            <span>{item.label}</span>
-                                                                        </button>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    {renderUploadSolutionButton(assignment)}
+                                                    {renderActionDropdown(assignment)}
                                                 </div>
                                             </td>
                                         </tr>
@@ -641,8 +685,8 @@ export default function AssignmentPage() {
                 )}
             </section>
 
-            {/* Upload Solution Modal */}
-            {uploadModalOpen && (
+            {/* Upload Solution Modal - Only show for Students */}
+            {uploadModalOpen && user?.role === "Student" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
                         <div className="flex items-center justify-between mb-4">
@@ -739,8 +783,8 @@ export default function AssignmentPage() {
                 </div>
             )}
 
-            {/* Remarks Modal */}
-            {remarksModalOpen && (
+            {/* Remarks Modal - Only show for Teachers */}
+            {remarksModalOpen && user?.role === "Teacher" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
                         <div className="flex items-center justify-between mb-4">

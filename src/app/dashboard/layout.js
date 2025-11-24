@@ -191,83 +191,65 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const getNavItems = () => {
     const basePath = "/dashboard";
 
-    const items = [
-      {
-        name: "Dashboard",
-        icon: "/01.png",
-        path: userRole === "Parent" ? "/dashboard/parent" : `${basePath}/dashboard`,
-      },
-      {
+    const allItems = {
+      dashboard: { name: "Dashboard", icon: "/01.png", path: `${basePath}/dashboard` },
+      parents: {
         name: "Parents",
         icon: "/Family Woman Woman.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
-          { name: "Parents", path: "/dashboard/parent" },
+          { name: "Parents", path: `${basePath}/parent` },
           { name: "Add Parent", path: `${basePath}/parent/add` },
           { name: "Waiting List", path: `${basePath}/parent/waitlist` },
         ],
       },
-      {
+      students: {
         name: "Students",
         icon: "/Graduation Cap.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
-          { name: "Student", path: "/dashboard/student" },
+          { name: "Student", path: `${basePath}/student` },
           { name: "Add Student", path: `${basePath}/student/add` },
-          { name: "Waiting List", path: `${basePath}/student/waiting-list` }
+          { name: "Waiting List", path: `${basePath}/student/waiting-list` },
         ],
       },
-      {
+      class: {
         name: "Class",
         icon: "/Classroom.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
           { name: "Class", path: `${basePath}/class` },
           { name: "Create Class", path: `${basePath}/class/createClass` },
           { name: "Subject", path: `${basePath}/subject` },
-          { name: "Timetable", path: `${basePath}/class/timetable` }],
+          { name: "Timetable", path: `${basePath}/class/timetable` },
+        ],
       },
-      {
+      assignment: {
         name: "Assignment",
         icon: "/Classroom.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
           { name: "Assignments", path: `${basePath}/assignment` },
           { name: "Create Assignment", path: `${basePath}/assignment/add` },
-          { name: "Grade", path: `${basePath}/grade` }],
+          { name: "Grade", path: `${basePath}/grade` },
+        ],
       },
-      {
+      notifications: {
         name: "Notification",
         icon: "/Literature.png",
-        path: "",
         hasSubmenu: true,
-        subItems: [
-          { name: "Notifications", path: `${basePath}/notifications` },
-        ],
+        subItems: [{ name: "Notifications", path: `${basePath}/notifications` }],
       },
-      {
-        name: "Settings",
-        icon: "/window.svg",
-        path: `${basePath}/settings`,
-        hasSubmenu: false,
-      },
-      {
+      settings: { name: "Settings", icon: "/window.svg", path: `${basePath}/settings` },
+      attendance: {
         name: "Attendance",
         icon: "/Checked User Male.png",
-        path: "",
         hasSubmenu: true,
-        subItems: [
-          { name: "Mark Attendance", path: `${basePath}/attendance` },
-        ],
+        subItems: [{ name: "Mark Attendance", path: `${basePath}/attendance` }],
       },
-      {
+      finance: {
         name: "Finance",
         icon: "/Coins.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
           { name: "Invoice", path: `${basePath}/finance/invoice` },
@@ -276,44 +258,116 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Payments", path: `${basePath}/finance/payment` },
         ],
       },
-      {
+      activities: {
         name: "Activities",
         icon: "/Rubik's Cube.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
           { name: "Activities", path: `${basePath}/activities` },
           { name: "Text Log", path: `${basePath}/activities/text-log` },
         ],
       },
-      {
+      text: {
         name: "Send A Text",
         icon: "/SMS.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
           { name: "Send A Text", path: `${basePath}/text` },
           { name: "Schedule", path: `${basePath}/text/schedule` },
         ],
       },
-    ];
-
-    if (userRole === "Super Admin") {
-      const teamItem = {
+      team: {
         name: "Team",
         icon: "/Staff.png",
-        path: "",
         hasSubmenu: true,
         subItems: [
           { name: "Admin", path: `${basePath}/team/admin` },
           { name: "Teachers", path: `${basePath}/team/teacher` },
           { name: "Permission", path: `${basePath}/team/permission` },
         ],
-      };
-      items.splice(3, 0, teamItem);
-    }
+      },
+    };
 
-    return items;
+    // Create role-specific dashboard items
+    const roleDashboardItems = {
+      "Super Admin": allItems.dashboard,
+      "Admin": allItems.dashboard,
+      "Teacher": { ...allItems.dashboard, path: `${basePath}/teacher/dashboard` },
+      "Student": { ...allItems.dashboard, path: `${basePath}/student/dashboard` },
+      "Parent": { ...allItems.dashboard, path: `${basePath}/parent/dashboard` }
+    };
+
+    switch (userRole) {
+      case "Super Admin":
+      case "Admin":
+        return [
+          roleDashboardItems[userRole],
+          allItems.parents,
+          allItems.students,
+          allItems.class,
+          allItems.assignment,
+          allItems.notifications,
+          allItems.settings,
+          allItems.attendance,
+          allItems.finance,
+          allItems.activities,
+          allItems.text,
+          allItems.team,
+        ];
+
+      case "Teacher":
+        return [
+          roleDashboardItems[userRole],
+          allItems.class,
+          allItems.students,
+          allItems.assignment,
+          allItems.settings,
+          allItems.notifications,
+          allItems.attendance,
+        ];
+
+      case "Student":
+        return [
+          roleDashboardItems[userRole],
+          allItems.settings,
+          {
+            ...allItems.class,
+            subItems: allItems.class.subItems.filter(
+              (item) => item.name !== "Subject" && item.name !== "Create Class"
+            )
+          },
+          {
+            ...allItems.assignment,
+            subItems: allItems.assignment.subItems.filter(
+              (item) => item.name !== "Create Assignment"
+            )
+          },
+          allItems.notifications,
+        ];
+
+      case "Parent":
+        return [
+          roleDashboardItems[userRole],
+          allItems.settings,
+          allItems.students,
+          {
+            ...allItems.assignment,
+            subItems: allItems.assignment.subItems.filter(
+              (i) => i.name === "Assignments" || i.name === "Grade"
+            ),
+          },
+          allItems.notifications,
+          {
+            ...allItems.finance,
+            subItems: allItems.finance.subItems.filter(
+              (i) => i.name === "Invoice" || i.name === "Payments"
+            ),
+          },
+        ];
+
+      default:
+        return [allItems.dashboard];
+    }
   };
 
   const sidebarBg = "bg-[#0B4B31]";

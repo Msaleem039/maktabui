@@ -15,9 +15,12 @@ export const createTimetableAction = createAsyncThunk(
 
 export const getAllTimetablesAction = createAsyncThunk(
   `timetables/getAllTimetables`,
-  async (_, { rejectWithValue }) => {
+  async (requestData = {}, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllTimetables`);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllTimetables`,
+        requestData
+      );
       return res.data.timetables;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

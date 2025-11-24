@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTimetablesAction } from "@/redux/slices/timetableSlices/timetableSlices";
+import { getCookie } from "cookies-next";
 
 export default function TimetablePage() {
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -17,6 +18,11 @@ export default function TimetablePage() {
     (state) => state.getAllTimetables
   );
 
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
   const actionMenuItems = [
     { label: "View Detail", icon: Eye, action: "view" },
     { label: "Edit", icon: Edit, action: "edit" },
@@ -24,8 +30,16 @@ export default function TimetablePage() {
   ];
 
   useEffect(() => {
-    dispatch(getAllTimetablesAction());
-  }, [dispatch]);
+    let requestData = {};
+
+    if (user?.role === "Student" && user?.id) {
+      requestData = { studentId: user.id };
+    } else if (user?.role === "Teacher" && user?.id) {
+      requestData = { teacherId: user.id };
+    }
+
+    dispatch(getAllTimetablesAction(requestData));
+  }, [dispatch, user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -69,12 +83,14 @@ export default function TimetablePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold text-[#0B4B31] mb-4">Manage Timetables</h1>
-        <Link
-          href="/dashboard/class/createTimeTable"
-          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-        >
-          <span className="text-lg">+</span>Add Timetable
-        </Link>
+        {user?.role === "Admin" || user?.role === "Super Admin" && (
+          <Link
+            href="/dashboard/class/createTimeTable"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B3120]"
+          >
+            <span className="text-lg">+</span>Add Timetable
+          </Link>
+        )}
       </div>
 
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -126,9 +142,8 @@ export default function TimetablePage() {
                                 key={item.action}
                                 type="button"
                                 onClick={(e) => handleActionClick(item.action, t._id, e)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
-                                  idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                } hover:bg-[#E5EFEB]`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                  } hover:bg-[#E5EFEB]`}
                               >
                                 <Icon size={16} className="text-[#0B4B31]" />
                                 <span>{item.label}</span>

@@ -51,7 +51,6 @@ const Page = () => {
                     id: resultAction.payload.id || ''
                 }), tokenOptions);
 
-                // Redirect based on role
                 const userRole = resultAction.payload.role;
                 if (userRole === 'Parent') {
                     router.push('/dashboard/parent/dashboard');

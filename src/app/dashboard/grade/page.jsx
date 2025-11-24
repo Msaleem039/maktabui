@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrades } from "@/redux/slices/gradeSlices/gradeSlices";
+import { getCookie } from "cookies-next";
 
 export default function GradesPage() {
   const [searchValue, setSearchValue] = useState("");
@@ -15,8 +16,10 @@ export default function GradesPage() {
   const dispatch = useDispatch();
 
   const { grades, status, error } = useSelector((state) => state.grade);
-  console.log("grades", grades);
-
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
   const actionMenuItems = [
     { label: "View Details", icon: Eye, action: "view" },
     { label: "Edit Grade", icon: Edit, action: "edit" },
@@ -24,8 +27,17 @@ export default function GradesPage() {
   ];
 
   useEffect(() => {
-    dispatch(getGrades());
-  }, [dispatch]);
+    let requestData = {};
+
+    if (user?.role === "Student" && user?.id) {
+      requestData = { studentId: user.id };
+    } else if (user?.role === "Teacher" && user?.id) {
+      requestData = { teacherId: user.id };
+    }
+
+    dispatch(getGrades(requestData));
+
+  }, [dispatch, user]);
 
   useEffect(() => {
     if (grades && grades.length > 0) {
@@ -152,7 +164,7 @@ export default function GradesPage() {
               MaktabOS
             </h1>
           </div>
-         
+
         </div>
 
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -257,7 +269,10 @@ export default function GradesPage() {
                 <th className="px-4 font-normal text-[#0000008C]">Status</th>
                 <th className="px-4 font-normal text-[#0000008C]">Graded By</th>
                 <th className="px-4 font-normal text-[#0000008C]">Date</th>
-                <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
+                {user?.role === "Student" || user?.role === "Teacher" && (
+                  <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
+
+                )}
               </tr>
             </thead>
             <tbody>
@@ -265,7 +280,7 @@ export default function GradesPage() {
                 filteredGrades.map((grade) => {
                   const assessmentInfo = getAssessmentInfo(grade);
                   const percentage = calculatePercentage(grade.marksObtained, assessmentInfo.totalMarks);
-                  
+
                   return (
                     <tr
                       key={grade._id}
@@ -295,11 +310,10 @@ export default function GradesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 font-medium text-[#1E1E1E]">
-                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                          grade.status === "Graded" 
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}>
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${grade.status === "Graded"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                          }`}>
                           {grade.status || "Pending"}
                         </span>
                       </td>
@@ -332,9 +346,8 @@ export default function GradesPage() {
                                     key={item.action}
                                     type="button"
                                     onClick={(e) => handleActionClick(item.action, grade._id, e)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
-                                      idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                    } hover:bg-[#E5EFEB]`}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                      } hover:bg-[#E5EFEB]`}
                                   >
                                     <Icon size={16} className="text-[#0B4B31]" />
                                     <span>{item.label}</span>

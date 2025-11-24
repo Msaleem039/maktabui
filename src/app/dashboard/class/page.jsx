@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllClassesAction } from "@/redux/slices/classSlices/classSlice";
+import { getCookie, deleteCookie } from "cookies-next";
 
 export default function ClassPage() {
+
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [filteredClasses, setFilteredClasses] = useState([]);
@@ -16,7 +18,10 @@ export default function ClassPage() {
   const dispatch = useDispatch();
 
   const { classes, loading, error } = useSelector((state) => state.getAllClasses);
-  console.log("classes", classes);
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
 
   const actionMenuItems = [
     { label: "View Detail", icon: Eye, action: "view" },
@@ -25,8 +30,16 @@ export default function ClassPage() {
   ];
 
   useEffect(() => {
-    dispatch(getAllClassesAction());
-  }, [dispatch]);
+    let requestData = {};
+
+    if (user?.role === "Student" && user?.id) {
+      requestData = { studentId: user.id };
+    } else if (user?.role === "Teacher" && user?.id) {
+      requestData = { teacherId: user.id };
+    }
+
+    dispatch(getAllClassesAction(requestData));
+  }, [dispatch, user]);
 
   useEffect(() => {
     if (classes && classes.length > 0) {
@@ -70,16 +83,13 @@ export default function ClassPage() {
     } else if (action === "edit") {
       router.push(`/dashboard/class/${id}/edit`);
     } else if (action === "remove") {
-      // TODO: Implement remove functionality with confirmation
       if (confirm("Are you sure you want to remove this class?")) {
         console.log(`Remove class ${id}`);
-        // TODO: Add API call to delete class
       }
     }
     setOpenDropdownId(null);
   };
 
-  // Format date to readable format
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -101,10 +111,15 @@ export default function ClassPage() {
               MaktabOS
             </h1>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition opacity-50">
-            <span className="text-lg">+</span>
-            Add New Class
-          </div>
+          {user?.role === "Admin" || user?.role === "Super Admin" && (
+            <Link
+              href="/dashboard/class/createClass"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+            >
+              <span className="text-lg">+</span>
+              Add New Class
+            </Link>
+          )}
         </div>
 
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -132,13 +147,15 @@ export default function ClassPage() {
               MaktabOS
             </h1>
           </div>
-          <Link
-            href="/dashboard/class/createClass"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-          >
-            <span className="text-lg">+</span>
-            Add New Class
-          </Link>
+          {user?.role === "Admin" || user?.role === "Super Admin" && (
+            <Link
+              href="/dashboard/class/createClass"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+            >
+              <span className="text-lg">+</span>
+              Add New Class
+            </Link>
+          )}
         </div>
 
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -169,13 +186,15 @@ export default function ClassPage() {
             MaktabOS
           </h1>
         </div>
-        <Link
-          href="/dashboard/class/createClass"
-          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-        >
-          <span className="text-lg">+</span>
-          Add New Class
-        </Link>
+        {user?.role === "Admin" || user?.role === "Super Admin" && (
+          <Link
+            href="/dashboard/class/createClass"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+          >
+            <span className="text-lg">+</span>
+            Add New Class
+          </Link>
+        )}
       </div>
 
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">

@@ -15,9 +15,12 @@ export const createClassAction = createAsyncThunk(
 
 export const getAllClassesAction = createAsyncThunk(
   `classes/getAllClasses`,
-  async (_, { rejectWithValue }) => {
+  async (requestData = {}, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClasses`);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClasses`,
+        requestData
+      );
       return res.data.classes;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
