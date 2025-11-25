@@ -112,40 +112,6 @@ const ClassDetailCard = ({ classData, onAddLesson }) => {
                       <p className="text-xs text-[#627169]">ID: {student.id}</p>
                     </div>
                   </div>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={(e) => toggleDropdown(student.id, e)}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                    >
-                      Take Action
-                      <span>▾</span>
-                    </button>
-
-                    {isDropdownOpen && (
-                      <div
-                        ref={(el) => (dropdownRefs.current[student.id] = el)}
-                        className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
-                      >
-                        {actionMenuItems.map((item, idx) => {
-                          const Icon = item.icon;
-                          return (
-                            <button
-                              key={item.action}
-                              type="button"
-                              onClick={(e) => handleActionClick(item.action, student.id, e)}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
-                                idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                              } hover:bg-[#E5EFEB]`}
-                            >
-                              <Icon size={16} className="text-[#0B4B31]" />
-                              <span>{item.label}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
                 </div>
               );
             })}

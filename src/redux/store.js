@@ -27,14 +27,17 @@ import {
   addToWaitlistStudentReducer,
   removeFromWaitlistStudentReducer,
   getStudentNamesWithIdsReducer,
-  getStudentDashboardStatsReducer
+  getStudentDashboardStatsReducer,
+  updateStudentReducer 
 } from './slices/studentSlices/studentSlices';
 
 // Class slices
 import {
   createClassReducer,
   getAllClassesReducer,
-  getAllClassesNameReducer
+  getAllClassesNameReducer,
+  getClassByIDReducer,
+  updateClassReducer
 } from './slices/classSlices/classSlice';
 
 // Teacher slices
@@ -109,11 +112,14 @@ export const store = configureStore({
     removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
     getStudentNamesWithIds: getStudentNamesWithIdsReducer,
     getStudentDashboardStats: getStudentDashboardStatsReducer,
+    updateStudent: updateStudentReducer,
 
     // Class management
     createClass: createClassReducer,
     getAllClasses: getAllClassesReducer,
     getAllClassesName: getAllClassesNameReducer,
+    getClassByID: getClassByIDReducer,
+    updateClass: updateClassReducer,
 
     // Teacher management
     createTeacher: createTeacherReducer,

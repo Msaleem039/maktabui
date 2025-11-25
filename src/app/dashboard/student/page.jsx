@@ -1,9 +1,10 @@
 "use client";
 
 import StudentTable from "@/components/dashboard/students/StudentTable";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllStudents } from "@/redux/slices/studentSlices/studentSlices";
+import { getCookie } from "cookies-next";
 
 export default function StudentsPage() {
   const [searchValue, setSearchValue] = useState("");
@@ -13,9 +14,20 @@ export default function StudentsPage() {
     (state) => state.getAllStudents
   );
 
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
   useEffect(() => {
-    dispatch(getAllStudents());
-  }, [dispatch]);
+    const requestData = {};
+
+    if (user?.role === "Teacher") {
+      requestData.teacherId = user.id;
+    }
+
+    dispatch(getAllStudents(requestData));
+  }, [dispatch, user]);
 
   if (status === "loading") {
     return (
@@ -36,7 +48,7 @@ export default function StudentsPage() {
   return (
     <div className="space-y-8">
       <StudentTable
-        title="Students (All Classes)"
+        title={user?.role === "Teacher" ? "My Students" : "Students (All Classes)"}
         onSearchChange={setSearchValue}
         searchValue={searchValue}
         students={students}

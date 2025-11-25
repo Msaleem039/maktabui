@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { getGrades, createGrade } from "@/redux/slices/gradeSlices/gradeSlices";
+import { getGradeById, updateGradeById, clearDetailStatus, clearUpdateStatus } from "@/redux/slices/gradeSlices/gradeSlices";
 import { ArrowLeft, Save } from "lucide-react";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
@@ -29,8 +29,7 @@ export default function EditGradePage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { grades, status, createStatus } = useSelector((state) => state.grade);
-  const [grade, setGrade] = useState(null);
+  const { currentGrade, detailStatus, detailError, updateStatus, updateError } = useSelector((state) => state.grade);
   const [formData, setFormData] = useState({
     marksObtained: "",
     grade: "",
@@ -38,29 +37,38 @@ export default function EditGradePage() {
     feedback: "",
   });
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    dispatch(getGrades());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (grades && grades.length > 0 && params?.id) {
-      const foundGrade = grades.find((g) => g._id === params.id);
-      if (foundGrade) {
-        setGrade(foundGrade);
-        setFormData({
-          marksObtained: foundGrade.marksObtained || "",
-          grade: foundGrade.grade || "",
-          status: foundGrade.status || "Graded",
-          feedback: foundGrade.feedback || "",
-        });
-      }
+    if (params?.id) {
+      dispatch(getGradeById({ gradeId: params.id }));
     }
-  }, [grades, params?.id]);
+  }, [dispatch, params?.id]);
+
+  useEffect(() => {
+    if (currentGrade) {
+      setFormData({
+        marksObtained: currentGrade.marksObtained?.toString() || "",
+        grade: currentGrade.grade || "",
+        status: currentGrade.status || "Graded",
+        feedback: currentGrade.feedback || "",
+      });
+    }
+  }, [currentGrade]);
+
+  useEffect(() => {
+    // Cleanup when component unmounts
+    return () => {
+      dispatch(clearDetailStatus());
+      dispatch(clearUpdateStatus());
+    };
+  }, [dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear validation error when user starts typing
+    if (validationError) setValidationError("");
   };
 
   const toggleDropdown = (name) => {
@@ -70,14 +78,66 @@ export default function EditGradePage() {
   const selectOption = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setOpenDropdown(null);
+    // Clear validation error when user selects an option
+    if (validationError) setValidationError("");
+  };
+
+  const validateForm = () => {
+    if (!formData.marksObtained.trim()) {
+      setValidationError("Marks obtained is required");
+      return false;
+    }
+
+    const marks = parseFloat(formData.marksObtained);
+    const totalMarks = currentGrade?.totalMarks || currentGrade?.assignment?.totalMarks;
+
+    if (isNaN(marks) || marks < 0) {
+      setValidationError("Marks obtained must be a valid non-negative number");
+      return false;
+    }
+
+    if (totalMarks && marks > totalMarks) {
+      setValidationError(`Marks obtained cannot exceed total marks (${totalMarks})`);
+      return false;
+    }
+
+    if (!formData.grade.trim()) {
+      setValidationError("Grade is required");
+      return false;
+    }
+
+    if (!formData.status.trim()) {
+      setValidationError("Status is required");
+      return false;
+    }
+
+    setValidationError("");
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement update grade API call
-    console.log("Update grade:", params.id, formData);
-    // After successful update, navigate back
-    router.push(`/dashboard/grades/${params.id}`);
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const result = await dispatch(updateGradeById({
+        gradeId: params.id,
+        marksObtained: parseFloat(formData.marksObtained),
+        feedback: formData.feedback,
+        gradedBy: currentGrade.gradedBy?._id // Use the original grader or get from auth context
+      })).unwrap();
+
+      // If update is successful, navigate back to view page
+      if (result) {
+        router.push(`/dashboard/grades/${params.id}`);
+      }
+    } catch (error) {
+      // Error is handled by Redux, we'll display it below
+      console.error("Failed to update grade:", error);
+    }
   };
 
   const getAssessmentInfo = (grade) => {
@@ -95,7 +155,7 @@ export default function EditGradePage() {
     return { title: "N/A", totalMarks: "N/A" };
   };
 
-  if (status === 'loading') {
+  if (detailStatus === 'loading') {
     return (
       <div className="space-y-8">
         <div className="flex items-center justify-center py-12">
@@ -108,12 +168,14 @@ export default function EditGradePage() {
     );
   }
 
-  if (!grade) {
+  if (detailError || !currentGrade) {
     return (
       <div className="space-y-8">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <p className="text-red-600">Grade not found</p>
+            <p className="text-red-600">
+              {detailError || "Grade not found"}
+            </p>
             <button
               onClick={() => router.push('/dashboard/grade')}
               className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
@@ -126,7 +188,7 @@ export default function EditGradePage() {
     );
   }
 
-  const assessmentInfo = getAssessmentInfo(grade);
+  const assessmentInfo = getAssessmentInfo(currentGrade);
 
   return (
     <div className="space-y-8">
@@ -154,12 +216,30 @@ export default function EditGradePage() {
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
         <h2 className="text-lg font-semibold text-[#104D2E] mb-6">Edit Grade</h2>
 
+        {/* Error Messages */}
+        {(validationError || updateError) && (
+          <div className="mb-6 rounded-[18px] border border-red-300 bg-red-50 p-4">
+            <p className="text-red-700 text-sm">
+              {validationError || updateError}
+            </p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {updateStatus === 'succeeded' && (
+          <div className="mb-6 rounded-[18px] border border-green-300 bg-green-50 p-4">
+            <p className="text-green-700 text-sm">
+              Grade updated successfully!
+            </p>
+          </div>
+        )}
+
         <div className="mb-6 rounded-[18px] border border-[#D2E2DB] bg-[#E5EFEB] p-6">
           <h3 className="text-sm font-semibold text-[#0B4B31] mb-4">Grade Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-xs text-gray-600">Student</p>
-              <p className="font-medium text-[#1E1E1E]">{grade.student?.studentName || "N/A"}</p>
+              <p className="font-medium text-[#1E1E1E]">{currentGrade.student?.studentName || "N/A"}</p>
             </div>
             <div>
               <p className="text-xs text-gray-600">Assessment/Assignment</p>
@@ -171,7 +251,7 @@ export default function EditGradePage() {
             </div>
             <div>
               <p className="text-xs text-gray-600">Graded By</p>
-              <p className="font-medium text-[#1E1E1E]">{grade.gradedBy?.fullName || "N/A"}</p>
+              <p className="font-medium text-[#1E1E1E]">{currentGrade.gradedBy?.fullName || "N/A"}</p>
             </div>
           </div>
         </div>
@@ -186,6 +266,9 @@ export default function EditGradePage() {
               onChange={handleInputChange}
               placeholder="Enter marks"
               required
+              min="0"
+              max={assessmentInfo.totalMarks}
+              step="0.1"
             />
 
             <SimpleDropdown
@@ -197,6 +280,7 @@ export default function EditGradePage() {
               isOpen={openDropdown === "grade"}
               onToggle={toggleDropdown}
               placeholder="Select grade"
+              required
             />
 
             <SimpleDropdown
@@ -208,6 +292,7 @@ export default function EditGradePage() {
               isOpen={openDropdown === "status"}
               onToggle={toggleDropdown}
               placeholder="Select status"
+              required
             />
           </div>
 
@@ -228,15 +313,15 @@ export default function EditGradePage() {
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              disabled={createStatus === "loading"}
+              disabled={updateStatus === "loading"}
               className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold transition ${
-                createStatus === "loading"
+                updateStatus === "loading"
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
               }`}
             >
               <Save size={16} />
-              {createStatus === "loading" ? "Saving..." : "Save Changes"}
+              {updateStatus === "loading" ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
@@ -244,4 +329,3 @@ export default function EditGradePage() {
     </div>
   );
 }
-

@@ -369,7 +369,6 @@ export default function TeacherAssignmentsPage() {
                         </td>
                       </tr>
                       
-                      {/* Expanded Assignment Details */}
                       {isExpanded && (
                         <tr>
                           <td colSpan="8" className="px-4 py-4 bg-[#F8FBFA] border-b border-l border-r border-[#E2E7E4] rounded-b-3xl">

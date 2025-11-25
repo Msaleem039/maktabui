@@ -32,14 +32,6 @@ const StudentTable = ({
 
   const tableData = useMemo(() => {
     if (transformedStudents.length > 0) return transformedStudents;
-
-    return Array.from({ length: 10 }, (_, index) => ({
-      id: `student-${index + 1}`,
-      name: "Milad Hersi",
-      parentName: "Milad Hersi",
-      phone: "123456789",
-      class: "203 Abdirahman Jama Class",
-    }));
   }, [transformedStudents]);
 
   const [selectedId, setSelectedId] = useState(null);
@@ -97,7 +89,6 @@ const StudentTable = ({
       } else if (action === "remove") {
         if (confirm("Are you sure you want to remove this student?")) {
           console.log("Remove student:", studentId);
-          // Add your remove student logic here
         }
       } else {
         console.log(`${action} clicked for student ${studentId}`);
@@ -130,7 +121,6 @@ const StudentTable = ({
   const actionMenuItems = [
     { label: "View Profile", icon: Eye, action: "view" },
     { label: "Edit", icon: Pencil, action: "edit" },
-    { label: "Comment", icon: MessageSquare, action: "comment" },
     { label: "Remove", icon: Trash2, action: "remove" },
   ];
 
@@ -180,7 +170,7 @@ const StudentTable = ({
             </tr>
           </thead>
           <tbody>
-            {filteredStudents.map((student) => {
+            {filteredStudents?.map((student) => {
               const isSelected = student.id === selectedId;
               const isDropdownOpen = actionMenu.id === student.id;
               return (
@@ -280,7 +270,7 @@ const StudentTable = ({
       </div>
 
       {/* Show message when no students found */}
-      {filteredStudents.length === 0 && (
+      {filteredStudents?.length === 0 && (
         <div className="text-center py-8 text-[#666]">
           {students.length === 0 ? "No students found" : "No students match your search"}
         </div>
@@ -288,7 +278,7 @@ const StudentTable = ({
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-[#8A928F]">
-          Showing {filteredStudents.length} of {students.length} students
+          Showing {filteredStudents?.length} of {students.length} students
         </div>
         <div className="flex items-center gap-3">
           <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
@@ -360,7 +350,6 @@ const StudentTable = ({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("Comment saved for", commentStudentId, commentText);
                   setCommentStudentId(null);
                   setCommentText("");
                 }}

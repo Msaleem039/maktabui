@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createClassAction } from "@/redux/slices/classSlices/classSlice";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices"; 
+import { getCookie } from "cookies-next";
 
 const CustomField = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   if (type === "textarea") {
@@ -67,22 +68,24 @@ const CustomField = ({ label, name, type = "text", value, onChange, placeholder,
   );
 };
 
-const DropdownField = ({ label, name, value, options, onSelect, isOpen, onToggle, placeholder, required = false, className = "" }) => {
+const DropdownField = ({ label, name, value, options, onSelect, isOpen, onToggle, placeholder, required = false, className = "", disabled = false }) => {
   return (
     <div className={`relative ${className}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
         {label} {required && "*"}
       </label>
       <div
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-        onClick={() => onToggle(name)}
+        className={`w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30 ${
+          disabled ? "opacity-60 cursor-not-allowed" : ""
+        }`}
+        onClick={() => !disabled && onToggle(name)}
       >
         <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
           {value || placeholder}
         </span>
-        <span className="text-[#0B4B31]">▾</span>
+        {!disabled && <span className="text-[#0B4B31]">▾</span>}
       </div>
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
           {options.map((option) => (
             <div
@@ -124,12 +127,20 @@ const Page = () => {
     const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
     const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
     
+    const user = useMemo(() => {
+        const userCookie = getCookie("user");
+        return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+    }, []);
+
+    const isTeacher = user?.role === "Teacher";
+
     const [formData, setFormData] = useState({
         name: "",
         code: "",
         subject: "",
         description: "",
         teacherId: "",
+        teacherName: "",
         startDate: "",
         endDate: ""
     });
@@ -138,6 +149,17 @@ const Page = () => {
     useEffect(() => {
         dispatch(getTeachersName());
     }, [dispatch]);
+
+    // Auto-set teacher ID if user is a teacher
+    useEffect(() => {
+        if (isTeacher && user?.id) {
+            setFormData(prev => ({
+                ...prev,
+                teacherId: user.id,
+                teacherName: `Teacher - ${user.email.split('@')[0]}` // Using email username as display name
+            }));
+        }
+    }, [isTeacher, user]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -166,14 +188,17 @@ const Page = () => {
     };
 
     const handleDropdownToggle = (name) => {
+        if (isTeacher) return; // Don't allow dropdown interaction for teachers
         setDropdownOpen(prev => prev === name ? null : name);
     };
 
     const handleDropdownSelect = (name, value, selectedTeacher) => {
+        if (isTeacher) return; // Don't allow selection for teachers
+        
         setFormData(prev => ({
             ...prev,
-            [name]: value, // This stores the teacher ID
-            teacherName: selectedTeacher ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}` : "" // Store display name
+            [name]: value,
+            teacherName: selectedTeacher ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}` : ""
         }));
         setDropdownOpen(null);
     };
@@ -181,7 +206,10 @@ const Page = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.subject || !formData.teacherId) {
+        // For teachers, ensure the teacherId is set to their own ID
+        const finalTeacherId = isTeacher ? user.id : formData.teacherId;
+
+        if (!formData.name || !formData.subject || !finalTeacherId) {
             alert('Please fill all required fields: Name, Subject, and Teacher');
             return;
         }
@@ -191,7 +219,7 @@ const Page = () => {
             code: formData.code,
             subject: formData.subject,
             description: formData.description,
-            teacherId: formData.teacherId, // This is the ID that gets sent to the backend
+            teacherId: finalTeacherId, // Use the appropriate teacher ID
             startDate: convertToISODate(formData.startDate),
             endDate: convertToISODate(formData.endDate)
         };
@@ -206,13 +234,13 @@ const Page = () => {
                 code: "",
                 subject: "",
                 description: "",
-                teacherId: "",
-                teacherName: "",
+                teacherId: isTeacher ? user.id : "",
+                teacherName: isTeacher ? `Teacher - ${user.email.split('@')[0]}` : "",
                 startDate: "",
                 endDate: ""
             });
         }
-    }, [createdClass]);
+    }, [createdClass, isTeacher, user]);
 
     // Get loading state for teachers
     const fetchingTeachers = teachersStatus === "loading";
@@ -275,13 +303,20 @@ const Page = () => {
                         <DropdownField
                             label="Teacher"
                             name="teacherId"
-                            value={formData.teacherName} // Display the stored teacher name
+                            value={formData.teacherName}
                             options={teacherNames}
                             onSelect={handleDropdownSelect}
                             isOpen={dropdownOpen === "teacherId"}
                             onToggle={handleDropdownToggle}
-                            placeholder={fetchingTeachers ? "Loading teachers..." : "Select a teacher"}
+                            placeholder={
+                                isTeacher 
+                                    ? `Teacher - ${user.email.split('@')[0]}` 
+                                    : fetchingTeachers 
+                                        ? "Loading teachers..." 
+                                        : "Select a teacher"
+                            }
                             required={true}
+                            disabled={isTeacher} // Disable dropdown for teachers
                         />
 
                         <CustomField

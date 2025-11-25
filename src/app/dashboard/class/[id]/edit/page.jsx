@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { CustomField } from "@/components/CustomField";
-import { DropdownField } from "@/components/DropdownField";
+import { useDispatch, useSelector } from "react-redux";
+import { getClassByIDAction } from "@/redux/slices/classSlices/classSlice";
+import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
+import { updateClassAction } from "@/redux/slices/classSlices/classSlice";
+import { FormInput } from "@/components/FormInput";
+import { SimpleDropdown } from "@/components/SimpleDropdown";
 
 const defaultForm = {
   name: "",
@@ -15,38 +19,51 @@ const defaultForm = {
   endDate: "",
 };
 
-const mockTeachers = [
-  { _id: "1", id: "1", fullName: "John Doe", specialization: "Mathematics" },
-  { _id: "2", id: "2", fullName: "Jane Smith", specialization: "English" },
-  { _id: "3", id: "3", fullName: "Ahmed Ali", specialization: "Science" },
-  { _id: "4", id: "4", fullName: "Fatima Khan", specialization: "History" },
-];
-
 export default function EditClassPage({ params }) {
   const router = useRouter();
-  const classId = params?.id ?? "class-1";
+  const dispatch = useDispatch();
+
+  const unwrappedParams = use(params);
+  const classId = unwrappedParams.id;
+
+  const { classDetails, loading: classLoading } = useSelector(state => state.getClassByID);
+  const { teacherNames, loading: teachersLoading } = useSelector(state => state.getTeachersName);
+  const { loading: updateLoading } = useSelector(state => state.updateClass);
+
   const [formData, setFormData] = useState(defaultForm);
   const [dropdownOpen, setDropdownOpen] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [prefilling, setPrefilling] = useState(true);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    setPrefilling(true);
-    const timer = setTimeout(() => {
-      setFormData({
-        name: "203 Abdirahman Jama Class",
-        code: "CLS-203",
-        subject: "Quran",
-        description: "Weekly Quran memorization lessons.",
-        teacherId: "2",
-        startDate: "2024-02-01",
-        endDate: "2024-06-30",
-      });
-      setPrefilling(false);
-    }, 400);
+    if (classId) {
+      dispatch(getClassByIDAction(classId));
+      dispatch(getTeachersName());
+    }
+  }, [classId, dispatch]);
 
-    return () => clearTimeout(timer);
-  }, [classId]);
+  useEffect(() => {
+    if (classDetails) {
+      setFormData({
+        name: classDetails.name || "",
+        code: classDetails.code || "",
+        subject: classDetails.subject || "",
+        description: classDetails.description || "",
+        teacherId: classDetails.teacherId?._id || "",
+        startDate: classDetails.startDate ? new Date(classDetails.startDate).toISOString().split('T')[0] : "",
+        endDate: classDetails.endDate ? new Date(classDetails.endDate).toISOString().split('T')[0] : "",
+      });
+    }
+  }, [classDetails]);
+
+  // Transform teacher data for dropdown
+  const teacherOptions = useMemo(() => {
+    if (!teacherNames) return [];
+    
+    return teacherNames.map(teacher => ({
+      value: teacher._id,
+      label: `${teacher.fullName} - ${teacher.specialization || "Teacher"}`
+    }));
+  }, [teacherNames]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -54,6 +71,12 @@ export default function EditClassPage({ params }) {
       ...prev,
       [name]: value,
     }));
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
   };
 
   const handleDropdownToggle = (name) => {
@@ -66,26 +89,75 @@ export default function EditClassPage({ params }) {
       [name]: value,
     }));
     setDropdownOpen(null);
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
   };
 
-  const selectedTeacherLabel = useMemo(() => {
-    const selected = mockTeachers.find((teacher) => teacher._id === formData.teacherId);
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.name.trim()) errors.name = "Class name is required";
+    if (!formData.subject.trim()) errors.subject = "Subject is required";
+    if (!formData.teacherId) errors.teacherId = "Teacher is required";
+    if (!formData.code.trim()) errors.code = "Class code is required";
+
+    if (formData.startDate && formData.endDate) {
+      const start = new Date(formData.startDate);
+      const end = new Date(formData.endDate);
+      if (end < start) {
+        errors.endDate = "End date cannot be before start date";
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+const selectedTeacherLabel = useMemo(() => {
+    if (!formData.teacherId || !teacherNames) return "";
+
+    const selected = teacherNames.find((teacher) => teacher._id === formData.teacherId);
     if (!selected) return "";
-    return `${selected.fullName} - ${selected.specialization}`;
-  }, [formData.teacherId]);
+
+    return `${selected.fullName} - ${selected.specialization || "Teacher"}`;
+}, [formData.teacherId, teacherNames]);
+
+// To this:
+const selectedTeacherValue = formData.teacherId;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
+
+    if (!validateForm()) return;
+
     try {
-      // TODO: Replace with API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      alert("Class updated successfully! (UI Testing Mode)");
-      router.push("/dashboard/class");
-    } finally {
-      setLoading(false);
+      const updateData = {
+        classId,
+        name: formData.name,
+        code: formData.code,
+        subject: formData.subject,
+        description: formData.description,
+        teacherId: formData.teacherId,
+        startDate: formData.startDate || undefined,
+        endDate: formData.endDate || undefined,
+      };
+
+      const result = await dispatch(updateClassAction(updateData)).unwrap();
+
+      if (result) {
+        alert("Class updated successfully!");
+        router.push("/dashboard/class");
+      }
+    } catch (error) {
+      alert(`Error updating class: ${error}`);
     }
   };
+
+  const isLoading = classLoading || teachersLoading || updateLoading;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
@@ -107,11 +179,13 @@ export default function EditClassPage({ params }) {
           </button>
         </div>
 
-        {prefilling ? (
+        {classLoading ? (
           <div className="py-20 text-center text-[#0B4B31] font-semibold">Loading class data...</div>
+        ) : !classDetails ? (
+          <div className="py-20 text-center text-red-600 font-semibold">Class not found</div>
         ) : (
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <CustomField
+            <FormInput
               label="Class Name"
               name="name"
               type="text"
@@ -119,9 +193,10 @@ export default function EditClassPage({ params }) {
               onChange={handleInputChange}
               placeholder="Class Name"
               required={true}
+              error={formErrors.name}
             />
 
-            <CustomField
+            <FormInput
               label="Subject"
               name="subject"
               type="text"
@@ -129,13 +204,14 @@ export default function EditClassPage({ params }) {
               onChange={handleInputChange}
               placeholder="Subject"
               required={true}
+              error={formErrors.subject}
             />
 
-            <DropdownField
+            <SimpleDropdown
               label="Teacher"
               name="teacherId"
-              value={selectedTeacherLabel || "Select a teacher"}
-              options={mockTeachers}
+              value={selectedTeacherValue}
+              options={teacherOptions}
               onSelect={handleDropdownSelect}
               isOpen={dropdownOpen === "teacherId"}
               onToggle={handleDropdownToggle}
@@ -143,17 +219,28 @@ export default function EditClassPage({ params }) {
               required={true}
             />
 
-            <CustomField
+            {formErrors.teacherId && (
+              <p className="text-red-500 text-xs mt-1 ml-4">{formErrors.teacherId}</p>
+            )}
+
+            <FormInput
               label="Class Code"
               name="code"
               type="text"
               value={formData.code}
               onChange={handleInputChange}
               placeholder="Class Code"
+              required={true}
+              error={formErrors.code}
             />
 
             <div className="sm:col-span-2">
-              <label className="block font-normal text-sm text-[#000000] mb-1">Description</label>
+              <label className="block font-normal text-sm text-[#000000] mb-1">
+                Description
+                {formErrors.description && (
+                  <span className="text-red-600 text-xs ml-2">{formErrors.description}</span>
+                )}
+              </label>
               <textarea
                 name="description"
                 placeholder="Class Description"
@@ -164,33 +251,34 @@ export default function EditClassPage({ params }) {
               />
             </div>
 
-            <CustomField
+            <FormInput
               label="Start Date"
               name="startDate"
               placeholder="mm/dd/yyyy"
               type="date"
               value={formData.startDate}
               onChange={handleInputChange}
+              error={formErrors.startDate}
             />
 
-            <CustomField
+            <FormInput
               label="End Date"
               name="endDate"
               placeholder="mm/dd/yyyy"
               type="date"
               value={formData.endDate}
               onChange={handleInputChange}
+              error={formErrors.endDate}
             />
 
             <div className="sm:col-span-2 flex justify-center mt-4">
               <button
                 type="submit"
-                disabled={loading}
-                className={`bg-[#cedbd6] text-[#0B4B31] font-semibold px-8 py-3 rounded-full transition w-full sm:w-auto ${
-                  loading ? "opacity-60 cursor-not-allowed" : ""
-                }`}
+                disabled={isLoading}
+                className={`bg-[#cedbd6] text-[#0B4B31] font-semibold px-8 py-3 rounded-full transition w-full sm:w-auto ${isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#b8c9c2]"
+                  }`}
               >
-                {loading ? "Saving Changes..." : "Save Changes"}
+                {updateLoading ? "Saving Changes..." : "Save Changes"}
               </button>
             </div>
           </form>
@@ -199,6 +287,3 @@ export default function EditClassPage({ params }) {
     </div>
   );
 }
-
-
-

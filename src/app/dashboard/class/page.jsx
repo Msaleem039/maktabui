@@ -18,6 +18,8 @@ export default function ClassPage() {
   const dispatch = useDispatch();
 
   const { classes, loading, error } = useSelector((state) => state.getAllClasses);
+  console.log("classes",classes);
+  
   const user = useMemo(() => {
     const userCookie = getCookie("user");
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
@@ -134,7 +136,6 @@ export default function ClassPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="space-y-8">

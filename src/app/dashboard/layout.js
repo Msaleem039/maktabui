@@ -196,10 +196,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       }
     }
 
-    // Normalize role name (handle case variations)
     if (role) {
       const normalizedRole = role.trim();
-      // Map common variations
       if (normalizedRole.toLowerCase() === "super admin" || normalizedRole === "SuperAdmin") {
         return "Super Admin";
       }
@@ -255,7 +253,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Class", path: `${basePath}/class` },
           { name: "Create Class", path: `${basePath}/class/createClass` },
-          { name: "Subject", path: `${basePath}/subject` },
           { name: "Timetable", path: `${basePath}/class/timetable` },
         ],
       },
@@ -354,7 +351,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         return [
           roleDashboardItems[userRole],
           allItems.class,
-          allItems.students,
+          {
+            ...allItems.students,
+            subItems: allItems.students.subItems.filter(
+              (item) => item.name === "Student" // Only show "Student", hide "Add Student" and "Waiting List"
+            )
+          },
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(

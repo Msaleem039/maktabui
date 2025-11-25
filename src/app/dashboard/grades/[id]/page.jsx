@@ -3,26 +3,34 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { getGrades } from "@/redux/slices/gradeSlices/gradeSlices";
+import { getGradeById, clearDetailStatus } from "@/redux/slices/gradeSlices/gradeSlices";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 
 export default function ViewGradePage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { grades, status, error } = useSelector((state) => state.grade);
+  const { currentGrade, detailStatus, detailError } = useSelector((state) => state.grade);
   const [grade, setGrade] = useState(null);
 
   useEffect(() => {
-    dispatch(getGrades());
-  }, [dispatch]);
+    if (params?.id) {
+      dispatch(getGradeById({ gradeId: params.id }));
+    }
+  }, [dispatch, params?.id]);
 
   useEffect(() => {
-    if (grades && grades.length > 0 && params?.id) {
-      const foundGrade = grades.find((g) => g._id === params.id);
-      setGrade(foundGrade);
+    if (currentGrade) {
+      setGrade(currentGrade);
     }
-  }, [grades, params?.id]);
+  }, [currentGrade]);
+
+  useEffect(() => {
+    // Cleanup when component unmounts
+    return () => {
+      dispatch(clearDetailStatus());
+    };
+  }, [dispatch]);
 
   const calculatePercentage = (marksObtained, totalMarks) => {
     if (!totalMarks || totalMarks === 0) return "N/A";
@@ -69,7 +77,7 @@ export default function ViewGradePage() {
     });
   };
 
-  if (status === 'loading') {
+  if (detailStatus === 'loading') {
     return (
       <div className="space-y-8">
         <div className="flex items-center justify-center py-12">
@@ -82,12 +90,14 @@ export default function ViewGradePage() {
     );
   }
 
-  if (error || !grade) {
+  if (detailError || !grade) {
     return (
       <div className="space-y-8">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <p className="text-red-600">Grade not found</p>
+            <p className="text-red-600">
+              {detailError || "Grade not found"}
+            </p>
             <button
               onClick={() => router.push('/dashboard/grade')}
               className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
@@ -142,12 +152,24 @@ export default function ViewGradePage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-600">Student Name</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{grade.student?.studentName || "N/A"}</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {grade.student?.studentName || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-600">Email</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{grade.student?.email || "N/A"}</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {grade.student?.email || "N/A"}
+                </p>
               </div>
+              {grade.student?.rollNumber && (
+                <div>
+                  <p className="text-xs text-gray-600">Roll Number</p>
+                  <p className="text-sm font-medium text-[#1E1E1E]">
+                    {grade.student.rollNumber}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -156,12 +178,22 @@ export default function ViewGradePage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-600">Assessment/Assignment</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{assessmentInfo.title}</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {assessmentInfo.title}
+                </p>
               </div>
-              {grade.assignment?.subject && (
+              <div>
+                <p className="text-xs text-gray-600">Subject</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {grade.assignment?.subject || grade.assessment?.subject || "N/A"}
+                </p>
+              </div>
+              {grade.assignment?.class && (
                 <div>
-                  <p className="text-xs text-gray-600">Subject</p>
-                  <p className="text-sm font-medium text-[#1E1E1E]">{grade.assignment.subject}</p>
+                  <p className="text-xs text-gray-600">Class</p>
+                  <p className="text-sm font-medium text-[#1E1E1E]">
+                    {grade.assignment.class.name || grade.assignment.class.code || "N/A"}
+                  </p>
                 </div>
               )}
             </div>
@@ -172,11 +204,15 @@ export default function ViewGradePage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-600">Marks Obtained</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{grade.marksObtained} / {assessmentInfo.totalMarks}</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {grade.marksObtained} / {assessmentInfo.totalMarks}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-600">Percentage</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{percentage}</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {percentage}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-600">Grade</p>
@@ -192,20 +228,25 @@ export default function ViewGradePage() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-600">Status</p>
-                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${grade.status === "Graded"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
-                  }`}>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                  grade.status === "Graded" 
+                    ? "bg-green-100 text-green-800" 
+                    : "bg-yellow-100 text-yellow-800"
+                }`}>
                   {grade.status || "Pending"}
                 </span>
               </div>
               <div>
                 <p className="text-xs text-gray-600">Graded By</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{grade.gradedBy?.fullName || "N/A"}</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {grade.gradedBy?.fullName || "N/A"}
+                </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Date</p>
-                <p className="text-sm font-medium text-[#1E1E1E]">{formatDate(grade.createdAt)}</p>
+                <p className="text-xs text-gray-600">Graded Date</p>
+                <p className="text-sm font-medium text-[#1E1E1E]">
+                  {formatDate(grade.gradedAt || grade.createdAt)}
+                </p>
               </div>
             </div>
           </div>
@@ -221,4 +262,3 @@ export default function ViewGradePage() {
     </div>
   );
 }
-

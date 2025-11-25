@@ -172,11 +172,11 @@ const StudentProfile = ({
             </div>
 
             {/* Attendance Details Placeholder */}
-            <PlaceholderCard
+            {/* <PlaceholderCard
               icon={Calendar}
               title="Attendance Details"
               description="Detailed attendance records and history will appear here."
-            />
+            /> */}
           </div>
         );
       case "assignments":
@@ -223,11 +223,11 @@ const StudentProfile = ({
             </div>
 
             {/* Assignment Details Placeholder */}
-            <PlaceholderCard
+            {/* <PlaceholderCard
               icon={ClipboardList}
               title="Assignment Details"
               description="Detailed assignment submissions and grades will appear here."
-            />
+            /> */}
           </div>
         );
       default:
