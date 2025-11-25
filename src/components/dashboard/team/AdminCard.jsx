@@ -5,7 +5,7 @@ import { User, Edit, Trash2, ChevronDown, ChevronUp, Building2 } from "lucide-re
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const AdminCard = ({ admin, onDelete, isExpanded, onToggle, isInstitute = false }) => {
+const AdminCard = ({ key, admin, onDelete, isExpanded, onToggle, isInstitute = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
 
@@ -153,8 +153,10 @@ const AdminCard = ({ admin, onDelete, isExpanded, onToggle, isInstitute = false 
               <p className="text-gray-500 font-medium text-sm mb-3">Quick Actions</p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
+                  onClick={() => router.push(`/dashboard/team/admin/${admin._id}/detail`)}
                   className="flex-1 rounded-full bg-white border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-md flex items-center justify-center gap-2"
                 >
+                  <User size={16} />
                   View Profile
                 </button>
                 <button

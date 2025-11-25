@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import {
   Search,
@@ -15,92 +16,71 @@ import {
   PenLine,
   Clock4,
 } from "lucide-react";
-
-const teacherStats = [
-  {
-    label: "Active Classes",
-    value: 6,
-    sublabel: "This semester",
-    icon: BookOpen,
-  },
-  {
-    label: "Total Students",
-    value: 142,
-    sublabel: "Across classes",
-    icon: Users,
-  },
-  {
-    label: "Assignments Due",
-    value: 4,
-    sublabel: "This week",
-    icon: ClipboardList,
-  },
-];
-
-const upcomingLessons = [
-  {
-    time: "08:30 AM",
-    title: "Arabic Literature",
-    className: "Grade 8 • Room 204",
-    focus: "Poetry analysis & discussion",
-  },
-  {
-    time: "11:15 AM",
-    title: "Qur'an Studies",
-    className: "Grade 9 • Room 310",
-    focus: "Surah Al-Mulk review",
-  },
-  {
-    time: "02:00 PM",
-    title: "Islamic History",
-    className: "Grade 7 • Room 112",
-    focus: "Ottoman Empire timeline",
-  },
-];
-
-const assessments = [
-  {
-    title: "Weekly Tajweed Quiz",
-    className: "Grade 9",
-    due: "Tomorrow",
-    submissions: "12/28",
-    status: "In Progress",
-  },
-  {
-    title: "History Essay Draft",
-    className: "Grade 7",
-    due: "Oct 14",
-    submissions: "6/24",
-    status: "Not Started",
-  },
-  {
-    title: "Arabic Vocabulary Test",
-    className: "Grade 8",
-    due: "Oct 18",
-    submissions: "0/26",
-    status: "Scheduled",
-  },
-];
-
-const studentFocus = [
-  {
-    name: "Fatima Ali",
-    className: "Grade 7 • Islamic History",
-    status: "Absent twice this week",
-  },
-  {
-    name: "Yusuf Ibrahim",
-    className: "Grade 8 • Arabic",
-    status: "Assignment missing",
-  },
-  {
-    name: "Layla Hassan",
-    className: "Grade 9 • Qur'an Studies",
-    status: "Parent meeting Monday",
-  },
-];
+import { getTeacherDashboard } from "@/redux/slices/teacherSlices/teacherSlices";
+import { getCookie } from "cookies-next";
 
 export default function TeacherDashboardPage() {
+  const dispatch = useDispatch();
+  const {
+    stats,
+    upcomingLessons,
+    assessments,
+    studentFocus,
+    loading,
+    error
+  } = useSelector(state => state.teacherDashboard);
+
+
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+  useEffect(() => {
+    dispatch(getTeacherDashboard(user.id));
+  }, [dispatch, user.id]);
+
+  const defaultStats = [
+    {
+      label: "Active Classes",
+      value: 0,
+      sublabel: "This semester",
+      icon: BookOpen,
+    },
+    {
+      label: "Total Students",
+      value: 0,
+      sublabel: "Across classes",
+      icon: Users,
+    },
+    {
+      label: "Assignments Due",
+      value: 0,
+      sublabel: "This week",
+      icon: ClipboardList,
+    },
+  ];
+
+  const displayStats = stats?.data || defaultStats;
+  const displayLessons = upcomingLessons?.data || [];
+  const displayAssessments = assessments?.data || [];
+  const displayStudentFocus = studentFocus?.data || [];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-[#0B4B31]">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">Error loading dashboard: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col gap-6 p-4 sm:p-6 md:p-8">
       {/* Header */}
@@ -154,13 +134,15 @@ export default function TeacherDashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {teacherStats.map((stat) => (
+        {displayStats.map((stat, index) => (
           <div
             key={stat.label}
             className="rounded-2xl border border-[#E2E7E4] bg-white px-5 py-6 shadow-sm flex items-center gap-4"
           >
             <div className="w-12 h-12 rounded-full bg-[#0B4B31]/10 flex items-center justify-center">
-              <stat.icon size={20} className="text-[#0B4B31]" />
+              {index === 0 && <BookOpen size={20} className="text-[#0B4B31]" />}
+              {index === 1 && <Users size={20} className="text-[#0B4B31]" />}
+              {index === 2 && <ClipboardList size={20} className="text-[#0B4B31]" />}
             </div>
             <div>
               <p className="text-sm text-[#5E6C64]">{stat.sublabel}</p>
@@ -177,36 +159,42 @@ export default function TeacherDashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[#0B4B31] flex items-center gap-2">
               <Calendar size={18} />
-              Today’s Schedule
+              Today's Schedule
             </h2>
             <button className="text-sm text-[#0B4B31] font-semibold">See Weekly ↗</button>
           </div>
 
           <div className="space-y-4">
-            {upcomingLessons.map((lesson, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl border border-[#D2E2DB] px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3"
-              >
-                <div className="flex items-center gap-3 w-full sm:w-48">
-                  <div className="w-12 h-12 rounded-full bg-[#0B4B31]/10 flex items-center justify-center text-[#0B4B31] font-semibold">
-                    {lesson.time.split(" ")[0]}
+            {displayLessons.length > 0 ? (
+              displayLessons.map((lesson, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-[#D2E2DB] px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3"
+                >
+                  <div className="flex items-center gap-3 w-full sm:w-48">
+                    <div className="w-12 h-12 rounded-full bg-[#0B4B31]/10 flex items-center justify-center text-[#0B4B31] font-semibold">
+                      {lesson.time.split(" ")[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#0B4B31]">{lesson.time}</p>
+                      <p className="text-xs text-gray-500">Start</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#0B4B31]">{lesson.time}</p>
-                    <p className="text-xs text-gray-500">Start</p>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-[#0B4B31]">{lesson.title}</p>
+                    <p className="text-xs text-gray-500">{lesson.className}</p>
+                    <p className="text-xs text-gray-600 mt-1">{lesson.focus}</p>
                   </div>
+                  <button className="text-xs font-semibold text-[#0B4B31] rounded-full border border-[#0B4B31]/20 px-4 py-1">
+                    View Lesson
+                  </button>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#0B4B31]">{lesson.title}</p>
-                  <p className="text-xs text-gray-500">{lesson.className}</p>
-                  <p className="text-xs text-gray-600 mt-1">{lesson.focus}</p>
-                </div>
-                <button className="text-xs font-semibold text-[#0B4B31] rounded-full border border-[#0B4B31]/20 px-4 py-1">
-                  View Lesson
-                </button>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No lessons scheduled for today
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -221,23 +209,29 @@ export default function TeacherDashboardPage() {
           </div>
 
           <div className="space-y-4">
-            {studentFocus.map((student, idx) => (
-              <div key={idx} className="rounded-2xl border border-[#D2E2DB] px-4 py-3">
-                <p className="text-sm font-semibold text-[#0B4B31]">{student.name}</p>
-                <p className="text-xs text-gray-500">{student.className}</p>
-                <p className="text-xs text-[#C43B30] mt-2">{student.status}</p>
-                <div className="flex gap-2 mt-3">
-                  <button className="text-xs flex items-center gap-1 rounded-full border border-[#0B4B31]/30 px-3 py-1 text-[#0B4B31]">
-                    <MessageSquareText size={12} />
-                    Message
-                  </button>
-                  <button className="text-xs flex items-center gap-1 rounded-full border border-[#0B4B31]/30 px-3 py-1 text-[#0B4B31]">
-                    <PenLine size={12} />
-                    Notes
-                  </button>
+            {displayStudentFocus.length > 0 ? (
+              displayStudentFocus.map((student, idx) => (
+                <div key={idx} className="rounded-2xl border border-[#D2E2DB] px-4 py-3">
+                  <p className="text-sm font-semibold text-[#0B4B31]">{student.name}</p>
+                  <p className="text-xs text-gray-500">{student.className}</p>
+                  <p className="text-xs text-[#C43B30] mt-2">{student.status}</p>
+                  <div className="flex gap-2 mt-3">
+                    <button className="text-xs flex items-center gap-1 rounded-full border border-[#0B4B31]/30 px-3 py-1 text-[#0B4B31]">
+                      <MessageSquareText size={12} />
+                      Message
+                    </button>
+                    <button className="text-xs flex items-center gap-1 rounded-full border border-[#0B4B31]/30 px-3 py-1 text-[#0B4B31]">
+                      <PenLine size={12} />
+                      Notes
+                    </button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No students need focus at the moment
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -264,30 +258,39 @@ export default function TeacherDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {assessments.map((item, idx) => (
-                <tr key={idx} className="border-b border-[#E2E7E4]">
-                  <td className="px-4 py-3 font-semibold text-[#1E1E1E]">{item.title}</td>
-                  <td className="px-4 py-3 text-[#5E6C64]">{item.className}</td>
-                  <td className="px-4 py-3 text-[#5E6C64] flex items-center gap-1">
-                    <Clock4 size={14} />
-                    {item.due}
-                  </td>
-                  <td className="px-4 py-3 text-[#5E6C64]">{item.submissions}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                        item.status === "In Progress"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : item.status === "Not Started"
-                          ? "bg-gray-100 text-gray-600"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
+              {displayAssessments.length > 0 ? (
+                displayAssessments.map((item, idx) => (
+                  <tr key={idx} className="border-b border-[#E2E7E4]">
+                    <td className="px-4 py-3 font-semibold text-[#1E1E1E]">{item.title}</td>
+                    <td className="px-4 py-3 text-[#5E6C64]">{item.className}</td>
+                    <td className="px-4 py-3 text-[#5E6C64] flex items-center gap-1">
+                      <Clock4 size={14} />
+                      {item.due}
+                    </td>
+                    <td className="px-4 py-3 text-[#5E6C64]">{item.submissions}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${item.status === "In Progress"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : item.status === "Not Started"
+                              ? "bg-gray-100 text-gray-600"
+                              : item.status === "Scheduled"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-green-100 text-green-700"
+                          }`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                    No assessments found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -295,4 +298,3 @@ export default function TeacherDashboardPage() {
     </div>
   );
 }
-

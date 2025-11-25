@@ -71,9 +71,22 @@ export const createParent = createAsyncThunk(
 
 export const getAllParents = createAsyncThunk(
   `parents/getAllParents`,
-  async (parentData, { rejectWithValue }) => {
+  async (requestData = {}, { rejectWithValue, getState }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllParents`, parentData);
+      const state = getState();
+      const { allParents } = state;
+
+      const payload = {
+        page: requestData.page || allParents.pagination?.currentPage || 1,
+        limit: requestData.limit || allParents.pagination?.itemsPerPage || 10,
+        search: requestData.search !== undefined ? requestData.search : allParents.search,
+        ...requestData
+      };
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllParents`,
+        payload
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -291,18 +304,51 @@ const createParentSlice = createSlice({
 const getAllParentsSlice = createSlice({
   name: "allParents",
   initialState: {
-    parents: null,
-    pagination: null,
+    parents: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 0,
+      totalItems: 0,
+      itemsPerPage: 10,
+      hasNextPage: false,
+      hasPrevPage: false
+    },
     status: "idle",
     error: null,
+    search: "",
+    filters: {}
   },
   reducers: {
     resetAllParentsState: (state) => {
-      state.parents = null;
-      state.pagination = null;
+      state.parents = [];
+      state.pagination = {
+        currentPage: 1,
+        totalPages: 0,
+        totalItems: 0,
+        itemsPerPage: 10,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
       state.status = "idle";
       state.error = null;
+      state.search = "";
+      state.filters = {};
     },
+    setParentsPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
+    },
+    setParentsSearch: (state, action) => {
+      state.search = action.payload;
+    },
+    setParentsLimit: (state, action) => {
+      state.pagination.itemsPerPage = action.payload;
+    },
+    clearParentsError: (state) => {
+      state.error = null;
+    },
+    setParentsFilters: (state, action) => {
+      state.filters = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -312,8 +358,15 @@ const getAllParentsSlice = createSlice({
       })
       .addCase(getAllParents.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.parents = action.payload.data;
-        state.pagination = action.payload.pagination;
+        state.parents = action.payload.data || [];
+
+        // Update pagination info
+        if (action.payload.pagination) {
+          state.pagination = {
+            ...state.pagination,
+            ...action.payload.pagination
+          };
+        }
       })
       .addCase(getAllParents.rejected, (state, action) => {
         state.status = "failed";
@@ -758,6 +811,11 @@ export const {
 
 export const {
   resetAllParentsState,
+  setParentsPage,
+  setParentsSearch,
+  setParentsLimit,
+  clearParentsError,
+  setParentsFilters
 } = getAllParentsSlice.actions;
 
 export const {

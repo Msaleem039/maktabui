@@ -476,11 +476,11 @@ export default function TeacherAssignmentsPage() {
               Showing {filteredAssignments.length} of {teacherAssignments.length} assignments
             </div>
             <div className="flex items-center gap-3">
-              <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
+              {/* <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
                 <option>Display 10</option>
                 <option>Display 20</option>
                 <option>Display 50</option>
-              </select>
+              </select> */}
               <div className="flex items-center gap-2">
                 <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
                   ‹

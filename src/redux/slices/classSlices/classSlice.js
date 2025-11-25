@@ -15,13 +15,30 @@ export const createClassAction = createAsyncThunk(
 
 export const getAllClassesAction = createAsyncThunk(
   `classes/getAllClasses`,
-  async (requestData = {}, { rejectWithValue }) => {
+  async (requestData = {}, { rejectWithValue, getState }) => {
     try {
+      const state = getState();
+      const { getAllClasses } = state;
+      
+      const payload = {
+        page: requestData.page || getAllClasses.pagination.currentPage,
+        limit: requestData.limit || 10,
+        ...requestData
+      };
+
+      if (requestData.search === undefined && getAllClasses.search) {
+        payload.search = getAllClasses.search;
+      }
+
+      if (requestData.filters === undefined && Object.keys(getAllClasses.filters).length > 0) {
+        payload.filters = getAllClasses.filters;
+      }
+
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClasses`,
-        requestData
+        payload
       );
-      return res.data.classes;
+      return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -102,7 +119,20 @@ const createClassSlice = createSlice({
 
 const getAllClassesSlice = createSlice({
   name: "getAllClasses",
-  initialState: { loading: false, classes: [], error: null },
+  initialState: { 
+    loading: false, 
+    classes: [], 
+    error: null,
+    pagination: {
+      currentPage: 1,
+      totalPages: 0,
+      totalCount: 0,
+      hasNextPage: false,
+      hasPrevPage: false
+    },
+    search: "",
+    filters: {}
+  },
   reducers: {
     clearAllClassesError: (state) => {
       state.error = null;
@@ -111,6 +141,24 @@ const getAllClassesSlice = createSlice({
       state.loading = false;
       state.classes = [];
       state.error = null;
+      state.pagination = {
+        currentPage: 1,
+        totalPages: 0,
+        totalCount: 0,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
+      state.search = "";
+      state.filters = {};
+    },
+    setAllClassesPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
+    },
+    setAllClassesSearch: (state, action) => {
+      state.search = action.payload;
+    },
+    setAllClassesFilters: (state, action) => {
+      state.filters = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -121,7 +169,29 @@ const getAllClassesSlice = createSlice({
       })
       .addCase(getAllClassesAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.classes = action.payload;
+        state.classes = action.payload.classes || action.payload;
+        
+        if (action.payload.classes !== undefined) {
+          state.classes = action.payload.classes;
+          state.pagination = {
+            currentPage: action.payload.currentPage || 1,
+            totalPages: action.payload.totalPages || 0,
+            totalCount: action.payload.totalCount || action.payload.count || 0,
+            hasNextPage: action.payload.hasNextPage || false,
+            hasPrevPage: action.payload.hasPrevPage || false
+          };
+        } else {
+          // Old format without pagination
+          state.classes = action.payload;
+          state.pagination = {
+            currentPage: 1,
+            totalPages: 1,
+            totalCount: action.payload.length || 0,
+            hasNextPage: false,
+            hasPrevPage: false
+          };
+        }
+        
         state.error = null;
       })
       .addCase(getAllClassesAction.rejected, (state, action) => {
@@ -257,7 +327,8 @@ export const {
 
 export const { 
   clearAllClassesError, 
-  resetAllClassesState 
+  resetAllClassesState,
+  setAllClassesPage
 } = getAllClassesSlice.actions;
 
 export const { 

@@ -27,11 +27,26 @@ export const getStudentNamesWithIds = createAsyncThunk(
 
 export const getAllStudents = createAsyncThunk(
   `students/getAllStudents`,
-  async (requestData = {}, { rejectWithValue }) => {
+  async (requestData = {}, { rejectWithValue, getState }) => {
     try {
+      // Get current state to include pagination and search if not provided
+      const state = getState();
+      const { allStudents } = state;
+      
+      const payload = {
+        page: requestData.page || allStudents.pagination.currentPage,
+        limit: requestData.limit || allStudents.pagination.limit,
+        ...requestData
+      };
+
+      // Include search from state if not explicitly provided
+      if (requestData.search === undefined && allStudents.search) {
+        payload.search = allStudents.search;
+      }
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllStudent`,
-        requestData
+        payload
       );
       return response.data;
     } catch (error) {
@@ -159,13 +174,43 @@ const getAllStudentsSlice = createSlice({
     students: [],
     status: "idle",
     error: null,
+    search: "",
+    pagination: {
+      currentPage: 1,
+      totalPages: 0,
+      totalCount: 0,
+      limit: 10,
+      hasNextPage: false,
+      hasPrevPage: false
+    }
   },
   reducers: {
     resetAllStudentsState: (state) => {
       state.students = [];
       state.status = "idle";
       state.error = null;
+      state.search = "";
+      state.pagination = {
+        currentPage: 1,
+        totalPages: 0,
+        totalCount: 0,
+        limit: 10,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
     },
+    setStudentsPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
+    },
+    setStudentsSearch: (state, action) => {
+      state.search = action.payload;
+    },
+    setStudentsLimit: (state, action) => {
+      state.pagination.limit = action.payload;
+    },
+    clearStudentsError: (state) => {
+      state.error = null;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -176,6 +221,13 @@ const getAllStudentsSlice = createSlice({
       .addCase(getAllStudents.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.students = action.payload.students || [];
+        
+        if (action.payload.pagination) {
+          state.pagination = {
+            ...state.pagination,
+            ...action.payload.pagination
+          };
+        }
       })
       .addCase(getAllStudents.rejected, (state, action) => {
         state.status = "failed";
@@ -516,7 +568,7 @@ const updateStudentSlice = createSlice({
 });
 
 export const { resetCreateStudentState } = createStudentSlice.actions;
-export const { resetAllStudentsState } = getAllStudentsSlice.actions;
+export const { resetAllStudentsState,setStudentsPage } = getAllStudentsSlice.actions;
 export const { resetStudentByIdState } = getStudentByIdSlice.actions;
 export const { resetWaitlistStudentsState } = getAllWaitlistStudentsSlice.actions;
 export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;

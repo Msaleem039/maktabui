@@ -5,21 +5,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllClassesAction } from "@/redux/slices/classSlices/classSlice";
-import { getCookie, deleteCookie } from "cookies-next";
+import { 
+  getAllClassesAction, 
+  setAllClassesPage 
+} from "@/redux/slices/classSlices/classSlice";
+import { getCookie } from "cookies-next";
 
 export default function ClassPage() {
-
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [filteredClasses, setFilteredClasses] = useState([]);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const dropdownRefs = useRef({});
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { classes, loading, error } = useSelector((state) => state.getAllClasses);
-  console.log("classes",classes);
-  
+  const { 
+    classes, 
+    loading, 
+    error, 
+    pagination,
+    search: storeSearch 
+  } = useSelector((state) => state.getAllClasses);
+
   const user = useMemo(() => {
     const userCookie = getCookie("user");
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
@@ -31,32 +38,38 @@ export default function ClassPage() {
     { label: "Remove", icon: Trash2, action: "remove" },
   ];
 
+  // Debounce search input
   useEffect(() => {
-    let requestData = {};
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchValue);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  // Fetch classes when user, debounced search, or pagination changes
+  useEffect(() => {
+    let requestData = {
+      page: pagination.currentPage,
+      limit: 10,
+      search: debouncedSearch
+    };
 
     if (user?.role === "Student" && user?.id) {
-      requestData = { studentId: user.id };
+      requestData.studentId = user.id;
     } else if (user?.role === "Teacher" && user?.id) {
-      requestData = { teacherId: user.id };
+      requestData.teacherId = user.id;
     }
 
     dispatch(getAllClassesAction(requestData));
-  }, [dispatch, user]);
+  }, [dispatch, user, debouncedSearch, pagination.currentPage]);
 
+  // Sync local search with store search on mount
   useEffect(() => {
-    if (classes && classes.length > 0) {
-      const filtered = classes.filter((classItem) => {
-        const searchLower = searchValue.toLowerCase();
-        return (
-          classItem.name?.toLowerCase().includes(searchLower) ||
-          classItem.subject?.toLowerCase().includes(searchLower) ||
-          classItem.code?.toLowerCase().includes(searchLower));
-      });
-      setFilteredClasses(filtered);
-    } else {
-      setFilteredClasses([]);
+    if (storeSearch) {
+      setSearchValue(storeSearch);
     }
-  }, [searchValue, classes]);
+  }, [storeSearch]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,7 +105,29 @@ export default function ClassPage() {
     setOpenDropdownId(null);
   };
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    // Reset to page 1 when searching
+    if (value !== debouncedSearch) {
+      dispatch(setAllClassesPage(1));
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      dispatch(setAllClassesPage(newPage));
+    }
+  };
+
+  const handleLimitChange = (e) => {
+    const newLimit = parseInt(e.target.value);
+    // You can add limit change functionality here
+    console.log("Change limit to:", newLimit);
+  };
+
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -100,8 +135,45 @@ export default function ClassPage() {
     });
   };
 
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const current = pagination.currentPage;
+    const total = pagination.totalPages;
+    
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      } else if (current >= total - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = total - 4; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      }
+    }
+    
+    return pages;
+  };
+
   // Loading state
-  if (loading) {
+  if (loading && classes.length === 0) {
     return (
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -113,7 +185,7 @@ export default function ClassPage() {
               MaktabOS
             </h1>
           </div>
-          {user?.role === "Admin" || user?.role === "Super Admin" && (
+          {(user?.role === "Admin" || user?.role === "Super Admin") && (
             <Link
               href="/dashboard/class/createClass"
               className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
@@ -136,7 +208,7 @@ export default function ClassPage() {
     );
   }
 
-  if (error) {
+  if (error && classes.length === 0) {
     return (
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -148,7 +220,7 @@ export default function ClassPage() {
               MaktabOS
             </h1>
           </div>
-          {user?.role === "Admin" || user?.role === "Super Admin" && (
+          {(user?.role === "Admin" || user?.role === "Super Admin") && (
             <Link
               href="/dashboard/class/createClass"
               className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
@@ -187,7 +259,7 @@ export default function ClassPage() {
             MaktabOS
           </h1>
         </div>
-        {user?.role === "Admin" || user?.role === "Super Admin" && (
+        {(user?.role === "Admin" || user?.role === "Super Admin") && (
           <Link
             href="/dashboard/class/createClass"
             className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
@@ -217,7 +289,7 @@ export default function ClassPage() {
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Search by class name, subject, or code..."
               className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
             />
@@ -236,8 +308,8 @@ export default function ClassPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredClasses.length > 0 ? (
-                filteredClasses.map((classItem) => (
+              {classes.length > 0 ? (
+                classes.map((classItem) => (
                   <tr
                     key={classItem._id}
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
@@ -294,7 +366,7 @@ export default function ClassPage() {
               ) : (
                 <tr>
                   <td colSpan="6" className="px-4 py-8 text-center text-[#8A928F]">
-                    {classes.length === 0 ? "No classes found." : "No classes match your search."}
+                    {debouncedSearch ? "No classes match your search." : "No classes found."}
                   </td>
                 </tr>
               )}
@@ -303,34 +375,56 @@ export default function ClassPage() {
         </div>
 
         {/* Pagination */}
-        {filteredClasses.length > 0 && (
+        {pagination.totalCount > 0 && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[#8A928F]">
-              Showing {filteredClasses.length} of {classes.length} entries
+              Showing {classes.length} of {pagination.totalCount} entries
+              {debouncedSearch && " (filtered)"}
             </div>
             <div className="flex items-center gap-3">
-              <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-                <option>Display 10</option>
-                <option>Display 20</option>
-                <option>Display 50</option>
-              </select>
+              {/* <select 
+                onChange={handleLimitChange}
+                className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="10">Display 10</option>
+                <option value="20">Display 20</option>
+                <option value="50">Display 50</option>
+              </select> */}
               <div className="flex items-center gap-2">
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                <button 
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
+                    pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                  }`}
+                >
                   ‹
                 </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  1
-                </button>
-                <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                  2
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  3
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  4
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === 'number' && handlePageChange(page)}
+                    disabled={page === '...'}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${
+                      page === pagination.currentPage
+                        ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                        : page === '...'
+                        ? 'bg-white text-[#0B4B31] cursor-default'
+                        : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
+                    pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                  }`}
+                >
                   ›
                 </button>
               </div>

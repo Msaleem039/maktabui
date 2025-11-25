@@ -3,332 +3,265 @@ import { useState, useEffect, useMemo } from "react";
 import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createClassAction } from "@/redux/slices/classSlices/classSlice";
-import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices"; 
+import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { getCookie } from "cookies-next";
-
-const CustomField = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
-  if (type === "textarea") {
-    return (
-      <div className={className}>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {label} {required && "*"}
-        </label>
-        <textarea
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          required={required}
-          rows="3"
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-2xl px-4 py-3 outline-none resize-none focus:ring-2 focus:ring-[#0B4B31]/30"
-        />
-      </div>
-    );
-  }
-
-  if (type === "date") {
-    return (
-      <CustomDatePicker
-        label={label}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className={className}
-      />
-    );
-  }
-
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-      />
-    </div>
-  );
-};
-
-const DropdownField = ({ label, name, value, options, onSelect, isOpen, onToggle, placeholder, required = false, className = "", disabled = false }) => {
-  return (
-    <div className={`relative ${className}`}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <div
-        className={`w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30 ${
-          disabled ? "opacity-60 cursor-not-allowed" : ""
-        }`}
-        onClick={() => !disabled && onToggle(name)}
-      >
-        <span className={value ? "text-[#0B4B31]" : "text-[#0B4B31]/60"}>
-          {value || placeholder}
-        </span>
-        {!disabled && <span className="text-[#0B4B31]">▾</span>}
-      </div>
-      {isOpen && !disabled && (
-        <div className="absolute w-full bg-white border border-[#D2E2DB] rounded-xl shadow-lg z-10 mt-2 max-h-48 overflow-y-auto">
-          {options.map((option) => (
-            <div
-              key={option._id || option.id}
-              onClick={() => onSelect(name, option._id || option.id, option)}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
-                value === (option._id || option.id) ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-              }`}
-            >
-              {option.fullName} - {option.specialization}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { FormInput } from "@/components/FormInput";
+import { SimpleDropdown } from "@/components/SimpleDropdown";
 
 const Page = () => {
-    const dispatch = useDispatch();
-    const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
-    const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
+  const dispatch = useDispatch();
+  const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
+  const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
+
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
+  const isTeacher = user?.role === "Teacher";
+
+  const [formData, setFormData] = useState({
+    name: "",
+    code: "",
+    subject: "",
+    description: "",
+    teacherId: "",
+    teacherName: "",
+    startDate: "",
+    endDate: ""
+  });
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+
+  useEffect(() => {
+    dispatch(getTeachersName());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isTeacher && user?.id) {
+      setFormData(prev => ({
+        ...prev,
+        teacherId: user.id,
+        teacherName: `Teacher - ${user.email.split('@')[0]}`
+      }));
+    }
+  }, [isTeacher, user]);
+
+  // Transform teacherNames to match SimpleDropdown expected format
+  const teacherOptions = useMemo(() => {
+    if (!teacherNames || !Array.isArray(teacherNames)) return [];
     
-    const user = useMemo(() => {
-        const userCookie = getCookie("user");
-        return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
-    }, []);
+    return teacherNames.map(teacher => ({
+      value: teacher.id || teacher._id, // Use appropriate ID field
+      label: `${teacher.fullName} - ${teacher.specialization}`,
+      teacherData: teacher // Keep original data for reference
+    }));
+  }, [teacherNames]);
 
-    const isTeacher = user?.role === "Teacher";
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-    const [formData, setFormData] = useState({
+  const handleDropdownToggle = (name) => {
+    if (isTeacher) return; // Don't allow dropdown interaction for teachers
+    setDropdownOpen(prev => prev === name ? null : name);
+  };
+
+  const handleDropdownSelect = (name, value) => {
+    if (isTeacher) return; // Don't allow selection for teachers
+
+    const selectedTeacher = teacherNames.find(teacher => 
+      teacher.id === value || teacher._id === value
+    );
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+      teacherName: selectedTeacher ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}` : ""
+    }));
+    setDropdownOpen(null);
+  };
+
+  const convertToISODate = (dateString) => {
+    if (!dateString) return "";
+    // Assuming dateString is in YYYY-MM-DD format (HTML date input)
+    return new Date(dateString).toISOString();
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // For teachers, ensure the teacherId is set to their own ID
+    const finalTeacherId = isTeacher ? user.id : formData.teacherId;
+
+    if (!formData.name || !formData.subject || !finalTeacherId) {
+      alert('Please fill all required fields: Name, Subject, and Teacher');
+      return;
+    }
+
+    const classData = {
+      name: formData.name,
+      code: formData.code,
+      subject: formData.subject,
+      description: formData.description,
+      teacherId: finalTeacherId,
+      startDate: convertToISODate(formData.startDate),
+      endDate: convertToISODate(formData.endDate)
+    };
+
+    dispatch(createClassAction(classData));
+  };
+
+  useEffect(() => {
+    if (createdClass) {
+      setFormData({
         name: "",
         code: "",
         subject: "",
         description: "",
-        teacherId: "",
-        teacherName: "",
+        teacherId: isTeacher ? user.id : "",
+        teacherName: isTeacher ? `Teacher - ${user.email.split('@')[0]}` : "",
         startDate: "",
         endDate: ""
-    });
-    const [dropdownOpen, setDropdownOpen] = useState(null);
+      });
+    }
+  }, [createdClass, isTeacher, user]);
 
-    useEffect(() => {
-        dispatch(getTeachersName());
-    }, [dispatch]);
+  // Get loading state for teachers
+  const fetchingTeachers = teachersStatus === "loading";
 
-    // Auto-set teacher ID if user is a teacher
-    useEffect(() => {
-        if (isTeacher && user?.id) {
-            setFormData(prev => ({
-                ...prev,
-                teacherId: user.id,
-                teacherName: `Teacher - ${user.email.split('@')[0]}` // Using email username as display name
-            }));
-        }
-    }, [isTeacher, user]);
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
+      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
+      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+      <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
+        <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Class</h2>
 
-    const handleDropdownToggle = (name) => {
-        if (isTeacher) return; // Don't allow dropdown interaction for teachers
-        setDropdownOpen(prev => prev === name ? null : name);
-    };
+        {/* Status Messages */}
+        {loading && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-full text-center mb-6">
+            Creating class...
+          </div>
+        )}
 
-    const handleDropdownSelect = (name, value, selectedTeacher) => {
-        if (isTeacher) return; // Don't allow selection for teachers
-        
-        setFormData(prev => ({
-            ...prev,
-            [name]: value,
-            teacherName: selectedTeacher ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}` : ""
-        }));
-        setDropdownOpen(null);
-    };
+        {createdClass && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full text-center mb-6">
+            Class created successfully! (UI Testing Mode)
+          </div>
+        )}
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center mb-6">
+            Error: {error}
+          </div>
+        )}
 
-        // For teachers, ensure the teacherId is set to their own ID
-        const finalTeacherId = isTeacher ? user.id : formData.teacherId;
+        {teachersError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center mb-6">
+            Error loading teachers: {teachersError}
+          </div>
+        )}
 
-        if (!formData.name || !formData.subject || !finalTeacherId) {
-            alert('Please fill all required fields: Name, Subject, and Teacher');
-            return;
-        }
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <FormInput
+              label="Class Name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Class Name"
+              required={true}
+            />
 
-        const classData = {
-            name: formData.name,
-            code: formData.code,
-            subject: formData.subject,
-            description: formData.description,
-            teacherId: finalTeacherId,
-            startDate: convertToISODate(formData.startDate),
-            endDate: convertToISODate(formData.endDate)
-        };
+            <FormInput
+              label="Subject"
+              name="subject"
+              type="text"
+              value={formData.subject}
+              onChange={handleInputChange}
+              placeholder="Subject"
+              required={true}
+            />
 
-        dispatch(createClassAction(classData));
-    };
+            <SimpleDropdown
+              label="Teacher"
+              name="teacherId"
+              value={formData.teacherId}
+              options={teacherOptions}
+              onSelect={handleDropdownSelect}
+              isOpen={dropdownOpen === "teacherId"}
+              onToggle={handleDropdownToggle}
+              placeholder={
+                isTeacher
+                  ? `Teacher - ${user.email.split('@')[0]}`
+                  : fetchingTeachers
+                    ? "Loading teachers..."
+                    : "Select a teacher"
+              }
+              required={true}
+              disabled={isTeacher}
+            />
 
-    useEffect(() => {
-        if (createdClass) {
-            setFormData({
-                name: "",
-                code: "",
-                subject: "",
-                description: "",
-                teacherId: isTeacher ? user.id : "",
-                teacherName: isTeacher ? `Teacher - ${user.email.split('@')[0]}` : "",
-                startDate: "",
-                endDate: ""
-            });
-        }
-    }, [createdClass, isTeacher, user]);
+            <FormInput
+              label="Class Code"
+              name="code"
+              type="text"
+              value={formData.code}
+              onChange={handleInputChange}
+              placeholder="Class Code (optional)"
+            />
 
-    // Get loading state for teachers
-    const fetchingTeachers = teachersStatus === "loading";
+            <FormInput
+              label="Start Date"
+              name="startDate"
+              type="date"
+              value={formData.startDate}
+              onChange={handleInputChange}
+            />
 
-    return (
-        <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
-            <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
+            <FormInput
+              label="End Date"
+              name="endDate"
+              type="date"
+              value={formData.endDate}
+              onChange={handleInputChange}
+            />
+          </div>
 
-            <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
-                <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Class</h2>
+          <div className="sm:col-span-2">
+            <FormInput
+              label="Description"
+              name="description"
+              type="textarea"
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder="Class Description (optional)"
+              className="w-full"
+            />
+          </div>
 
-                {/* Status Messages */}
-                {loading && (
-                    <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-full text-center mb-6">
-                        Creating class...
-                    </div>
-                )}
-
-                {createdClass && (
-                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full text-center mb-6">
-                        Class created successfully! (UI Testing Mode)
-                    </div>
-                )}
-
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center mb-6">
-                        Error: {error}
-                    </div>
-                )}
-
-                {teachersError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center mb-6">
-                        Error loading teachers: {teachersError}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <CustomField
-                            label="Class Name"
-                            name="name"
-                            type="text"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            placeholder="Class Name"
-                            required={true}
-                        />
-
-                        <CustomField
-                            label="Subject"
-                            name="subject"
-                            type="text"
-                            value={formData.subject}
-                            onChange={handleInputChange}
-                            placeholder="Subject"
-                            required={true}
-                        />
-
-                        <DropdownField
-                            label="Teacher"
-                            name="teacherId"
-                            value={formData.teacherName}
-                            options={teacherNames}
-                            onSelect={handleDropdownSelect}
-                            isOpen={dropdownOpen === "teacherId"}
-                            onToggle={handleDropdownToggle}
-                            placeholder={
-                                isTeacher 
-                                    ? `Teacher - ${user.email.split('@')[0]}` 
-                                    : fetchingTeachers 
-                                        ? "Loading teachers..." 
-                                        : "Select a teacher"
-                            }
-                            required={true}
-                            disabled={isTeacher} // Disable dropdown for teachers
-                        />
-
-                        <CustomField
-                            label="Class Code"
-                            name="code"
-                            type="text"
-                            value={formData.code}
-                            onChange={handleInputChange}
-                            placeholder="Class Code (optional)"
-                        />
-
-                        <CustomField
-                            label="Start Date"
-                            name="startDate"
-                            placeholder="MM-DD-YYYY"
-                            type="date"
-                            value={formData.startDate}
-                            onChange={handleInputChange}
-                        />
-
-                        <CustomField
-                            label="End Date"
-                            name="endDate"
-                            placeholder="MM-DD-YYYY"
-                            type="date"
-                            value={formData.endDate}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <CustomField
-                        label="Description"
-                        name="description"
-                        type="textarea"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        placeholder="Class Description (optional)"
-                        className="sm:col-span-2"
-                    />
-
-                    <div className="flex justify-center pt-6">
-                        <button
-                            type="submit"
-                            disabled={loading || fetchingTeachers}
-                            className={`rounded-full px-8 py-3 text-sm font-semibold transition ${
-                                loading || fetchingTeachers
-                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
-                            }`}
-                        >
-                            {loading ? 'Creating Class...' : 'Create Class'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+          <div className="flex justify-center pt-6">
+            <button
+              type="submit"
+              disabled={loading || fetchingTeachers}
+              className={`rounded-full px-8 py-3 text-sm font-semibold transition ${
+                loading || fetchingTeachers
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
+              }`}
+            >
+              {loading ? 'Creating Class...' : 'Create Class'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default Page;

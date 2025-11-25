@@ -10,6 +10,17 @@ const StudentTable = ({
   onSearchChange,
   searchValue = "",
   students = [],
+  pagination = {
+    currentPage: 1,
+    totalPages: 0,
+    totalCount: 0,
+    limit: 10,
+    hasNextPage: false,
+    hasPrevPage: false
+  },
+  onPageChange,
+  onLimitChange,
+  loading = false
 }) => {
 
   const router = useRouter();
@@ -32,6 +43,7 @@ const StudentTable = ({
 
   const tableData = useMemo(() => {
     if (transformedStudents.length > 0) return transformedStudents;
+    return [];
   }, [transformedStudents]);
 
   const [selectedId, setSelectedId] = useState(null);
@@ -39,18 +51,8 @@ const StudentTable = ({
   const [commentStudentId, setCommentStudentId] = useState(null);
   const [commentText, setCommentText] = useState("");
 
-  const filteredStudents = useMemo(() => {
-    if (!searchValue) return tableData;
-
-    const lowerSearch = searchValue.toLowerCase();
-    return tableData.filter(student =>
-      student.name?.toLowerCase().includes(lowerSearch) ||
-      student.parentName?.toLowerCase().includes(lowerSearch) ||
-      student.email?.toLowerCase().includes(lowerSearch) ||
-      student.phone?.includes(searchValue) ||
-      student.class?.toLowerCase().includes(lowerSearch)
-    );
-  }, [tableData, searchValue]);
+  // Remove client-side filtering since we're using server-side search
+  const filteredStudents = tableData;
 
   const handleSearchChange = (event) => {
     onSearchChange?.(event.target.value);
@@ -129,13 +131,55 @@ const StudentTable = ({
     return new Date(dateString).toLocaleDateString();
   };
 
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const current = pagination.currentPage;
+    const total = pagination.totalPages;
+    
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      } else if (current >= total - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = total - 4; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      }
+    }
+    
+    return pages;
+  };
+
+  const handlePageButtonClick = (page) => {
+    if (typeof page === 'number' && page >= 1 && page <= pagination.totalPages) {
+      onPageChange?.(page);
+    }
+  };
+
   return (
     <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold text-[#104D2E]">{title}</h2>
 
         <div className="flex flex-wrap items-center gap-3">
-
           <button
             type="button"
             className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
@@ -156,6 +200,16 @@ const StudentTable = ({
           />
         </label>
       </div>
+
+      {/* Loading overlay */}
+      {loading && (
+        <div className="mt-6 flex items-center justify-center py-4">
+          <div className="flex items-center gap-2 text-[#0B4B31]">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+            <span className="text-sm">Loading students...</span>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
@@ -270,44 +324,70 @@ const StudentTable = ({
       </div>
 
       {/* Show message when no students found */}
-      {filteredStudents?.length === 0 && (
+      {filteredStudents?.length === 0 && !loading && (
         <div className="text-center py-8 text-[#666]">
-          {students.length === 0 ? "No students found" : "No students match your search"}
+          {searchValue ? "No students match your search" : "No students found"}
         </div>
       )}
 
-      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-[#8A928F]">
-          Showing {filteredStudents?.length} of {students.length} students
-        </div>
-        <div className="flex items-center gap-3">
-          <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-            <option>Display 10</option>
-            <option>Display 20</option>
-            <option>Display 50</option>
-          </select>
-          <div className="flex items-center gap-2">
-            <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-              ‹
-            </button>
-            <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-              1
-            </button>
-            <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-              2
-            </button>
-            <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-              3
-            </button>
-            <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-              4
-            </button>
-            <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-              ›
-            </button>
+      {/* Pagination */}
+      {pagination.totalCount > 0 && (
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-[#8A928F]">
+            Showing {filteredStudents?.length} of {pagination.totalCount} students
+            {searchValue && " (filtered)"}
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={pagination.limit}
+              onChange={(e) => onLimitChange?.(parseInt(e.target.value))}
+              className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+            >
+              <option value="10">Display 10</option>
+              <option value="20">Display 20</option>
+              <option value="50">Display 50</option>
+            </select>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => handlePageButtonClick(pagination.currentPage - 1)}
+                disabled={!pagination.hasPrevPage}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
+                  pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                }`}
+              >
+                ‹
+              </button>
+              
+              {getPageNumbers().map((page, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageButtonClick(page)}
+                  disabled={page === '...'}
+                  className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${
+                    page === pagination.currentPage
+                      ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                      : page === '...'
+                      ? 'bg-white text-[#0B4B31] cursor-default'
+                      : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              
+              <button 
+                onClick={() => handlePageButtonClick(pagination.currentPage + 1)}
+                disabled={!pagination.hasNextPage}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
+                  pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                }`}
+              >
+                ›
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {commentStudentId && (
         <div

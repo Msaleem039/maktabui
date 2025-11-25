@@ -111,8 +111,11 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
             <div className="bg-white/60 rounded-xl p-4 border border-white/40 shadow-sm">
               <p className="text-gray-500 font-medium text-sm mb-3">Quick Actions</p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button className="flex-1 rounded-full bg-white border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-md flex items-center justify-center gap-2"
+                <button
+                  onClick={() => router.push(`/dashboard/team/teacher/${teacher._id}/detail`)}
+                  className="flex-1 rounded-full bg-white border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-md flex items-center justify-center gap-2"
                 >
+                  <User size={16} />
                   View Profile
                 </button>
                 <button

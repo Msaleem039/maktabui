@@ -2,46 +2,105 @@
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Download, Eye, Pencil, Trash2, CheckCircle, X, AlertTriangle } from "lucide-react";
+import { Eye, Pencil, Trash2, X, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllParents, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
+import {
+  getAllParents,
+  resetAllParentsState,
+  setParentsPage,
+  setParentsSearch
+} from "@/redux/slices/parentSlices/parentSlice";
 
 const ParentTable = ({
   title = "Parents",
   onSearchChange,
   searchValue = "",
   parents = [],
+  pagination = {
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0,
+    itemsPerPage: 10,
+    hasNextPage: false,
+    hasPrevPage: false
+  },
+  onPageChange,
+  onLimitChange,
+  loading = false
 }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { parents: reduxParents, pagination, status, error } = useSelector((state) => state.getAllParents);
+  const {
+    parents: reduxParents,
+    pagination: reduxPagination,
+    status,
+    error,
+    search: storeSearch
+  } = useSelector((state) => state.getAllParents);
 
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
   const [deleteModal, setDeleteModal] = useState({ open: false, parent: null });
-  const [commitModal, setCommitModal] = useState({ open: false, parent: null });
   const dropdownRefs = useRef({});
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(localSearch);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  // Sync local search with store search on mount
+  useEffect(() => {
+    if (storeSearch) {
+      setLocalSearch(storeSearch);
+    }
+  }, [storeSearch]);
+
+  // Fetch parents when debounced search or pagination changes
   useEffect(() => {
     dispatch(getAllParents({
-      page: 1,
-      limit: 10,
-      search: localSearch,
+      page: reduxPagination.currentPage,
+      limit: reduxPagination.itemsPerPage,
+      search: debouncedSearch,
       sortBy: "createdAt",
       sortOrder: "desc"
     }));
+  }, [dispatch, debouncedSearch, reduxPagination.currentPage, reduxPagination.itemsPerPage]);
 
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       dispatch(resetAllParentsState());
     };
-  }, [dispatch, localSearch]);
+  }, [dispatch]);
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setLocalSearch(value);
+    dispatch(setParentsSearch(value));
     onSearchChange?.(value);
+
+    // Reset to page 1 when searching
+    if (value !== debouncedSearch) {
+      dispatch(setParentsPage(1));
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= reduxPagination.totalPages) {
+      dispatch(setParentsPage(newPage));
+      onPageChange?.(newPage);
+    }
+  };
+
+  const handleLimitChange = (newLimit) => {
+    onLimitChange?.(newLimit);
   };
 
   const handleRowSelect = (parentId) => {
@@ -81,26 +140,12 @@ const ParentTable = ({
     setDeleteModal({ open: true, parent });
   };
 
-  const handleCommit = (event, parent) => {
-    event.stopPropagation();
-    setActionMenu({ id: null, openUp: false });
-    setCommitModal({ open: true, parent });
-  };
-
   const confirmDelete = () => {
     if (deleteModal.parent) {
       console.log("Delete parent:", deleteModal.parent.id);
       // TODO: Implement delete parent logic
       // dispatch(deleteParentAction(deleteModal.parent.id));
       setDeleteModal({ open: false, parent: null });
-    }
-  };
-
-  const confirmCommit = () => {
-    if (commitModal.parent) {
-      console.log("Commit parent:", commitModal.parent.id);
-      // TODO: Implement commit/save parent logic
-      setCommitModal({ open: false, parent: null });
     }
   };
 
@@ -146,18 +191,53 @@ const ParentTable = ({
     return [];
   }, [reduxParents, parents]);
 
-  const getInvoiceStatus = (parent) => {
-    if (parent.fee && parent.fee > 0) {
-      return { label: `$${parent.fee}`, tone: "overdue" };
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const current = reduxPagination.currentPage;
+    const total = reduxPagination.totalPages;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      } else if (current >= total - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = total - 4; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      }
     }
-    return { label: "Paid", tone: "paid" };
+
+    return pages;
+  };
+
+  const handlePageButtonClick = (page) => {
+    if (typeof page === 'number' && page >= 1 && page <= reduxPagination.totalPages) {
+      handlePageChange(page);
+    }
   };
 
   return (
     <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold text-[#0B4B31]">{title}</h2>
-
       </div>
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -166,14 +246,17 @@ const ParentTable = ({
           <input
             value={localSearch}
             onChange={handleSearchChange}
-            placeholder="Search by name, email, or phone..."
+            placeholder="Search by name, email, phone, or ID..."
             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
 
         {/* Loading State */}
         {status === "loading" && (
-          <div className="text-sm text-[#0B4B31]">Loading parents...</div>
+          <div className="flex items-center gap-2 text-sm text-[#0B4B31]">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+            Loading parents...
+          </div>
         )}
 
         {/* Error State */}
@@ -184,10 +267,21 @@ const ParentTable = ({
         {/* Results Count */}
         {status === "succeeded" && reduxParents && (
           <div className="text-sm text-[#0B4B31]">
-            Showing {reduxParents.length} of {pagination?.totalItems || 0} parents
+            Showing {reduxParents.length} of {reduxPagination?.totalItems || 0} parents
+            {localSearch && " (filtered)"}
           </div>
         )}
       </div>
+
+      {/* Loading overlay for table */}
+      {loading && (
+        <div className="mt-6 flex items-center justify-center py-8">
+          <div className="flex items-center gap-2 text-[#0B4B31]">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+            <span>Loading parents...</span>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
@@ -240,7 +334,7 @@ const ParentTable = ({
                   <td className="px-4 py-3 text-black">{parent.spouse}</td>
                   <td className="px-4 py-3 text-black">{parent.children}</td>
                   <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <div 
+                    <div
                       ref={(el) => (dropdownRefs.current[parent.id] = el)}
                       className="relative inline-block text-left"
                     >
@@ -281,14 +375,6 @@ const ParentTable = ({
                             <Trash2 size={16} className="text-[#C43B30]" />
                             Delete
                           </button>
-                          <button
-                            type="button"
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
-                            onClick={(event) => handleCommit(event, parent)}
-                          >
-                            <CheckCircle size={16} className="text-[#0B4B31]" />
-                            Commit
-                          </button>
                         </div>
                       )}
                     </div>
@@ -302,10 +388,66 @@ const ParentTable = ({
         {/* Empty State */}
         {status === "succeeded" && (!tableData || tableData.length === 0) && (
           <div className="text-center py-8 text-[#0B4B31]">
-            No parents found {localSearch && `for "${localSearch}"`}
+            {localSearch ? `No parents found for "${localSearch}"` : "No parents found"}
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {reduxPagination.totalItems > 0 && (
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-[#8A928F]">
+            Showing {tableData.length} of {reduxPagination.totalItems} parents
+            {localSearch && " (filtered)"}
+          </div>
+          <div className="flex items-center gap-3">
+            {/* <select 
+              value={reduxPagination.itemsPerPage}
+              onChange={(e) => handleLimitChange(parseInt(e.target.value))}
+              className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+            >
+              <option value="10">Display 10</option>
+              <option value="20">Display 20</option>
+              <option value="50">Display 50</option>
+            </select> */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(reduxPagination.currentPage - 1)}
+                disabled={!reduxPagination.hasPrevPage}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${reduxPagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                  }`}
+              >
+                ‹
+              </button>
+
+              {getPageNumbers().map((page, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageButtonClick(page)}
+                  disabled={page === '...'}
+                  className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === reduxPagination.currentPage
+                      ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                      : page === '...'
+                        ? 'bg-white text-[#0B4B31] cursor-default'
+                        : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                    }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(reduxPagination.currentPage + 1)}
+                disabled={!reduxPagination.hasNextPage}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${reduxPagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                  }`}
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteModal.open && (
@@ -356,61 +498,6 @@ const ParentTable = ({
                 className="flex-1 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
               >
                 Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Commit Confirmation Modal */}
-      {commitModal.open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setCommitModal({ open: false, parent: null });
-            }
-          }}
-        >
-          <div className="relative w-full max-w-md rounded-[28px] bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0B4B31]/10">
-                  <CheckCircle size={24} className="text-[#0B4B31]" />
-                </div>
-                <h2 className="text-lg font-semibold text-[#0B4B31]">
-                  Commit Changes
-                </h2>
-              </div>
-              <button
-                onClick={() => setCommitModal({ open: false, parent: null })}
-                className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="px-6 py-6">
-              <p className="text-sm text-gray-700 mb-2">
-                Are you sure you want to commit changes for <span className="font-semibold text-[#0B4B31]">{commitModal.parent?.name}</span>?
-              </p>
-              <p className="text-xs text-gray-500">
-                All pending changes will be saved and applied.
-              </p>
-            </div>
-
-            <div className="flex gap-3 border-t border-gray-200 px-6 py-4">
-              <button
-                onClick={() => setCommitModal({ open: false, parent: null })}
-                className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmCommit}
-                className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-              >
-                Commit
               </button>
             </div>
           </div>

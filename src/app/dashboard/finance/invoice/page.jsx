@@ -14,7 +14,12 @@ import {
   BarElement,
   Title,
 } from "chart.js";
-import { getAllInvoicesAction } from "@/redux/slices/invoiceSlices/invoiceSlices";
+import {
+  getAllInvoicesAction,
+  setInvoicesPage,
+  setInvoicesSearch,
+  setInvoicesFilter
+} from "@/redux/slices/invoiceSlices/invoiceSlices";
 
 ChartJS.register(
   ArcElement,
@@ -29,16 +34,45 @@ ChartJS.register(
 export default function InvoicePage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [searchValue, setSearchValue] = useState("");
-  const [filterBy, setFilterBy] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const dropdownRefs = useRef({});
 
-  const { invoices, loading, error } = useSelector((state) => state.getAllInvoices);
+  const {
+    invoices,
+    loading,
+    error,
+    pagination,
+    search: storeSearch,
+    filters
+  } = useSelector((state) => state.getAllInvoices);
 
+  // Debounce search input
   useEffect(() => {
-    dispatch(getAllInvoicesAction());
-  }, [dispatch]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(localSearch);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  // Sync local search with store search on mount
+  useEffect(() => {
+    if (storeSearch) {
+      setLocalSearch(storeSearch);
+    }
+  }, [storeSearch]);
+
+  // Fetch invoices when search, filters, or pagination changes
+  useEffect(() => {
+    dispatch(getAllInvoicesAction({
+      search: debouncedSearch,
+      status: filters.status,
+      page: pagination.currentPage,
+      limit: pagination.itemsPerPage
+    }));
+  }, [dispatch, debouncedSearch, filters.status, pagination.currentPage, pagination.itemsPerPage]);
 
   const tableData = invoices?.map((invoice, index) => {
     const isUnpaid = invoice.status === "pending" || invoice.status === "unpaid";
@@ -88,9 +122,9 @@ export default function InvoicePage() {
     if (action === "addFunds" || action === "payment") {
       router.push(`/dashboard/finance/invoice/${id}/payment`);
     } else if (action === "view") {
-      router.push(`/dashboard/student/${id}`);
+      router.push(`/dashboard/finance/invoice/${id}/detail`);
     } else if (action === "edit") {
-      router.push(`/dashboard/student/${id}/edit`);
+      router.push(`/dashboard/finance/invoice/${id}/edit`);
     } else {
       console.log(`${action} clicked for invoice ${id}`);
     }
@@ -98,18 +132,73 @@ export default function InvoicePage() {
     setOpenDropdownId(null);
   };
 
-  const filteredTableData = tableData.filter((invoice) => {
-    const matchesSearch = searchValue === "" ||
-      invoice.parentName.toLowerCase().includes(searchValue.toLowerCase()) ||
-      invoice.studentName.toLowerCase().includes(searchValue.toLowerCase()) ||
-      invoice.invoiceNumber.toLowerCase().includes(searchValue.toLowerCase());
+  const handleSearchChange = (value) => {
+    setLocalSearch(value);
+    dispatch(setInvoicesSearch(value));
+    // Reset to page 1 when searching
+    if (value !== debouncedSearch) {
+      dispatch(setInvoicesPage(1));
+    }
+  };
 
-    const matchesFilter = filterBy === "" ||
-      (filterBy === "paid" && invoice.paymentStatus === "PAID") ||
-      (filterBy === "unpaid" && invoice.paymentStatus === "UNPAID");
+  const handleStatusFilter = (status) => {
+    dispatch(setInvoicesFilter({ status }));
+    dispatch(setInvoicesPage(1));
+  };
 
-    return matchesSearch && matchesFilter;
-  });
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      dispatch(setInvoicesPage(newPage));
+    }
+  };
+
+  const handleLimitChange = (newLimit) => {
+    // You can add limit change functionality here
+    console.log("Change limit to:", newLimit);
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const current = pagination.currentPage;
+    const total = pagination.totalPages;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      } else if (current >= total - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = total - 4; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      }
+    }
+
+    return pages;
+  };
+
+  const handlePageButtonClick = (page) => {
+    if (typeof page === 'number' && page >= 1 && page <= pagination.totalPages) {
+      handlePageChange(page);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -124,14 +213,14 @@ export default function InvoicePage() {
         </div>
       </div>
 
-      {loading && (
+      {loading && invoices.length === 0 && (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31]"></div>
           <p className="mt-2 text-[#0B4B31]">Loading invoices...</p>
         </div>
       )}
 
-      {error && (
+      {error && invoices.length === 0 && (
         <div className="rounded-[36px] border border-red-300 bg-red-50 px-6 py-6 text-red-700">
           <p>Error loading invoices: {error}</p>
           <button
@@ -158,13 +247,15 @@ export default function InvoicePage() {
             </label>
             <div className="relative flex-1">
               <select
-                value={filterBy}
-                onChange={(e) => setFilterBy(e.target.value)}
+                value={filters.status}
+                onChange={(e) => handleStatusFilter(e.target.value)}
                 className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
               >
                 <option value="">All</option>
                 <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
                 <option value="unpaid">Unpaid</option>
+                <option value="overdue">Overdue</option>
               </select>
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
             </div>
@@ -180,8 +271,8 @@ export default function InvoicePage() {
           <label className="relative flex w-full items-center">
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search by invoice number, parent or student name..."
               className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
@@ -197,6 +288,16 @@ export default function InvoicePage() {
           </div>
         </div>
 
+        {/* Loading overlay for table */}
+        {loading && invoices.length > 0 && (
+          <div className="mt-6 flex items-center justify-center py-4">
+            <div className="flex items-center gap-2 text-[#0B4B31]">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+              <span className="text-sm">Loading invoices...</span>
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
             <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
@@ -211,7 +312,7 @@ export default function InvoicePage() {
               </tr>
             </thead>
             <tbody>
-              {filteredTableData.map((invoice) => {
+              {tableData?.map((invoice) => {
                 const isUnpaid = invoice.paymentStatus === "UNPAID";
                 const isDropdownOpen = openDropdownId === invoice.id;
                 return (
@@ -275,13 +376,13 @@ export default function InvoicePage() {
                             >
                               Edit
                             </button>
-                            <button
+                            {/* <button
                               type="button"
                               onClick={(e) => handleActionClick("payment", invoice.id, invoice.originalInvoice, e)}
                               className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
                             >
                               {isUnpaid ? "Make Payment" : "Add Funds"}
-                            </button>
+                            </button> */}
                           </div>
                         )}
                       </div>
@@ -291,40 +392,70 @@ export default function InvoicePage() {
               })}
             </tbody>
           </table>
+
+          {/* Empty State */}
+          {!loading && (!tableData || tableData.length === 0) && (
+            <div className="text-center py-8 text-[#0B4B31]">
+              {localSearch || filters.status ? "No invoices match your search criteria" : "No invoices found"}
+            </div>
+          )}
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm font-normal text-[#0000008C]">
-            Showing 1 to {filteredTableData.length} of {invoices?.length || 0} entries
-          </div>
-          <div className="flex items-center gap-3">
-            <select className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-              <option>Display 10</option>
-              <option>Display 20</option>
-              <option>Display 50</option>
-            </select>
-            <div className="flex items-center gap-2">
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                ‹
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                1
-              </button>
-              <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                2
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                3
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                4
-              </button>
-              <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                ›
-              </button>
+        {/* Pagination */}
+        {pagination.totalItems > 0 && (
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm font-normal text-[#0000008C]">
+              Showing {tableData?.length || 0} of {pagination.totalItems} entries
+              {(localSearch || filters.status) && " (filtered)"}
+            </div>
+            <div className="flex items-center gap-3">
+              {/* <select 
+                value={pagination.itemsPerPage}
+                onChange={(e) => handleLimitChange(parseInt(e.target.value))}
+                className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="10">Display 10</option>
+                <option value="20">Display 20</option>
+                <option value="50">Display 50</option>
+              </select> */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                >
+                  ‹
+                </button>
+
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageButtonClick(page)}
+                    disabled={page === '...'}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === pagination.currentPage
+                      ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                      : page === '...'
+                        ? 'bg-white text-[#0B4B31] cursor-default'
+                        : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                >
+                  ›
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
     </div>
   );

@@ -28,7 +28,7 @@ import {
   removeFromWaitlistStudentReducer,
   getStudentNamesWithIdsReducer,
   getStudentDashboardStatsReducer,
-  updateStudentReducer 
+  updateStudentReducer
 } from './slices/studentSlices/studentSlices';
 
 // Class slices
@@ -48,7 +48,8 @@ import {
   updateTeacherReducer,
   deleteTeacherReducer,
   getTeachersNameReducer,
-  getTeacherDetailReducer
+  getTeacherDetailReducer,
+  teacherDashboardReducer
 } from './slices/teacherSlices/teacherSlices';
 
 // Admin slices
@@ -69,7 +70,9 @@ import {
 import {
   getAllInvoicesReducer,
   getInvoicesStatsReducer,
-  createInvoiceReducer
+  createInvoiceReducer,
+  getInvoiceByIdReducer,
+  updateInvoiceReducer
 } from './slices/invoiceSlices/invoiceSlices';
 
 // Payment slices
@@ -129,6 +132,7 @@ export const store = configureStore({
     deleteTeacher: deleteTeacherReducer,
     getTeachersName: getTeachersNameReducer,
     getTeacherDetail: getTeacherDetailReducer,
+    teacherDashboard: teacherDashboardReducer,
 
     // Admin management
     createAdmin: createAdminReducer,
@@ -148,7 +152,8 @@ export const store = configureStore({
     getInvoicesStats: getInvoicesStatsReducer,
     createInvoice: createInvoiceReducer,
     getAllPaymentStats: getAllPaymentStatsReducer,
-
+    getInvoiceById: getInvoiceByIdReducer,
+    updateInvoice: updateInvoiceReducer,
     // Dashboard
     dashboard: dashboardReducer,
   },

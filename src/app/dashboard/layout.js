@@ -619,20 +619,6 @@ export default function DashboardLayout({ children }) {
                 MaktabOS
               </p>
             </div>
-            {/* <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#B4B31] border border-[#0B4B31]/25 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-              >
-                Archived Students
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/85"
-              >
-                <PlusIcon size={20} /> Add Students
-              </button>
-            </div> */}
           </div>
         )}
         {children}
