@@ -248,13 +248,6 @@ export default function GradesPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
-            >
-              <Download size={16} className="text-white" />
-              Export Data
-            </button>
-            <button
-              type="button"
               className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
             >
               See All ↗

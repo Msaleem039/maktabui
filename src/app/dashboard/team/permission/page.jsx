@@ -65,15 +65,6 @@ export default function PermissionPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-[#104D2E]">Manage Permissions</h2>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-            >
-              <Download size={16} className="text-white" />
-              Export Data
-            </button>
-          </div>
         </div>
 
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

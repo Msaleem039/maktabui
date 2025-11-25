@@ -168,11 +168,6 @@ const ViewInvoiceModal = ({ invoice, paymentRecords = [], onClose }) => {
                   className="w-full rounded-full border border-gray-200 bg-white px-10 py-1.5 text-xs focus:border-[#0B4B31] focus:outline-none sm:py-2 sm:text-sm"
                 />
               </div>
-              <button className="flex items-center justify-center gap-2 rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90 sm:px-4 sm:py-2 sm:text-sm">
-                <Download size={14} className="sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Export Data</span>
-                <span className="sm:hidden">Export</span>
-              </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[500px]">

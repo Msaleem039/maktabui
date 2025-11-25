@@ -81,7 +81,7 @@ const StudentTable = ({
   const handleActionClick = (action, studentId, event) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     // Close dropdown first
     setActionMenu({ id: null, openUp: false });
 
@@ -110,12 +110,12 @@ const StudentTable = ({
       // Check if click is outside the dropdown menu and action button
       const dropdown = event.target.closest('[data-dropdown-menu]');
       const actionButton = event.target.closest('[data-action-button]');
-      
+
       if (!dropdown && !actionButton && actionMenu.id) {
         setActionMenu({ id: null, openUp: false });
       }
     };
-    
+
     if (actionMenu.id) {
       // Use a small delay to allow action clicks to process first
       setTimeout(() => {
@@ -145,13 +145,6 @@ const StudentTable = ({
         <h2 className="text-lg font-semibold text-[#104D2E]">{title}</h2>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-          >
-            <Download size={16} />
-            Export Data
-          </button>
 
           <button
             type="button"
@@ -201,8 +194,8 @@ const StudentTable = ({
                     <div className="relative flex items-center gap-3 pl-3">
                       <span
                         className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${isSelected
-                            ? "bg-[#0B4B31]"
-                            : "bg-transparent group-hover:bg-[#0B4B31]/50"
+                          ? "bg-[#0B4B31]"
+                          : "bg-transparent group-hover:bg-[#0B4B31]/50"
                           }`}
                       ></span>
                       <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F5EF] text-sm">
@@ -262,8 +255,7 @@ const StudentTable = ({
                                   e.stopPropagation();
                                   handleActionClick(item.action, student.id, e);
                                 }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
-                                  index === 0
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${index === 0
                                     ? ""
                                     : "border-t border-[#E2E7E4]"
                                   } hover:bg-[#E5EFEB]`}
@@ -328,7 +320,7 @@ const StudentTable = ({
       </div>
 
       {commentStudentId && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -337,7 +329,7 @@ const StudentTable = ({
             }
           }}
         >
-          <div 
+          <div
             className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >

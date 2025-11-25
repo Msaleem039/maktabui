@@ -356,13 +356,6 @@ export default function PaymentPage() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition"
-              >
-                <Download size={16} className="text-white" />
-                Export Data
-              </button>
-              <button
-                type="button"
                 className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
               >
                 See All ↗

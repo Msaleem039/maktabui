@@ -557,14 +557,6 @@ export default function InvoiceReportPage() {
         {/* Unpaid Invoices Report Section */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">Unpaid Invoices Report</h2>
-          <button
-            type="button"
-            onClick={handleExportData}
-            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0a3f27]"
-          >
-            <Download size={16} />
-            Export Data
-          </button>
         </div>
 
         {/* Unpaid Invoices Filters */}

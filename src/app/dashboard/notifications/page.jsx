@@ -176,15 +176,6 @@ export default function NotificationsPage() {
           <h2 className="text-[1.0625rem] font-semibold text-[#000000]">
             All Notifications
           </h2>
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B3138] px-4 py-2 text-xs sm:text-sm font-normal text-[#0B4B31] transition"
-            >
-              <Download size={16} />
-              Export Data
-            </button>
-          </div>
         </div>
 
         {/* Filters */}

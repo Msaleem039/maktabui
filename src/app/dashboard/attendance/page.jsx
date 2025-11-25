@@ -234,9 +234,6 @@ export default function AttendancePage() {
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-[#104D2E]">Attendance</h2>
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90">
-            <Download size={16} className="text-white" /> Export Data
-          </button>
         </div>
 
         <div className="mt-6 space-y-4">

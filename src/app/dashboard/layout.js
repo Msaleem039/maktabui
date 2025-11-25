@@ -635,7 +635,6 @@ export default function DashboardLayout({ children }) {
         )}
         {children}
       </main>
-      <Chatbot />
     </div>
   );
 }

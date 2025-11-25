@@ -36,31 +36,6 @@ export default function SendTextPage() {
           <h2 className="text-[1.125rem] font-semibold text-[#0B4B31]">
             Manage Text
           </h2>
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-            >
-              <Download size={16} />
-              Export Data
-            </button>
-
-            <div className="flex items-center rounded-full border border-[#0B4B31] px-4 py-2 bg-white min-w-[240px]">
-              <Search size={16} className="text-[#799086] mr-2" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full  text-sm text-[#0B4B31]  bg-white placeholder:text-[#979699] focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="button"
-              className="rounded-full border border-[#0B4B3138] px-4 py-2 text-xs sm:text-sm font-normal text-[#0B4B31] transition hover:bg-[#F3F6F5] whitespace-nowrap"
-            >
-              See All ↗
-            </button>
-          </div>
         </div>
 
         <div className="mt-6 overflow-x-auto">
