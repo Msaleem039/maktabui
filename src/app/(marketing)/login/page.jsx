@@ -56,6 +56,8 @@ const Page = () => {
                     router.push('/dashboard/parent/dashboard');
                 } else if (userRole === 'Student') {
                     router.push('/dashboard/student/dashboard');
+                } else if (userRole === 'Teacher') {
+                    router.push('/dashboard/teacher/dashboard');
                 } else {
                     router.push('/dashboard');
                 }
