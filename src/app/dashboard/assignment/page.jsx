@@ -12,6 +12,7 @@ import { getCookie } from "cookies-next";
 export default function AssignmentPage() {
     const [searchValue, setSearchValue] = useState("");
     const [openDropdownId, setOpenDropdownId] = useState(null);
+    const [dropdownDirections, setDropdownDirections] = useState({});
     const [filteredAssignments, setFilteredAssignments] = useState([]);
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -104,7 +105,28 @@ export default function AssignmentPage() {
 
     const toggleDropdown = (id, event) => {
         event.stopPropagation();
-        setOpenDropdownId(openDropdownId === id ? null : id);
+        const isOpening = openDropdownId !== id;
+
+        if (isOpening && typeof window !== "undefined") {
+            const buttonRect = event.currentTarget.getBoundingClientRect();
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            const dropdownHeight = actionMenuItems.length * 52 + 24;
+            const spaceBelow = viewportHeight - buttonRect.bottom;
+            const shouldOpenUp = spaceBelow < dropdownHeight;
+
+            setDropdownDirections((prev) => ({
+                ...prev,
+                [id]: shouldOpenUp ? "up" : "down",
+            }));
+        } else {
+            setDropdownDirections((prev) => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+        }
+
+        setOpenDropdownId(isOpening ? id : null);
     };
 
     const handleActionClick = (action, id, event) => {
@@ -438,8 +460,16 @@ export default function AssignmentPage() {
 
                     {openDropdownId === assignment._id && (
                         <div
-                            ref={(el) => (dropdownRefs.current[assignment._id] = el)}
-                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                            ref={(el) => {
+                                if (el) {
+                                    dropdownRefs.current[assignment._id] = el;
+                                } else {
+                                    delete dropdownRefs.current[assignment._id];
+                                }
+                            }}
+                            className={`absolute right-0 min-w-[200px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_14px_40px_-12px_rgba(11,75,49,0.35)] overflow-hidden ${
+                                dropdownDirections[assignment._id] === "up" ? "bottom-full mb-3" : "top-full mt-3"
+                            }`}
                         >
                             {actionMenuItems.map((item, idx) => {
                                 const Icon = item.icon;
@@ -564,7 +594,7 @@ export default function AssignmentPage() {
                 </div>
 
                 <div className="mt-6 overflow-x-auto">
-                    <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
+                    <table className="w-full min-w-[1200px] border-separate border-spacing-y-3 text-left text-sm text-[#333]">
                         <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
                             <tr>
                                 <th className="px-4 font-normal text-[#0000008C]">Title</th>
@@ -678,85 +708,106 @@ export default function AssignmentPage() {
             </section>
 
             {uploadModalOpen && user?.role === "Super Admin" && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-[#0B4B31]">
-                                Upload Solution
-                            </h3>
-                            <button
-                                onClick={() => setUploadModalOpen(false)}
-                                className="text-gray-400 hover:text-gray-600"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-10">
+                    <div className="relative w-full max-w-xl rounded-[28px] bg-white px-6 py-7 shadow-[0_40px_120px_rgba(0,0,0,0.25)]">
+                        <button
+                            onClick={() => setUploadModalOpen(false)}
+                            className="absolute right-6 top-6 text-gray-400 hover:text-gray-600 transition"
+                            aria-label="Close upload modal"
+                            disabled={isUploading}
+                        >
+                            <X size={22} />
+                        </button>
 
-                        {selectedAssignment && (
-                            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                                <h4 className="font-medium text-[#0B4B31]">{selectedAssignment.title}</h4>
-                                <p className="text-sm text-gray-600">Subject: {selectedAssignment.subject}</p>
-                                <p className="text-sm text-gray-600">Due: {formatDate(selectedAssignment.dueDate)}</p>
-                                <p className="text-sm text-gray-600">Student: {selectedAssignment.student?.studentName}</p>
-                                <p className="text-sm text-gray-600">Student ID: {selectedAssignment.student?._id}</p>
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <h3 className="text-2xl font-semibold text-[#0B4B31]">Upload Solution</h3>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Attach your completed work and submit it for review.
+                                </p>
+                            </div>
+
+                            {selectedAssignment && (
+                                <div className="rounded-2xl bg-[#F8FAF9] p-5">
+                                    <p className="text-base font-semibold text-[#0B4B31] mb-3">
+                                        {selectedAssignment.title}
+                                    </p>
+                                    <div className="space-y-1 text-sm text-gray-600">
+                                        <p>Subject: <span className="text-gray-800">{selectedAssignment.subject}</span></p>
+                                        <p>Due: <span className="text-gray-800">{formatDate(selectedAssignment.dueDate)}</span></p>
+                                        <p>Student: <span className="text-gray-800">{selectedAssignment.student?.studentName || "—"}</span></p>
+                                        <p>Student ID: <span className="text-gray-800">{selectedAssignment.student?._id || "—"}</span></p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-gray-700">
                                     Select File
                                 </label>
+                                <label
+                                    htmlFor="solution-file-input"
+                                    className={`flex w-full cursor-pointer items-center justify-between rounded-2xl border border-[#0B4B31]/20 px-4 py-3 text-sm text-[#0B4B31] shadow-sm transition ${isUploading ? "opacity-60 cursor-not-allowed" : "hover:border-[#0B4B31]"}`}
+                                >
+                                    <span className="truncate pr-4">
+                                        {uploadFile ? uploadFile.name : "Choose file (PDF, DOC, DOCX, TXT, JPG, PNG)"}
+                                    </span>
+                                    <span className="rounded-full bg-[#0B4B31]/10 px-3 py-1 text-xs font-semibold text-[#0B4B31]">
+                                        Browse
+                                    </span>
+                                </label>
                                 <input
+                                    id="solution-file-input"
                                     type="file"
                                     onChange={handleFileChange}
                                     accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                                    className="w-full border border-gray-300 rounded-lg p-2"
+                                    className="sr-only"
                                     disabled={isUploading}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB)
+                                <p className="text-xs text-gray-500">
+                                    Max size 10MB. Only submit final versions.
                                 </p>
                             </div>
 
                             {uploadFile && (
-                                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="rounded-2xl border border-[#D9F2E1] bg-[#F4FBF7] p-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-green-800">
-                                            {uploadFile.name}
-                                        </span>
+                                        <div>
+                                            <p className="text-sm font-semibold text-[#0B4B31]">{uploadFile.name}</p>
+                                            <p className="text-xs text-gray-500">
+                                                Size: {(uploadFile.size / 1024 / 1024).toFixed(2)} MB
+                                            </p>
+                                        </div>
                                         <button
                                             onClick={removeSelectedFile}
-                                            className="text-red-500 hover:text-red-700"
+                                            className="rounded-full bg-white p-1 text-red-500 hover:text-red-700 transition"
                                             disabled={isUploading}
+                                            aria-label="Remove file"
                                         >
                                             <X size={16} />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-green-600 mt-1">
-                                        Size: {(uploadFile.size / 1024 / 1024).toFixed(2)} MB
-                                    </p>
                                 </div>
                             )}
 
                             {isUploading && (
                                 <div className="space-y-2">
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="h-2 w-full rounded-full bg-gray-200">
                                         <div
-                                            className="bg-[#0B4B31] h-2 rounded-full transition-all duration-300"
+                                            className="h-2 rounded-full bg-[#0B4B31] transition-all duration-300"
                                             style={{ width: `${uploadProgress}%` }}
                                         ></div>
                                     </div>
                                     <p className="text-sm text-gray-600 text-center">
-                                        Uploading... {uploadProgress}%
+                                        Uploading… {uploadProgress}%
                                     </p>
                                 </div>
                             )}
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                                 <button
                                     onClick={() => setUploadModalOpen(false)}
-                                    className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                                    className="flex-1 rounded-full border border-[#0B4B31]/20 px-4 py-3 text-base font-semibold text-[#0B4B31] transition hover:bg-[#F5F8F6] disabled:opacity-60"
                                     disabled={isUploading}
                                 >
                                     Cancel
@@ -764,9 +815,9 @@ export default function AssignmentPage() {
                                 <button
                                     onClick={handleSubmitSolution}
                                     disabled={!uploadFile || isUploading}
-                                    className="flex-1 py-2 px-4 bg-[#0B4B31] text-white rounded-lg hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                    className="flex-1 rounded-full bg-[#0B4B31] px-4 py-3 text-base font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {isUploading ? 'Uploading...' : 'Upload Solution'}
+                                    {isUploading ? "Uploading..." : "Upload Solution"}
                                 </button>
                             </div>
                         </div>

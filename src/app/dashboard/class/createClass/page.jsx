@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createClassAction } from "@/redux/slices/classSlices/classSlice";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices"; 
+import CustomDatePicker from "@/components/DatePicker";
 
 const CustomField = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   if (type === "textarea") {
@@ -27,25 +27,15 @@ const CustomField = ({ label, name, type = "text", value, onChange, placeholder,
 
   if (type === "date") {
     return (
-      <div className={className}>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          {label} {required && "*"}
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            name={name}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            required={required}
-            maxLength={10}
-            className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-          />
-          <Calendar size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]/60 pointer-events-none" />
-        </div>
-        <p className="text-xs text-gray-500 mt-1 ml-2">Format: MM-DD-YYYY (e.g., 05-15-2010)</p>
-      </div>
+      <CustomDatePicker
+        label={label}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        className={className}
+      />
     );
   }
 
@@ -101,24 +91,6 @@ const DropdownField = ({ label, name, value, options, onSelect, isOpen, onToggle
   );
 };
 
-const convertToISODate = (dateString) => {
-  if (!dateString) return null;
-  
-  const [month, day, year] = dateString.split('-');
-  if (!month || !day || !year) return null;
-  
-  const monthNum = parseInt(month, 10);
-  const dayNum = parseInt(day, 10);
-  const yearNum = parseInt(year, 10);
-  
-  if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31 || yearNum < 1900 || yearNum > 2100) {
-    return null;
-  }
-  
-  const isoDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-  return isoDate.toISOString();
-};
-
 const Page = () => {
     const dispatch = useDispatch();
     const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
@@ -141,23 +113,6 @@ const Page = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
-        if (name === "startDate" || name === "endDate") {
-            let input = value.replace(/\D/g, '');
-            
-            if (input.length > 2) {
-                input = input.substring(0, 2) + '-' + input.substring(2);
-            }
-            if (input.length > 5) {
-                input = input.substring(0, 5) + '-' + input.substring(5, 9);
-            }
-            
-            setFormData(prev => ({
-                ...prev,
-                [name]: input
-            }));
-            return;
-        }
         
         setFormData(prev => ({
             ...prev,
@@ -192,8 +147,8 @@ const Page = () => {
             subject: formData.subject,
             description: formData.description,
             teacherId: formData.teacherId, // This is the ID that gets sent to the backend
-            startDate: convertToISODate(formData.startDate),
-            endDate: convertToISODate(formData.endDate)
+            startDate: formData.startDate || null,
+            endDate: formData.endDate || null
         };
 
         dispatch(createClassAction(classData));
