@@ -12,12 +12,12 @@ export default function StaffPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
-          </h1>
-          <p className="text-[1.75rem] font-medium text-[#000000] mb-4">
-            MaktabOS
           </p>
+          <h1 className="font-medium text-[#000000] text-[1.75rem]">
+            MaktabOS
+          </h1>
         </div>
       </div>
 

@@ -158,13 +158,15 @@ export default function CreateInvoice() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
-                    Welcome to
-                </p>
-                <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
-                    MaktabOS
-                </h1>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+                        Welcome to
+                    </p>
+                    <h1 className="font-medium text-[#000000] text-[1.75rem]">
+                        MaktabOS
+                    </h1>
+                </div>
             </div>
 
             <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">

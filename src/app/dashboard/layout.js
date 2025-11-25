@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { ChevronDown, PlusIcon } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
+import { useSelector } from "react-redux";
 import Chatbot from "@/components/dashboard/Chatbot";
 
 const NavItem = ({
@@ -169,21 +170,55 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const [openSubmenus, setOpenSubmenus] = useState({});
   const [navItems, setNavItems] = useState([]);
   const userCookie = getCookie("user");
+  
+  // Get user role from Redux state
+  const reduxUser = useSelector((state) => state.user?.userInfo);
+  const reduxRole = reduxUser?.role;
 
   const getUserRole = () => {
-    try {
-      if (userCookie) {
-        const userData =
-          typeof userCookie === "string"
-            ? JSON.parse(userCookie)
-            : userCookie;
-        return userData?.role || "Admin";
+    let role = null;
+    
+    // First try Redux state
+    if (reduxRole) {
+      role = reduxRole;
+    } else {
+      // Fallback to cookie
+      try {
+        if (userCookie) {
+          const userData =
+            typeof userCookie === "string"
+              ? JSON.parse(userCookie)
+              : userCookie;
+          role = userData?.role;
+        }
+      } catch (error) {
+        console.error("Error parsing user cookie:", error);
       }
-      return "Admin";
-    } catch (error) {
-      console.error("Error parsing user cookie:", error);
-      return "Admin";
     }
+    
+    // Normalize role name (handle case variations)
+    if (role) {
+      const normalizedRole = role.trim();
+      // Map common variations
+      if (normalizedRole.toLowerCase() === "super admin" || normalizedRole === "SuperAdmin") {
+        return "Super Admin";
+      }
+      if (normalizedRole.toLowerCase() === "admin") {
+        return "Admin";
+      }
+      if (normalizedRole.toLowerCase() === "teacher") {
+        return "Teacher";
+      }
+      if (normalizedRole.toLowerCase() === "student") {
+        return "Student";
+      }
+      if (normalizedRole.toLowerCase() === "parent") {
+        return "Parent";
+      }
+      return normalizedRole;
+    }
+    
+    return "Admin"; // Default fallback
   };
 
   const userRole = getUserRole();
@@ -240,7 +275,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [{ name: "Notifications", path: `${basePath}/notifications` }],
       },
-      settings: { name: "Settings", icon: "/window.svg", path: `${basePath}/settings` },
+
       attendance: {
         name: "Attendance",
         icon: "/Checked User Male.png",
@@ -286,6 +321,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Permission", path: `${basePath}/team/permission` },
         ],
       },
+      settings: { name: "Settings", icon: "/window.svg", path: `${basePath}/s` },
     };
 
     // Create role-specific dashboard items
@@ -329,27 +365,31 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       case "Student":
         return [
           roleDashboardItems[userRole],
-          allItems.settings,
-          {
-            ...allItems.class,
-            subItems: allItems.class.subItems.filter(
-              (item) => item.name !== "Subject" && item.name !== "Create Class"
-            )
-          },
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
               (item) => item.name !== "Create Assignment"
             )
           },
+          {
+            ...allItems.class,
+            subItems: allItems.class.subItems.filter(
+              (item) => item.name !== "Subject" && item.name !== "Create Class" && item.name !== "Timetable"
+            )
+          },
           allItems.notifications,
+          allItems.settings,
         ];
 
       case "Parent":
         return [
           roleDashboardItems[userRole],
-          allItems.settings,
-          allItems.students,
+          {
+            ...allItems.finance,
+            subItems: allItems.finance.subItems.filter(
+              (i) => i.name === "Invoice" || i.name === "Payments"
+            ),
+          },
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
@@ -357,12 +397,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             ),
           },
           allItems.notifications,
-          {
-            ...allItems.finance,
-            subItems: allItems.finance.subItems.filter(
-              (i) => i.name === "Invoice" || i.name === "Payments"
-            ),
-          },
+          allItems.settings,
         ];
 
       default:
@@ -382,7 +417,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   useEffect(() => {
     setNavItems(getNavItems());
-  }, [userRole]);
+  }, [userRole, reduxRole]);
 
   useEffect(() => {
     const newOpenSubmenus = {};

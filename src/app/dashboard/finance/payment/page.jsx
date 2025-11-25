@@ -184,10 +184,10 @@ export default function PaymentPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[0.8125rem] font-medium uppercase tracking-[0.35em] text-[#979699]">
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-[1.5rem] font-semibold text-[#000000] leading-tight sm:text-[1.5rem]">
+          <h1 className="font-medium text-[#000000] text-[1.75rem]">
             MaktabOS
           </h1>
         </div>

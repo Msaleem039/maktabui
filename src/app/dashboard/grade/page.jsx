@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Eye, Edit, Trash2 } from "lucide-react";
+import { Download, Eye, Edit, Trash2, X, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrades } from "@/redux/slices/gradeSlices/gradeSlices";
 import { getCookie } from "cookies-next";
@@ -11,6 +11,7 @@ export default function GradesPage() {
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [filteredGrades, setFilteredGrades] = useState([]);
+  const [deleteModal, setDeleteModal] = useState({ open: false, grade: null });
   const dropdownRefs = useRef({});
   const router = useRouter();
   const dispatch = useDispatch();
@@ -59,38 +60,54 @@ export default function GradesPage() {
   }, [searchValue, grades]);
 
   useEffect(() => {
+    if (!openDropdownId) return;
+
     const handleClickOutside = (event) => {
-      Object.values(dropdownRefs.current).forEach((ref) => {
-        if (ref && !ref.contains(event.target)) {
-          setOpenDropdownId(null);
-        }
-      });
+      const dropdownRef = dropdownRefs.current[openDropdownId];
+      if (dropdownRef && !dropdownRef.contains(event.target)) {
+        setOpenDropdownId(null);
+      }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // Add event listener after a small delay to avoid immediate trigger
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 10);
+
     return () => {
+      clearTimeout(timeoutId);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [openDropdownId]);
 
   const toggleDropdown = (id, event) => {
     event.stopPropagation();
+    event.preventDefault();
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
   const handleActionClick = (action, id, event) => {
     event.stopPropagation();
     if (action === "view") {
+      setOpenDropdownId(null);
       router.push(`/dashboard/grades/${id}`);
     } else if (action === "edit") {
+      setOpenDropdownId(null);
       router.push(`/dashboard/grades/${id}/edit`);
     } else if (action === "delete") {
-      if (confirm("Are you sure you want to delete this grade?")) {
-        console.log(`Delete grade ${id}`);
-        // TODO: Add API call to delete grade
-      }
+      const grade = filteredGrades.find((g) => g._id === id);
+      setOpenDropdownId(null);
+      setDeleteModal({ open: true, grade });
     }
-    setOpenDropdownId(null);
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal.grade) {
+      console.log("Delete grade:", deleteModal.grade._id);
+      // TODO: Implement delete grade logic
+      // dispatch(deleteGradeAction(deleteModal.grade._id));
+      setDeleteModal({ open: false, grade: null });
+    }
   };
 
   // Format date to readable format
@@ -269,9 +286,8 @@ export default function GradesPage() {
                 <th className="px-4 font-normal text-[#0000008C]">Status</th>
                 <th className="px-4 font-normal text-[#0000008C]">Graded By</th>
                 <th className="px-4 font-normal text-[#0000008C]">Date</th>
-                {user?.role === "Student" || user?.role === "Teacher" && (
+                {(user?.role === "Admin" || user?.role === "Super Admin" || user?.role === "Teacher") && (
                   <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
-
                 )}
               </tr>
             </thead>
@@ -323,47 +339,61 @@ export default function GradesPage() {
                       <td className="px-4 py-3 font-medium text-[#1E1E1E]">
                         {formatDate(grade.createdAt)}
                       </td>
-                      <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
-                        <div className="relative inline-block">
-                          <button
-                            type="button"
-                            onClick={(e) => toggleDropdown(grade._id, e)}
-                            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
+                      {(user?.role === "Admin" || user?.role === "Super Admin" || user?.role === "Teacher") && (
+                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div 
+                            ref={(el) => (dropdownRefs.current[grade._id] = el)}
+                            className="relative inline-block text-left"
                           >
-                            Take Action
-                            <span>▾</span>
-                          </button>
-
-                          {openDropdownId === grade._id && (
-                            <div
-                              ref={(el) => (dropdownRefs.current[grade._id] = el)}
-                              className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                            <button
+                              type="button"
+                              onClick={(e) => toggleDropdown(grade._id, e)}
+                              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
                             >
-                              {actionMenuItems.map((item, idx) => {
-                                const Icon = item.icon;
-                                return (
-                                  <button
-                                    key={item.action}
-                                    type="button"
-                                    onClick={(e) => handleActionClick(item.action, grade._id, e)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                      } hover:bg-[#E5EFEB]`}
-                                  >
-                                    <Icon size={16} className="text-[#0B4B31]" />
-                                    <span>{item.label}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </td>
+                              Take Action
+                              <span>▾</span>
+                            </button>
+
+                            {openDropdownId === grade._id && (
+                              <div
+                                onClick={(event) => event.stopPropagation()}
+                                className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                              >
+                                <button
+                                  type="button"
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 bg-[#0B4B3138] hover:bg-[#E5EFEB]"
+                                  onClick={(e) => handleActionClick("view", grade._id, e)}
+                                >
+                                  <Eye size={16} className="text-[#0B4B31]" />
+                                  View Details
+                                </button>
+                                <button
+                                  type="button"
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
+                                  onClick={(e) => handleActionClick("edit", grade._id, e)}
+                                >
+                                  <Edit size={16} className="text-[#0B4B31]" />
+                                  Edit Grade
+                                </button>
+                                <button
+                                  type="button"
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
+                                  onClick={(e) => handleActionClick("delete", grade._id, e)}
+                                >
+                                  <Trash2 size={16} className="text-[#C43B30]" />
+                                  Delete Grade
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan="9" className="px-4 py-8 text-center text-[#8A928F]">
+                  <td colSpan={(user?.role === "Admin" || user?.role === "Super Admin" || user?.role === "Teacher") ? "9" : "8"} className="px-4 py-8 text-center text-[#8A928F]">
                     {grades.length === 0 ? "No grades found." : "No grades match your search."}
                   </td>
                 </tr>
@@ -408,6 +438,61 @@ export default function GradesPage() {
           </div>
         )}
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && deleteModal.grade && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setDeleteModal({ open: false, grade: null });
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md rounded-[28px] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                  <AlertTriangle size={24} className="text-red-600" />
+                </div>
+                <h2 className="text-lg font-semibold text-[#0B4B31]">
+                  Delete Grade
+                </h2>
+              </div>
+              <button
+                onClick={() => setDeleteModal({ open: false, grade: null })}
+                className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="px-6 py-6">
+              <p className="text-sm text-gray-700 mb-2">
+                Are you sure you want to delete the grade for <span className="font-semibold text-[#0B4B31]">{deleteModal.grade.student?.studentName || "this student"}</span>?
+              </p>
+              <p className="text-xs text-red-600">
+                This action cannot be undone. The grade will be permanently deleted.
+              </p>
+            </div>
+
+            <div className="flex gap-3 border-t border-gray-200 px-6 py-4">
+              <button
+                onClick={() => setDeleteModal({ open: false, grade: null })}
+                className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

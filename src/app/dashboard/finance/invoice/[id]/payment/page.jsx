@@ -49,7 +49,8 @@ function PaymentPageContent({ params }) {
   const [cardDetails, setCardDetails] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { loading } = useSelector((state) => state.processCardPayment);
+  const processCardPaymentState = useSelector((state) => state.processCardPayment);
+  const loading = processCardPaymentState?.loading ?? false;
 
   const parentInfo = {
     name: "Abdalla Mumin",
@@ -159,10 +160,10 @@ function PaymentPageContent({ params }) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+          <h1 className="text-[1.75rem] font-medium text-[#000000]">
             MaktabOS
           </h1>
         </div>

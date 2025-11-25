@@ -240,16 +240,20 @@ const CreateTeacher = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">
-                Welcome to
-            </h1>
-            <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">
-                MaktabOS
-            </p>
+        <div className="space-y-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+                        Welcome to
+                    </p>
+                    <h1 className="font-medium text-[#000000] text-[1.75rem]">
+                        MaktabOS
+                    </h1>
+                </div>
+            </div>
 
-            <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
-                <h2 className="text-lg font-semibold mb-6 text-[#000000]">
+            <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
+                <h2 className="text-lg font-semibold text-gray-700 mb-6">
                     Create Teacher
                 </h2>
 

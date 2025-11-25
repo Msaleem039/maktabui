@@ -1,7 +1,6 @@
 "use client";
 
 import AddStudentForm from "@/components/dashboard/students/AddStudentForm";
-import AddStudentForm from "@/components/dashboard/students/AddStudentForm";
 
 export default function EditParentPage({ params }) {
   return (

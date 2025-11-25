@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, Trash2, CheckCircle, X, AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllParents, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
 
@@ -13,11 +14,15 @@ const ParentTable = ({
   parents = [],
 }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { parents: reduxParents, pagination, status, error } = useSelector((state) => state.getAllParents);
 
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
   const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
+  const [deleteModal, setDeleteModal] = useState({ open: false, parent: null });
+  const [commitModal, setCommitModal] = useState({ open: false, parent: null });
+  const dropdownRefs = useRef({});
 
   useEffect(() => {
     dispatch(getAllParents({
@@ -45,9 +50,10 @@ const ParentTable = ({
 
   const toggleActionMenu = (event, parentId) => {
     event.stopPropagation();
+    event.preventDefault();
 
     // Calculate if menu should open upwards (if near bottom of viewport)
-    const buttonRect = event.target.getBoundingClientRect();
+    const buttonRect = event.currentTarget.getBoundingClientRect();
     const spaceBelow = window.innerHeight - buttonRect.bottom;
     const menuHeight = 200; // Approximate menu height
 
@@ -57,38 +63,68 @@ const ParentTable = ({
     }));
   };
 
-  const handleViewProfile = (event, parentId) => {
+  const handleView = (event, parentId) => {
     event.stopPropagation();
-    // Implement view profile logic
-    console.log("View profile:", parentId);
     setActionMenu({ id: null, openUp: false });
+    router.push(`/dashboard/parent/${parentId}`);
   };
 
   const handleEdit = (event, parentId) => {
     event.stopPropagation();
     setActionMenu({ id: null, openUp: false });
+    router.push(`/dashboard/parent/${parentId}/edit`);
   };
 
-  const handleComment = (event, parent) => {
+  const handleDelete = (event, parent) => {
     event.stopPropagation();
     setActionMenu({ id: null, openUp: false });
+    setDeleteModal({ open: true, parent });
   };
 
-  const handleRemove = (event, parent) => {
+  const handleCommit = (event, parent) => {
     event.stopPropagation();
     setActionMenu({ id: null, openUp: false });
+    setCommitModal({ open: true, parent });
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal.parent) {
+      console.log("Delete parent:", deleteModal.parent.id);
+      // TODO: Implement delete parent logic
+      // dispatch(deleteParentAction(deleteModal.parent.id));
+      setDeleteModal({ open: false, parent: null });
+    }
+  };
+
+  const confirmCommit = () => {
+    if (commitModal.parent) {
+      console.log("Commit parent:", commitModal.parent.id);
+      // TODO: Implement commit/save parent logic
+      setCommitModal({ open: false, parent: null });
+    }
   };
 
   useEffect(() => {
-    const handleClickOutside = () => {
-      setActionMenu({ id: null, openUp: false });
+    if (!actionMenu.id) return;
+
+    const handleClickOutside = (event) => {
+      // Check if click is outside the dropdown container (which includes the button)
+      const dropdownRef = dropdownRefs.current[actionMenu.id];
+      if (dropdownRef && !dropdownRef.contains(event.target)) {
+        setActionMenu({ id: null, openUp: false });
+      }
     };
 
-    document.addEventListener("click", handleClickOutside);
+    // Add event listener after a small delay to avoid immediate trigger
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 10);
+
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      clearTimeout(timeoutId);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [actionMenu.id]);
 
   const tableData = useMemo(() => {
     if (reduxParents && reduxParents.length > 0) {
@@ -219,8 +255,11 @@ const ParentTable = ({
                   <td className="px-4 py-3 font-normal text-black">{parent.phone}</td>
                   <td className="px-4 py-3 text-black">{parent.spouse}</td>
                   <td className="px-4 py-3 text-black">{parent.children}</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="relative inline-block text-left">
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    <div 
+                      ref={(el) => (dropdownRefs.current[parent.id] = el)}
+                      className="relative inline-block text-left"
+                    >
                       <button
                         type="button"
                         onClick={(event) => toggleActionMenu(event, parent.id)}
@@ -232,35 +271,39 @@ const ParentTable = ({
                       {actionMenu.id === parent.id && (
                         <div
                           onClick={(event) => event.stopPropagation()}
-                          className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "mt-3"} w-48 rounded-2xl border border-[#DDE5E0] bg-white shadow-xl z-20 overflow-hidden`}
+                          className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "top-full mt-2"} z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden`}
                         >
                           <button
-                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#0B4B31] hover:bg-[#F3F6F5]"
-                            onClick={(event) => handleViewProfile(event, parent.id)}
+                            type="button"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 bg-[#0B4B3138] hover:bg-[#E5EFEB]"
+                            onClick={(event) => handleView(event, parent.id)}
                           >
-                            <Eye size={16} />
-                            View Profile
+                            <Eye size={16} className="text-[#0B4B31]" />
+                            View
                           </button>
                           <button
-                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#0B4B31] hover:bg-[#F3F6F5]"
+                            type="button"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
                             onClick={(event) => handleEdit(event, parent.id)}
                           >
-                            <Pencil size={16} />
+                            <Pencil size={16} className="text-[#0B4B31]" />
                             Edit
                           </button>
                           <button
-                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#0B4B31] hover:bg-[#F3F6F5]"
-                            onClick={(event) => handleComment(event, parent)}
+                            type="button"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
+                            onClick={(event) => handleDelete(event, parent)}
                           >
-                            <MessageSquare size={16} />
-                            Comment
+                            <Trash2 size={16} className="text-[#C43B30]" />
+                            Delete
                           </button>
                           <button
-                            className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#C43B30] hover:bg-[#FCEDEA]"
-                            onClick={(event) => handleRemove(event, parent)}
+                            type="button"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
+                            onClick={(event) => handleCommit(event, parent)}
                           >
-                            <Trash2 size={16} />
-                            Remove
+                            <CheckCircle size={16} className="text-[#0B4B31]" />
+                            Commit
                           </button>
                         </div>
                       )}
@@ -279,6 +322,116 @@ const ParentTable = ({
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setDeleteModal({ open: false, parent: null });
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md rounded-[28px] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                  <AlertTriangle size={24} className="text-red-600" />
+                </div>
+                <h2 className="text-lg font-semibold text-[#0B4B31]">
+                  Delete Parent
+                </h2>
+              </div>
+              <button
+                onClick={() => setDeleteModal({ open: false, parent: null })}
+                className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="px-6 py-6">
+              <p className="text-sm text-gray-700 mb-2">
+                Are you sure you want to delete <span className="font-semibold text-[#0B4B31]">{deleteModal.parent?.name}</span>?
+              </p>
+              <p className="text-xs text-red-600">
+                This action cannot be undone. All associated data will be permanently deleted.
+              </p>
+            </div>
+
+            <div className="flex gap-3 border-t border-gray-200 px-6 py-4">
+              <button
+                onClick={() => setDeleteModal({ open: false, parent: null })}
+                className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Commit Confirmation Modal */}
+      {commitModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setCommitModal({ open: false, parent: null });
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md rounded-[28px] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0B4B31]/10">
+                  <CheckCircle size={24} className="text-[#0B4B31]" />
+                </div>
+                <h2 className="text-lg font-semibold text-[#0B4B31]">
+                  Commit Changes
+                </h2>
+              </div>
+              <button
+                onClick={() => setCommitModal({ open: false, parent: null })}
+                className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="px-6 py-6">
+              <p className="text-sm text-gray-700 mb-2">
+                Are you sure you want to commit changes for <span className="font-semibold text-[#0B4B31]">{commitModal.parent?.name}</span>?
+              </p>
+              <p className="text-xs text-gray-500">
+                All pending changes will be saved and applied.
+              </p>
+            </div>
+
+            <div className="flex gap-3 border-t border-gray-200 px-6 py-4">
+              <button
+                onClick={() => setCommitModal({ open: false, parent: null })}
+                className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmCommit}
+                className="flex-1 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              >
+                Commit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

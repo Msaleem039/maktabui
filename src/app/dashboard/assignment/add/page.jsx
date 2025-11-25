@@ -293,9 +293,13 @@ const Page = () => {
   const isSubmitting = createStatus === 'loading' || uploading;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
-      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
+    <div className="min-h-screen bg-gray-100 flex flex-col gap-6 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</p>
+          <h1 className="text-[1.75rem] font-medium text-[#000000]">MaktabOS</h1>
+        </div>
+      </div>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
         <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Assignment</h2>

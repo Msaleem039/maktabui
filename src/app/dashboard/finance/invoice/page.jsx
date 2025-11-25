@@ -118,7 +118,7 @@ export default function InvoicePage() {
           <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
+          <h1 className="font-medium text-[#000000] text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
