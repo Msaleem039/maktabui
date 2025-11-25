@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/redux/slices/attendanceSlices/attendanceSlices";
 import { getTeachersName, resetTeachersNameState, getTeacherDetail } from "@/redux/slices/teacherSlices/teacherSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
+import { getCookie } from "cookies-next";
 
 const CalendarWidget = ({ selectedDate, onDateChange }) => {
   const [viewDate, setViewDate] = useState(selectedDate || new Date());
@@ -132,7 +133,12 @@ export default function AttendancePage() {
   const [reasons, setReasons] = useState({});
   const datePickerRef = useRef(null);
 
-  const role = "Admin";
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
+  const role = user?.role;
 
   const { classNames, loading: classesLoading } = useSelector((state) => state.getAllClassesName);
   const { teacherNames, loading: teachersLoading } = useSelector((state) => state.getTeachersName);
@@ -146,15 +152,15 @@ export default function AttendancePage() {
     dispatch(getAllClassesNameAction());
     if (role === "Admin") {
       dispatch(getTeachersName());
-    } else if (role === "Teacher") {
-      setSelectedTeacher("6906776ad98e2cd9cb8c5bff");
-      dispatch(getTeacherDetail("6906776ad98e2cd9cb8c5bff"));
+    } else if (role === "Teacher" && user?.id) {
+      setSelectedTeacher(user.id);
+      dispatch(getTeacherDetail(user.id));
     }
     return () => {
       dispatch(resetAttendanceState());
       dispatch(resetTeachersNameState());
     };
-  }, [dispatch, role]);
+  }, [dispatch, role, user?.id]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -213,7 +219,7 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-8">
-      
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
@@ -254,6 +260,15 @@ export default function AttendancePage() {
                   )}
                 </select>
                 <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
+              </div>
+            )}
+
+            {/* Show teacher name for Teacher role */}
+            {role === "Teacher" && (
+              <div className="relative flex-1">
+                <div className="w-full rounded-full border border-[#C5D2CD] bg-gray-50 py-3 pl-4 pr-10 text-sm text-[#0B4B31]">
+                  {user?.fullName || "Teacher"}
+                </div>
               </div>
             )}
 

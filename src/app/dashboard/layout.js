@@ -170,14 +170,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const [openSubmenus, setOpenSubmenus] = useState({});
   const [navItems, setNavItems] = useState([]);
   const userCookie = getCookie("user");
-  
+
   // Get user role from Redux state
   const reduxUser = useSelector((state) => state.user?.userInfo);
   const reduxRole = reduxUser?.role;
 
   const getUserRole = () => {
     let role = null;
-    
+
     // First try Redux state
     if (reduxRole) {
       role = reduxRole;
@@ -195,7 +195,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         console.error("Error parsing user cookie:", error);
       }
     }
-    
+
     // Normalize role name (handle case variations)
     if (role) {
       const normalizedRole = role.trim();
@@ -217,8 +217,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       }
       return normalizedRole;
     }
-    
-    return "Admin"; // Default fallback
+
+    return "Admin";
   };
 
   const userRole = getUserRole();
@@ -266,6 +266,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Assignments", path: `${basePath}/assignment` },
           { name: "Create Assignment", path: `${basePath}/assignment/add` },
+          { name: "Submitted Assignment", path: `${basePath}/assignment/submittedAssignment` },
           { name: "Grade", path: `${basePath}/grade` },
         ],
       },
@@ -275,7 +276,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [{ name: "Notifications", path: `${basePath}/notifications` }],
       },
-
       attendance: {
         name: "Attendance",
         icon: "/Checked User Male.png",
@@ -324,7 +324,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       settings: { name: "Settings", icon: "/window.svg", path: `${basePath}/s` },
     };
 
-    // Create role-specific dashboard items
     const roleDashboardItems = {
       "Super Admin": allItems.dashboard,
       "Admin": allItems.dashboard,
@@ -356,7 +355,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           roleDashboardItems[userRole],
           allItems.class,
           allItems.students,
-          allItems.assignment,
+          {
+            ...allItems.assignment,
+            subItems: allItems.assignment.subItems.filter(
+              (item) => item.name === "Create Assignment" || item.name === "Submitted Assignment"
+            )
+          },
           allItems.settings,
           allItems.notifications,
           allItems.attendance,
@@ -368,7 +372,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (item) => item.name !== "Create Assignment"
+              (item) =>
+                item.name === "Assignments" ||
+                item.name === "Grade"
             )
           },
           {

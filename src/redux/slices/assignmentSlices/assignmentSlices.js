@@ -102,10 +102,26 @@ export const uploadSolution = createAsyncThunk(
   }
 );
 
+export const getAssignmentAgainstTeacher = createAsyncThunk(
+  'assignment/getAssignmentAgainstTeacher',
+  async ({ teacherId }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAssignmentAgainstTeacher`,
+        { teacherId }
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 const initialState = {
   assignments: [],
   currentAssignment: null,
   studentAssignments: [],
+  teacherAssignments: [], // New state for teacher assignments
   status: 'idle',
   error: null,
   createStatus: 'idle',
@@ -114,6 +130,8 @@ const initialState = {
   fetchError: null,
   uploadSolutionStatus: 'idle',
   uploadSolutionError: null,
+  teacherAssignmentsStatus: 'idle', // New status for teacher assignments
+  teacherAssignmentsError: null, // New error for teacher assignments
 };
 
 const assignmentSlice = createSlice({
@@ -125,6 +143,7 @@ const assignmentSlice = createSlice({
       state.createError = null;
       state.fetchError = null;
       state.uploadSolutionError = null;
+      state.teacherAssignmentsError = null; // Clear teacher assignments error
     },
     clearCreateStatus: (state) => {
       state.createStatus = 'idle';
@@ -138,6 +157,11 @@ const assignmentSlice = createSlice({
     },
     clearAssignments: (state) => {
       state.assignments = [];
+    },
+    clearTeacherAssignments: (state) => { // New reducer for teacher assignments
+      state.teacherAssignments = [];
+      state.teacherAssignmentsStatus = 'idle';
+      state.teacherAssignmentsError = null;
     },
     clearUploadSolutionStatus: (state) => {
       state.uploadSolutionStatus = 'idle';
@@ -157,9 +181,29 @@ const assignmentSlice = createSlice({
         }
       }
     },
+    updateSolutionInTeacherAssignments: (state, action) => { // New reducer for teacher assignments
+      const { assignmentId, studentId, solutionData } = action.payload;
+      
+      const assignmentIndex = state.teacherAssignments.findIndex(
+        assignment => assignment._id === assignmentId
+      );
+      
+      if (assignmentIndex !== -1 && state.teacherAssignments[assignmentIndex].solutions) {
+        const existingIndex = state.teacherAssignments[assignmentIndex].solutions.findIndex(
+          s => s.student === studentId
+        );
+        
+        if (existingIndex !== -1) {
+          state.teacherAssignments[assignmentIndex].solutions[existingIndex] = solutionData;
+        } else {
+          state.teacherAssignments[assignmentIndex].solutions.push(solutionData);
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
+      // Existing cases...
       .addCase(createAssignment.pending, (state) => {
         state.createStatus = 'loading';
         state.createError = null;
@@ -181,7 +225,6 @@ const assignmentSlice = createSlice({
         if (action.payload.assessment) {
           state.currentAssignment = action.payload.assessment;
         } else {
-          // All assignments
           state.assignments = action.payload.assessments;
         }
       })
@@ -222,6 +265,7 @@ const assignmentSlice = createSlice({
         
         const { solution, assignmentId } = action.payload;
         
+        // Update current assignment
         if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
           const existingIndex = state.currentAssignment.solutions.findIndex(
             s => s.student === solution.student
@@ -234,6 +278,7 @@ const assignmentSlice = createSlice({
           }
         }
         
+        // Update assignments list
         const assignmentIndex = state.assignments.findIndex(
           assignment => assignment._id === assignmentId
         );
@@ -250,6 +295,7 @@ const assignmentSlice = createSlice({
           }
         }
         
+        // Update student assignments
         const studentAssignmentIndex = state.studentAssignments.findIndex(
           assignment => assignment._id === assignmentId
         );
@@ -265,10 +311,40 @@ const assignmentSlice = createSlice({
             state.studentAssignments[studentAssignmentIndex].solutions.push(solution);
           }
         }
+        
+        // Update teacher assignments
+        const teacherAssignmentIndex = state.teacherAssignments.findIndex(
+          assignment => assignment._id === assignmentId
+        );
+        
+        if (teacherAssignmentIndex !== -1) {
+          const existingSolutionIndex = state.teacherAssignments[teacherAssignmentIndex].solutions.findIndex(
+            s => s.student === solution.student
+          );
+          
+          if (existingSolutionIndex !== -1) {
+            state.teacherAssignments[teacherAssignmentIndex].solutions[existingSolutionIndex] = solution;
+          } else {
+            state.teacherAssignments[teacherAssignmentIndex].solutions.push(solution);
+          }
+        }
       })
       .addCase(uploadSolution.rejected, (state, action) => {
         state.uploadSolutionStatus = 'failed';
         state.uploadSolutionError = action.payload;
+      })
+      // New case for getAssignmentAgainstTeacher
+      .addCase(getAssignmentAgainstTeacher.pending, (state) => {
+        state.teacherAssignmentsStatus = 'loading';
+        state.teacherAssignmentsError = null;
+      })
+      .addCase(getAssignmentAgainstTeacher.fulfilled, (state, action) => {
+        state.teacherAssignmentsStatus = 'succeeded';
+        state.teacherAssignments = action.payload.assignments;
+      })
+      .addCase(getAssignmentAgainstTeacher.rejected, (state, action) => {
+        state.teacherAssignmentsStatus = 'failed';
+        state.teacherAssignmentsError = action.payload;
       });
   },
 });
@@ -279,8 +355,10 @@ export const {
   clearCurrentAssignment,
   clearStudentAssignments,
   clearAssignments,
+  clearTeacherAssignments, 
   clearUploadSolutionStatus,
   updateSolutionInCurrentAssignment,
+  updateSolutionInTeacherAssignments, 
 } = assignmentSlice.actions;
 
 export default assignmentSlice.reducer;

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Calendar, Upload, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createAssignment, clearCreateStatus, clearError } from "@/redux/slices/assignmentSlices/assignmentSlices";
@@ -8,6 +8,7 @@ import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getStudentNamesWithIds } from "@/redux/slices/studentSlices/studentSlices";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { getCookie } from "cookies-next";
 
 const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
   const handleFileSelect = (e) => {
@@ -71,6 +72,11 @@ const Page = () => {
   const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
   const { students, status: studentsStatus, error: studentsError } = useSelector((state) => state.getStudentNamesWithIds);
 
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -81,20 +87,39 @@ const Page = () => {
     totalMarks: "",
     dueDate: "",
     attachments: [],
-    student: "" // Changed from students array to single student ID
+    student: ""
   });
 
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentUserTeacherId, setCurrentUserTeacherId] = useState(null);
 
-  // Fetch initial data
   useEffect(() => {
     dispatch(getTeachersName());
     dispatch(getAllClassesNameAction());
     dispatch(getStudentNamesWithIds());
   }, [dispatch]);
+
+  // Find the current user's teacher ID if they are a teacher
+  useEffect(() => {
+    if (user && user.role === 'Teacher' && teacherNames && teacherNames.length > 0) {
+      // Find the teacher that matches the current user's ID
+      const currentTeacher = teacherNames.find(teacher => 
+        teacher.user === user.id || teacher._id === user.id
+      );
+      
+      if (currentTeacher) {
+        setCurrentUserTeacherId(currentTeacher._id || currentTeacher.id);
+        // Auto-populate the teacher field
+        setFormData(prev => ({
+          ...prev,
+          teacherId: currentTeacher._id || currentTeacher.id
+        }));
+      }
+    }
+  }, [user, teacherNames]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -105,10 +130,18 @@ const Page = () => {
   };
 
   const handleDropdownToggle = (name) => {
+    // Don't allow changing teacher if current user is a teacher
+    if (name === "teacherId" && user?.role === 'Teacher') {
+      return;
+    }
     setDropdownOpen(prev => prev === name ? null : name);
   };
 
   const handleDropdownSelect = (name, value, selectedItem) => {
+    // Don't allow changing teacher if current user is a teacher
+    if (name === "teacherId" && user?.role === 'Teacher') {
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -116,11 +149,10 @@ const Page = () => {
     setDropdownOpen(null);
   };
 
-  // Handle student selection - single student
   const handleStudentSelect = (name, studentId, selectedItem) => {
     setFormData(prev => ({
       ...prev,
-      student: studentId // Store as single student ID
+      student: studentId
     }));
     setDropdownOpen(null);
   };
@@ -129,7 +161,6 @@ const Page = () => {
     setSelectedFiles(files);
   };
 
-  // File upload function using XMLHttpRequest
   const uploadFileToSupabase = (file) => {
     const SUPABASE_URL = "https://rixdrbokebnvidwyzvzo.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpeGRyYm9rZWJudmlkd3l6dnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MjMzMzIsImV4cCI6MjA0ODE5OTMzMn0.Zhnz5rLRoIhtHyF52pFjzYijNdxgZBvEr9LtOxR2Lhw";
@@ -179,11 +210,10 @@ const Page = () => {
     });
   };
 
-  // Upload multiple files
   const uploadFilesToSupabase = async (files) => {
     setUploading(true);
     setUploadProgress(0);
-    
+
     try {
       const uploadPromises = files.map(file => uploadFileToSupabase(file));
       const results = await Promise.all(uploadPromises);
@@ -200,7 +230,6 @@ const Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
     if (!formData.title || !formData.type || !formData.subject || !formData.classId || !formData.teacherId || !formData.dueDate) {
       alert('Please fill all required fields');
       return;
@@ -209,7 +238,6 @@ const Page = () => {
     try {
       let uploadedAttachments = [];
 
-      // Upload files to Supabase if any files are selected
       if (selectedFiles.length > 0) {
         uploadedAttachments = await uploadFilesToSupabase(selectedFiles);
       }
@@ -224,7 +252,7 @@ const Page = () => {
         totalMarks: formData.totalMarks ? parseInt(formData.totalMarks) : 0,
         dueDate: formData.dueDate,
         attachments: uploadedAttachments,
-        student: formData.student 
+        student: formData.student
       };
 
       dispatch(createAssignment(assignmentData));
@@ -235,7 +263,6 @@ const Page = () => {
     }
   };
 
-  // Clear status when component unmounts
   useEffect(() => {
     return () => {
       dispatch(clearCreateStatus());
@@ -243,7 +270,6 @@ const Page = () => {
     };
   }, [dispatch]);
 
-  // Reset form on success
   useEffect(() => {
     if (createStatus === 'succeeded') {
       setFormData({
@@ -252,18 +278,17 @@ const Page = () => {
         type: "",
         subject: "",
         classId: "",
-        teacherId: "",
+        teacherId: user?.role === 'Teacher' ? currentUserTeacherId : "",
         totalMarks: "",
         dueDate: "",
         attachments: [],
-        student: "" // Reset to empty string
+        student: ""
       });
       setSelectedFiles([]);
       setUploadProgress(0);
     }
-  }, [createStatus]);
+  }, [createStatus, user, currentUserTeacherId]);
 
-  // Transform data for SimpleDropdown
   const assignmentTypeOptions = [
     { value: "Assignment", label: "Assignment" },
     { value: "quiz", label: "Quiz" },
@@ -285,6 +310,11 @@ const Page = () => {
     value: student._id || student.id,
     label: student.name || student.fullName || "Unknown Student"
   }));
+
+  // Find current teacher's name for display
+  const currentTeacherName = currentUserTeacherId 
+    ? teacherOptions.find(teacher => teacher.value === currentUserTeacherId)?.label 
+    : "";
 
   const fetchingTeachers = teachersStatus === "loading";
   const fetchingClasses = classesLoading;
@@ -309,8 +339,8 @@ const Page = () => {
           <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-full text-center mb-6">
             <div>Uploading files... {uploadProgress}%</div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-              <div 
-                className="bg-blue-600 h-2.5 rounded-full" 
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
@@ -399,17 +429,30 @@ const Page = () => {
               required={true}
             />
 
-            <SimpleDropdown
-              label="Teacher"
-              name="teacherId"
-              value={formData.teacherId}
-              options={teacherOptions}
-              onSelect={handleDropdownSelect}
-              isOpen={dropdownOpen === "teacherId"}
-              onToggle={handleDropdownToggle}
-              placeholder={fetchingTeachers ? "Loading teachers..." : "Select a teacher"}
-              required={true}
-            />
+            {/* Conditional Teacher Field */}
+            {user?.role === 'Teacher' ? (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Teacher <span className="text-red-500">*</span>
+                </label>
+                <div className="w-full px-4 py-3 border border-gray-300 rounded-full bg-gray-50 text-gray-700">
+                  {currentTeacherName || "Loading..."}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Automatically assigned as you are a teacher</p>
+              </div>
+            ) : (
+              <SimpleDropdown
+                label="Teacher"
+                name="teacherId"
+                value={formData.teacherId}
+                options={teacherOptions}
+                onSelect={handleDropdownSelect}
+                isOpen={dropdownOpen === "teacherId"}
+                onToggle={handleDropdownToggle}
+                placeholder={fetchingTeachers ? "Loading teachers..." : "Select a teacher"}
+                required={true}
+              />
+            )}
 
             <FormInput
               label="Total Marks"
@@ -430,13 +473,12 @@ const Page = () => {
               required={true}
             />
 
-            {/* FIXED: Use handleStudentSelect instead of handleDropdownSelect for student dropdown */}
             <SimpleDropdown
               label="Assign to Student"
               name="student"
               value={formData.student}
               options={studentOptions}
-              onSelect={handleStudentSelect} 
+              onSelect={handleStudentSelect}
               isOpen={dropdownOpen === "student"}
               onToggle={handleDropdownToggle}
               placeholder={fetchingStudents ? "Loading students..." : "Select a student"}

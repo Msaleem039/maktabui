@@ -44,7 +44,7 @@ export default function AssignmentPage() {
             { label: "View Detail", icon: Eye, action: "view" },
         ];
 
-        if (user?.role === "Teacher") {
+        if (user?.role === "Super Admin") {
             return [
                 ...baseItems,
                 { label: "Edit", icon: Edit, action: "edit" },
@@ -141,7 +141,6 @@ export default function AssignmentPage() {
         setMarksObtained("");
         setFeedback("");
 
-        // Pre-fill existing grade if available
         if (assignment.grades && assignment.grades.length > 0) {
             const existingGrade = assignment.grades[0];
             setMarksObtained(existingGrade.marksObtained?.toString() || "");
@@ -408,7 +407,7 @@ export default function AssignmentPage() {
 
     // Show Upload Solution button only for Students
     const renderUploadSolutionButton = (assignment) => {
-        if (user?.role === "Student") {
+        if (user?.role === "Super Admin") {
             return (
                 <button
                     type="button"
@@ -425,7 +424,7 @@ export default function AssignmentPage() {
 
     // Show Action dropdown only for Teachers
     const renderActionDropdown = (assignment) => {
-        if (user?.role === "Teacher") {
+        if (user?.role === "Super Admin") {
             return (
                 <div className="relative inline-block">
                     <button
@@ -685,8 +684,7 @@ export default function AssignmentPage() {
                 )}
             </section>
 
-            {/* Upload Solution Modal - Only show for Students */}
-            {uploadModalOpen && user?.role === "Student" && (
+            {uploadModalOpen && user?.role === "Super Admin" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
                         <div className="flex items-center justify-between mb-4">
@@ -783,8 +781,7 @@ export default function AssignmentPage() {
                 </div>
             )}
 
-            {/* Remarks Modal - Only show for Teachers */}
-            {remarksModalOpen && user?.role === "Teacher" && (
+            {remarksModalOpen && user?.role === "Super Admin" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
                         <div className="flex items-center justify-between mb-4">
