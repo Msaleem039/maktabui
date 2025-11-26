@@ -157,6 +157,18 @@ export const getParentDashboard = createAsyncThunk(
   }
 );
 
+export const deleteParent = createAsyncThunk(
+  `parent/deleteParent`,
+  async (parentId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteParent`, { parentId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const getAllParentsWithStudentsSlice = createSlice({
   name: "parentsWithStudents",
   initialState: {
@@ -801,6 +813,46 @@ const dashboardSlice = createSlice({
   }
 });
 
+const deleteParentSlice = createSlice({
+  name: 'deleteParent',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetDeleteParent: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearDeleteParentError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(deleteParent.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(deleteParent.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(deleteParent.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
 export const {
   resetAddWaitList,
 } = addToWaitListSlice.actions;
@@ -856,6 +908,11 @@ export const {
   updateMetrics,
 } = dashboardSlice.actions;
 
+export const {
+  resetDeleteParent,
+  clearDeleteParentError,
+} = deleteParentSlice.actions;
+
 export const addToWaitListReducer = addToWaitListSlice.reducer;
 export const createParentReducer = createParentSlice.reducer;
 export const getAllParentsReducer = getAllParentsSlice.reducer;
@@ -867,6 +924,7 @@ export const addCardDetailReducer = addCardDetailSlice.reducer;
 export const setDefaultCardReducer = setDefaultCardSlice.reducer;
 export const removeCardReducer = removeCardSlice.reducer;
 export const parentDashboardReducer = dashboardSlice.reducer;
+export const deleteParentReducer = deleteParentSlice.reducer;
 
 export default getAllParentsWithStudentsSlice.reducer;
 
@@ -882,4 +940,5 @@ export const parentReducer = {
   setDefaultCard: setDefaultCardReducer,
   removeCard: removeCardReducer,
   dashboard: parentDashboardReducer,
+  deleteParent: deleteParentReducer,
 };

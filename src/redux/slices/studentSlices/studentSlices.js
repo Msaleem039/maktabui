@@ -130,6 +130,18 @@ export const updateStudentById = createAsyncThunk(
   }
 );
 
+export const deleteStudent = createAsyncThunk(
+  `student/deleteStudent`,
+  async (studentId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteStudent`, { studentId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 // Slices
 const createStudentSlice = createSlice({
   name: "createStudent",
@@ -567,6 +579,46 @@ const updateStudentSlice = createSlice({
   },
 });
 
+const deleteStudentSlice = createSlice({
+  name: 'deleteStudent',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetDeleteStudent: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearDeleteStudentError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(deleteStudent.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(deleteStudent.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(deleteStudent.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
 export const { resetCreateStudentState } = createStudentSlice.actions;
 export const { resetAllStudentsState,setStudentsPage } = getAllStudentsSlice.actions;
 export const { resetStudentByIdState } = getStudentByIdSlice.actions;
@@ -577,6 +629,8 @@ export const { resetStudentNamesState, clearStudentNamesError } = getStudentName
 export const { resetDashboardStatsState, clearDashboardStatsError, updateDashboardStats } = getStudentDashboardStatsSlice.actions;
 export const { resetUpdateStudentState, clearUpdateStudentError, resetSuccessStatus } = updateStudentSlice.actions;
 
+export const { resetDeleteStudent, clearDeleteStudentError } = deleteStudentSlice.actions;
+
 export const createStudentReducer = createStudentSlice.reducer;
 export const getAllStudentsReducer = getAllStudentsSlice.reducer;
 export const getStudentByIdReducer = getStudentByIdSlice.reducer;
@@ -586,6 +640,7 @@ export const removeFromWaitlistStudentReducer = removeFromWaitlistStudentSlice.r
 export const getStudentNamesWithIdsReducer = getStudentNamesWithIdsSlice.reducer;
 export const getStudentDashboardStatsReducer = getStudentDashboardStatsSlice.reducer;
 export const updateStudentReducer = updateStudentSlice.reducer;
+export const deleteStudentReducer = deleteStudentSlice.reducer;
 
 export const studentReducer = {
   createStudent: createStudentReducer,
@@ -596,5 +651,6 @@ export const studentReducer = {
   removeFromWaitlistStudent: removeFromWaitlistStudentReducer,
   getStudentNamesWithIds: getStudentNamesWithIdsReducer,
   getStudentDashboardStats: getStudentDashboardStatsReducer,
-  updateStudent: updateStudentReducer
+  updateStudent: updateStudentReducer,
+  deleteStudent: deleteStudentReducer
 };
