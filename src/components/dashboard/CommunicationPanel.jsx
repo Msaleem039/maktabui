@@ -56,31 +56,31 @@ const defaultMessages = [
   {
     id: "msg-1",
     sender: "advisor",
-    text: "Hello! I understand you're interested in the new curriculum?",
+    text: "Hello! I understand you're interested in the upcoming parent-teacher meetup.",
     time: "7:20",
   },
   {
     id: "msg-2",
     sender: "client",
-    text: "Hi! Yes, I have a 2020 Winnebago Adventurer student that I'm looking to enroll.",
+    text: "Hi! Yes, I wanted to confirm if the meetup is still scheduled for next week.",
     time: "7:20",
   },
   {
     id: "msg-3",
     sender: "advisor",
-    text: "Great! What's the approximate mileage on your Winnebago Adventurer?",
+    text: "Absolutely! It is on Tuesday at 6 PM. Would you like us to reserve a slot?",
     time: "7:20",
   },
   {
     id: "msg-4",
     sender: "client",
-    text: "I'm interested in the new curriculum. Can you tell me more about it?",
+    text: "Yes please, and could you also share the agenda so I can prepare questions?",
     time: "7:21",
   },
   {
     id: "msg-5",
-    sender: "client",
-    text: "The new curriculum is a great way to learn. It's in excellent condition.",
+    sender: "advisor",
+    text: "Sure thing! I'll send the detailed agenda shortly. Looking forward to seeing you.",
     time: "7:22",
   },
 ];
@@ -192,13 +192,13 @@ export default function CommunicationPanel({
                     <div
                       className={`rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-sm ${
                         isAdvisor
-                          ? "bg-[#F7A21B] text-white rounded-bl-none"
+                          ? "bg-[#0B4B31] text-white rounded-bl-none"
                           : "bg-[#F2F3F4] text-[#394240] rounded-br-none"
                       }`}
                     >
                       {message.text}
                     </div>
-                    <p className={`text-xs mt-1 ${isAdvisor ? "text-[#D97706]" : "text-gray-400"} text-right`}>
+                    <p className={`text-xs mt-1 ${isAdvisor ? "text-[#0B4B31]" : "text-gray-400"} text-right`}>
                       {message.time}
                     </p>
                   </div>
@@ -214,7 +214,7 @@ export default function CommunicationPanel({
                 className="flex-1 bg-transparent outline-none text-sm text-[#0B4B31]"
               />
               <button
-                className="ml-3 bg-[#F7A21B] hover:bg-[#dd8c11] transition text-white rounded-full w-10 h-10 flex items-center justify-center shadow"
+                className="ml-3 bg-[#0B4B31] hover:bg-[#0a3f27] transition text-white rounded-full w-10 h-10 flex items-center justify-center shadow"
                 aria-label="Send message"
               >
                 <Send size={18} />

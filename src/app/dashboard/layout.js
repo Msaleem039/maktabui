@@ -308,6 +308,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Schedule", path: `${basePath}/text/schedule` },
         ],
       },
+      events: {
+        name: "Events",
+        icon: "/Calendar.png",
+        hasSubmenu: true,
+        subItems: [
+          { name: "Send Event", path: `${basePath}/events` },
+          { name: "Create Event", path: `${basePath}/events/create` },
+        ],
+      },
       team: {
         name: "Team",
         icon: "/Staff.png",
@@ -318,7 +327,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Permission", path: `${basePath}/team/permission` },
         ],
       },
-      settings: { name: "Settings", icon: "/window.svg", path: `${basePath}/s` },
+      settings: { name: "Settings", icon: "/settings.jpeg", path: `${basePath}/s` },
     };
 
     const roleDashboardItems = {
@@ -344,6 +353,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.finance,
           allItems.activities,
           allItems.text,
+          allItems.events,
           allItems.communication,
           allItems.team,
         ];
