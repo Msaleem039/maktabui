@@ -30,6 +30,13 @@ const roleOptions = [
     icon: Users,
     role: "Parent"
   },
+  {
+    id: "student",
+    title: "Students",
+    description: "Stay connected with guardians for student progress.",
+    icon: Users,
+    role: "Student"
+  },
 ];
 
 const roleCopy = {
@@ -66,12 +73,12 @@ const parseUserCookie = (cookieValue) => {
 
 const CommunicationPage = () => {
   const dispatch = useDispatch();
-  const { 
-    usersList, 
-    loading, 
-    error, 
+  const {
+    usersList,
+    loading,
+    error,
     inbox,
-    conversations: userConversations 
+    conversations: userConversations
   } = useSelector((state) => state.message);
 
   const [roleChoice, setRoleChoice] = useState("");
@@ -98,18 +105,44 @@ const CommunicationPage = () => {
     };
   }, [userData]);
 
+  // Filter role options based on current user's role
+  const filteredRoleOptions = useMemo(() => {
+    if (!currentUser?.role) return roleOptions;
+
+    const userRole = currentUser.role.toLowerCase();
+
+    switch (userRole) {
+      case "super admin":
+        return roleOptions; // Show all roles
+
+      case "admin":
+        return roleOptions; // Show all roles
+
+      case "teacher":
+        return roleOptions.filter(role =>
+          role.id === "parent" || role.id === "student" || role.id === "super admin"
+        );
+
+      case "parent":
+        return roleOptions.filter(role =>
+          role.id === "teacher"
+        );
+
+      case "student":
+        return roleOptions.filter(role =>
+          role.id === "teacher"
+        );
+
+      default:
+        return roleOptions;
+    }
+  }, [currentUser?.role]);
+
   useEffect(() => {
     if (!currentUser?.id) return;
-    
+
     dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
     dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
-    
-    const interval = setInterval(() => {
-      dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
-      dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
-    }, 30000);
-    
-    return () => clearInterval(interval);
   }, [currentUser?.id, currentUser?.role, dispatch]);
 
   const activeRoleCopy = useMemo(() => {
@@ -118,14 +151,14 @@ const CommunicationPage = () => {
   }, [selectedRole]);
 
   const handleRoleSelect = useCallback((roleId) => {
-    const roleOption = roleOptions.find(role => role.id === roleId);
+    const roleOption = filteredRoleOptions.find(role => role.id === roleId);
     if (roleOption) {
       setRoleChoice(roleId);
       setSelectedRole(roleId);
       setSelectedRoleOption(roleOption);
       dispatch(getUsersData({ role: roleOption.role }));
     }
-  }, [dispatch]);
+  }, [dispatch, filteredRoleOptions]);
 
   const handleStartChat = useCallback(() => {
     if (roleChoice) {
@@ -150,10 +183,10 @@ const CommunicationPage = () => {
         })
         .forEach(conv => {
           const roomId = [currentUser.id, conv.participantId].sort().join('_');
-          
+
           let lastMessage = conv.lastMessage || "Start a conversation...";
           let lastMessageTime = "Online";
-          
+
           if (conv.lastMessageTime) {
             try {
               const msgDate = new Date(conv.lastMessageTime);
@@ -162,7 +195,7 @@ const CommunicationPage = () => {
               lastMessageTime = "Online";
             }
           }
-          
+
           conversations.push({
             id: conv.participantId,
             name: conv.participantName || `${conv.participantModel} User`,
@@ -177,7 +210,7 @@ const CommunicationPage = () => {
             unreadCount: conv.unreadCount || 0,
             conversationMessages: conv.messages || []
           });
-          
+
           addedUserIds.add(conv.participantId);
         });
     }
@@ -207,13 +240,13 @@ const CommunicationPage = () => {
     return conversations.sort((a, b) => {
       if (a.hasExistingConversation && !b.hasExistingConversation) return -1;
       if (!a.hasExistingConversation && b.hasExistingConversation) return 1;
-      
+
       if (a.hasExistingConversation && b.hasExistingConversation) {
         const timeA = new Date(userConversations.find(c => c.participantId === a.id)?.lastMessageTime || 0);
         const timeB = new Date(userConversations.find(c => c.participantId === b.id)?.lastMessageTime || 0);
         return timeB - timeA;
       }
-      
+
       return a.name.localeCompare(b.name);
     });
   }, [usersList, currentUser?.id, selectedRoleOption, userConversations, selectedRole]);
@@ -309,7 +342,7 @@ const CommunicationPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {roleOptions.map((role) => (
+            {filteredRoleOptions.map((role) => (
               <button
                 key={role.id}
                 onClick={() => handleRoleSelect(role.id)}
@@ -336,7 +369,7 @@ const CommunicationPage = () => {
                 className="w-full rounded-full border border-[#0B4B31] bg-white px-4 py-3 text-sm text-[#0B4B31] focus:outline-none focus:ring-2 focus:ring-[#0B4B31]/40"
               >
                 <option value="">Choose...</option>
-                {roleOptions.map((role) => (
+                {filteredRoleOptions.map((role) => (
                   <option key={role.id} value={role.id}>
                     {role.title}
                   </option>
@@ -365,7 +398,7 @@ const CommunicationPage = () => {
 
           {loading && (
             <div className="text-center py-8">
-              <p className="text-[#0B4B31]">Loading {roleOptions.find(r => r.id === selectedRole)?.title}...</p>
+              <p className="text-[#0B4B31]">Loading {filteredRoleOptions.find(r => r.id === selectedRole)?.title}...</p>
             </div>
           )}
 
@@ -375,7 +408,7 @@ const CommunicationPage = () => {
             </div>
           )}
 
-          {!loading && !error && (
+          {!error && (
             <CommunicationPanel {...communicationPanelProps} />
           )}
         </div>

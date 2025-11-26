@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { shallowEqual } from "react-redux";
 import {
   sendMessage,
-  markAsRead
+  markAsRead,
+  getUserConversations
 } from "@/redux/slices/messagesSlices/messagesSlices";
 import socketService from "@/services/socketService";
 
@@ -35,17 +36,20 @@ const MessageStatus = memo(({ isRead, isSent, isCurrentUser }) => {
 
 MessageStatus.displayName = 'MessageStatus';
 
-const useMessagesSelector = (activeConversation, currentUser, userConversations) => {
+const useMessagesSelector = (activeConversation, currentUser) => {
   const inbox = useSelector(state => state.message.inbox, shallowEqual);
+  const userConversations = useSelector(state => state.message.conversations, shallowEqual);
 
   return useMemo(() => {
     if (!activeConversation || !currentUser?.id) return [];
 
-    if (
-      activeConversation?.conversationMessages &&
-      activeConversation?.conversationMessages.length > 0
-    ) {
-      const sortedMessages = [...activeConversation.conversationMessages].sort(
+    // First, check if activeConversation has its own messages from userConversations
+    const conversationFromList = userConversations?.find(conv => 
+      conv.participantId === activeConversation.id
+    );
+
+    if (conversationFromList?.messages?.length > 0) {
+      const sortedMessages = [...conversationFromList.messages].sort(
         (a, b) => {
           try {
             const timeA = new Date(a.createdAt || a.timestamp);
@@ -56,34 +60,26 @@ const useMessagesSelector = (activeConversation, currentUser, userConversations)
           }
         }
       );
-
       return sortedMessages;
     }
 
-    if (!inbox) return [];
+    // If no conversation messages, check inbox
+    if (!inbox || inbox.length === 0) return [];
 
+    // Filter messages for the current conversation
     const conversationMessages = inbox.filter(msg => {
       const senderId = msg.sender?.$oid || msg.sender?._id || msg.sender;
       const receiverId = msg.receiver?.$oid || msg.receiver?._id || msg.receiver;
       const currentUserId = currentUser.id;
       const activeConvId = activeConversation.id;
 
-      const senderModel = msg.senderModel === "Super Admin" ? "User" : msg.senderModel;
-      const receiverModel = msg.receiverModel === "Super Admin" ? "User" : msg.receiverModel;
-      const currentUserModel = currentUser.role === "Super Admin" ? "User" : currentUser.role;
-      const activeConvModel = activeConversation.receiverModel === "Super Admin" ? "User" : activeConversation.receiverModel;
+      const isCurrentUserToActive = 
+        senderId === currentUserId && 
+        receiverId === activeConvId;
 
-      const isCurrentUserToActive =
-        senderId === currentUserId &&
-        senderModel === currentUserModel &&
-        receiverId === activeConvId &&
-        receiverModel === activeConvModel;
-
-      const isActiveToCurrentUser =
-        senderId === activeConvId &&
-        senderModel === activeConvModel &&
-        receiverId === currentUserId &&
-        receiverModel === currentUserModel;
+      const isActiveToCurrentUser = 
+        senderId === activeConvId && 
+        receiverId === currentUserId;
 
       return isCurrentUserToActive || isActiveToCurrentUser;
     });
@@ -119,20 +115,24 @@ const CommunicationPanel = memo(({
   const isConnected = useSocketStatus();
 
   const [activeConversation, setActiveConversation] = useState(null);
-  const messages = useMessagesSelector(activeConversation, currentUser, userConversations);
-
   const [messageInput, setMessageInput] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  
   const messagesEndRef = useRef(null);
   const messageContainerRef = useRef(null);
+  
+  const messages = useMessagesSelector(activeConversation, currentUser);
 
+  // Set initial active conversation
   useEffect(() => {
     if (conversations.length > 0 && !activeConversation) {
       setActiveConversation(conversations[0]);
     }
   }, [conversations, activeConversation]);
 
+  // Socket connection and room management
   useEffect(() => {
     if (!currentUser?.id) return;
 
@@ -149,6 +149,7 @@ const CommunicationPanel = memo(({
     };
   }, [currentUser?.id, currentUser?.role]);
 
+  // Join room when active conversation changes
   useEffect(() => {
     if (!activeConversation) return;
 
@@ -160,6 +161,19 @@ const CommunicationPanel = memo(({
     };
   }, [activeConversation?.id]);
 
+  // Refresh messages when active conversation changes
+  useEffect(() => {
+    if (activeConversation && currentUser?.id && onRefresh) {
+      setMessagesLoading(true);
+      // Use setTimeout to allow UI to update before refresh
+      setTimeout(() => {
+        onRefresh();
+        setMessagesLoading(false);
+      }, 100);
+    }
+  }, [activeConversation?.id, currentUser?.id]);
+
+  // Mark messages as read
   useEffect(() => {
     if (!activeConversation || !currentUser?.id || messages.length === 0) return;
 
@@ -177,21 +191,28 @@ const CommunicationPanel = memo(({
     });
   }, [messages, activeConversation?.id, currentUser?.id, dispatch]);
 
+  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: messages.length > 10 ? "smooth" : "auto"
     });
   }, [messages]);
 
+  // Socket message listener
   useEffect(() => {
     if (!socketService.socket) return;
 
     const handleSocketMessage = (message) => {
-      if (activeConversation &&
-        ((message.sender === activeConversation.id && message.receiver === currentUser.id) ||
-          (message.receiver === activeConversation.id && message.sender === currentUser.id))) {
-        if (onRefresh) {
-          onRefresh();
+      if (activeConversation && currentUser?.id) {
+        const isRelevantMessage = 
+          (message.sender === activeConversation.id && message.receiver === currentUser.id) ||
+          (message.receiver === activeConversation.id && message.sender === currentUser.id);
+        
+        if (isRelevantMessage && onRefresh) {
+          // Small delay to ensure message is processed
+          setTimeout(() => {
+            onRefresh();
+          }, 100);
         }
       }
     };
@@ -199,7 +220,9 @@ const CommunicationPanel = memo(({
     socketService.socket.on('receiveMessage', handleSocketMessage);
 
     return () => {
-      socketService.socket.off('receiveMessage', handleSocketMessage);
+      if (socketService.socket) {
+        socketService.socket.off('receiveMessage', handleSocketMessage);
+      }
     };
   }, [activeConversation?.id, currentUser?.id, onRefresh]);
 
@@ -228,13 +251,21 @@ const CommunicationPanel = memo(({
 
     try {
       await dispatch(sendMessage(messageData)).unwrap();
+
+      // Force immediate refresh after sending message
+      if (onRefresh) {
+        setTimeout(() => {
+          onRefresh();
+        }, 200);
+      }
+
     } catch (error) {
       console.error("Failed to send message:", error);
       setMessageInput(messageContent);
     } finally {
       setSendingMessage(false);
     }
-  }, [messageInput, activeConversation, currentUser, sendingMessage, dispatch]);
+  }, [messageInput, activeConversation, currentUser, sendingMessage, dispatch, onRefresh]);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -242,6 +273,16 @@ const CommunicationPanel = memo(({
       handleSendMessage();
     }
   }, [handleSendMessage]);
+
+  const handleConversationSelect = useCallback((conversation) => {
+    setActiveConversation(conversation);
+    // Refresh when switching conversations
+    if (onRefresh) {
+      setTimeout(() => {
+        onRefresh();
+      }, 100);
+    }
+  }, [onRefresh]);
 
   const formatMessageTime = useCallback((timestamp) => {
     try {
@@ -260,7 +301,17 @@ const CommunicationPanel = memo(({
     try {
       const date = new Date(timestamp?.$date || timestamp);
       if (isNaN(date.getTime())) return "";
-      return date.toLocaleDateString();
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.toDateString() === today.toDateString()) {
+        return "Today";
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return "Yesterday";
+      } else {
+        return date.toLocaleDateString();
+      }
     } catch (error) {
       return "";
     }
@@ -351,7 +402,7 @@ const CommunicationPanel = memo(({
             {filteredConversations.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveConversation(item)}
+                onClick={() => handleConversationSelect(item)}
                 className={`w-full flex items-center gap-3 px-5 py-4 text-left transition ${activeConversation?.id === item.id
                   ? "bg-white shadow-sm border-r-2 border-[#0B4B31]"
                   : "bg-transparent hover:bg-white"
@@ -413,7 +464,11 @@ const CommunicationPanel = memo(({
                 ref={messageContainerRef}
                 className="flex-1 px-6 py-4 bg-white overflow-y-auto max-h-[400px]"
               >
-                {messages.length === 0 ? (
+                {messagesLoading ? (
+                  <div className="text-center py-16 text-[#5E6C64]">
+                    <p>Loading messages...</p>
+                  </div>
+                ) : messages.length === 0 ? (
                   <div className="text-center py-16 text-[#5E6C64]">
                     <p>No messages yet</p>
                     <p className="text-sm mt-2">Start the conversation by sending a message!</p>
@@ -480,13 +535,13 @@ const CommunicationPanel = memo(({
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    disabled={sendingMessage}
+                    disabled={sendingMessage || messagesLoading}
                     className="flex-1 bg-transparent outline-none text-sm text-[#0B4B31] disabled:opacity-50"
                   />
                   <button
                     onClick={handleSendMessage}
-                    disabled={!messageInput.trim() || sendingMessage}
-                    className={`ml-3 transition text-white rounded-full w-10 h-10 flex items-center justify-center shadow ${!messageInput.trim() || sendingMessage
+                    disabled={!messageInput.trim() || sendingMessage || messagesLoading}
+                    className={`ml-3 transition text-white rounded-full w-10 h-10 flex items-center justify-center shadow ${!messageInput.trim() || sendingMessage || messagesLoading
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-[#0B4B31] hover:bg-[#0a3f27]"
                       }`}
