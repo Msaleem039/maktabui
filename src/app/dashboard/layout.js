@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ChevronDown, PlusIcon } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
 import { useSelector } from "react-redux";
-import Chatbot from "@/components/dashboard/Chatbot";
 
 const NavItem = ({
   name,
@@ -356,7 +355,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.students,
             subItems: allItems.students.subItems.filter(
-              (item) => item.name === "Student" // Only show "Student", hide "Add Student" and "Waiting List"
+              (item) => item.name === "Student"
             )
           },
           {

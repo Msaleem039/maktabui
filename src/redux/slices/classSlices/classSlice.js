@@ -86,6 +86,18 @@ export const updateClassAction = createAsyncThunk(
   }
 );
 
+export const deleteClass = createAsyncThunk(
+  `class/deleteClass`,
+  async (classId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteClass`, { classId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const createClassSlice = createSlice({
   name: "createClass",
   initialState: { loading: false, class: null, error: null },
@@ -320,6 +332,46 @@ const updateClassSlice = createSlice({
   },
 });
 
+const deleteClassSlice = createSlice({
+  name: 'deleteClass',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetDeleteClass: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearDeleteClassError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(deleteClass.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(deleteClass.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(deleteClass.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
 export const { 
   clearClassError, 
   resetClassState 
@@ -349,8 +401,23 @@ export const {
   resetUpdateClassState 
 } = updateClassSlice.actions;
 
+export const { 
+  resetDeleteClass, 
+  clearDeleteClassError 
+} = deleteClassSlice.actions;
+
 export const createClassReducer = createClassSlice.reducer;
 export const getAllClassesReducer = getAllClassesSlice.reducer;
 export const getAllClassesNameReducer = getAllClassesNameSlice.reducer;
 export const getClassByIDReducer = getClassByIDSlice.reducer;
 export const updateClassReducer = updateClassSlice.reducer;
+export const deleteClassReducer = deleteClassSlice.reducer;
+
+export const classReducer = {
+  createClass: createClassReducer,
+  getAllClasses: getAllClassesReducer,
+  getAllClassesName: getAllClassesNameReducer,
+  getClassByID: getClassByIDReducer,
+  updateClass: updateClassReducer,
+  deleteClass: deleteClassReducer, 
+};

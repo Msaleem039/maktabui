@@ -117,11 +117,26 @@ export const getAssignmentAgainstTeacher = createAsyncThunk(
   }
 );
 
+export const deleteAssignment = createAsyncThunk(
+  'assignment/deleteAssignment',
+  async (assignmentId, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteAssignment`,
+        { assignmentId }
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 const initialState = {
   assignments: [],
   currentAssignment: null,
   studentAssignments: [],
-  teacherAssignments: [], // New state for teacher assignments
+  teacherAssignments: [],
   status: 'idle',
   error: null,
   createStatus: 'idle',
@@ -130,8 +145,10 @@ const initialState = {
   fetchError: null,
   uploadSolutionStatus: 'idle',
   uploadSolutionError: null,
-  teacherAssignmentsStatus: 'idle', // New status for teacher assignments
-  teacherAssignmentsError: null, // New error for teacher assignments
+  teacherAssignmentsStatus: 'idle',
+  teacherAssignmentsError: null,
+  deleteStatus: 'idle',
+  deleteError: null,
 };
 
 const assignmentSlice = createSlice({
@@ -143,7 +160,8 @@ const assignmentSlice = createSlice({
       state.createError = null;
       state.fetchError = null;
       state.uploadSolutionError = null;
-      state.teacherAssignmentsError = null; // Clear teacher assignments error
+      state.teacherAssignmentsError = null;
+      state.deleteError = null;
     },
     clearCreateStatus: (state) => {
       state.createStatus = 'idle';
@@ -158,7 +176,7 @@ const assignmentSlice = createSlice({
     clearAssignments: (state) => {
       state.assignments = [];
     },
-    clearTeacherAssignments: (state) => { // New reducer for teacher assignments
+    clearTeacherAssignments: (state) => {
       state.teacherAssignments = [];
       state.teacherAssignmentsStatus = 'idle';
       state.teacherAssignmentsError = null;
@@ -167,13 +185,27 @@ const assignmentSlice = createSlice({
       state.uploadSolutionStatus = 'idle';
       state.uploadSolutionError = null;
     },
+    clearDeleteStatus: (state) => {
+      state.deleteStatus = 'idle';
+      state.deleteError = null;
+    },
+    removeAssignmentFromState: (state, action) => {
+      const assignmentId = action.payload;
+      state.assignments = state.assignments.filter(assignment => assignment._id !== assignmentId);
+      state.studentAssignments = state.studentAssignments.filter(assignment => assignment._id !== assignmentId);
+      state.teacherAssignments = state.teacherAssignments.filter(assignment => assignment._id !== assignmentId);
+
+      if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
+        state.currentAssignment = null;
+      }
+    },
     updateSolutionInCurrentAssignment: (state, action) => {
       const { studentId, solutionData } = action.payload;
       if (state.currentAssignment && state.currentAssignment.solutions) {
         const existingIndex = state.currentAssignment.solutions.findIndex(
           s => s.student === studentId
         );
-        
+
         if (existingIndex !== -1) {
           state.currentAssignment.solutions[existingIndex] = solutionData;
         } else {
@@ -181,18 +213,18 @@ const assignmentSlice = createSlice({
         }
       }
     },
-    updateSolutionInTeacherAssignments: (state, action) => { // New reducer for teacher assignments
+    updateSolutionInTeacherAssignments: (state, action) => {
       const { assignmentId, studentId, solutionData } = action.payload;
-      
+
       const assignmentIndex = state.teacherAssignments.findIndex(
         assignment => assignment._id === assignmentId
       );
-      
+
       if (assignmentIndex !== -1 && state.teacherAssignments[assignmentIndex].solutions) {
         const existingIndex = state.teacherAssignments[assignmentIndex].solutions.findIndex(
           s => s.student === studentId
         );
-        
+
         if (existingIndex !== -1) {
           state.teacherAssignments[assignmentIndex].solutions[existingIndex] = solutionData;
         } else {
@@ -203,7 +235,6 @@ const assignmentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Existing cases...
       .addCase(createAssignment.pending, (state) => {
         state.createStatus = 'loading';
         state.createError = null;
@@ -262,66 +293,62 @@ const assignmentSlice = createSlice({
       })
       .addCase(uploadSolution.fulfilled, (state, action) => {
         state.uploadSolutionStatus = 'succeeded';
-        
+
         const { solution, assignmentId } = action.payload;
-        
-        // Update current assignment
+
         if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
           const existingIndex = state.currentAssignment.solutions.findIndex(
             s => s.student === solution.student
           );
-          
+
           if (existingIndex !== -1) {
             state.currentAssignment.solutions[existingIndex] = solution;
           } else {
             state.currentAssignment.solutions.push(solution);
           }
         }
-        
-        // Update assignments list
+
         const assignmentIndex = state.assignments.findIndex(
           assignment => assignment._id === assignmentId
         );
-        
+
         if (assignmentIndex !== -1) {
           const existingSolutionIndex = state.assignments[assignmentIndex].solutions.findIndex(
             s => s.student === solution.student
           );
-          
+
           if (existingSolutionIndex !== -1) {
             state.assignments[assignmentIndex].solutions[existingSolutionIndex] = solution;
           } else {
             state.assignments[assignmentIndex].solutions.push(solution);
           }
         }
-        
-        // Update student assignments
+
         const studentAssignmentIndex = state.studentAssignments.findIndex(
           assignment => assignment._id === assignmentId
         );
-        
+
         if (studentAssignmentIndex !== -1) {
           const existingSolutionIndex = state.studentAssignments[studentAssignmentIndex].solutions.findIndex(
             s => s.student === solution.student
           );
-          
+
           if (existingSolutionIndex !== -1) {
             state.studentAssignments[studentAssignmentIndex].solutions[existingSolutionIndex] = solution;
           } else {
             state.studentAssignments[studentAssignmentIndex].solutions.push(solution);
           }
         }
-        
-        // Update teacher assignments
+
         const teacherAssignmentIndex = state.teacherAssignments.findIndex(
           assignment => assignment._id === assignmentId
         );
-        
+
         if (teacherAssignmentIndex !== -1) {
           const existingSolutionIndex = state.teacherAssignments[teacherAssignmentIndex].solutions.findIndex(
             s => s.student === solution.student
           );
-          
+
           if (existingSolutionIndex !== -1) {
             state.teacherAssignments[teacherAssignmentIndex].solutions[existingSolutionIndex] = solution;
           } else {
@@ -333,7 +360,6 @@ const assignmentSlice = createSlice({
         state.uploadSolutionStatus = 'failed';
         state.uploadSolutionError = action.payload;
       })
-      // New case for getAssignmentAgainstTeacher
       .addCase(getAssignmentAgainstTeacher.pending, (state) => {
         state.teacherAssignmentsStatus = 'loading';
         state.teacherAssignmentsError = null;
@@ -345,6 +371,26 @@ const assignmentSlice = createSlice({
       .addCase(getAssignmentAgainstTeacher.rejected, (state, action) => {
         state.teacherAssignmentsStatus = 'failed';
         state.teacherAssignmentsError = action.payload;
+      })
+      .addCase(deleteAssignment.pending, (state) => {
+        state.deleteStatus = 'loading';
+        state.deleteError = null;
+      })
+      .addCase(deleteAssignment.fulfilled, (state, action) => {
+        state.deleteStatus = 'succeeded';
+        const { deletedAssignmentId } = action.payload;
+
+        state.assignments = state.assignments.filter(assignment => assignment._id !== deletedAssignmentId);
+        state.studentAssignments = state.studentAssignments.filter(assignment => assignment._id !== deletedAssignmentId);
+        state.teacherAssignments = state.teacherAssignments.filter(assignment => assignment._id !== deletedAssignmentId);
+
+        if (state.currentAssignment && state.currentAssignment._id === deletedAssignmentId) {
+          state.currentAssignment = null;
+        }
+      })
+      .addCase(deleteAssignment.rejected, (state, action) => {
+        state.deleteStatus = 'failed';
+        state.deleteError = action.payload;
       });
   },
 });
@@ -355,10 +401,12 @@ export const {
   clearCurrentAssignment,
   clearStudentAssignments,
   clearAssignments,
-  clearTeacherAssignments, 
+  clearTeacherAssignments,
   clearUploadSolutionStatus,
+  clearDeleteStatus,
+  removeAssignmentFromState,
   updateSolutionInCurrentAssignment,
-  updateSolutionInTeacherAssignments, 
+  updateSolutionInTeacherAssignments,
 } = assignmentSlice.actions;
 
 export default assignmentSlice.reducer;

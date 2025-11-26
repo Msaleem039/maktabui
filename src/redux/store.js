@@ -1,9 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-// Auth slice
 import userReducer from './slices/authSlices/userLoginSlice';
 
-// Parent slices
 import {
   addToWaitListReducer,
   createParentReducer,
@@ -15,10 +13,10 @@ import {
   addCardDetailReducer,
   setDefaultCardReducer,
   removeCardReducer,
-  parentDashboardReducer
+  parentDashboardReducer,
+  deleteParentReducer 
 } from './slices/parentSlices/parentSlice';
 
-// Student slices
 import {
   createStudentReducer,
   getAllStudentsReducer,
@@ -28,19 +26,19 @@ import {
   removeFromWaitlistStudentReducer,
   getStudentNamesWithIdsReducer,
   getStudentDashboardStatsReducer,
-  updateStudentReducer
+  updateStudentReducer,
+  deleteStudentReducer
 } from './slices/studentSlices/studentSlices';
 
-// Class slices
 import {
   createClassReducer,
   getAllClassesReducer,
   getAllClassesNameReducer,
   getClassByIDReducer,
-  updateClassReducer
+  updateClassReducer,
+  deleteClassReducer
 } from './slices/classSlices/classSlice';
 
-// Teacher slices
 import {
   createTeacherReducer,
   getAllTeachersReducer,
@@ -52,7 +50,6 @@ import {
   teacherDashboardReducer
 } from './slices/teacherSlices/teacherSlices';
 
-// Admin slices
 import {
   createAdminReducer,
   getAllAdminsReducer,
@@ -60,13 +57,12 @@ import {
   updateAdminReducer
 } from './slices/adminSlices/adminSlices';
 
-// Timetable slices
 import {
   createTimetableReducer,
-  getAllTimetablesReducer
+  getAllTimetablesReducer,
+  deleteTimeTableReducer
 } from './slices/timetableSlices/timetableSlices';
 
-// Invoice slices
 import {
   getAllInvoicesReducer,
   getInvoicesStatsReducer,
@@ -75,15 +71,12 @@ import {
   updateInvoiceReducer
 } from './slices/invoiceSlices/invoiceSlices';
 
-// Payment slices
 import {
   getAllPaymentStatsReducer
 } from './slices/paymentSlices/paymentSlices';
 
-// Dashboard
 import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
 
-// Other slices
 import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
 import gradeReducer from './slices/gradeSlices/gradeSlices';
 import assignmentReducer from './slices/assignmentSlices/assignmentSlices';
@@ -105,6 +98,7 @@ export const store = configureStore({
     setDefaultCard: setDefaultCardReducer,
     removeCard: removeCardReducer,
     parentDashboard: parentDashboardReducer,
+    deleteParent: deleteParentReducer, // ADD THIS
 
     // Student management
     createStudent: createStudentReducer,
@@ -116,6 +110,7 @@ export const store = configureStore({
     getStudentNamesWithIds: getStudentNamesWithIdsReducer,
     getStudentDashboardStats: getStudentDashboardStatsReducer,
     updateStudent: updateStudentReducer,
+    deleteStudent: deleteStudentReducer, 
 
     // Class management
     createClass: createClassReducer,
@@ -123,6 +118,7 @@ export const store = configureStore({
     getAllClassesName: getAllClassesNameReducer,
     getClassByID: getClassByIDReducer,
     updateClass: updateClassReducer,
+    deleteClass: deleteClassReducer, // ADD THIS
 
     // Teacher management
     createTeacher: createTeacherReducer,
@@ -143,6 +139,7 @@ export const store = configureStore({
     // Academic management
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
+    deleteTimeTable: deleteTimeTableReducer, // ADD THIS
     attendance: attendanceReducer,
     grade: gradeReducer,
     assignment: assignmentReducer,
@@ -154,6 +151,7 @@ export const store = configureStore({
     getAllPaymentStats: getAllPaymentStatsReducer,
     getInvoiceById: getInvoiceByIdReducer,
     updateInvoice: updateInvoiceReducer,
+    
     // Dashboard
     dashboard: dashboardReducer,
   },

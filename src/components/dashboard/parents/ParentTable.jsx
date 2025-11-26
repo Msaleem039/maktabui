@@ -9,8 +9,10 @@ import {
   getAllParents,
   resetAllParentsState,
   setParentsPage,
-  setParentsSearch
+  setParentsSearch,
+  deleteParent
 } from "@/redux/slices/parentSlices/parentSlice";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 const ParentTable = ({
   title = "Parents",
@@ -39,6 +41,9 @@ const ParentTable = ({
     search: storeSearch
   } = useSelector((state) => state.getAllParents);
 
+  // Get delete state from Redux
+  const deleteState = useSelector((state) => state.deleteParent);
+
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -46,7 +51,6 @@ const ParentTable = ({
   const [deleteModal, setDeleteModal] = useState({ open: false, parent: null });
   const dropdownRefs = useRef({});
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(localSearch);
@@ -55,14 +59,12 @@ const ParentTable = ({
     return () => clearTimeout(timer);
   }, [localSearch]);
 
-  // Sync local search with store search on mount
   useEffect(() => {
     if (storeSearch) {
       setLocalSearch(storeSearch);
     }
   }, [storeSearch]);
 
-  // Fetch parents when debounced search or pagination changes
   useEffect(() => {
     dispatch(getAllParents({
       page: reduxPagination.currentPage,
@@ -73,7 +75,28 @@ const ParentTable = ({
     }));
   }, [dispatch, debouncedSearch, reduxPagination.currentPage, reduxPagination.itemsPerPage]);
 
-  // Cleanup on unmount
+  // Refresh parents list after successful deletion
+  useEffect(() => {
+    if (deleteState.success) {
+      // Close the delete modal
+      setDeleteModal({ open: false, parent: null });
+      
+      // Refresh the parents list
+      dispatch(getAllParents({
+        page: reduxPagination.currentPage,
+        limit: reduxPagination.itemsPerPage,
+        search: debouncedSearch,
+        sortBy: "createdAt",
+        sortOrder: "desc"
+      }));
+
+      // Reset delete state
+      setTimeout(() => {
+        dispatch(resetDeleteParent());
+      }, 2000);
+    }
+  }, [deleteState.success, dispatch, debouncedSearch, reduxPagination.currentPage, reduxPagination.itemsPerPage]);
+
   useEffect(() => {
     return () => {
       dispatch(resetAllParentsState());
@@ -86,7 +109,6 @@ const ParentTable = ({
     dispatch(setParentsSearch(value));
     onSearchChange?.(value);
 
-    // Reset to page 1 when searching
     if (value !== debouncedSearch) {
       dispatch(setParentsPage(1));
     }
@@ -111,10 +133,9 @@ const ParentTable = ({
     event.stopPropagation();
     event.preventDefault();
 
-    // Calculate if menu should open upwards (if near bottom of viewport)
     const buttonRect = event.currentTarget.getBoundingClientRect();
     const spaceBelow = window.innerHeight - buttonRect.bottom;
-    const menuHeight = 200; // Approximate menu height
+    const menuHeight = 200;
 
     setActionMenu(prev => ({
       id: prev.id === parentId ? null : parentId,
@@ -142,10 +163,15 @@ const ParentTable = ({
 
   const confirmDelete = () => {
     if (deleteModal.parent) {
-      console.log("Delete parent:", deleteModal.parent.id);
-      // TODO: Implement delete parent logic
-      // dispatch(deleteParentAction(deleteModal.parent.id));
-      setDeleteModal({ open: false, parent: null });
+      dispatch(deleteParent(deleteModal.parent.id));
+    }
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ open: false, parent: null });
+    // Clear any delete errors when closing modal
+    if (deleteState.error) {
+      dispatch(clearDeleteParentError());
     }
   };
 
@@ -153,14 +179,12 @@ const ParentTable = ({
     if (!actionMenu.id) return;
 
     const handleClickOutside = (event) => {
-      // Check if click is outside the dropdown container (which includes the button)
       const dropdownRef = dropdownRefs.current[actionMenu.id];
       if (dropdownRef && !dropdownRef.contains(event.target)) {
         setActionMenu({ id: null, openUp: false });
       }
     };
 
-    // Add event listener after a small delay to avoid immediate trigger
     const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside);
     }, 10);
@@ -191,7 +215,6 @@ const ParentTable = ({
     return [];
   }, [reduxParents, parents]);
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const current = reduxPagination.currentPage;
@@ -401,15 +424,6 @@ const ParentTable = ({
             {localSearch && " (filtered)"}
           </div>
           <div className="flex items-center gap-3">
-            {/* <select 
-              value={reduxPagination.itemsPerPage}
-              onChange={(e) => handleLimitChange(parseInt(e.target.value))}
-              className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-            >
-              <option value="10">Display 10</option>
-              <option value="20">Display 20</option>
-              <option value="50">Display 50</option>
-            </select> */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handlePageChange(reduxPagination.currentPage - 1)}
@@ -449,58 +463,31 @@ const ParentTable = ({
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteModal.open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setDeleteModal({ open: false, parent: null });
-            }
-          }}
-        >
-          <div className="relative w-full max-w-md rounded-[28px] bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                  <AlertTriangle size={24} className="text-red-600" />
-                </div>
-                <h2 className="text-lg font-semibold text-[#0B4B31]">
-                  Delete Parent
-                </h2>
-              </div>
-              <button
-                onClick={() => setDeleteModal({ open: false, parent: null })}
-                className="rounded-full bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
-              >
-                <X size={20} />
-              </button>
-            </div>
+      <DeleteConfirmModal
+        isOpen={deleteModal.open}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Delete Parent"
+        itemName={deleteModal.parent?.name}
+        itemType="parent"
+        description={`Are you sure you want to delete ${deleteModal.parent?.name}? This will remove all their information and associated data.`}
+        warningText="This action cannot be undone. All associated data will be permanently deleted."
+        confirmButtonText="Delete Parent"
+        cancelButtonText="Cancel"
+        variant="danger"
+        isLoading={deleteState.loading}
+        size="md"
+      />
 
-            <div className="px-6 py-6">
-              <p className="text-sm text-gray-700 mb-2">
-                Are you sure you want to delete <span className="font-semibold text-[#0B4B31]">{deleteModal.parent?.name}</span>?
-              </p>
-              <p className="text-xs text-red-600">
-                This action cannot be undone. All associated data will be permanently deleted.
-              </p>
-            </div>
+      {deleteState.success && (
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-green-100 px-4 py-3 text-green-800 shadow-lg">
+          Parent deleted successfully!
+        </div>
+      )}
 
-            <div className="flex gap-3 border-t border-gray-200 px-6 py-4">
-              <button
-                onClick={() => setDeleteModal({ open: false, parent: null })}
-                className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+      {deleteState.error && (
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-red-100 px-4 py-3 text-red-800 shadow-lg">
+          Error: {deleteState.error}
         </div>
       )}
     </section>
