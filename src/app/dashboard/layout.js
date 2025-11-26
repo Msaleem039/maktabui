@@ -327,7 +327,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Permission", path: `${basePath}/team/permission` },
         ],
       },
-      settings: { name: "Settings", icon: "/settings.jpeg", path: `${basePath}/s` },
+      settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/s` },
     };
 
     const roleDashboardItems = {
