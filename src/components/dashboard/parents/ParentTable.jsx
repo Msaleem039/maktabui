@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, Pencil, Trash2, X, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import {
   setParentsPage,
   setParentsSearch
 } from "@/redux/slices/parentSlices/parentSlice";
+import ActionMenu from "@/components/dashboard/ActionMenu";
 
 const ParentTable = ({
   title = "Parents",
@@ -42,9 +43,7 @@ const ParentTable = ({
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
   const [deleteModal, setDeleteModal] = useState({ open: false, parent: null });
-  const dropdownRefs = useRef({});
 
   // Debounce search input
   useEffect(() => {
@@ -107,36 +106,15 @@ const ParentTable = ({
     setSelectedId(parentId);
   };
 
-  const toggleActionMenu = (event, parentId) => {
-    event.stopPropagation();
-    event.preventDefault();
-
-    // Calculate if menu should open upwards (if near bottom of viewport)
-    const buttonRect = event.currentTarget.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - buttonRect.bottom;
-    const menuHeight = 200; // Approximate menu height
-
-    setActionMenu(prev => ({
-      id: prev.id === parentId ? null : parentId,
-      openUp: spaceBelow < menuHeight
-    }));
-  };
-
-  const handleView = (event, parentId) => {
-    event.stopPropagation();
-    setActionMenu({ id: null, openUp: false });
+  const handleView = (parentId) => {
     router.push(`/dashboard/parent/${parentId}`);
   };
 
-  const handleEdit = (event, parentId) => {
-    event.stopPropagation();
-    setActionMenu({ id: null, openUp: false });
+  const handleEdit = (parentId) => {
     router.push(`/dashboard/parent/${parentId}/edit`);
   };
 
-  const handleDelete = (event, parent) => {
-    event.stopPropagation();
-    setActionMenu({ id: null, openUp: false });
+  const handleDelete = (parent) => {
     setDeleteModal({ open: true, parent });
   };
 
@@ -148,28 +126,6 @@ const ParentTable = ({
       setDeleteModal({ open: false, parent: null });
     }
   };
-
-  useEffect(() => {
-    if (!actionMenu.id) return;
-
-    const handleClickOutside = (event) => {
-      // Check if click is outside the dropdown container (which includes the button)
-      const dropdownRef = dropdownRefs.current[actionMenu.id];
-      if (dropdownRef && !dropdownRef.contains(event.target)) {
-        setActionMenu({ id: null, openUp: false });
-      }
-    };
-
-    // Add event listener after a small delay to avoid immediate trigger
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-    }, 10);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [actionMenu.id]);
 
   const tableData = useMemo(() => {
     if (reduxParents && reduxParents.length > 0) {
@@ -334,50 +290,28 @@ const ParentTable = ({
                   <td className="px-4 py-3 text-black">{parent.spouse}</td>
                   <td className="px-4 py-3 text-black">{parent.children}</td>
                   <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <div
-                      ref={(el) => (dropdownRefs.current[parent.id] = el)}
-                      className="relative inline-block text-left"
-                    >
-                      <button
-                        type="button"
-                        onClick={(event) => toggleActionMenu(event, parent.id)}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                      >
-                        Take Action
-                        <span>▾</span>
-                      </button>
-                      {actionMenu.id === parent.id && (
-                        <div
-                          onClick={(event) => event.stopPropagation()}
-                          className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "top-full mt-2"} z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden`}
-                        >
-                          <button
-                            type="button"
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 bg-[#0B4B3138] hover:bg-[#E5EFEB]"
-                            onClick={(event) => handleView(event, parent.id)}
-                          >
-                            <Eye size={16} className="text-[#0B4B31]" />
-                            View
-                          </button>
-                          <button
-                            type="button"
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
-                            onClick={(event) => handleEdit(event, parent.id)}
-                          >
-                            <Pencil size={16} className="text-[#0B4B31]" />
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
-                            onClick={(event) => handleDelete(event, parent)}
-                          >
-                            <Trash2 size={16} className="text-[#C43B30]" />
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    <ActionMenu
+                      triggerLabel="Take Action"
+                      items={[
+                        {
+                          label: "View",
+                          icon: Eye,
+                          onClick: () => handleView(parent.id),
+                          className: "bg-[#0B4B3138]",
+                        },
+                        {
+                          label: "Edit",
+                          icon: Pencil,
+                          onClick: () => handleEdit(parent.id),
+                        },
+                        {
+                          label: "Delete",
+                          icon: Trash2,
+                          onClick: () => handleDelete(parent),
+                          iconClassName: "text-[#C43B30]",
+                        },
+                      ]}
+                    />
                   </td>
                 </tr>
               );

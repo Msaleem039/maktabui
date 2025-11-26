@@ -45,13 +45,17 @@ export default function AssignmentPage() {
             { label: "View Detail", icon: Eye, action: "view" },
         ];
 
+        const canAddRemarks = ["Super Admin", "Teacher"].includes(user?.role);
+
+        if (canAddRemarks) {
+            baseItems.push({ label: "Add Remarks", icon: Star, action: "remarks" });
+        }
+
         if (user?.role === "Super Admin") {
-            return [
-                ...baseItems,
+            baseItems.push(
                 { label: "Edit", icon: Edit, action: "edit" },
-                { label: "Add Remarks", icon: Star, action: "remarks" },
                 { label: "Remove", icon: Trash2, action: "remove" },
-            ];
+            );
         }
 
         return baseItems;
@@ -452,10 +456,10 @@ export default function AssignmentPage() {
                     <button
                         type="button"
                         onClick={(e) => toggleDropdown(assignment._id, e)}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/80"
                     >
-                        Actions
-                        <span>▾</span>
+                        <span>Actions</span>
+                        <span className="text-xs">▾</span>
                     </button>
 
                     {openDropdownId === assignment._id && (
@@ -467,7 +471,7 @@ export default function AssignmentPage() {
                                     delete dropdownRefs.current[assignment._id];
                                 }
                             }}
-                            className={`absolute right-0 min-w-[200px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_14px_40px_-12px_rgba(11,75,49,0.35)] overflow-hidden ${
+                            className={`absolute right-0 z-50 min-w-[240px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_18px_45px_-18px_rgba(11,75,49,0.35)] overflow-hidden ${
                                 dropdownDirections[assignment._id] === "up" ? "bottom-full mb-3" : "top-full mt-3"
                             }`}
                         >
@@ -478,8 +482,8 @@ export default function AssignmentPage() {
                                         key={item.action}
                                         type="button"
                                         onClick={(e) => handleActionClick(item.action, assignment._id, e)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                            } hover:bg-[#E5EFEB]`}
+                                        className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                            } hover:bg-[#F4F7F5]`}
                                     >
                                         <Icon size={16} className="text-[#0B4B31]" />
                                         <span>{item.label}</span>
@@ -825,70 +829,70 @@ export default function AssignmentPage() {
                 </div>
             )}
 
-            {remarksModalOpen && user?.role === "Super Admin" && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-[#0B4B31]">
-                                Add Remarks
-                            </h3>
+            {remarksModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                    <div className="w-full max-w-xl rounded-[28px] bg-white p-6 sm:p-8 shadow-2xl mx-4">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-2xl font-semibold text-[#0B4B31]">Add Remarks</h3>
                             <button
                                 onClick={() => setRemarksModalOpen(false)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-gray-400 hover:text-gray-600 transition"
+                                aria-label="Close"
                             >
-                                <X size={20} />
+                                <X size={24} />
                             </button>
                         </div>
 
                         {selectedAssignmentForRemarks && (
-                            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                                <h4 className="font-medium text-[#0B4B31]">{selectedAssignmentForRemarks.title}</h4>
-                                <p className="text-sm text-gray-600">Subject: {selectedAssignmentForRemarks.subject}</p>
-                                <p className="text-sm text-gray-600">Total Marks: {selectedAssignmentForRemarks.totalMarks}</p>
-                                <p className="text-sm text-gray-600">Student: {selectedAssignmentForRemarks.student?.studentName}</p>
-                                <p className="text-sm text-gray-600">Teacher: {selectedAssignmentForRemarks.teacher?.fullName}</p>
-                                <p className="text-sm text-gray-600">Teacher ID: {selectedAssignmentForRemarks.teacher?._id}</p>
+                            <div className="mb-6 rounded-2xl bg-[#F4F7F5] p-4 text-sm text-[#1E1E1E] space-y-1">
+                                <p className="font-semibold text-[#0B4B31]">Data</p>
+                                <p><span className="font-medium">Subject:</span> {selectedAssignmentForRemarks.subject || "N/A"}</p>
+                                <p><span className="font-medium">Total Marks:</span> {selectedAssignmentForRemarks.totalMarks || "N/A"}</p>
+                                <p><span className="font-medium">Student:</span> {selectedAssignmentForRemarks.student?.studentName || "N/A"}</p>
+                                <p><span className="font-medium">Teacher:</span> {selectedAssignmentForRemarks.teacher?.fullName || "N/A"}</p>
+                                <p className="truncate"><span className="font-medium">Teacher ID:</span> {selectedAssignmentForRemarks.teacher?._id || "N/A"}</p>
                             </div>
                         )}
 
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Marks Obtained
-                                </label>
-                                <input
-                                    type="number"
-                                    value={marksObtained}
-                                    onChange={(e) => setMarksObtained(e.target.value)}
-                                    placeholder="Enter marks obtained"
-                                    className="w-full border border-gray-300 rounded-lg p-2"
-                                    max={selectedAssignmentForRemarks?.totalMarks}
-                                    step="0.1"
-                                />
-                                {selectedAssignmentForRemarks?.totalMarks && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Out of {selectedAssignmentForRemarks.totalMarks} total marks
-                                    </p>
-                                )}
+                        <div className="space-y-5">
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <div>
+                                    <label className="block text-sm font-semibold text-[#0B4B31] mb-2">
+                                        Marks Obtained
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={marksObtained}
+                                        onChange={(e) => setMarksObtained(e.target.value)}
+                                        placeholder="Enter marks obtained"
+                                        className="w-full rounded-full border border-[#D0D8D4] bg-white px-4 py-3 text-sm text-[#0B4B31] outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
+                                        max={selectedAssignmentForRemarks?.totalMarks}
+                                        step="0.1"
+                                    />
+                                    {selectedAssignmentForRemarks?.totalMarks && (
+                                        <p className="mt-1 text-xs text-[#5E6C64]">
+                                            Out of {selectedAssignmentForRemarks.totalMarks} total marks
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col">
+                                    <label className="block text-sm font-semibold text-[#0B4B31] mb-2">
+                                        Feedback
+                                    </label>
+                                    <textarea
+                                        value={feedback}
+                                        onChange={(e) => setFeedback(e.target.value)}
+                                        placeholder="Enter your feedback..."
+                                        className="flex-1 rounded-2xl border border-[#D0D8D4] bg-white px-4 py-3 text-sm text-[#0B4B31] outline-none focus:ring-2 focus:ring-[#0B4B31]/30 min-h-[120px]"
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Feedback
-                                </label>
-                                <textarea
-                                    value={feedback}
-                                    onChange={(e) => setFeedback(e.target.value)}
-                                    placeholder="Enter your feedback..."
-                                    rows="4"
-                                    className="w-full border border-gray-300 rounded-lg p-2"
-                                />
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                                 <button
                                     onClick={() => setRemarksModalOpen(false)}
-                                    className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                                    className="flex-1 rounded-full border border-[#D0D8D4] px-6 py-3 text-base font-semibold text-[#0B4B31] transition hover:bg-[#F5F8F6]"
                                     disabled={gradeCreateStatus === 'loading'}
                                 >
                                     Cancel
@@ -896,7 +900,7 @@ export default function AssignmentPage() {
                                 <button
                                     onClick={handleSubmitRemarks}
                                     disabled={!marksObtained || gradeCreateStatus === 'loading'}
-                                    className="flex-1 py-2 px-4 bg-[#0B4B31] text-white rounded-lg hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                    className="flex-1 rounded-full bg-[#7FA18F] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#6b8b79] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {gradeCreateStatus === 'loading' ? 'Submitting...' : 'Submit Remarks'}
                                 </button>
