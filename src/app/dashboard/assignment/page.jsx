@@ -427,7 +427,6 @@ export default function AssignmentPage() {
         return null;
     };
 
-    // Show Upload Solution button only for Students
     const renderUploadSolutionButton = (assignment) => {
         if (user?.role === "Super Admin") {
             return (

@@ -2,6 +2,9 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import userReducer from './slices/authSlices/userLoginSlice';
 
+import messageReducer from './slices/messagesSlices/messagesSlices';
+import socketReducer from './slices/messagesSlices/socketSlices';
+
 import {
   addToWaitListReducer,
   createParentReducer,
@@ -86,6 +89,9 @@ export const store = configureStore({
     // Authentication
     user: userReducer,
 
+    message: messageReducer,
+    socket: socketReducer,
+
     // Parent management
     createParent: createParentReducer,
     getAllParents: getAllParentsReducer,
@@ -98,7 +104,7 @@ export const store = configureStore({
     setDefaultCard: setDefaultCardReducer,
     removeCard: removeCardReducer,
     parentDashboard: parentDashboardReducer,
-    deleteParent: deleteParentReducer, // ADD THIS
+    deleteParent: deleteParentReducer,
 
     // Student management
     createStudent: createStudentReducer,
@@ -118,7 +124,7 @@ export const store = configureStore({
     getAllClassesName: getAllClassesNameReducer,
     getClassByID: getClassByIDReducer,
     updateClass: updateClassReducer,
-    deleteClass: deleteClassReducer, // ADD THIS
+    deleteClass: deleteClassReducer,
 
     // Teacher management
     createTeacher: createTeacherReducer,
@@ -139,7 +145,7 @@ export const store = configureStore({
     // Academic management
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
-    deleteTimeTable: deleteTimeTableReducer, // ADD THIS
+    deleteTimeTable: deleteTimeTableReducer,
     attendance: attendanceReducer,
     grade: gradeReducer,
     assignment: assignmentReducer,
@@ -155,6 +161,12 @@ export const store = configureStore({
     // Dashboard
     dashboard: dashboardReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['socket/socketConnected'],
+      },
+    }),
 });
 
 export default store;

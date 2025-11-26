@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Search, Grid, Moon, ChevronDown, Users, ShieldCheck, GraduationCap } from "lucide-react";
 import CommunicationPanel from "@/components/dashboard/CommunicationPanel";
+import { useDispatch, useSelector } from "react-redux";
+import { getUsersData, getInbox, getUserConversations } from "@/redux/slices/messagesSlices/messagesSlices";
+import { getCookie } from "cookies-next";
 
 const roleOptions = [
   {
@@ -11,18 +14,21 @@ const roleOptions = [
     title: "Admin Team",
     description: "Coordinate with leadership and support teams.",
     icon: ShieldCheck,
+    role: "Admin"
   },
   {
     id: "teacher",
     title: "Teachers",
     description: "Discuss classes, assignments, and academic updates.",
     icon: GraduationCap,
+    role: "Teacher"
   },
   {
     id: "parent",
     title: "Parents",
     description: "Stay connected with guardians for student progress.",
     icon: Users,
+    role: "Parent"
   },
 ];
 
@@ -41,20 +47,208 @@ const roleCopy = {
   },
 };
 
+const parseUserCookie = (cookieValue) => {
+  if (!cookieValue) return null;
+  try {
+    if (typeof cookieValue === 'object') return cookieValue;
+    if (typeof cookieValue === 'string') {
+      let decodedValue = cookieValue;
+      try {
+        decodedValue = decodeURIComponent(cookieValue);
+      } catch (e) { }
+      return JSON.parse(decodedValue);
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
 const CommunicationPage = () => {
+  const dispatch = useDispatch();
+  const { 
+    usersList, 
+    loading, 
+    error, 
+    inbox,
+    conversations: userConversations 
+  } = useSelector((state) => state.message);
+
   const [roleChoice, setRoleChoice] = useState("");
   const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedRoleOption, setSelectedRoleOption] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    try {
+      const userCookie = getCookie("user");
+      const parsedUser = parseUserCookie(userCookie);
+      setUserData(parsedUser);
+    } catch (error) {
+      setUserData(null);
+    }
+  }, []);
+
+  const currentUser = useMemo(() => {
+    if (!userData) return null;
+    return {
+      id: userData.id || userData._id || "unknown-id",
+      role: userData.role || "Unknown",
+      name: userData.name || "User"
+    };
+  }, [userData]);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    
+    dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
+    dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
+    
+    const interval = setInterval(() => {
+      dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
+      dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [currentUser?.id, currentUser?.role, dispatch]);
 
   const activeRoleCopy = useMemo(() => {
     if (!selectedRole) return null;
     return roleCopy[selectedRole];
   }, [selectedRole]);
 
-  const handleStartChat = () => {
-    if (roleChoice) {
-      setSelectedRole(roleChoice);
+  const handleRoleSelect = useCallback((roleId) => {
+    const roleOption = roleOptions.find(role => role.id === roleId);
+    if (roleOption) {
+      setRoleChoice(roleId);
+      setSelectedRole(roleId);
+      setSelectedRoleOption(roleOption);
+      dispatch(getUsersData({ role: roleOption.role }));
     }
-  };
+  }, [dispatch]);
+
+  const handleStartChat = useCallback(() => {
+    if (roleChoice) {
+      handleRoleSelect(roleChoice);
+    }
+  }, [roleChoice, handleRoleSelect]);
+
+  const usersConversations = useMemo(() => {
+    if (!currentUser?.id || !selectedRole) {
+      return [];
+    }
+
+    const conversations = [];
+    const addedUserIds = new Set();
+
+    if (userConversations && userConversations.length > 0) {
+      userConversations
+        .filter(conv => {
+          const convModel = conv.participantModel === "Super Admin" ? "User" : conv.participantModel;
+          const selectedModel = selectedRoleOption?.role || "";
+          return convModel === selectedModel;
+        })
+        .forEach(conv => {
+          const roomId = [currentUser.id, conv.participantId].sort().join('_');
+          
+          let lastMessage = conv.lastMessage || "Start a conversation...";
+          let lastMessageTime = "Online";
+          
+          if (conv.lastMessageTime) {
+            try {
+              const msgDate = new Date(conv.lastMessageTime);
+              lastMessageTime = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+              lastMessageTime = "Online";
+            }
+          }
+          
+          conversations.push({
+            id: conv.participantId,
+            name: conv.participantName || `${conv.participantModel} User`,
+            snippet: lastMessage,
+            time: lastMessageTime,
+            status: "Active",
+            tag: conv.participantModel,
+            role: conv.participantModel,
+            receiverModel: conv.participantModel,
+            roomId: roomId,
+            hasExistingConversation: true,
+            unreadCount: conv.unreadCount || 0,
+            conversationMessages: conv.messages || []
+          });
+          
+          addedUserIds.add(conv.participantId);
+        });
+    }
+
+    if (usersList && usersList.length > 0) {
+      usersList.forEach((user) => {
+        if (!addedUserIds.has(user._id)) {
+          const roomId = [currentUser.id, user._id].sort().join('_');
+          conversations.push({
+            id: user._id,
+            name: user.name || user.fullName || user.username || `${user.role} User`,
+            snippet: "Start a conversation...",
+            time: "Online",
+            status: "Active",
+            tag: user.role,
+            role: user.role,
+            receiverModel: selectedRoleOption?.role || user.role,
+            roomId: roomId,
+            hasExistingConversation: false,
+            unreadCount: 0,
+            conversationMessages: []
+          });
+        }
+      });
+    }
+
+    return conversations.sort((a, b) => {
+      if (a.hasExistingConversation && !b.hasExistingConversation) return -1;
+      if (!a.hasExistingConversation && b.hasExistingConversation) return 1;
+      
+      if (a.hasExistingConversation && b.hasExistingConversation) {
+        const timeA = new Date(userConversations.find(c => c.participantId === a.id)?.lastMessageTime || 0);
+        const timeB = new Date(userConversations.find(c => c.participantId === b.id)?.lastMessageTime || 0);
+        return timeB - timeA;
+      }
+      
+      return a.name.localeCompare(b.name);
+    });
+  }, [usersList, currentUser?.id, selectedRoleOption, userConversations, selectedRole]);
+
+  const resetRoleSelection = useCallback(() => {
+    setSelectedRole(null);
+    setRoleChoice("");
+    setSelectedRoleOption(null);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    if (currentUser?.id && currentUser?.role) {
+      dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
+      dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
+    }
+  }, [currentUser?.id, currentUser?.role, dispatch]);
+
+  const communicationPanelProps = useMemo(() => ({
+    panelTitle: activeRoleCopy?.title || "Live Conversations",
+    subtitle: activeRoleCopy?.subtitle || "Monitor, reply, and collaborate across roles",
+    conversations: usersConversations,
+    showUsersList: true,
+    currentUser: currentUser,
+    selectedRoleOption: selectedRoleOption,
+    onRefresh: handleRefresh,
+    userConversations: userConversations
+  }), [activeRoleCopy, usersConversations, currentUser, selectedRoleOption, handleRefresh, userConversations]);
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-[#0B4B31]">Loading user data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
@@ -88,7 +282,7 @@ const CommunicationPage = () => {
                 />
               </div>
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
-                Ahmed J.
+                {currentUser.name}
               </span>
               <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
@@ -108,7 +302,7 @@ const CommunicationPage = () => {
       {!selectedRole ? (
         <section className="rounded-[32px] border border-[#E2E7E4] bg-white p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col gap-3 mb-6">
-            <h2 className="text-2xl font-semibold text-[#0B4B31]">Choose who you’d like to chat with</h2>
+            <h2 className="text-2xl font-semibold text-[#0B4B31]">Choose who you'd like to chat with</h2>
             <p className="text-sm text-[#5E6C64]">
               Select a role to filter conversations and keep your communication focused.
             </p>
@@ -118,13 +312,9 @@ const CommunicationPage = () => {
             {roleOptions.map((role) => (
               <button
                 key={role.id}
-                onClick={() => {
-                  setRoleChoice(role.id);
-                  setSelectedRole(role.id);
-                }}
-                className={`rounded-3xl border px-5 py-6 text-left transition shadow-sm ${
-                  roleChoice === role.id ? "border-[#0B4B31] bg-[#F2F7F5]" : "border-[#E2E7E4] bg-white hover:border-[#0B4B31]/40"
-                }`}
+                onClick={() => handleRoleSelect(role.id)}
+                className={`rounded-3xl border px-5 py-6 text-left transition shadow-sm ${roleChoice === role.id ? "border-[#0B4B31] bg-[#F2F7F5]" : "border-[#E2E7E4] bg-white hover:border-[#0B4B31]/40"
+                  }`}
               >
                 <div className="w-12 h-12 rounded-2xl bg-[#0B4B31]/10 flex items-center justify-center text-[#0B4B31] mb-4">
                   <role.icon size={24} />
@@ -142,7 +332,7 @@ const CommunicationPage = () => {
               </label>
               <select
                 value={roleChoice}
-                onChange={(e) => setRoleChoice(e.target.value)}
+                onChange={(e) => handleRoleSelect(e.target.value)}
                 className="w-full rounded-full border border-[#0B4B31] bg-white px-4 py-3 text-sm text-[#0B4B31] focus:outline-none focus:ring-2 focus:ring-[#0B4B31]/40"
               >
                 <option value="">Choose...</option>
@@ -157,9 +347,8 @@ const CommunicationPage = () => {
             <button
               onClick={handleStartChat}
               disabled={!roleChoice}
-              className={`rounded-full px-8 py-3 text-sm font-semibold text-white transition ${
-                roleChoice ? "bg-[#0B4B31] hover:bg-[#0a3f27]" : "bg-gray-300 cursor-not-allowed"
-              }`}
+              className={`rounded-full px-8 py-3 text-sm font-semibold text-white transition ${roleChoice ? "bg-[#0B4B31] hover:bg-[#0a3f27]" : "bg-gray-300 cursor-not-allowed"
+                }`}
             >
               Start Chat
             </button>
@@ -168,18 +357,27 @@ const CommunicationPage = () => {
       ) : (
         <div className="space-y-4">
           <button
-            onClick={() => {
-              setSelectedRole(null);
-              setRoleChoice("");
-            }}
+            onClick={resetRoleSelection}
             className="inline-flex items-center text-sm text-[#0B4B31] font-semibold hover:underline"
           >
             ← Choose another role
           </button>
-          <CommunicationPanel
-            panelTitle={activeRoleCopy?.title || "Live Conversations"}
-            subtitle={activeRoleCopy?.subtitle || "Monitor, reply, and collaborate across roles"}
-          />
+
+          {loading && (
+            <div className="text-center py-8">
+              <p className="text-[#0B4B31]">Loading {roleOptions.find(r => r.id === selectedRole)?.title}...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-8 text-red-500">
+              <p>Error loading users: {error}</p>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <CommunicationPanel {...communicationPanelProps} />
+          )}
         </div>
       )}
     </div>
@@ -187,4 +385,3 @@ const CommunicationPage = () => {
 };
 
 export default CommunicationPage;
-
