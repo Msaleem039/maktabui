@@ -226,6 +226,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
     const allItems = {
       dashboard: { name: "Dashboard", icon: "/01.png", path: `${basePath}/dashboard` },
+      communication: { name: "Communication", icon: "/SMS.png", path: `${basePath}/communication` },
       parents: {
         name: "Parents",
         icon: "/Family Woman Woman.png",
@@ -344,6 +345,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.finance,
           allItems.activities,
           allItems.text,
+          allItems.communication,
           allItems.team,
         ];
 
@@ -366,6 +368,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.settings,
           allItems.notifications,
           allItems.attendance,
+          allItems.communication,
         ];
 
       case "Student":
@@ -387,6 +390,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
           allItems.notifications,
           allItems.settings,
+          allItems.communication,
         ];
 
       case "Parent":
@@ -406,10 +410,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
           allItems.notifications,
           allItems.settings,
+          allItems.communication,
         ];
 
       default:
-        return [allItems.dashboard];
+        return [allItems.dashboard, allItems.communication];
     }
   };
 

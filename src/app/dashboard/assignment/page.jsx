@@ -437,7 +437,7 @@ export default function AssignmentPage() {
                     className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
                 >
                     <Upload size={16} />
-                    Upload Solution
+                    Upload
                 </button>
             );
         }
@@ -721,7 +721,7 @@ export default function AssignmentPage() {
 
                         <div className="space-y-6">
                             <div>
-                                <h3 className="text-2xl font-semibold text-[#0B4B31]">Upload Solution</h3>
+                                <h3 className="text-2xl font-semibold text-[#0B4B31]">Upload</h3>
                                 <p className="text-sm text-gray-500 mt-1">
                                     Attach your completed work and submit it for review.
                                 </p>
@@ -817,7 +817,7 @@ export default function AssignmentPage() {
                                     disabled={!uploadFile || isUploading}
                                     className="flex-1 rounded-full bg-[#0B4B31] px-4 py-3 text-base font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {isUploading ? "Uploading..." : "Upload Solution"}
+                                    {isUploading ? "Uploading..." : "Upload"}
                                 </button>
                             </div>
                         </div>
