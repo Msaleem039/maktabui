@@ -111,11 +111,11 @@ export const deleteMessage = createAsyncThunk(
 
 export const getUsersData = createAsyncThunk(
   'message/getUsersData',
-  async ({ role }, { rejectWithValue }) => {
+  async ({ role,id }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getUsersData`,
-        { role }
+        { role,id }
       );
       return response.data;
     } catch (error) {
@@ -141,9 +141,8 @@ const messageSlice = createSlice({
     unreadCount: 0,
     usersList: [],
     currentUserId: null,
-    // NEW: Conversation state
-    conversations: [], // All conversations grouped by participant
-    activeConversation: null, // Current active conversation messages
+    conversations: [],
+    activeConversation: null,
     conversationLoading: false,
   },
 

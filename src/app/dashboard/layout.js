@@ -262,8 +262,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Assignments", path: `${basePath}/assignment` },
-          { name: "Create Assignment", path: `${basePath}/assignment/add` },
-          { name: "Submitted Assignment", path: `${basePath}/assignment/submittedAssignment` },
+          { name: "C Assignment", path: `${basePath}/assignment/add` },
+          { name: "S Assignment", path: `${basePath}/assignment/submittedAssignment` },
           { name: "Grade", path: `${basePath}/grade` },
         ],
       },
@@ -299,21 +299,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Text Log", path: `${basePath}/activities/text-log` },
         ],
       },
-      text: {
-        name: "Send A Text",
-        icon: "/SMS.png",
-        hasSubmenu: true,
-        subItems: [
-          { name: "Send A Text", path: `${basePath}/text` },
-          { name: "Schedule", path: `${basePath}/text/schedule` },
-        ],
-      },
       events: {
         name: "Events",
         icon: "/Calendar.png",
         hasSubmenu: true,
         subItems: [
-          { name: "Send Event", path: `${basePath}/events` },
+          { name: "Events", path: `${basePath}/events` },
           { name: "Create Event", path: `${basePath}/events/create` },
         ],
       },
@@ -323,9 +314,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Admin", path: `${basePath}/team/admin` },
-          { name: "Teachers", path: `${basePath}/team/teacher` },
-          { name: "Permission", path: `${basePath}/team/permission` },
-        ],
+          { name: "Teachers", path: `${basePath}/team/teacher` }],
       },
       settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/s` },
     };
@@ -352,7 +341,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.attendance,
           allItems.finance,
           allItems.activities,
-          allItems.text,
           allItems.events,
           allItems.communication,
           allItems.team,
@@ -371,7 +359,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (item) => item.name === "Create Assignment" || item.name === "Submitted Assignment"
+              (item) => item.name === "C Assignment" || item.name === "S Assignment"
             )
           },
           allItems.settings,

@@ -4,113 +4,155 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2, X, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { getGrades } from "@/redux/slices/gradeSlices/gradeSlices";
+import { getGrades, setGradesPage } from "@/redux/slices/gradeSlices/gradeSlices";
 import { getCookie } from "cookies-next";
 
 export default function GradesPage() {
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [filteredGrades, setFilteredGrades] = useState([]);
   const [deleteModal, setDeleteModal] = useState({ open: false, grade: null });
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
   const dropdownRefs = useRef({});
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { grades, status, error } = useSelector((state) => state.grade);
+  const { grades, status, error, pagination } = useSelector((state) => state.grade);
+
   const user = useMemo(() => {
     const userCookie = getCookie("user");
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
   }, []);
-  const actionMenuItems = [
-    { label: "View Details", icon: Eye, action: "view" },
-    { label: "Edit Grade", icon: Edit, action: "edit" },
-    { label: "Delete Grade", icon: Trash2, action: "delete" },
-  ];
+
+  const currentPage = pagination?.currentPage || 1;
 
   useEffect(() => {
-    let requestData = {};
+    let requestData = {
+      page: currentPage,
+      limit: itemsPerPage,
+    };
+
+    if (searchInput) {
+      requestData.search = searchInput;
+    }
 
     if (user?.role === "Student" && user?.id) {
-      requestData = { studentId: user.id };
+      requestData.studentId = user.id;
     } else if (user?.role === "Teacher" && user?.id) {
-      requestData = { teacherId: user.id };
+      requestData.teacherId = user.id;
     }
 
     dispatch(getGrades(requestData));
-
-  }, [dispatch, user]);
-
-  useEffect(() => {
-    if (grades && grades.length > 0) {
-      const filtered = grades.filter((grade) => {
-        const searchLower = searchValue.toLowerCase();
-        return (
-          grade.student?.studentName?.toLowerCase().includes(searchLower) ||
-          grade.assessment?.title?.toLowerCase().includes(searchLower) ||
-          grade.assignment?.title?.toLowerCase().includes(searchLower) ||
-          grade.marksObtained?.toString().includes(searchLower) ||
-          grade.gradedBy?.fullName?.toLowerCase().includes(searchLower) ||
-          grade.grade?.toLowerCase().includes(searchLower)
-        );
-      });
-      setFilteredGrades(filtered);
-    } else {
-      setFilteredGrades([]);
-    }
-  }, [searchValue, grades]);
+  }, [dispatch, user, currentPage, itemsPerPage, searchInput]);
 
   useEffect(() => {
-    if (!openDropdownId) return;
+    const timer = setTimeout(() => {
+      setSearchInput(searchValue);
+      dispatch(setGradesPage(1));
+    }, 500);
 
+    return () => clearTimeout(timer);
+  }, [searchValue, dispatch]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      const dropdownRef = dropdownRefs.current[openDropdownId];
-      if (dropdownRef && !dropdownRef.contains(event.target)) {
-        setOpenDropdownId(null);
-      }
+      Object.values(dropdownRefs.current).forEach((ref) => {
+        if (ref && !ref.contains(event.target)) {
+          setOpenDropdownId(null);
+        }
+      });
     };
 
-    // Add event listener after a small delay to avoid immediate trigger
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-    }, 10);
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      clearTimeout(timeoutId);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [openDropdownId]);
+  }, []);
 
   const toggleDropdown = (id, event) => {
     event.stopPropagation();
-    event.preventDefault();
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const handleActionClick = (action, id, event) => {
+  const handleActionClick = (action, grade, event) => {
     event.stopPropagation();
     if (action === "view") {
-      setOpenDropdownId(null);
-      router.push(`/dashboard/grades/${id}`);
+      router.push(`/dashboard/grades/${grade._id}`);
     } else if (action === "edit") {
-      setOpenDropdownId(null);
-      router.push(`/dashboard/grades/${id}/edit`);
+      router.push(`/dashboard/grades/${grade._id}/edit`);
     } else if (action === "delete") {
-      const grade = filteredGrades.find((g) => g._id === id);
-      setOpenDropdownId(null);
       setDeleteModal({ open: true, grade });
     }
+    setOpenDropdownId(null);
   };
 
   const confirmDelete = () => {
     if (deleteModal.grade) {
-      console.log("Delete grade:", deleteModal.grade._id);
-      // TODO: Implement delete grade logic
-      // dispatch(deleteGradeAction(deleteModal.grade._id));
       setDeleteModal({ open: false, grade: null });
     }
   };
 
-  // Format date to readable format
+  const handlePageChange = (page) => {
+    dispatch(setGradesPage(page));
+  };
+
+  const handleItemsPerPageChange = (e) => {
+    const newLimit = Number(e.target.value);
+    setItemsPerPage(newLimit);
+    dispatch(setGradesPage(1));
+  };
+
+  const getPageNumbers = () => {
+    if (!pagination?.totalPages) return [];
+
+    const pages = [];
+    const current = currentPage;
+    const total = pagination.totalPages;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      } else if (current >= total - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = total - 4; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(total);
+      }
+    }
+
+    return pages;
+  };
+
+  const getDisplayRange = () => {
+    const totalCount = pagination?.totalCount || 0;
+    if (totalCount === 0) return { start: 0, end: 0 };
+
+    const start = ((currentPage - 1) * itemsPerPage) + 1;
+    const end = Math.min(currentPage * itemsPerPage, totalCount);
+
+    return { start, end };
+  };
+
+  const { start, end } = getDisplayRange();
+  const totalCount = pagination?.totalCount || 0;
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -119,14 +161,12 @@ export default function GradesPage() {
     });
   };
 
-  // Calculate percentage based on marks obtained and total marks
   const calculatePercentage = (marksObtained, totalMarks) => {
     if (!totalMarks || totalMarks === 0) return "N/A";
     const percentage = (marksObtained / totalMarks) * 100;
     return `${percentage.toFixed(1)}%`;
   };
 
-  // Get color class for grade badge
   const getGradeColorClass = (grade) => {
     switch (grade) {
       case "A+":
@@ -152,7 +192,6 @@ export default function GradesPage() {
     }
   };
 
-  // Get assessment title and total marks
   const getAssessmentInfo = (grade) => {
     if (grade.assessment) {
       return {
@@ -168,7 +207,11 @@ export default function GradesPage() {
     return { title: "N/A", totalMarks: "N/A" };
   };
 
-  // Loading state
+  const actionMenuItems = [
+    { label: "View Details", icon: Eye, action: "view" },
+    { label: "Edit", icon: Edit, action: "edit" }
+  ];
+
   if (status === 'loading') {
     return (
       <div className="space-y-8">
@@ -181,7 +224,6 @@ export default function GradesPage() {
               MaktabOS
             </h1>
           </div>
-
         </div>
 
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -196,7 +238,6 @@ export default function GradesPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="space-y-8">
@@ -285,8 +326,8 @@ export default function GradesPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredGrades.length > 0 ? (
-                filteredGrades.map((grade) => {
+              {grades && grades.length > 0 ? (
+                grades.map((grade) => {
                   const assessmentInfo = getAssessmentInfo(grade);
                   const percentage = calculatePercentage(grade.marksObtained, assessmentInfo.totalMarks);
 
@@ -333,15 +374,15 @@ export default function GradesPage() {
                         {formatDate(grade.createdAt)}
                       </td>
                       {(user?.role === "Admin" || user?.role === "Super Admin" || user?.role === "Teacher") && (
-                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div 
+                        <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
+                          <div
                             ref={(el) => (dropdownRefs.current[grade._id] = el)}
                             className="relative inline-block text-left"
                           >
                             <button
                               type="button"
                               onClick={(e) => toggleDropdown(grade._id, e)}
-                              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+                              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
                             >
                               Take Action
                               <span>▾</span>
@@ -349,33 +390,23 @@ export default function GradesPage() {
 
                             {openDropdownId === grade._id && (
                               <div
-                                onClick={(event) => event.stopPropagation()}
-                                className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                                className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
                               >
-                                <button
-                                  type="button"
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 bg-[#0B4B3138] hover:bg-[#E5EFEB]"
-                                  onClick={(e) => handleActionClick("view", grade._id, e)}
-                                >
-                                  <Eye size={16} className="text-[#0B4B31]" />
-                                  View Details
-                                </button>
-                                <button
-                                  type="button"
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
-                                  onClick={(e) => handleActionClick("edit", grade._id, e)}
-                                >
-                                  <Edit size={16} className="text-[#0B4B31]" />
-                                  Edit Grade
-                                </button>
-                                <button
-                                  type="button"
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] border-t border-[#00000040] transition-all duration-150 hover:bg-[#E5EFEB]"
-                                  onClick={(e) => handleActionClick("delete", grade._id, e)}
-                                >
-                                  <Trash2 size={16} className="text-[#C43B30]" />
-                                  Delete Grade
-                                </button>
+                                {actionMenuItems.map((item, idx) => {
+                                  const Icon = item.icon;
+                                  return (
+                                    <button
+                                      key={item.action}
+                                      type="button"
+                                      onClick={(e) => handleActionClick(item.action, grade, e)}
+                                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                        } hover:bg-[#E5EFEB]`}
+                                    >
+                                      <Icon size={16} className="text-[#0B4B31]" />
+                                      <span>{item.label}</span>
+                                    </button>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -387,7 +418,7 @@ export default function GradesPage() {
               ) : (
                 <tr>
                   <td colSpan={(user?.role === "Admin" || user?.role === "Super Admin" || user?.role === "Teacher") ? "9" : "8"} className="px-4 py-8 text-center text-[#8A928F]">
-                    {grades.length === 0 ? "No grades found." : "No grades match your search."}
+                    {searchInput ? "No grades match your search." : "No grades found."}
                   </td>
                 </tr>
               )}
@@ -395,35 +426,55 @@ export default function GradesPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {filteredGrades.length > 0 && (
+        {/* Updated Pagination */}
+        {pagination && totalCount > 0 && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[#8A928F]">
-              Showing {filteredGrades.length} of {grades.length} entries
+              Showing {start} to {end} of {totalCount} entries
+              {searchInput && " (filtered)"}
             </div>
             <div className="flex items-center gap-3">
-              <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-                <option>Display 10</option>
-                <option>Display 20</option>
-                <option>Display 50</option>
+              <select
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value={10}>Display 10</option>
+                <option value={20}>Display 20</option>
+                <option value={50}>Display 50</option>
               </select>
               <div className="flex items-center gap-2">
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!pagination.hasPrev}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasPrev ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                >
                   ‹
                 </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  1
-                </button>
-                <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                  2
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  3
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  4
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === 'number' && handlePageChange(page)}
+                    disabled={page === "..."}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === currentPage
+                        ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                        : page === "..."
+                          ? 'bg-white text-[#0B4B31] cursor-default'
+                          : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!pagination.hasNext}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasNext ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                >
                   ›
                 </button>
               </div>
@@ -432,7 +483,6 @@ export default function GradesPage() {
         )}
       </section>
 
-      {/* Delete Confirmation Modal */}
       {deleteModal.open && deleteModal.grade && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -449,7 +499,7 @@ export default function GradesPage() {
                   <AlertTriangle size={24} className="text-red-600" />
                 </div>
                 <h2 className="text-lg font-semibold text-[#0B4B31]">
-                  Delete Grade
+                  Remove
                 </h2>
               </div>
               <button

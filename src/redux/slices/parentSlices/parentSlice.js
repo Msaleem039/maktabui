@@ -108,9 +108,26 @@ export const getParentById = createAsyncThunk(
 
 export const getAllWaitListParents = createAsyncThunk(
   `parent/getAllWaitListParents`,
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitListParents`);
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        sortBy = "createdAt",
+        sortOrder = "desc"
+      } = params;
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitListParents`,
+        {
+          page,
+          limit,
+          search,
+          sortBy,
+          sortOrder
+        }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

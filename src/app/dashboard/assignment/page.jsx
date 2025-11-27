@@ -3,17 +3,17 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Download, Eye, Edit, Trash2, Upload, X, Star } from "lucide-react";
+import { Download, Eye, Edit, Trash2, Upload, X, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllAssignment, uploadSolution } from "@/redux/slices/assignmentSlices/assignmentSlices";
+import { getAllAssignment, uploadSolution, deleteAssignment } from "@/redux/slices/assignmentSlices/assignmentSlices";
 import { createGrade } from "@/redux/slices/gradeSlices/gradeSlices";
 import { getCookie } from "cookies-next";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 export default function AssignmentPage() {
     const [searchValue, setSearchValue] = useState("");
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [dropdownDirections, setDropdownDirections] = useState({});
-    const [filteredAssignments, setFilteredAssignments] = useState([]);
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [selectedAssignment, setSelectedAssignment] = useState(null);
     const [uploadFile, setUploadFile] = useState(null);
@@ -23,11 +23,21 @@ export default function AssignmentPage() {
     const [selectedAssignmentForRemarks, setSelectedAssignmentForRemarks] = useState(null);
     const [marksObtained, setMarksObtained] = useState("");
     const [feedback, setFeedback] = useState("");
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    
+    // Delete modal state
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [assignmentToDelete, setAssignmentToDelete] = useState(null);
+    
     const dropdownRefs = useRef({});
     const router = useRouter();
     const dispatch = useDispatch();
 
-    const { assignments, status, error, uploadSolutionStatus } = useSelector((state) => state.assignment);
+    const { assignments, status, error, uploadSolutionStatus, totalCount, deleteStatus } = useSelector((state) => state.assignment);
     const { createStatus: gradeCreateStatus } = useSelector((state) => state.grade);
 
     const getTeacherId = (assignment) => {
@@ -39,15 +49,12 @@ export default function AssignmentPage() {
         return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
     }, []);
 
-    // Role-based action menu items
     const getActionMenuItems = () => {
         const baseItems = [
             { label: "View Detail", icon: Eye, action: "view" },
         ];
 
-        const canAddRemarks = ["Super Admin", "Teacher"].includes(user?.role);
-
-        if (canAddRemarks) {
+        if (["Super Admin", "Teacher"].includes(user?.role)) {
             baseItems.push({ label: "Add Remarks", icon: Star, action: "remarks" });
         }
 
@@ -63,34 +70,56 @@ export default function AssignmentPage() {
 
     const actionMenuItems = getActionMenuItems();
 
+    // Fetch assignments with pagination and search
     useEffect(() => {
-        let requestData = {};
+        let requestData = {
+            page: currentPage,
+            limit: itemsPerPage,
+        };
+
+        if (searchValue) {
+            requestData.search = searchValue;
+        }
 
         if (user?.role === "Student" && user?.id) {
-            requestData = { studentId: user.id };
+            requestData.studentId = user.id;
         } else if (user?.role === "Teacher" && user?.id) {
-            requestData = { teacherId: user.id };
+            requestData.teacherId = user.id;
         }
 
         dispatch(getAllAssignment(requestData));
-    }, [dispatch, user]);
+    }, [dispatch, user, currentPage, itemsPerPage, searchValue]);
 
+    // Update total pages when totalCount changes
     useEffect(() => {
-        if (assignments && assignments.length > 0) {
-            const filtered = assignments.filter((assignment) => {
-                const searchLower = searchValue.toLowerCase();
-                return (
-                    assignment.title?.toLowerCase().includes(searchLower) ||
-                    assignment.subject?.toLowerCase().includes(searchLower) ||
-                    assignment.type?.toLowerCase().includes(searchLower) ||
-                    assignment.classId?.name?.toLowerCase().includes(searchLower)
-                );
-            });
-            setFilteredAssignments(filtered);
-        } else {
-            setFilteredAssignments([]);
+        if (totalCount) {
+            setTotalPages(Math.ceil(totalCount / itemsPerPage));
         }
-    }, [searchValue, assignments]);
+    }, [totalCount, itemsPerPage]);
+
+    // Refresh assignments when delete is successful
+    useEffect(() => {
+        if (deleteStatus === 'succeeded') {
+            let requestData = {
+                page: currentPage,
+                limit: itemsPerPage,
+            };
+
+            if (searchValue) {
+                requestData.search = searchValue;
+            }
+
+            if (user?.role === "Student" && user?.id) {
+                requestData.studentId = user.id;
+            } else if (user?.role === "Teacher" && user?.id) {
+                requestData.teacherId = user.id;
+            }
+
+            dispatch(getAllAssignment(requestData));
+            setDeleteModalOpen(false);
+            setAssignmentToDelete(null);
+        }
+    }, [deleteStatus, dispatch, currentPage, itemsPerPage, searchValue, user]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -106,6 +135,15 @@ export default function AssignmentPage() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    // Handle search with debounce
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setCurrentPage(1);
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchValue]);
 
     const toggleDropdown = (id, event) => {
         event.stopPropagation();
@@ -145,11 +183,29 @@ export default function AssignmentPage() {
                 handleRemarksClick(assignment, event);
             }
         } else if (action === "remove") {
-            if (confirm("Are you sure you want to remove this assignment?")) {
-                console.log(`Remove assignment ${id}`);
+            const assignment = assignments.find(a => a._id === id);
+            if (assignment) {
+                handleDeleteClick(assignment, event);
             }
         }
         setOpenDropdownId(null);
+    };
+
+    const handleDeleteClick = (assignment, event) => {
+        event.stopPropagation();
+        setAssignmentToDelete(assignment);
+        setDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!assignmentToDelete) return;
+
+        try {
+            await dispatch(deleteAssignment(assignmentToDelete._id)).unwrap();
+        } catch (error) {
+            console.error("Error deleting assignment:", error);
+            alert(`Failed to delete assignment: ${error.message || "Please try again."}`);
+        }
     };
 
     const handleUploadSolution = (assignment, event) => {
@@ -186,7 +242,7 @@ export default function AssignmentPage() {
                 'image/png'
             ];
 
-            const maxSize = 10 * 1024 * 1024; // 10MB
+            const maxSize = 10 * 1024 * 1024;
 
             if (!allowedTypes.includes(file.type)) {
                 alert("Please upload a valid file type (PDF, DOC, DOCX, TXT, JPG, PNG)");
@@ -287,7 +343,22 @@ export default function AssignmentPage() {
             setSelectedAssignment(null);
             setUploadProgress(0);
 
-            dispatch(getAllAssignment());
+            let requestData = {
+                page: currentPage,
+                limit: itemsPerPage,
+            };
+
+            if (searchValue) {
+                requestData.search = searchValue;
+            }
+
+            if (user?.role === "Student" && user?.id) {
+                requestData.studentId = user.id;
+            } else if (user?.role === "Teacher" && user?.id) {
+                requestData.teacherId = user.id;
+            }
+
+            dispatch(getAllAssignment(requestData));
 
         } catch (error) {
             console.error("Error uploading solution:", error);
@@ -331,8 +402,22 @@ export default function AssignmentPage() {
             setMarksObtained("");
             setFeedback("");
 
-            // Refresh assignments to show updated grades
-            dispatch(getAllAssignment());
+            let requestData = {
+                page: currentPage,
+                limit: itemsPerPage,
+            };
+
+            if (searchValue) {
+                requestData.search = searchValue;
+            }
+
+            if (user?.role === "Student" && user?.id) {
+                requestData.studentId = user.id;
+            } else if (user?.role === "Teacher" && user?.id) {
+                requestData.teacherId = user.id;
+            }
+
+            dispatch(getAllAssignment(requestData));
 
         } catch (error) {
             console.error("Error adding remarks:", error);
@@ -415,6 +500,36 @@ export default function AssignmentPage() {
         }
     };
 
+    // Pagination handlers
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (e) => {
+        setItemsPerPage(Number(e.target.value));
+        setCurrentPage(1);
+    };
+
+    const generatePageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+        }
+        
+        return pages;
+    };
+
     // Show "Add New Assignment" button only for Teachers
     const renderAddAssignmentButton = () => {
         if (user?.role === "Teacher") {
@@ -447,9 +562,9 @@ export default function AssignmentPage() {
         return null;
     };
 
-    // Show Action dropdown only for Teachers
+    // Show Action dropdown for Super Admin and Teachers
     const renderActionDropdown = (assignment) => {
-        if (user?.role === "Super Admin") {
+        if (["Super Admin", "Teacher"].includes(user?.role)) {
             return (
                 <div className="relative inline-block">
                     <button
@@ -470,9 +585,8 @@ export default function AssignmentPage() {
                                     delete dropdownRefs.current[assignment._id];
                                 }
                             }}
-                            className={`absolute right-0 z-50 min-w-[240px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_18px_45px_-18px_rgba(11,75,49,0.35)] overflow-hidden ${
-                                dropdownDirections[assignment._id] === "up" ? "bottom-full mb-3" : "top-full mt-3"
-                            }`}
+                            className={`absolute right-0 z-50 min-w-[240px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_18px_45px_-18px_rgba(11,75,49,0.35)] overflow-hidden ${dropdownDirections[assignment._id] === "up" ? "bottom-full mb-3" : "top-full mt-3"
+                                }`}
                         >
                             {actionMenuItems.map((item, idx) => {
                                 const Icon = item.icon;
@@ -544,7 +658,24 @@ export default function AssignmentPage() {
                         <div className="text-center">
                             <p className="text-red-600">Error loading assignments: {error}</p>
                             <button
-                                onClick={() => dispatch(getAllAssignment())}
+                                onClick={() => {
+                                    let requestData = {
+                                        page: currentPage,
+                                        limit: itemsPerPage,
+                                    };
+
+                                    if (searchValue) {
+                                        requestData.search = searchValue;
+                                    }
+
+                                    if (user?.role === "Student" && user?.id) {
+                                        requestData.studentId = user.id;
+                                    } else if (user?.role === "Teacher" && user?.id) {
+                                        requestData.teacherId = user.id;
+                                    }
+
+                                    dispatch(getAllAssignment(requestData));
+                                }}
                                 className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
                             >
                                 Try Again
@@ -594,121 +725,179 @@ export default function AssignmentPage() {
                             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
                         />
                     </label>
+
+                    {/* Items per page selector */}
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm text-[#8A928F]">Show:</label>
+                        <select
+                            value={itemsPerPage}
+                            onChange={handleItemsPerPageChange}
+                            className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] outline-none"
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div className="mt-6 overflow-x-auto">
-                    <table className="w-full min-w-[1200px] border-separate border-spacing-y-3 text-left text-sm text-[#333]">
-                        <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
-                            <tr>
-                                <th className="px-4 font-normal text-[#0000008C]">Title</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Subject</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Type</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Due Date</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Status</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Total Marks</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Solution</th>
-                                <th className="px-4 font-normal text-[#0000008C]">Remarks</th>
-                                <th className="px-4 font-normal text-right text-[#0000008C]">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredAssignments.length > 0 ? (
-                                filteredAssignments.map((assignment) => {
-                                    const statusBadge = getStatusBadge(assignment.dueDate);
-                                    const solutionStatus = getSolutionStatus(assignment);
-                                    const gradeStatus = getGradeStatus(assignment);
+                <div className="mt-6">
+                    <div
+                        className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-xl"
+                        style={{
+                            scrollbarWidth: "thin",
+                            scrollbarColor: "#c1c1c1 #f1f1f1",
+                        }}
+                    >
+                        <table className="min-w-[1200px] w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
 
-                                    return (
-                                        <tr
-                                            key={assignment._id}
-                                            className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
-                                        >
-                                            <td className="px-4 py-3 font-medium text-[#1E1E1E]">
-                                                {assignment.title || "N/A"}
-                                            </td>
-                                            <td className="px-4 py-3 font-medium text-[#1E1E1E]">
-                                                {assignment.subject || "N/A"}
-                                            </td>
-                                            <td className="px-4 py-3 font-medium text-[#1E1E1E]">
-                                                <span className="capitalize">{assignment.type || "N/A"}</span>
-                                            </td>
-                                            <td className="px-4 py-3 font-medium text-[#1E1E1E]">
-                                                {formatDate(assignment.dueDate)}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusBadge.style}`}>
-                                                    {statusBadge.text}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 font-medium text-[#1E1E1E]">
-                                                {assignment.totalMarks || "N/A"}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${solutionStatus.style}`}>
-                                                    {solutionStatus.text}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${gradeStatus.style}`}>
-                                                    {gradeStatus.text}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
-                                                <div className="flex items-center justify-end gap-2">
+                            {/* HEADER */}
+                            <thead className="sticky top-0 bg-white z-10 text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+                                <tr>
+                                    <th className="px-4 py-2 font-normal text-[#0000008C]">Title</th>
+                                    <th className="px-4 py-2 font-normal text-[#0000008C]">Due Date</th>
+                                    <th className="px-4 py-2 font-normal text-[#0000008C]">Status</th>
+                                    <th className="px-4 py-2 font-normal text-[#0000008C]">Total Marks</th>
+                                    <th className="px-4 py-2 font-normal text-[#0000008C]">Solution</th>
+                                    <th className="px-4 py-2 font-normal text-[#0000008C]">Remarks</th>
+                                    <th className="px-4 py-2 text-right font-normal text-[#0000008C]">Actions</th>
+                                </tr>
+                            </thead>
+
+                            {/* BODY */}
+                            <tbody>
+                                {assignments && assignments.length > 0 ? (
+                                    assignments.map((assignment) => {
+                                        const statusBadge = getStatusBadge(assignment.dueDate);
+                                        const solutionStatus = getSolutionStatus(assignment);
+                                        const gradeStatus = getGradeStatus(assignment);
+
+                                        return (
+                                            <tr
+                                                key={assignment._id}
+                                                className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
+                                            >
+                                                <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                                                    {assignment.title || "N/A"}
+                                                </td>
+
+                                                <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                                                    {formatDate(assignment.dueDate)}
+                                                </td>
+
+                                                <td className="px-4 py-3">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusBadge.style}`}
+                                                    >
+                                                        {statusBadge.text}
+                                                    </span>
+                                                </td>
+
+                                                <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                                                    {assignment.totalMarks || "N/A"}
+                                                </td>
+
+                                                <td className="px-4 py-3">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${solutionStatus.style}`}
+                                                    >
+                                                        {solutionStatus.text}
+                                                    </span>
+                                                </td>
+
+                                                <td className="px-4 py-3">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${gradeStatus.style}`}
+                                                    >
+                                                        {gradeStatus.text}
+                                                    </span>
+                                                </td>
+
+                                                <td className="px-4 py-3 flex items-center justify-end gap-3">
                                                     {renderUploadSolutionButton(assignment)}
                                                     {renderActionDropdown(assignment)}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            ) : (
-                                <tr>
-                                    <td colSpan="9" className="px-4 py-8 text-center text-[#8A928F]">
-                                        {assignments.length === 0 ? "No assignments found." : "No assignments match your search."}
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="8"
+                                            className="px-4 py-8 text-center text-[#8A928F]"
+                                        >
+                                            {assignments && assignments.length === 0
+                                                ? "No assignments found."
+                                                : "No assignments match your search."}
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 {/* Pagination */}
-                {filteredAssignments.length > 0 && (
+                {assignments && assignments.length > 0 && (
                     <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="text-sm text-[#8A928F]">
-                            Showing {filteredAssignments.length} of {assignments.length} entries
+                            Showing {assignments.length} of {totalCount || 0} entries
+                            {searchValue && " (filtered)"}
                         </div>
                         <div className="flex items-center gap-3">
-                            {/* <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-                                <option>Display 10</option>
-                                <option>Display 20</option>
-                                <option>Display 50</option>
-                            </select> */}
                             <div className="flex items-center gap-2">
-                                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                                    ‹
+                                <button 
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    <ChevronLeft size={16} />
                                 </button>
-                                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                                    1
-                                </button>
-                                <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                                    2
-                                </button>
-                                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                                    3
-                                </button>
-                                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                                    4
-                                </button>
-                                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                                    ›
+                                
+                                {generatePageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={`rounded-full px-4 py-2 text-sm transition ${
+                                            currentPage === page
+                                                ? 'bg-[#0B4B31] text-white'
+                                                : 'border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                                
+                                <button 
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    <ChevronRight size={16} />
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
             </section>
+
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Assignment"
+                itemName={assignmentToDelete?.title}
+                itemType="assignment"
+                description={`Are you sure you want to delete the assignment "${assignmentToDelete?.title}"? This will also remove all associated solutions and grades.`}
+                warningText="This action cannot be undone. All associated data will be permanently deleted."
+                confirmButtonText="Delete Assignment"
+                cancelButtonText="Cancel"
+                variant="danger"
+                isLoading={deleteStatus === 'loading'}
+                size="lg"
+            />
 
             {uploadModalOpen && user?.role === "Super Admin" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-10">
@@ -828,6 +1017,7 @@ export default function AssignmentPage() {
                 </div>
             )}
 
+            {/* Remarks Modal */}
             {remarksModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
                     <div className="w-full max-w-xl rounded-[28px] bg-white p-6 sm:p-8 shadow-2xl mx-4">

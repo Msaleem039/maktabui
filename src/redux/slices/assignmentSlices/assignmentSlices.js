@@ -132,6 +132,60 @@ export const deleteAssignment = createAsyncThunk(
   }
 );
 
+export const getAssignmentById = createAsyncThunk(
+  'assignment/getAssignmentById',
+  async (assignmentId, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAssignmentById`,
+        { assignmentId }
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
+export const updateAssignment = createAsyncThunk(
+  'assignment/updateAssignment',
+  async ({
+    assignmentId,
+    title,
+    description,
+    type,
+    subject,
+    classId,
+    teacherId,
+    totalMarks,
+    dueDate,
+    attachments,
+    student
+  }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateAssignment`,
+        {
+          assignmentId,
+          title,
+          description,
+          type,
+          subject,
+          classId,
+          teacherId,
+          totalMarks,
+          dueDate,
+          attachments,
+          student
+        }
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 const initialState = {
   assignments: [],
   currentAssignment: null,
@@ -141,6 +195,8 @@ const initialState = {
   error: null,
   createStatus: 'idle',
   createError: null,
+  updateStatus: 'idle',
+  updateError: null,
   fetchStatus: 'idle',
   fetchError: null,
   uploadSolutionStatus: 'idle',
@@ -158,6 +214,7 @@ const assignmentSlice = createSlice({
     clearError: (state) => {
       state.error = null;
       state.createError = null;
+      state.updateError = null;
       state.fetchError = null;
       state.uploadSolutionError = null;
       state.teacherAssignmentsError = null;
@@ -166,6 +223,10 @@ const assignmentSlice = createSlice({
     clearCreateStatus: (state) => {
       state.createStatus = 'idle';
       state.createError = null;
+    },
+    clearUpdateStatus: (state) => {
+      state.updateStatus = 'idle';
+      state.updateError = null;
     },
     clearCurrentAssignment: (state) => {
       state.currentAssignment = null;
@@ -197,6 +258,29 @@ const assignmentSlice = createSlice({
 
       if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
         state.currentAssignment = null;
+      }
+    },
+    updateAssignmentInState: (state, action) => {
+      const updatedAssignment = action.payload;
+      const assignmentId = updatedAssignment._id;
+
+      const assignmentIndex = state.assignments.findIndex(assignment => assignment._id === assignmentId);
+      if (assignmentIndex !== -1) {
+        state.assignments[assignmentIndex] = { ...state.assignments[assignmentIndex], ...updatedAssignment };
+      }
+
+      const studentAssignmentIndex = state.studentAssignments.findIndex(assignment => assignment._id === assignmentId);
+      if (studentAssignmentIndex !== -1) {
+        state.studentAssignments[studentAssignmentIndex] = { ...state.studentAssignments[studentAssignmentIndex], ...updatedAssignment };
+      }
+
+      const teacherAssignmentIndex = state.teacherAssignments.findIndex(assignment => assignment._id === assignmentId);
+      if (teacherAssignmentIndex !== -1) {
+        state.teacherAssignments[teacherAssignmentIndex] = { ...state.teacherAssignments[teacherAssignmentIndex], ...updatedAssignment };
+      }
+
+      if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
+        state.currentAssignment = { ...state.currentAssignment, ...updatedAssignment };
       }
     },
     updateSolutionInCurrentAssignment: (state, action) => {
@@ -235,6 +319,7 @@ const assignmentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Create Assignment
       .addCase(createAssignment.pending, (state) => {
         state.createStatus = 'loading';
         state.createError = null;
@@ -247,6 +332,54 @@ const assignmentSlice = createSlice({
         state.createStatus = 'failed';
         state.createError = action.payload;
       })
+
+      // Get Assignment By ID
+      .addCase(getAssignmentById.pending, (state) => {
+        state.fetchStatus = 'loading';
+        state.fetchError = null;
+      })
+      .addCase(getAssignmentById.fulfilled, (state, action) => {
+        state.fetchStatus = 'succeeded';
+        state.currentAssignment = action.payload.assessment;
+      })
+      .addCase(getAssignmentById.rejected, (state, action) => {
+        state.fetchStatus = 'failed';
+        state.fetchError = action.payload;
+      })
+
+      .addCase(updateAssignment.pending, (state) => {
+        state.updateStatus = 'loading';
+        state.updateError = null;
+      })
+      .addCase(updateAssignment.fulfilled, (state, action) => {
+        state.updateStatus = 'succeeded';
+        const updatedAssignment = action.payload.assessment;
+        const assignmentId = updatedAssignment._id;
+
+        const assignmentIndex = state.assignments.findIndex(assignment => assignment._id === assignmentId);
+        if (assignmentIndex !== -1) {
+          state.assignments[assignmentIndex] = updatedAssignment;
+        }
+
+        const studentAssignmentIndex = state.studentAssignments.findIndex(assignment => assignment._id === assignmentId);
+        if (studentAssignmentIndex !== -1) {
+          state.studentAssignments[studentAssignmentIndex] = updatedAssignment;
+        }
+
+        const teacherAssignmentIndex = state.teacherAssignments.findIndex(assignment => assignment._id === assignmentId);
+        if (teacherAssignmentIndex !== -1) {
+          state.teacherAssignments[teacherAssignmentIndex] = updatedAssignment;
+        }
+
+        if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
+          state.currentAssignment = updatedAssignment;
+        }
+      })
+      .addCase(updateAssignment.rejected, (state, action) => {
+        state.updateStatus = 'failed';
+        state.updateError = action.payload;
+      })
+
       .addCase(getAssignment.pending, (state) => {
         state.fetchStatus = 'loading';
         state.fetchError = null;
@@ -263,6 +396,7 @@ const assignmentSlice = createSlice({
         state.fetchStatus = 'failed';
         state.fetchError = action.payload;
       })
+
       .addCase(getAllAssignment.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -275,6 +409,7 @@ const assignmentSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload;
       })
+
       .addCase(getAssignmentByStudentId.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -287,6 +422,7 @@ const assignmentSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload;
       })
+
       .addCase(uploadSolution.pending, (state) => {
         state.uploadSolutionStatus = 'loading';
         state.uploadSolutionError = null;
@@ -360,6 +496,7 @@ const assignmentSlice = createSlice({
         state.uploadSolutionStatus = 'failed';
         state.uploadSolutionError = action.payload;
       })
+
       .addCase(getAssignmentAgainstTeacher.pending, (state) => {
         state.teacherAssignmentsStatus = 'loading';
         state.teacherAssignmentsError = null;
@@ -372,6 +509,8 @@ const assignmentSlice = createSlice({
         state.teacherAssignmentsStatus = 'failed';
         state.teacherAssignmentsError = action.payload;
       })
+
+      // Delete Assignment
       .addCase(deleteAssignment.pending, (state) => {
         state.deleteStatus = 'loading';
         state.deleteError = null;
@@ -407,6 +546,7 @@ export const {
   removeAssignmentFromState,
   updateSolutionInCurrentAssignment,
   updateSolutionInTeacherAssignments,
+  clearUpdateStatus
 } = assignmentSlice.actions;
 
 export default assignmentSlice.reducer;

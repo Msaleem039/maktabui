@@ -65,7 +65,7 @@ export const updateGradeById = createAsyncThunk(
   async ({ gradeId, marksObtained, feedback, gradedBy }, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updatGradeById`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateGradeById`,
         { marksObtained, feedback, gradedBy, gradeId }
       );
       return res.data;
@@ -87,6 +87,14 @@ const initialState = {
   updateError: null,
   detailStatus: 'idle',
   detailError: null,
+  pagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    hasNext: false,
+    hasPrev: false,
+    limit: 10
+  },
 };
 
 const gradeSlice = createSlice({
@@ -118,10 +126,15 @@ const gradeSlice = createSlice({
     setCurrentGrade: (state, action) => {
       state.currentGrade = action.payload;
     },
+    setGradesPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
+    },
+    setGradesLimit: (state, action) => {
+      state.pagination.limit = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Create Grade
       .addCase(createGrade.pending, (state) => {
         state.createStatus = 'loading';
         state.createError = null;
@@ -134,7 +147,6 @@ const gradeSlice = createSlice({
         state.createStatus = 'failed';
         state.createError = action.payload;
       })
-      // Get All Grades
       .addCase(getGrades.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -142,12 +154,33 @@ const gradeSlice = createSlice({
       .addCase(getGrades.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.grades = action.payload.grades;
+        
+        if (action.payload.pagination) {
+          state.pagination = {
+            currentPage: action.payload.pagination.currentPage || 1,
+            totalPages: action.payload.pagination.totalPages || 1,
+            totalCount: action.payload.pagination.totalCount || action.payload.totalCount || 0,
+            hasNext: action.payload.pagination.hasNext || false,
+            hasPrev: action.payload.pagination.hasPrev || false,
+            limit: action.payload.pagination.limit || 10
+          };
+        } else {
+          state.pagination = {
+            currentPage: 1,
+            totalPages: 1,
+            totalCount: action.payload.totalCount || action.payload.grades?.length || 0,
+            hasNext: false,
+            hasPrev: false,
+            limit: 10
+          };
+        }
       })
       .addCase(getGrades.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+        state.grades = [];
+        state.pagination = initialState.pagination;
       })
-      // Get Grades by Student ID
       .addCase(getGradesByStudentId.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -160,7 +193,6 @@ const gradeSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload;
       })
-      // Get Grade by ID
       .addCase(getGradeById.pending, (state) => {
         state.detailStatus = 'loading';
         state.detailError = null;
@@ -175,7 +207,6 @@ const gradeSlice = createSlice({
         state.detailError = action.payload;
         state.currentGrade = null;
       })
-      // Update Grade by ID
       .addCase(updateGradeById.pending, (state) => {
         state.updateStatus = 'loading';
         state.updateError = null;
@@ -183,20 +214,17 @@ const gradeSlice = createSlice({
       .addCase(updateGradeById.fulfilled, (state, action) => {
         state.updateStatus = 'succeeded';
 
-        // Update the grade in grades array if it exists
         const updatedGrade = action.payload.grade;
         const index = state.grades.findIndex(grade => grade._id === updatedGrade._id);
         if (index !== -1) {
           state.grades[index] = updatedGrade;
         }
 
-        // Update in studentGrades array if it exists
         const studentIndex = state.studentGrades.findIndex(grade => grade._id === updatedGrade._id);
         if (studentIndex !== -1) {
           state.studentGrades[studentIndex] = updatedGrade;
         }
 
-        // Update currentGrade if it's the one being updated
         if (state.currentGrade && state.currentGrade._id === updatedGrade._id) {
           state.currentGrade = updatedGrade;
         }
@@ -214,7 +242,8 @@ export const {
   clearUpdateStatus,
   clearDetailStatus,
   clearStudentGrades,
-  setCurrentGrade
+  setCurrentGrade,
+  setGradesPage
 } = gradeSlice.actions;
 
 export default gradeSlice.reducer;

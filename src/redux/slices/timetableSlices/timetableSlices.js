@@ -40,10 +40,47 @@ export const deleteTimeTable = createAsyncThunk(
   }
 );
 
+export const getTimetableByIdAction = createAsyncThunk(
+  `timetables/getTimetableById`,
+  async (timetableId, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getTimetableById/`,{timetableId}
+      );
+      return res.data.timetable;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const updateTimetableByIdAction = createAsyncThunk(
+  `timetables/updateTimetableById`,
+  async ({ timetableId, formData }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateTimetableById`,{formData,timetableId}
+      );
+      return res.data.timetable;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const createTimetableSlice = createSlice({
   name: "createTimetable",
   initialState: { loading: false, timetable: null, error: null },
-  reducers: {},
+  reducers: {
+    clearCreateTimetableError: (state) => {
+      state.error = null;
+    },
+    resetCreateTimetable: (state) => {
+      state.loading = false;
+      state.timetable = null;
+      state.error = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createTimetableAction.pending, (state) => {
@@ -52,6 +89,7 @@ const createTimetableSlice = createSlice({
       .addCase(createTimetableAction.fulfilled, (state, action) => {
         state.loading = false;
         state.timetable = action.payload;
+        state.error = null;
       })
       .addCase(createTimetableAction.rejected, (state, action) => {
         state.loading = false;
@@ -63,7 +101,16 @@ const createTimetableSlice = createSlice({
 const getAllTimetablesSlice = createSlice({
   name: "getAllTimetables",
   initialState: { loading: false, timetables: [], error: null },
-  reducers: {},
+  reducers: {
+    clearAllTimetablesError: (state) => {
+      state.error = null;
+    },
+    resetAllTimetables: (state) => {
+      state.loading = false;
+      state.timetables = [];
+      state.error = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getAllTimetablesAction.pending, (state) => {
@@ -72,6 +119,7 @@ const getAllTimetablesSlice = createSlice({
       .addCase(getAllTimetablesAction.fulfilled, (state, action) => {
         state.loading = false;
         state.timetables = action.payload;
+        state.error = null;
       })
       .addCase(getAllTimetablesAction.rejected, (state, action) => {
         state.loading = false;
@@ -120,12 +168,115 @@ const deleteTimeTableSlice = createSlice({
   }
 });
 
+const getTimetableByIdSlice = createSlice({
+  name: "getTimetableById",
+  initialState: { 
+    loading: false, 
+    timetable: null, 
+    error: null 
+  },
+  reducers: {
+    clearTimetableByIdError: (state) => {
+      state.error = null;
+    },
+    resetTimetableById: (state) => {
+      state.loading = false;
+      state.timetable = null;
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getTimetableByIdAction.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getTimetableByIdAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.timetable = action.payload;
+        state.error = null;
+      })
+      .addCase(getTimetableByIdAction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
+
+const updateTimetableByIdSlice = createSlice({
+  name: "updateTimetableById",
+  initialState: { 
+    loading: false, 
+    timetable: null, 
+    error: null,
+    success: false
+  },
+  reducers: {
+    clearUpdateTimetableError: (state) => {
+      state.error = null;
+    },
+    resetUpdateTimetable: (state) => {
+      state.loading = false;
+      state.timetable = null;
+      state.error = null;
+      state.success = false;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(updateTimetableByIdAction.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(updateTimetableByIdAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.timetable = action.payload;
+        state.error = null;
+        state.success = true;
+      })
+      .addCase(updateTimetableByIdAction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+      });
+  },
+});
+
 export const createTimetableReducer = createTimetableSlice.reducer;
 export const getAllTimetablesReducer = getAllTimetablesSlice.reducer;
 export const deleteTimeTableReducer = deleteTimeTableSlice.reducer;
+export const getTimetableByIdReducer = getTimetableByIdSlice.reducer;
+export const updateTimetableByIdReducer = updateTimetableByIdSlice.reducer;
+
+// Export actions
+export const { 
+  clearCreateTimetableError, 
+  resetCreateTimetable 
+} = createTimetableSlice.actions;
+
+export const { 
+  clearAllTimetablesError, 
+  resetAllTimetables 
+} = getAllTimetablesSlice.actions;
+
+export const { 
+  resetDeleteTimeTable, 
+  clearDeleteTimeTableError 
+} = deleteTimeTableSlice.actions;
+
+export const { 
+  clearTimetableByIdError, 
+  resetTimetableById 
+} = getTimetableByIdSlice.actions;
+
+export const { 
+  clearUpdateTimetableError, 
+  resetUpdateTimetable 
+} = updateTimetableByIdSlice.actions;
 
 export const timetableReducer = {
   createTimetable: createTimetableReducer,
   getAllTimetables: getAllTimetablesReducer,
   deleteTimeTable: deleteTimeTableReducer,
+  getTimetableById: getTimetableByIdReducer,
+  updateTimetableById: updateTimetableByIdReducer,
 };

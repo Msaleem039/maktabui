@@ -80,12 +80,25 @@ export default function ViewGradePage() {
   if (detailStatus === 'loading') {
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#0B4B31] border-r-transparent"></div>
-            <p className="mt-4 text-[#0B4B31]">Loading grade details...</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+              Welcome to
+            </p>
+            <h1 className="font-medium text-[#000000] text-[1.75rem]">
+              MaktabOS
+            </h1>
           </div>
         </div>
+
+        <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#0B4B31] border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+              <p className="mt-4 text-[#0B4B31]">Loading grade details...</p>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -93,19 +106,32 @@ export default function ViewGradePage() {
   if (detailError || !grade) {
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <p className="text-red-600">
-              {detailError || "Grade not found"}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+              Welcome to
             </p>
-            <button
-              onClick={() => router.push('/dashboard/grade')}
-              className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
-            >
-              Back to Grades
-            </button>
+            <h1 className="font-medium text-[#000000] text-[1.75rem]">
+              MaktabOS
+            </h1>
           </div>
         </div>
+
+        <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-red-600">
+                {detailError || "Grade not found"}
+              </p>
+              <button
+                onClick={() => router.push('/dashboard/grade')}
+                className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
+              >
+                Back to Grades
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -117,7 +143,7 @@ export default function ViewGradePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
@@ -132,7 +158,7 @@ export default function ViewGradePage() {
           className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
         >
           <ArrowLeft size={16} />
-          Back
+          Back to Grades
         </button>
         <button
           onClick={() => router.push(`/dashboard/grades/${grade._id}/edit`)}

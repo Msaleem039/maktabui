@@ -17,7 +17,7 @@ import {
   setDefaultCardReducer,
   removeCardReducer,
   parentDashboardReducer,
-  deleteParentReducer 
+  deleteParentReducer
 } from './slices/parentSlices/parentSlice';
 
 import {
@@ -63,7 +63,9 @@ import {
 import {
   createTimetableReducer,
   getAllTimetablesReducer,
-  deleteTimeTableReducer
+  deleteTimeTableReducer,
+  getTimetableByIdReducer,
+  updateTimetableByIdReducer
 } from './slices/timetableSlices/timetableSlices';
 
 import {
@@ -83,6 +85,8 @@ import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
 import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
 import gradeReducer from './slices/gradeSlices/gradeSlices';
 import assignmentReducer from './slices/assignmentSlices/assignmentSlices';
+
+import eventReducer from './slices/eventSlices/eventSlices';
 
 export const store = configureStore({
   reducer: {
@@ -116,7 +120,7 @@ export const store = configureStore({
     getStudentNamesWithIds: getStudentNamesWithIdsReducer,
     getStudentDashboardStats: getStudentDashboardStatsReducer,
     updateStudent: updateStudentReducer,
-    deleteStudent: deleteStudentReducer, 
+    deleteStudent: deleteStudentReducer,
 
     // Class management
     createClass: createClassReducer,
@@ -146,6 +150,8 @@ export const store = configureStore({
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
     deleteTimeTable: deleteTimeTableReducer,
+    getTimetableById: getTimetableByIdReducer,
+    updateTimetableById: updateTimetableByIdReducer,
     attendance: attendanceReducer,
     grade: gradeReducer,
     assignment: assignmentReducer,
@@ -157,9 +163,12 @@ export const store = configureStore({
     getAllPaymentStats: getAllPaymentStatsReducer,
     getInvoiceById: getInvoiceByIdReducer,
     updateInvoice: updateInvoiceReducer,
-    
+
     // Dashboard
     dashboard: dashboardReducer,
+
+    // Event management
+    events: eventReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

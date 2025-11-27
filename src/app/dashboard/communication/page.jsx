@@ -105,7 +105,6 @@ const CommunicationPage = () => {
     };
   }, [userData]);
 
-  // Filter role options based on current user's role
   const filteredRoleOptions = useMemo(() => {
     if (!currentUser?.role) return roleOptions;
 
@@ -113,10 +112,10 @@ const CommunicationPage = () => {
 
     switch (userRole) {
       case "super admin":
-        return roleOptions; // Show all roles
+        return roleOptions;
 
       case "admin":
-        return roleOptions; // Show all roles
+        return roleOptions; 
 
       case "teacher":
         return roleOptions.filter(role =>
@@ -156,7 +155,7 @@ const CommunicationPage = () => {
       setRoleChoice(roleId);
       setSelectedRole(roleId);
       setSelectedRoleOption(roleOption);
-      dispatch(getUsersData({ role: roleOption.role }));
+      dispatch(getUsersData({ role: roleOption.role,id:userData?.id }));
     }
   }, [dispatch, filteredRoleOptions]);
 
@@ -221,7 +220,7 @@ const CommunicationPage = () => {
           const roomId = [currentUser.id, user._id].sort().join('_');
           conversations.push({
             id: user._id,
-            name: user.name || user.fullName || user.username || `${user.role} User`,
+            name: user.name || user.fullName || user.username || user.studentName || `${user.role} User`,
             snippet: "Start a conversation...",
             time: "Online",
             status: "Active",

@@ -1,27 +1,30 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Search, Grid, Moon, ChevronDown, FileText, FolderCheck, UserCheck, GraduationCap, Clock, Calendar } from "lucide-react";
 import { useSelector, useDispatch } from 'react-redux';
 import { getStudentDashboardStats, resetDashboardStatsState } from '@/redux/slices/studentSlices/studentSlices';
+import { getCookie } from "cookies-next";
 
 const Page = () => {
   const dispatch = useDispatch();
 
   const { data, status, error } = useSelector(state => state.getStudentDashboardStats);
-  console.log("data", data);
 
-  const studentId = "691f9111502b1d990b46066c";
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
 
   useEffect(() => {
-    if (studentId) {
-      dispatch(getStudentDashboardStats(studentId));
+    if (user?.id) {
+      dispatch(getStudentDashboardStats(user?.id));
     }
 
     return () => {
       dispatch(resetDashboardStatsState());
     };
-  }, [dispatch, studentId]);
+  }, [dispatch, user?.id]);
 
   const {
     keyMetrics = {
@@ -181,11 +184,10 @@ const Page = () => {
               <h3 className="font-semibold text-[#0B4B31] text-[14px] leading-[20px]">
                 My Attendance Overview
               </h3>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                studentAttendance.status === "Good" ? "bg-green-100 text-green-800" :
-                studentAttendance.status === "Average" ? "bg-yellow-100 text-yellow-800" :
-                "bg-red-100 text-red-800"
-              }`}>
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${studentAttendance.status === "Good" ? "bg-green-100 text-green-800" :
+                  studentAttendance.status === "Average" ? "bg-yellow-100 text-yellow-800" :
+                    "bg-red-100 text-red-800"
+                }`}>
                 Status: {studentAttendance.status}
               </div>
             </div>

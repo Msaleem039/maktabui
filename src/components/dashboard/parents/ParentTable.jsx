@@ -13,6 +13,7 @@ import {
   deleteParent
 } from "@/redux/slices/parentSlices/parentSlice";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import ActionMenu from "../ActionMenu";
 
 const ParentTable = ({
   title = "Parents",
@@ -41,13 +42,13 @@ const ParentTable = ({
     search: storeSearch
   } = useSelector((state) => state.getAllParents);
 
-  // Get delete state from Redux
   const deleteState = useSelector((state) => state.deleteParent);
 
   const [selectedId, setSelectedId] = useState(null);
   const [localSearch, setLocalSearch] = useState(searchValue);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deleteModal, setDeleteModal] = useState({ open: false, parent: null });
+  const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,13 +74,10 @@ const ParentTable = ({
     }));
   }, [dispatch, debouncedSearch, reduxPagination.currentPage, reduxPagination.itemsPerPage]);
 
-  // Refresh parents list after successful deletion
   useEffect(() => {
     if (deleteState.success) {
-      // Close the delete modal
       setDeleteModal({ open: false, parent: null });
-      
-      // Refresh the parents list
+
       dispatch(getAllParents({
         page: reduxPagination.currentPage,
         limit: reduxPagination.itemsPerPage,
@@ -88,7 +86,6 @@ const ParentTable = ({
         sortOrder: "desc"
       }));
 
-      // Reset delete state
       setTimeout(() => {
         dispatch(resetDeleteParent());
       }, 2000);
@@ -412,10 +409,10 @@ const ParentTable = ({
                   onClick={() => handlePageButtonClick(page)}
                   disabled={page === '...'}
                   className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === reduxPagination.currentPage
-                      ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
-                      : page === '...'
-                        ? 'bg-white text-[#0B4B31] cursor-default'
-                        : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                    ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                    : page === '...'
+                      ? 'bg-white text-[#0B4B31] cursor-default'
+                      : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
                     }`}
                 >
                   {page}

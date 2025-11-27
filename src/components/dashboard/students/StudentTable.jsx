@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Download, Eye, Pencil, MessageSquare, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, MessageSquare, Trash2, ChevronDown } from "lucide-react";
+import ActionMenu from "../ActionMenu";
 
 const StudentTable = ({
   title = "Students (All Classes)",
@@ -47,11 +48,7 @@ const StudentTable = ({
   }, [transformedStudents]);
 
   const [selectedId, setSelectedId] = useState(null);
-  const [actionMenu, setActionMenu] = useState({ id: null, openUp: false });
-  const [commentStudentId, setCommentStudentId] = useState(null);
-  const [commentText, setCommentText] = useState("");
 
-  // Remove client-side filtering since we're using server-side search
   const filteredStudents = tableData;
 
   const handleSearchChange = (event) => {
@@ -62,81 +59,30 @@ const StudentTable = ({
     setSelectedId(studentId);
   };
 
-  const toggleDropdown = (studentId, event) => {
-    event.stopPropagation();
-    const buttonRect = event.currentTarget.getBoundingClientRect();
-    const menuHeight = 220;
-    const openUp = buttonRect.bottom + menuHeight > window.innerHeight;
-    setActionMenu((prev) =>
-      prev.id === studentId ? { id: null, openUp: false } : { id: studentId, openUp }
-    );
+  const handleView = (studentId) => {
+    router.push(`/dashboard/student/${studentId}`);
   };
 
-  const handleActionClick = (action, studentId, event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Close dropdown first
-    setActionMenu({ id: null, openUp: false });
-
-    // Use setTimeout to ensure dropdown closes before navigation
-    setTimeout(() => {
-      if (action === "view") {
-        router.push(`/dashboard/student/${studentId}`);
-      } else if (action === "edit") {
-        router.push(`/dashboard/student/${studentId}/edit`);
-      } else if (action === "comment") {
-        setCommentStudentId(studentId);
-        setCommentText("");
-      } else if (action === "remove") {
-        if (confirm("Are you sure you want to remove this student?")) {
-          console.log("Remove student:", studentId);
-        }
-      } else {
-        console.log(`${action} clicked for student ${studentId}`);
-      }
-    }, 0);
+  const handleEdit = (studentId) => {
+    router.push(`/dashboard/student/${studentId}/edit`);
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Check if click is outside the dropdown menu and action button
-      const dropdown = event.target.closest('[data-dropdown-menu]');
-      const actionButton = event.target.closest('[data-action-button]');
-
-      if (!dropdown && !actionButton && actionMenu.id) {
-        setActionMenu({ id: null, openUp: false });
-      }
-    };
-
-    if (actionMenu.id) {
-      // Use a small delay to allow action clicks to process first
-      setTimeout(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-      }, 0);
+  const handleRemove = (studentId) => {
+    if (confirm("Are you sure you want to remove this student?")) {
+      console.log("Remove student:", studentId);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [actionMenu.id]);
-
-  const actionMenuItems = [
-    { label: "View Profile", icon: Eye, action: "view" },
-    { label: "Edit", icon: Pencil, action: "edit" },
-    { label: "Remove", icon: Trash2, action: "remove" },
-  ];
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const current = pagination.currentPage;
     const total = pagination.totalPages;
-    
+
     if (total <= 7) {
       for (let i = 1; i <= total; i++) {
         pages.push(i);
@@ -164,7 +110,7 @@ const StudentTable = ({
         pages.push(total);
       }
     }
-    
+
     return pages;
   };
 
@@ -173,6 +119,25 @@ const StudentTable = ({
       onPageChange?.(page);
     }
   };
+
+  const actionMenuItems = [
+    {
+      label: "View Profile",
+      icon: Eye,
+      onClick: (studentId) => handleView(studentId),
+    },
+    {
+      label: "Edit",
+      icon: Pencil,
+      onClick: (studentId) => handleEdit(studentId),
+    },
+    {
+      label: "Remove",
+      icon: Trash2,
+      onClick: (studentId) => handleRemove(studentId),
+      iconClassName: "text-[#C43B30]",
+    },
+  ];
 
   return (
     <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
@@ -201,7 +166,6 @@ const StudentTable = ({
         </label>
       </div>
 
-      {/* Loading overlay */}
       {loading && (
         <div className="mt-6 flex items-center justify-center py-4">
           <div className="flex items-center gap-2 text-[#0B4B31]">
@@ -226,7 +190,6 @@ const StudentTable = ({
           <tbody>
             {filteredStudents?.map((student) => {
               const isSelected = student.id === selectedId;
-              const isDropdownOpen = actionMenu.id === student.id;
               return (
                 <tr
                   key={student.id}
@@ -271,50 +234,14 @@ const StudentTable = ({
                   <td className="px-4 py-3 text-[#000000] font-medium text-sm text-xs">
                     {student.email}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="relative inline-block text-left">
-                      <button
-                        type="button"
-                        data-action-button
-                        onClick={(e) => toggleDropdown(student.id, e)}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                      >
-                        Take Action
-                        <span>▾</span>
-                      </button>
-
-                      {isDropdownOpen && (
-                        <div
-                          data-dropdown-menu
-                          className={`absolute right-0 ${actionMenu.openUp ? "bottom-full mb-3" : "mt-3"} z-50 min-w-[200px] rounded-2xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {actionMenuItems.map((item, index) => {
-                            const Icon = item.icon;
-                            return (
-                              <button
-                                key={item.action}
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleActionClick(item.action, student.id, e);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${index === 0
-                                    ? ""
-                                    : "border-t border-[#E2E7E4]"
-                                  } hover:bg-[#E5EFEB]`}
-                              >
-                                <Icon
-                                  size={16}
-                                  className={item.action === "remove" ? "text-[#C43B30]" : "text-[#0B4B31]"}
-                                />
-                                <span>{item.label}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    <ActionMenu
+                      triggerLabel="Take Action"
+                      items={actionMenuItems.map(item => ({
+                        ...item,
+                        onClick: () => item.onClick(student.id)
+                      }))}
+                    />
                   </td>
                 </tr>
               );
@@ -323,14 +250,12 @@ const StudentTable = ({
         </table>
       </div>
 
-      {/* Show message when no students found */}
       {filteredStudents?.length === 0 && !loading && (
         <div className="text-center py-8 text-[#666]">
           {searchValue ? "No students match your search" : "No students found"}
         </div>
       )}
 
-      {/* Pagination */}
       {pagination.totalCount > 0 && (
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-[#8A928F]">
@@ -338,7 +263,7 @@ const StudentTable = ({
             {searchValue && " (filtered)"}
           </div>
           <div className="flex items-center gap-3">
-            <select 
+            <select
               value={pagination.limit}
               onChange={(e) => onLimitChange?.(parseInt(e.target.value))}
               className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
@@ -348,94 +273,38 @@ const StudentTable = ({
               <option value="50">Display 50</option>
             </select>
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => handlePageButtonClick(pagination.currentPage - 1)}
                 disabled={!pagination.hasPrevPage}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
-                  pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
-                }`}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                  }`}
               >
                 ‹
               </button>
-              
+
               {getPageNumbers().map((page, index) => (
                 <button
                   key={index}
                   onClick={() => handlePageButtonClick(page)}
                   disabled={page === '...'}
-                  className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${
-                    page === pagination.currentPage
+                  className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === pagination.currentPage
                       ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
                       : page === '...'
-                      ? 'bg-white text-[#0B4B31] cursor-default'
-                      : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
-                  }`}
+                        ? 'bg-white text-[#0B4B31] cursor-default'
+                        : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                    }`}
                 >
                   {page}
                 </button>
               ))}
-              
-              <button 
+
+              <button
                 onClick={() => handlePageButtonClick(pagination.currentPage + 1)}
                 disabled={!pagination.hasNextPage}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
-                  pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
-                }`}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                  }`}
               >
                 ›
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {commentStudentId && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setCommentStudentId(null);
-              setCommentText("");
-            }
-          }}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="mb-3 text-lg font-semibold text-[#0B4B31]">
-              Add Comment
-            </h3>
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-[#799086]">
-              Student ID: {commentStudentId}
-            </p>
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Write a comment about this student..."
-              className="mb-4 h-32 w-full resize-none rounded-xl border border-[#C5D2CD] bg-[#F7FAF8] p-3 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
-              autoFocus
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setCommentStudentId(null);
-                  setCommentText("");
-                }}
-                className="rounded-full border border-[#0B4B31]/20 px-4 py-2 text-sm font-semibold text-[#0B4B31] hover:bg-[#F3F6F5]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCommentStudentId(null);
-                  setCommentText("");
-                }}
-                className="rounded-full bg-[#0B4B31] px-5 py-2 text-sm font-semibold text-white hover:bg-[#0B4B31]/90"
-              >
-                Save Comment
               </button>
             </div>
           </div>

@@ -1,16 +1,24 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { Calendar, Upload, X } from "lucide-react";
+import { Calendar, Upload, X, ArrowLeft } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { createAssignment, clearCreateStatus, clearError } from "@/redux/slices/assignmentSlices/assignmentSlices";
+import { useRouter, useParams } from "next/navigation";
+import {
+  getAssignment,
+  updateAssignment,
+  clearUpdateStatus,
+  clearError,
+  getAssignmentById
+} from "@/redux/slices/assignmentSlices/assignmentSlices";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getStudentNamesWithIds } from "@/redux/slices/studentSlices/studentSlices";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { getCookie } from "cookies-next";
+import Link from "next/link";
 
-const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
+const FileUploadField = ({ label, files, onFilesChange, existingAttachments = [], onRemoveExisting, className = "" }) => {
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files);
     onFilesChange([...files, ...selectedFiles]);
@@ -19,6 +27,12 @@ const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
   const removeFile = (index) => {
     const newFiles = files.filter((_, i) => i !== index);
     onFilesChange(newFiles);
+  };
+
+  const removeExistingAttachment = (index) => {
+    if (onRemoveExisting) {
+      onRemoveExisting(index);
+    }
   };
 
   return (
@@ -43,20 +57,52 @@ const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
         </label>
         <p className="text-sm text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX, Images</p>
 
+        {/* Existing Attachments */}
+        {existingAttachments.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-gray-700 mb-2">Existing Attachments:</p>
+            <div className="space-y-2">
+              {existingAttachments.map((attachment, index) => (
+                <div key={index} className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2">
+                  <a
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-[#0B4B31] truncate flex-1 hover:underline"
+                  >
+                    {attachment.name}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => removeExistingAttachment(index)}
+                    className="text-red-500 hover:text-red-700 ml-2"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* New Files */}
         {files.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2">
-                <span className="text-sm text-[#0B4B31] truncate flex-1">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => removeFile(index)}
-                  className="text-red-500 hover:text-red-700 ml-2"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ))}
+          <div className="mt-4">
+            <p className="text-sm font-medium text-gray-700 mb-2">New Files:</p>
+            <div className="space-y-2">
+              {files.map((file, index) => (
+                <div key={index} className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2">
+                  <span className="text-sm text-[#0B4B31] truncate flex-1">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="text-red-500 hover:text-red-700 ml-2"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -66,8 +112,18 @@ const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
 
 const Page = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const params = useParams();
+  const assignmentId = params.id;
 
-  const { createStatus, createError } = useSelector((state) => state.assignment);
+  const {
+    currentAssignment,
+    updateStatus,
+    updateError,
+    fetchStatus,
+    fetchError
+  } = useSelector((state) => state.assignment);
+
   const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
   const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
   const { students, status: studentsStatus, error: studentsError } = useSelector((state) => state.getStudentNamesWithIds);
@@ -92,34 +148,54 @@ const Page = () => {
 
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [existingAttachments, setExistingAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentUserTeacherId, setCurrentUserTeacherId] = useState(null);
 
   useEffect(() => {
+    if (assignmentId) {
+      dispatch(getAssignmentById(assignmentId));
+    }
     dispatch(getTeachersName());
     dispatch(getAllClassesNameAction());
     dispatch(getStudentNamesWithIds());
-  }, [dispatch]);
+  }, [dispatch, assignmentId]);
 
-  // Find the current user's teacher ID if they are a teacher
   useEffect(() => {
     if (user && user.role === 'Teacher' && teacherNames && teacherNames.length > 0) {
-      // Find the teacher that matches the current user's ID
-      const currentTeacher = teacherNames.find(teacher => 
+      const currentTeacher = teacherNames.find(teacher =>
         teacher.user === user.id || teacher._id === user.id
       );
-      
+
       if (currentTeacher) {
         setCurrentUserTeacherId(currentTeacher._id || currentTeacher.id);
-        // Auto-populate the teacher field
-        setFormData(prev => ({
-          ...prev,
-          teacherId: currentTeacher._id || currentTeacher.id
-        }));
       }
     }
   }, [user, teacherNames]);
+
+  useEffect(() => {
+    if (currentAssignment && currentAssignment._id === assignmentId) {
+      const dueDate = currentAssignment.dueDate
+        ? new Date(currentAssignment.dueDate).toISOString().split('T')[0]
+        : "";
+
+      setFormData({
+        title: currentAssignment.title || "",
+        description: currentAssignment.description || "",
+        type: currentAssignment.type || "",
+        subject: currentAssignment.subject || "",
+        classId: currentAssignment.class?._id || currentAssignment.class || "",
+        teacherId: currentAssignment.teacher?._id || currentAssignment.teacher || "",
+        totalMarks: currentAssignment.totalMarks?.toString() || "",
+        dueDate: dueDate,
+        attachments: currentAssignment.attachments || [],
+        student: currentAssignment.student?._id || currentAssignment.student || ""
+      });
+
+      setExistingAttachments(currentAssignment.attachments || []);
+    }
+  }, [currentAssignment, assignmentId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -130,7 +206,6 @@ const Page = () => {
   };
 
   const handleDropdownToggle = (name) => {
-    // Don't allow changing teacher if current user is a teacher
     if (name === "teacherId" && user?.role === 'Teacher') {
       return;
     }
@@ -138,7 +213,6 @@ const Page = () => {
   };
 
   const handleDropdownSelect = (name, value, selectedItem) => {
-    // Don't allow changing teacher if current user is a teacher
     if (name === "teacherId" && user?.role === 'Teacher') {
       return;
     }
@@ -159,6 +233,16 @@ const Page = () => {
 
   const handleFilesChange = (files) => {
     setSelectedFiles(files);
+  };
+
+  const handleRemoveExistingAttachment = (index) => {
+    const newAttachments = [...existingAttachments];
+    newAttachments.splice(index, 1);
+    setExistingAttachments(newAttachments);
+    setFormData(prev => ({
+      ...prev,
+      attachments: newAttachments
+    }));
   };
 
   const uploadFileToSupabase = (file) => {
@@ -236,13 +320,16 @@ const Page = () => {
     }
 
     try {
-      let uploadedAttachments = [];
+      let newUploadedAttachments = [];
 
       if (selectedFiles.length > 0) {
-        uploadedAttachments = await uploadFilesToSupabase(selectedFiles);
+        newUploadedAttachments = await uploadFilesToSupabase(selectedFiles);
       }
 
+      const allAttachments = [...existingAttachments, ...newUploadedAttachments];
+
       const assignmentData = {
+        assignmentId: assignmentId,
         title: formData.title,
         description: formData.description,
         type: formData.type,
@@ -251,11 +338,11 @@ const Page = () => {
         teacherId: formData.teacherId,
         totalMarks: formData.totalMarks ? parseInt(formData.totalMarks) : 0,
         dueDate: formData.dueDate,
-        attachments: uploadedAttachments,
+        attachments: allAttachments,
         student: formData.student
       };
 
-      dispatch(createAssignment(assignmentData));
+      dispatch(updateAssignment(assignmentData));
 
     } catch (error) {
       console.error('Error uploading files:', error);
@@ -263,31 +350,19 @@ const Page = () => {
     }
   };
 
+  // Clear status and redirect on success
   useEffect(() => {
+    if (updateStatus === 'succeeded') {
+      setTimeout(() => {
+        router.push('/dashboard/assignment');
+      }, 2000);
+    }
+
     return () => {
-      dispatch(clearCreateStatus());
+      dispatch(clearUpdateStatus());
       dispatch(clearError());
     };
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (createStatus === 'succeeded') {
-      setFormData({
-        title: "",
-        description: "",
-        type: "",
-        subject: "",
-        classId: "",
-        teacherId: user?.role === 'Teacher' ? currentUserTeacherId : "",
-        totalMarks: "",
-        dueDate: "",
-        attachments: [],
-        student: ""
-      });
-      setSelectedFiles([]);
-      setUploadProgress(0);
-    }
-  }, [createStatus, user, currentUserTeacherId]);
+  }, [dispatch, updateStatus, router]);
 
   const assignmentTypeOptions = [
     { value: "Assignment", label: "Assignment" },
@@ -311,15 +386,44 @@ const Page = () => {
     label: student.name || student.fullName || "Unknown Student"
   }));
 
-  const currentTeacherName = currentUserTeacherId 
-    ? teacherOptions.find(teacher => teacher.value === currentUserTeacherId)?.label 
+  const currentTeacherName = currentUserTeacherId
+    ? teacherOptions.find(teacher => teacher.value === currentUserTeacherId)?.label
     : "";
 
+  const fetchingAssignment = fetchStatus === "loading";
   const fetchingTeachers = teachersStatus === "loading";
   const fetchingClasses = classesLoading;
   const fetchingStudents = studentsStatus === "loading";
 
-  const isSubmitting = createStatus === 'loading' || uploading;
+  const isSubmitting = updateStatus === 'loading' || uploading;
+
+  if (fetchingAssignment) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#0B4B31] border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-[#0B4B31]">Loading assignment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError && !currentAssignment) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Error loading assignment: {fetchError}</p>
+          <Link
+            href="/dashboard/assignment"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
+          >
+            <ArrowLeft size={16} />
+            Back to Assignments
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col gap-6 p-4 sm:p-6 md:p-8">
@@ -328,10 +432,18 @@ const Page = () => {
           <p className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</p>
           <h1 className="text-[1.75rem] font-medium text-[#000000]">MaktabOS</h1>
         </div>
+
+        <Link
+          href="/dashboard/assignment"
+          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
+        >
+          <ArrowLeft size={16} />
+          Back to Assignments
+        </Link>
       </div>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
-        <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Assignment</h2>
+        <h2 className="text-lg font-semibold mb-6 text-[#000000]">Edit Assignment</h2>
 
         {/* Status Messages */}
         {uploading && (
@@ -348,19 +460,19 @@ const Page = () => {
 
         {isSubmitting && !uploading && (
           <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-full text-center mb-6">
-            Creating assignment...
+            Updating assignment...
           </div>
         )}
 
-        {createStatus === 'succeeded' && (
+        {updateStatus === 'succeeded' && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full text-center mb-6">
-            Assignment created successfully!
+            Assignment updated successfully! Redirecting...
           </div>
         )}
 
-        {createError && (
+        {updateError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-full text-center mb-6">
-            Error: {createError}
+            Error: {updateError}
           </div>
         )}
 
@@ -499,10 +611,18 @@ const Page = () => {
             label="Attachments"
             files={selectedFiles}
             onFilesChange={handleFilesChange}
+            existingAttachments={existingAttachments}
+            onRemoveExisting={handleRemoveExistingAttachment}
             className="sm:col-span-2"
           />
 
-          <div className="flex justify-center pt-6">
+          <div className="flex justify-center pt-6 gap-4">
+            <Link
+              href="/dashboard/assignment"
+              className="rounded-full px-8 py-3 text-sm font-semibold bg-gray-300 text-gray-700 hover:bg-gray-400 transition"
+            >
+              Cancel
+            </Link>
             <button
               type="submit"
               disabled={isSubmitting || fetchingTeachers || fetchingClasses || fetchingStudents}
@@ -511,7 +631,7 @@ const Page = () => {
                 : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
                 }`}
             >
-              {isSubmitting ? (uploading ? 'Uploading Files...' : 'Creating Assignment...') : 'Create Assignment'}
+              {isSubmitting ? (uploading ? 'Uploading Files...' : 'Updating Assignment...') : 'Update Assignment'}
             </button>
           </div>
         </form>
