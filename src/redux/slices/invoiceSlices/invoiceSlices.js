@@ -374,15 +374,12 @@ const getInvoicesStatsSlice = createSlice({
                 state.pagination = null;
                 state.unpaidPagination = null;
             })
-            // Update unpaid invoices when an invoice is updated
             .addCase(updateInvoiceAction.fulfilled, (state, action) => {
                 if (action.payload.data) {
                     const updatedInvoice = action.payload.data;
                     
-                    // Update in unpaid invoices list
                     const unpaidIndex = state.unpaidInvoices.findIndex(inv => inv._id === updatedInvoice._id);
                     if (unpaidIndex !== -1) {
-                        // Remove from unpaid if fully paid
                         if (updatedInvoice.status === 'paid' && updatedInvoice.paidAmount >= updatedInvoice.totalAmount) {
                             state.unpaidInvoices.splice(unpaidIndex, 1);
                         } else {
@@ -390,7 +387,6 @@ const getInvoicesStatsSlice = createSlice({
                         }
                     }
                     
-                    // Update in main invoices list
                     const mainIndex = state.invoices.findIndex(inv => inv._id === updatedInvoice._id);
                     if (mainIndex !== -1) {
                         state.invoices[mainIndex] = updatedInvoice;

@@ -85,6 +85,7 @@ import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
 import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
 import gradeReducer from './slices/gradeSlices/gradeSlices';
 import assignmentReducer from './slices/assignmentSlices/assignmentSlices';
+import notificationsReducer from './slices/notificationSlices/notificationSlices';
 
 import eventReducer from './slices/eventSlices/eventSlices';
 
@@ -92,6 +93,8 @@ export const store = configureStore({
   reducer: {
     // Authentication
     user: userReducer,
+
+    notifications: notificationsReducer,
 
     message: messageReducer,
     socket: socketReducer,

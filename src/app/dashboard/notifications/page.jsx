@@ -1,64 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Download, Search, Bell, Check, X } from "lucide-react";
-
-const mockNotifications = [
-  {
-    id: "1",
-    title: "New Payment Received",
-    message: "Payment of $150.00 has been received from Ahmed Ali's parent for invoice #6763",
-    type: "payment",
-    status: "unread",
-    date: "November 14, 2025, 3:49 am",
-    occurred: "2 hours ago",
-  },
-  {
-    id: "2",
-    title: "Invoice Created",
-    message: "A new invoice #6764 has been created for student Fatima Hassan",
-    type: "invoice",
-    status: "unread",
-    date: "November 14, 2025, 2:12 pm",
-    occurred: "5 hours ago",
-  },
-  {
-    id: "3",
-    title: "Student Added",
-    message: "New student Ahmed Ali has been added to Class 3A",
-    type: "student",
-    status: "read",
-    date: "November 13, 2025, 1:02 pm",
-    occurred: "1 day ago",
-  },
-  {
-    id: "4",
-    title: "Attendance Marked",
-    message: "Attendance has been marked for Class 3A - 25 students present, 2 absent",
-    type: "attendance",
-    status: "read",
-    date: "November 13, 2025, 10:30 am",
-    occurred: "1 day ago",
-  },
-  {
-    id: "5",
-    title: "Payment Reminder Sent",
-    message: "Payment reminder SMS has been sent to 15 parents for upcoming due date",
-    type: "reminder",
-    status: "read",
-    date: "November 12, 2025, 4:15 pm",
-    occurred: "2 days ago",
-  },
-  {
-    id: "6",
-    title: "Parent Added to Waitlist",
-    message: "New parent Abdifatah Garad has been added to the waitlist",
-    type: "parent",
-    status: "read",
-    date: "November 12, 2025, 11:20 am",
-    occurred: "2 days ago",
-  },
-];
+import { getCookie } from "cookies-next";
+import { fetchNotifications } from "@/redux/slices/notificationSlices/notificationSlices";
+import { markConversationAsRead } from "@/redux/slices/messagesSlices/messagesSlices";
 
 const notificationTypes = [
   { value: "", label: "All Types" },
@@ -77,39 +24,60 @@ const statusFilters = [
 ];
 
 export default function NotificationsPage() {
+  const dispatch = useDispatch();
+  const { notifications, loading, error, total, currentPage, totalPages } = useSelector(
+    (state) => state.notifications
+  );
+
   const [searchValue, setSearchValue] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
 
-  const handleMarkAsRead = (id) => {
-    setNotifications(
-      notifications.map((notif) =>
-        notif.id === id ? { ...notif, status: "read" } : notif
-      )
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
+  useEffect(() => {
+    if (!user?.id || !user?.userType) {
+      console.warn("User data not available");
+      return;
+    }
+
+    dispatch(
+      fetchNotifications({
+        userId: user.id,
+        userType: user.userType,
+        page,
+        limit,
+        unreadOnly: selectedStatus === "unread",
+      })
     );
+  }, [dispatch, user, page, limit, selectedStatus]);
+
+  const handleMarkAsRead = (notificationId) => {
+    dispatch(markNotificationRead(notificationId));
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(
-      notifications.map((notif) => ({ ...notif, status: "read" }))
-    );
-  };
-
-  const handleDelete = (id) => {
-    setNotifications(notifications.filter((notif) => notif.id !== id));
+    notifications
+      .filter((notif) => notif.status === "unread")
+      .forEach((notif) => {
+        dispatch(markConversationAsRead(notif._id));
+      });
   };
 
   const filteredNotifications = notifications.filter((notif) => {
     const matchesSearch =
       searchValue === "" ||
-      notif.title.toLowerCase().includes(searchValue.toLowerCase()) ||
-      notif.message.toLowerCase().includes(searchValue.toLowerCase());
+      notif.title?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      notif.message?.toLowerCase().includes(searchValue.toLowerCase());
 
     const matchesType = selectedType === "" || notif.type === selectedType;
-    const matchesStatus = selectedStatus === "" || notif.status === selectedStatus;
 
-    return matchesSearch && matchesType && matchesStatus;
+    return matchesSearch && matchesType;
   });
 
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
@@ -133,6 +101,46 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const handlePageClick = (pageNum) => {
+    setPage(pageNum);
+  };
+
+  if (loading && notifications.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-[18px] bg-red-50 px-6 py-4">
+        <p className="text-red-700">Error loading notifications: {error}</p>
+      </div>
+    );
+  }
+
+  if (!user?.id) {
+    return (
+      <div className="rounded-[18px] bg-yellow-50 px-6 py-4">
+        <p className="text-yellow-700">User information not available. Please log in again.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -140,10 +148,16 @@ export default function NotificationsPage() {
           <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
             Welcome to
           </p>
-          <h1 className="font-medium text-[#000000] text-[1.75rem]">
+          <h1 className="font-medium text-[#000000] text-[#0B4B31] text-[1.75rem]">
             MaktabOS
           </h1>
         </div>
+
+        {user && (
+          <div className="text-sm text-[#979699]">
+            Logged in as: <span className="text-[#0B4B31] font-medium">{user.name || user.email}</span>
+          </div>
+        )}
       </div>
 
       {/* Notification Summary */}
@@ -164,8 +178,9 @@ export default function NotificationsPage() {
             <button
               onClick={handleMarkAllAsRead}
               className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+              disabled={loading}
             >
-              Mark All as Read
+              {loading ? "Processing..." : "Mark All as Read"}
             </button>
           )}
         </div>
@@ -176,6 +191,9 @@ export default function NotificationsPage() {
           <h2 className="text-[1.0625rem] font-semibold text-[#000000]">
             All Notifications
           </h2>
+          <div className="text-sm text-[#979699]">
+            Page {page} of {totalPages}
+          </div>
         </div>
 
         {/* Filters */}
@@ -228,22 +246,30 @@ export default function NotificationsPage() {
           </div>
         </div>
 
+        {/* Loading state for subsequent loads */}
+        {loading && notifications.length > 0 && (
+          <div className="mt-6 flex justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0B4B31]"></div>
+          </div>
+        )}
+
         {/* Notifications List */}
         <div className="mt-6 space-y-3">
           {filteredNotifications.length === 0 ? (
             <div className="text-center py-12">
               <Bell size={48} className="mx-auto text-[#979699] mb-4" />
-              <p className="text-[#979699] font-medium">No notifications found</p>
+              <p className="text-[#979699] font-medium">
+                {notifications.length === 0 ? "No notifications yet" : "No notifications match your filters"}
+              </p>
             </div>
           ) : (
             filteredNotifications.map((notification) => (
               <div
-                key={notification.id}
-                className={`rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm p-4 transition-all ${
-                  notification.status === "unread"
+                key={notification._id || notification.id}
+                className={`rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm p-4 transition-all ${notification.status === "unread"
                     ? "bg-[#E5EFEB] border-[#0B4B31]"
                     : ""
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#0B4B3138] flex items-center justify-center text-xl">
@@ -255,11 +281,10 @@ export default function NotificationsPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3
-                            className={`font-semibold text-[#000000] ${
-                              notification.status === "unread"
+                            className={`font-semibold text-[#000000] ${notification.status === "unread"
                                 ? "text-[1rem]"
                                 : "text-sm"
-                            }`}
+                              }`}
                           >
                             {notification.title}
                           </h3>
@@ -271,29 +296,33 @@ export default function NotificationsPage() {
                           {notification.message}
                         </p>
                         <div className="flex items-center gap-4 text-xs text-[#979699]">
-                          <span>{notification.date}</span>
-                          <span>•</span>
-                          <span>{notification.occurred}</span>
+                          <span>
+                            {notification.createdAt
+                              ? new Date(notification.createdAt).toLocaleString()
+                              : notification.date || 'No date'
+                            }
+                          </span>
+                          {notification.occurred && (
+                            <>
+                              <span>•</span>
+                              <span>{notification.occurred}</span>
+                            </>
+                          )}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
                         {notification.status === "unread" && (
                           <button
-                            onClick={() => handleMarkAsRead(notification.id)}
+                            onClick={() => handleMarkAsRead(notification._id || notification.id)}
                             className="p-2 rounded-full hover:bg-[#0B4B3138] transition"
                             title="Mark as read"
+                            disabled={loading}
                           >
                             <Check size={16} className="text-[#0B4B31]" />
                           </button>
                         )}
-                        <button
-                          onClick={() => handleDelete(notification.id)}
-                          className="p-2 rounded-full hover:bg-red-50 transition"
-                          title="Delete"
-                        >
-                          <X size={16} className="text-[#979699] hover:text-red-500" />
-                        </button>
+
                       </div>
                     </div>
                   </div>
@@ -304,29 +333,60 @@ export default function NotificationsPage() {
         </div>
 
         {/* Pagination */}
-        {filteredNotifications.length > 0 && (
+        {filteredNotifications.length > 0 && totalPages > 1 && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[#979699]">
-              Showing 1 to {filteredNotifications.length} of{" "}
-              {filteredNotifications.length} entries
+              Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of{" "}
+              {total} entries
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-sm text-[#8A928F]">Display 10</span>
+              <span className="text-sm text-[#8A928F]">Display {limit}</span>
               <div className="flex items-center gap-2">
-                <button className="rounded-full border border-[#0B4B3138] bg-white px-3 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={page === 1}
+                  className="rounded-full border border-[#0B4B3138] bg-white px-3 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   ‹
                 </button>
-                <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-semibold text-white">
-                  1
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  2
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  3
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+
+                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageClick(pageNum)}
+                      className={`rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition ${page === pageNum
+                          ? "bg-[#0B4B31] text-white"
+                          : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                {totalPages > 3 && (
+                  <>
+                    <span className="text-[#0B4B31]">...</span>
+                    <button
+                      onClick={() => handlePageClick(totalPages)}
+                      className={`rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition ${page === totalPages
+                          ? "bg-[#0B4B31] text-white"
+                          : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                        }`}
+                    >
+                      {totalPages}
+                    </button>
+                  </>
+                )}
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={page === totalPages}
+                  className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-xs sm:text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   ›
                 </button>
               </div>
