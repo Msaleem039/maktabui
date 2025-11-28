@@ -2,33 +2,27 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Download, Search, Bell, Check, X } from "lucide-react";
+import { Search, Bell, Check, X } from "lucide-react";
 import { getCookie } from "cookies-next";
-import { fetchNotifications } from "@/redux/slices/notificationSlices/notificationSlices";
-import { markConversationAsRead } from "@/redux/slices/messagesSlices/messagesSlices";
-
-const notificationTypes = [
-  { value: "", label: "All Types" },
-  { value: "payment", label: "Payment" },
-  { value: "invoice", label: "Invoice" },
-  { value: "student", label: "Student" },
-  { value: "attendance", label: "Attendance" },
-  { value: "reminder", label: "Reminder" },
-  { value: "parent", label: "Parent" },
-];
-
-const statusFilters = [
-  { value: "", label: "All Status" },
-  { value: "unread", label: "Unread" },
-  { value: "read", label: "Read" },
-];
+import { 
+  fetchNotifications, 
+  markNotificationRead, 
+  markAllNotificationsRead,
+  fetchNotificationStats 
+} from "@/redux/slices/notificationSlices/notificationSlices";
 
 export default function NotificationsPage() {
   const dispatch = useDispatch();
-  const { notifications, loading, error, total, currentPage, totalPages } = useSelector(
-    (state) => state.notifications
-  );
-
+  const { 
+    notifications, 
+    loading, 
+    error, 
+    total, 
+    totalPages,
+    stats,
+    markAllLoading 
+  } = useSelector((state) => state.notifications);
+  
   const [searchValue, setSearchValue] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -41,18 +35,25 @@ export default function NotificationsPage() {
   }, []);
 
   useEffect(() => {
-    if (!user?.id || !user?.userType) {
-      console.warn("User data not available");
+    if (!user?.id || !user?.role) {
+      console.warn("User data not available", user);
       return;
     }
 
     dispatch(
       fetchNotifications({
         userId: user.id,
-        userType: user.userType,
+        userType: user.role,
         page,
         limit,
         unreadOnly: selectedStatus === "unread",
+      })
+    );
+
+    dispatch(
+      fetchNotificationStats({
+        userId: user.id,
+        userType: user.role,
       })
     );
   }, [dispatch, user, page, limit, selectedStatus]);
@@ -62,25 +63,49 @@ export default function NotificationsPage() {
   };
 
   const handleMarkAllAsRead = () => {
-    notifications
-      .filter((notif) => notif.status === "unread")
-      .forEach((notif) => {
-        dispatch(markConversationAsRead(notif._id));
-      });
+    if (user?.id && user?.role) {
+      dispatch(markAllNotificationsRead({
+        userId: user.id,
+        userType: user.role
+      }));
+    }
   };
 
-  const filteredNotifications = notifications.filter((notif) => {
+  const unreadCount = stats.unreadCount;
+  const totalCount = stats.totalCount;
+
+  const mappedNotifications = useMemo(() => {
+    return notifications.map(notif => ({
+      id: notif._id,
+      _id: notif._id,
+      title: notif.title,
+      message: notif.message,
+      type: notif.type,
+      status: notif.isRead ? 'read' : 'unread',
+      isRead: notif.isRead,
+      createdAt: notif.createdAt,
+      date: notif.createdAt,
+      occurred: notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : '',
+      actionUrl: notif.actionUrl,
+      priority: notif.priority,
+      relatedEntity: notif.relatedEntity
+    }));
+  }, [notifications]);
+
+  const filteredNotifications = mappedNotifications.filter((notif) => {
     const matchesSearch =
       searchValue === "" ||
       notif.title?.toLowerCase().includes(searchValue.toLowerCase()) ||
       notif.message?.toLowerCase().includes(searchValue.toLowerCase());
 
     const matchesType = selectedType === "" || notif.type === selectedType;
+    
+    const matchesStatus = selectedStatus === "" || 
+      (selectedStatus === "unread" && !notif.isRead) ||
+      (selectedStatus === "read" && notif.isRead);
 
-    return matchesSearch && matchesType;
+    return matchesSearch && matchesType && matchesStatus;
   });
-
-  const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -96,6 +121,8 @@ export default function NotificationsPage() {
         return "🔔";
       case "parent":
         return "👨‍👩‍👧";
+      case "event":
+        return "📅";
       default:
         return "🔔";
     }
@@ -117,7 +144,7 @@ export default function NotificationsPage() {
     setPage(pageNum);
   };
 
-  if (loading && notifications.length === 0) {
+  if (loading && mappedNotifications.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31]"></div>
@@ -170,7 +197,7 @@ export default function NotificationsPage() {
                 {unreadCount} Unread Notification{unreadCount !== 1 ? "s" : ""}
               </p>
               <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
-                {notifications.length} Total Notifications
+                {totalCount} Total Notifications
               </p>
             </div>
           </div>
@@ -178,9 +205,9 @@ export default function NotificationsPage() {
             <button
               onClick={handleMarkAllAsRead}
               className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-              disabled={loading}
+              disabled={markAllLoading}
             >
-              {loading ? "Processing..." : "Mark All as Read"}
+              {markAllLoading ? "Processing..." : "Mark All as Read"}
             </button>
           )}
         </div>
@@ -209,45 +236,11 @@ export default function NotificationsPage() {
                 className="w-full text-sm text-[#0B4B31] bg-white placeholder:text-[#979699] focus:outline-none"
               />
             </div>
-
-            <div className="relative flex-1 max-w-xs">
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-              >
-                {notificationTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
-                ▾
-              </span>
-            </div>
-
-            <div className="relative flex-1 max-w-xs">
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-              >
-                {statusFilters.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
-                ▾
-              </span>
-            </div>
           </div>
         </div>
 
         {/* Loading state for subsequent loads */}
-        {loading && notifications.length > 0 && (
+        {loading && mappedNotifications.length > 0 && (
           <div className="mt-6 flex justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0B4B31]"></div>
           </div>
@@ -259,16 +252,16 @@ export default function NotificationsPage() {
             <div className="text-center py-12">
               <Bell size={48} className="mx-auto text-[#979699] mb-4" />
               <p className="text-[#979699] font-medium">
-                {notifications.length === 0 ? "No notifications yet" : "No notifications match your filters"}
+                {mappedNotifications.length === 0 ? "No notifications yet" : "No notifications match your filters"}
               </p>
             </div>
           ) : (
             filteredNotifications.map((notification) => (
               <div
                 key={notification._id || notification.id}
-                className={`rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm p-4 transition-all ${notification.status === "unread"
-                    ? "bg-[#E5EFEB] border-[#0B4B31]"
-                    : ""
+                className={`rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm p-4 transition-all ${!notification.isRead
+                  ? "bg-[#E5EFEB] border-[#0B4B31]"
+                  : ""
                   }`}
               >
                 <div className="flex items-start gap-4">
@@ -281,14 +274,14 @@ export default function NotificationsPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3
-                            className={`font-semibold text-[#000000] ${notification.status === "unread"
-                                ? "text-[1rem]"
-                                : "text-sm"
+                            className={`font-semibold text-[#000000] ${!notification.isRead
+                              ? "text-[1rem]"
+                              : "text-sm"
                               }`}
                           >
                             {notification.title}
                           </h3>
-                          {notification.status === "unread" && (
+                          {!notification.isRead && (
                             <span className="w-2 h-2 rounded-full bg-[#0B4B31]"></span>
                           )}
                         </div>
@@ -312,7 +305,7 @@ export default function NotificationsPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {notification.status === "unread" && (
+                        {!notification.isRead && (
                           <button
                             onClick={() => handleMarkAsRead(notification._id || notification.id)}
                             className="p-2 rounded-full hover:bg-[#0B4B3138] transition"
@@ -322,7 +315,6 @@ export default function NotificationsPage() {
                             <Check size={16} className="text-[#0B4B31]" />
                           </button>
                         )}
-
                       </div>
                     </div>
                   </div>
@@ -358,8 +350,8 @@ export default function NotificationsPage() {
                       key={pageNum}
                       onClick={() => handlePageClick(pageNum)}
                       className={`rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition ${page === pageNum
-                          ? "bg-[#0B4B31] text-white"
-                          : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                        ? "bg-[#0B4B31] text-white"
+                        : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
                         }`}
                     >
                       {pageNum}
@@ -373,8 +365,8 @@ export default function NotificationsPage() {
                     <button
                       onClick={() => handlePageClick(totalPages)}
                       className={`rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition ${page === totalPages
-                          ? "bg-[#0B4B31] text-white"
-                          : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                        ? "bg-[#0B4B31] text-white"
+                        : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
                         }`}
                     >
                       {totalPages}

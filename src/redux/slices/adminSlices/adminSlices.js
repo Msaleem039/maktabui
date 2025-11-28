@@ -25,6 +25,18 @@ export const getAllAdminsAction = createAsyncThunk(
   }
 );
 
+export const deleteAdminAction = createAsyncThunk(
+  "admins/deleteAdmin",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteAdmin`, { id });
+      return res.data.deletedAdmin;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const getAdminByIdAction = createAsyncThunk(
   "admins/getAdminById",
   async (id, { rejectWithValue }) => {
@@ -135,6 +147,43 @@ const updateAdminSlice = createSlice({
   },
 });
 
+const deleteAdminSlice = createSlice({
+  name: "deleteAdmin",
+  initialState: { 
+    loading: false, 
+    success: false, 
+    deletedAdmin: null, 
+    error: null 
+  },
+  reducers: {
+    resetDeleteAdminState: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.deletedAdmin = null;
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(deleteAdminAction.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(deleteAdminAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.deletedAdmin = action.payload;
+        state.error = null;
+      })
+      .addCase(deleteAdminAction.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  },
+});
+
 export const { resetState } = updateAdminSlice.actions;
 
 
@@ -142,3 +191,4 @@ export const createAdminReducer = createAdminSlice.reducer;
 export const getAllAdminsReducer = getAllAdminsSlice.reducer;
 export const getAdminByIdReducer = getAdminByIdSlice.reducer;
 export const updateAdminReducer = updateAdminSlice.reducer;
+export const deleteAdminReducer = deleteAdminSlice.reducer;

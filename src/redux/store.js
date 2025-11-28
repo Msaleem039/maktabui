@@ -57,7 +57,8 @@ import {
   createAdminReducer,
   getAllAdminsReducer,
   getAdminByIdReducer,
-  updateAdminReducer
+  updateAdminReducer,
+  deleteAdminReducer
 } from './slices/adminSlices/adminSlices';
 
 import {
@@ -148,7 +149,7 @@ export const store = configureStore({
     getAllAdmins: getAllAdminsReducer,
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
-
+    deleteAdmin: deleteAdminReducer,
     // Academic management
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
