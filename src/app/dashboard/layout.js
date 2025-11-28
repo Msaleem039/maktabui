@@ -170,18 +170,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const [navItems, setNavItems] = useState([]);
   const userCookie = getCookie("user");
 
-  // Get user role from Redux state
   const reduxUser = useSelector((state) => state.user?.userInfo);
   const reduxRole = reduxUser?.role;
 
   const getUserRole = () => {
     let role = null;
 
-    // First try Redux state
     if (reduxRole) {
       role = reduxRole;
     } else {
-      // Fallback to cookie
       try {
         if (userCookie) {
           const userData =
@@ -316,7 +313,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Admin", path: `${basePath}/team/admin` },
           { name: "Teachers", path: `${basePath}/team/teacher` }],
       },
-      settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/s` },
+      settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/settings` },
     };
 
     const roleDashboardItems = {
@@ -337,7 +334,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.class,
           allItems.assignment,
           allItems.notifications,
-          allItems.settings,
           allItems.attendance,
           allItems.finance,
           allItems.activities,
@@ -362,7 +358,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               (item) => item.name === "C Assignment" || item.name === "S Assignment"
             )
           },
-          allItems.settings,
           allItems.notifications,
           allItems.attendance,
           allItems.communication,
@@ -386,7 +381,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             )
           },
           allItems.notifications,
-          allItems.settings,
           allItems.communication,
         ];
 
@@ -406,7 +400,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             ),
           },
           allItems.notifications,
-          allItems.settings,
           allItems.communication,
         ];
 

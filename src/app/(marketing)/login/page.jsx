@@ -52,6 +52,7 @@ const Page = () => {
                 }), tokenOptions);
 
                 const userRole = resultAction.payload.role;
+                
                 if (userRole === 'Parent') {
                     router.push('/dashboard/parent/dashboard');
                 } else if (userRole === 'Student') {
