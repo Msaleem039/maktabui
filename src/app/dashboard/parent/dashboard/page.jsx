@@ -1,22 +1,25 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Search, Grid, Moon, ChevronDown, Users, GraduationCap, Calendar, CalendarCheck, TrendingUp, DollarSign, Clock } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { getParentDashboard, setAttendanceYear, clearDashboardError } from "@/redux/slices/parentSlices/parentSlice";
+import { getCookie } from "cookies-next";
 
 const Page = () => {
   const dispatch = useDispatch();
   const dashboard = useSelector((state) => state.parentDashboard);
-  console.log("dashboard", dashboard);
 
-  const parentId = "691e33a83fc11c5af0bd5f4f";
+    const user = useMemo(() => {
+      const userCookie = getCookie("user");
+      return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+    }, []);
 
   useEffect(() => {
-    if (parentId) {
-      dispatch(getParentDashboard(parentId));
+    if (user?.id) {
+      dispatch(getParentDashboard(user?.id));
     }
-  }, [dispatch, parentId]);
+  }, [dispatch, user?.id]);
 
   const handleYearChange = (year) => {
     dispatch(setAttendanceYear(year));

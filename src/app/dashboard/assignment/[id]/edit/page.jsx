@@ -365,10 +365,7 @@ const Page = () => {
   }, [dispatch, updateStatus, router]);
 
   const assignmentTypeOptions = [
-    { value: "Assignment", label: "Assignment" },
-    { value: "quiz", label: "Quiz" },
-    { value: "project", label: "Project" },
-    { value: "exam", label: "Exam" }
+    { value: "Assignment", label: "Assignment" }
   ];
 
   const classOptions = (classNames || []).map(cls => ({

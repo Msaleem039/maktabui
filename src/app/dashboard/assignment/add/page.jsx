@@ -290,10 +290,7 @@ const Page = () => {
   }, [createStatus, user, currentUserTeacherId]);
 
   const assignmentTypeOptions = [
-    { value: "Assignment", label: "Assignment" },
-    { value: "quiz", label: "Quiz" },
-    { value: "project", label: "Project" },
-    { value: "exam", label: "Exam" }
+    { value: "Assignment", label: "Assignment" }
   ];
 
   const classOptions = (classNames || []).map(cls => ({

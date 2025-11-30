@@ -18,7 +18,8 @@ export default function GradesPage() {
   const dispatch = useDispatch();
 
   const { grades, status, error, pagination } = useSelector((state) => state.grade);
-
+  console.log("grades",grades);
+  
   const user = useMemo(() => {
     const userCookie = getCookie("user");
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;

@@ -11,6 +11,7 @@ import { getTeachersName, resetTeachersNameState, getTeacherDetail } from "@/red
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getCookie } from "cookies-next";
 
+// CalendarWidget component remains the same
 const CalendarWidget = ({ selectedDate, onDateChange }) => {
   const [viewDate, setViewDate] = useState(selectedDate || new Date());
 
@@ -79,6 +80,7 @@ const CalendarWidget = ({ selectedDate, onDateChange }) => {
   );
 };
 
+// StatusDropdown component remains the same
 const StatusDropdown = ({ studentId, currentStatus, onStatusChange, onReasonChange }) => {
   const [status, setStatus] = useState(currentStatus);
   const [reason, setReason] = useState("");
@@ -145,7 +147,18 @@ export default function AttendancePage() {
   const { detail: teacherDetail, loading: teacherDetailLoading } = useSelector((state) => state.getTeacherDetail);
   const { loading: attendanceLoading, success: attendanceSuccess, error: attendanceError } = useSelector((state) => state.attendance);
 
-  const tableData = teacherDetail?.students || [];
+  // Get students from the selected class
+  const getStudentsFromSelectedClass = () => {
+    if (!teacherDetail?.assignedClasses || !selectedClass) return [];
+    
+    const selectedClassData = teacherDetail.assignedClasses.find(
+      cls => cls._id === selectedClass
+    );
+    
+    return selectedClassData?.students || [];
+  };
+
+  const tableData = getStudentsFromSelectedClass();
   const teacherClasses = teacherDetail?.assignedClasses || [];
 
   useEffect(() => {
