@@ -68,10 +68,14 @@ export const getStudentById = createAsyncThunk(
 );
 
 export const getAllWaitlistStudents = createAsyncThunk(
-  `student/getAllWaitlistStudents`,
-  async (_, { rejectWithValue }) => {
+  'waitlistStudents/getAllWaitlistStudents',
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitlistStudents`);
+      const { limit = 10, page = 1, search = '' } = params;
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitlistStudent`,
+        { limit, page, search }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -304,32 +308,64 @@ const getStudentByIdSlice = createSlice({
 });
 
 const getAllWaitlistStudentsSlice = createSlice({
-  name: "waitlistStudents",
+  name: 'waitlistStudents',
   initialState: {
     students: [],
-    status: "idle",
+    status: 'idle', 
     error: null,
+    pagination: {
+      page: 1,
+      limit: 10,
+      total: 0,
+      totalPages: 0,
+    },
   },
   reducers: {
     resetWaitlistStudentsState: (state) => {
       state.students = [];
-      state.status = "idle";
+      state.status = 'idle';
       state.error = null;
+      state.pagination = {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      };
+    },
+    updateWaitlistStudent: (state, action) => {
+      const index = state.students.findIndex(
+        (student) => student._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.students[index] = action.payload;
+      }
+    },
+    removeWaitlistStudent: (state, action) => {
+      state.students = state.students.filter(
+        (student) => student._id !== action.payload
+      );
+      state.pagination.total -= 1;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(getAllWaitlistStudents.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(getAllWaitlistStudents.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
         state.students = action.payload.waitlist || [];
+        state.pagination = {
+          page: action.payload.page || 1,
+          limit: action.payload.limit || 10,
+          total: action.payload.total || 0,
+          totalPages: action.payload.totalPages || 0,
+        };
       })
       .addCase(getAllWaitlistStudents.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Something went wrong";
+        state.status = 'failed';
+        state.error = action.payload || 'Failed to fetch waitlist students';
       });
   },
 });

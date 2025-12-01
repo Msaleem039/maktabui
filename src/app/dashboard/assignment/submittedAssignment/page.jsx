@@ -1,26 +1,27 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2, FileText, User, Mail, ChevronDown, ChevronUp } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAssignmentAgainstTeacher } from "@/redux/slices/assignmentSlices/assignmentSlices";
+import { getAssignmentAgainstTeacher, updateTeacherAssignmentsPage, updateTeacherAssignmentsLimit } from "@/redux/slices/assignmentSlices/assignmentSlices";
 import { getCookie } from "cookies-next";
 
 export default function TeacherAssignmentsPage() {
   const [searchValue, setSearchValue] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // For debounced search
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [filteredAssignments, setFilteredAssignments] = useState([]);
   const [expandedAssignmentId, setExpandedAssignmentId] = useState(null);
   const dropdownRefs = useRef({});
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { 
-    teacherAssignments, 
-    teacherAssignmentsStatus, 
-    teacherAssignmentsError 
+  const {
+    teacherAssignments,
+    teacherAssignmentsStatus,
+    teacherAssignmentsError,
+    teacherAssignmentsPagination
   } = useSelector((state) => state.assignment);
 
   const user = useMemo(() => {
@@ -29,35 +30,33 @@ export default function TeacherAssignmentsPage() {
   }, []);
 
   const actionMenuItems = [
-    { label: "View Details", icon: Eye, action: "view" },
-    { label: "Edit", icon: Edit, action: "edit" },
-    { label: "Delete", icon: Trash2, action: "delete" },
+    { label: "View Details", icon: Eye, action: "view" }
   ];
 
+  // Fetch assignments on initial load and when pagination/search changes
   useEffect(() => {
     if (user?.role === "Teacher" && user?.id) {
-      dispatch(getAssignmentAgainstTeacher({ teacherId: user.id }));
+      dispatch(getAssignmentAgainstTeacher({
+        teacherId: user.id,
+        page: teacherAssignmentsPagination.page,
+        limit: teacherAssignmentsPagination.limit,
+        search: searchValue
+      }));
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, teacherAssignmentsPagination.page, teacherAssignmentsPagination.limit, searchValue]);
 
+  // Debounce search input
   useEffect(() => {
-    if (teacherAssignments && teacherAssignments.length > 0) {
-      const filtered = teacherAssignments.filter((assignment) => {
-        const searchLower = searchValue.toLowerCase();
-        return (
-          assignment.title?.toLowerCase().includes(searchLower) ||
-          assignment.subject?.toLowerCase().includes(searchLower) ||
-          assignment.type?.toLowerCase().includes(searchLower) ||
-          assignment.class?.name?.toLowerCase().includes(searchLower) ||
-          assignment.student?.studentName?.toLowerCase().includes(searchLower) ||
-          assignment.student?.email?.toLowerCase().includes(searchLower)
-        );
-      });
-      setFilteredAssignments(filtered);
-    } else {
-      setFilteredAssignments([]);
-    }
-  }, [searchValue, teacherAssignments]);
+    const timer = setTimeout(() => {
+      setSearchValue(searchInput);
+      // Reset to first page when searching
+      if (teacherAssignmentsPagination.page !== 1) {
+        dispatch(updateTeacherAssignmentsPage(1));
+      }
+    }, 500); // 500ms debounce delay
+
+    return () => clearTimeout(timer);
+  }, [searchInput, dispatch]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -112,10 +111,9 @@ export default function TeacherAssignmentsPage() {
     if (!assignment.solutions || assignment.solutions.length === 0) {
       return { text: "Not submitted", color: "text-red-600", count: 0 };
     }
-    
-    // Since student is a single object, check if there's any solution
+
     const hasSubmission = assignment.solutions.length > 0;
-    
+
     if (hasSubmission) {
       return { text: "Submitted", color: "text-green-600", count: 1 };
     } else {
@@ -127,18 +125,64 @@ export default function TeacherAssignmentsPage() {
     if (!assignment.solutions || assignment.solutions.length === 0) {
       return { submitted: false, text: "Not submitted", color: "text-red-600" };
     }
-    
-    // Since there's only one student, we can check the first solution
+
     const solution = assignment.solutions[0];
     if (solution) {
-      return { 
-        submitted: true, 
-        text: "Submitted", 
+      return {
+        submitted: true,
+        text: "Submitted",
         color: "text-green-600",
         submittedAt: solution.submittedAt ? formatDate(solution.submittedAt) : "Recently"
       };
     }
     return { submitted: false, text: "Not submitted", color: "text-red-600" };
+  };
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    dispatch(updateTeacherAssignmentsPage(page));
+  };
+
+  const handleLimitChange = (limit) => {
+    dispatch(updateTeacherAssignmentsLimit(Number(limit)));
+  };
+
+  const handlePreviousPage = () => {
+    if (teacherAssignmentsPagination.hasPrevPage) {
+      handlePageChange(teacherAssignmentsPagination.page - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (teacherAssignmentsPagination.hasNextPage) {
+      handlePageChange(teacherAssignmentsPagination.page + 1);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const { page, totalPages } = teacherAssignmentsPagination;
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let start = Math.max(1, page - 2);
+      let end = Math.min(totalPages, start + maxVisiblePages - 1);
+
+      if (end - start + 1 < maxVisiblePages) {
+        start = Math.max(1, end - maxVisiblePages + 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
   };
 
   // Loading state
@@ -206,7 +250,12 @@ export default function TeacherAssignmentsPage() {
             <div className="text-center">
               <p className="text-red-600">Error loading assignments: {teacherAssignmentsError}</p>
               <button
-                onClick={() => user?.id && dispatch(getAssignmentAgainstTeacher({ teacherId: user.id }))}
+                onClick={() => user?.id && dispatch(getAssignmentAgainstTeacher({
+                  teacherId: user.id,
+                  page: teacherAssignmentsPagination.page,
+                  limit: teacherAssignmentsPagination.limit,
+                  search: searchValue
+                }))}
                 className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
               >
                 Try Again
@@ -258,8 +307,8 @@ export default function TeacherAssignmentsPage() {
           <label className="relative flex w-full max-w-xl items-center">
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by title, subject, type, class, or student..."
               className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
             />
@@ -281,8 +330,8 @@ export default function TeacherAssignmentsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredAssignments.length > 0 ? (
-                filteredAssignments.map((assignment) => {
+              {teacherAssignments.length > 0 ? (
+                teacherAssignments.map((assignment) => {
                   const submissionStatus = getSubmissionStatus(assignment);
                   const studentSubmissionStatus = getStudentSubmissionStatus(assignment);
                   const isExpanded = expandedAssignmentId === assignment._id;
@@ -328,47 +377,24 @@ export default function TeacherAssignmentsPage() {
                             <button
                               type="button"
                               onClick={(e) => toggleStudentView(assignment._id, e)}
-                              className="p-2 text-[#0B4B31] hover:bg-[#E5EFEB] rounded-full transition-colors"
+                              className="inline-flex items-center gap-1 px-3 py-2 text-[#0B4B31] hover:bg-[#E5EFEB] rounded-full transition-colors text-sm font-medium"
                             >
-                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            </button>
-                            <div className="relative inline-block">
-                              <button
-                                type="button"
-                                onClick={(e) => toggleDropdown(assignment._id, e)}
-                                className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
-                              >
-                                Manage
-                                <span>▾</span>
-                              </button>
-
-                              {openDropdownId === assignment._id && (
-                                <div
-                                  ref={(el) => (dropdownRefs.current[assignment._id] = el)}
-                                  className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
-                                >
-                                  {actionMenuItems.map((item, idx) => {
-                                    const Icon = item.icon;
-                                    return (
-                                      <button
-                                        key={item.action}
-                                        type="button"
-                                        onClick={(e) => handleActionClick(item.action, assignment._id, e)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${idx === 0 ? "" : "border-t border-[#E2E7E4]"
-                                          } hover:bg-[#E5EFEB]`}
-                                      >
-                                        <Icon size={16} className="text-[#0B4B31]" />
-                                        <span>{item.label}</span>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp size={14} />
+                                  <span className="ml-1">Hide Details</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown size={14} />
+                                  <span className="ml-1">View Details</span>
+                                </>
                               )}
-                            </div>
+                            </button>
                           </div>
                         </td>
                       </tr>
-                      
+
                       {isExpanded && (
                         <tr>
                           <td colSpan="8" className="px-4 py-4 bg-[#F8FBFA] border-b border-l border-r border-[#E2E7E4] rounded-b-3xl">
@@ -459,9 +485,9 @@ export default function TeacherAssignmentsPage() {
               ) : (
                 <tr>
                   <td colSpan="8" className="px-4 py-8 text-center text-[#8A928F]">
-                    {teacherAssignments.length === 0 
-                      ? "No assignments found. Create your first assignment!" 
-                      : "No assignments match your search."}
+                    {searchValue
+                      ? "No assignments match your search."
+                      : "No assignments found. Create your first assignment!"}
                   </td>
                 </tr>
               )}
@@ -470,34 +496,55 @@ export default function TeacherAssignmentsPage() {
         </div>
 
         {/* Pagination */}
-        {filteredAssignments.length > 0 && (
+        {teacherAssignmentsPagination.total > 0 && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[#8A928F]">
-              Showing {filteredAssignments.length} of {teacherAssignments.length} assignments
+              Showing {(teacherAssignmentsPagination.page - 1) * teacherAssignmentsPagination.limit + 1} to{" "}
+              {Math.min(teacherAssignmentsPagination.page * teacherAssignmentsPagination.limit, teacherAssignmentsPagination.total)} of{" "}
+              {teacherAssignmentsPagination.total} assignments
             </div>
             <div className="flex items-center gap-3">
-              {/* <select className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]">
-                <option>Display 10</option>
-                <option>Display 20</option>
-                <option>Display 50</option>
-              </select> */}
+              <select
+                value={teacherAssignmentsPagination.limit}
+                onChange={(e) => handleLimitChange(e.target.value)}
+                className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="5">Display 5</option>
+                <option value="10">Display 10</option>
+                <option value="20">Display 20</option>
+                <option value="50">Display 50</option>
+              </select>
               <div className="flex items-center gap-2">
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={!teacherAssignmentsPagination.hasPrevPage}
+                  className={`rounded-full border border-[#C5D2CD] px-3 py-2 text-sm text-[#0B4B31] transition ${teacherAssignmentsPagination.hasPrevPage
+                      ? "bg-white hover:bg-[#F3F6F5] cursor-pointer"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}
+                >
                   ‹
                 </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  1
-                </button>
-                <button className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white">
-                  2
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  3
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
-                  4
-                </button>
-                <button className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5]">
+                {getPageNumbers().map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${pageNum === teacherAssignmentsPagination.page
+                        ? "bg-[#0B4B31] text-white font-semibold"
+                        : "bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                      }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+                <button
+                  onClick={handleNextPage}
+                  disabled={!teacherAssignmentsPagination.hasNextPage}
+                  className={`rounded-full border border-[#C5D2CD] px-3 py-2 text-sm text-[#0B4B31] transition ${teacherAssignmentsPagination.hasNextPage
+                      ? "bg-white hover:bg-[#F3F6F5] cursor-pointer"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}
+                >
                   ›
                 </button>
               </div>

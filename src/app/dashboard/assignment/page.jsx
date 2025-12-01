@@ -547,7 +547,7 @@ export default function AssignmentPage() {
     };
 
     const renderUploadSolutionButton = (assignment) => {
-        if (user?.role === "Super Admin") {
+        if (user?.role === "Student") {
             return (
                 <button
                     type="button"
@@ -562,7 +562,6 @@ export default function AssignmentPage() {
         return null;
     };
 
-    // Show Action dropdown for Super Admin and Teachers
     const renderActionDropdown = (assignment) => {
         if (["Super Admin", "Teacher"].includes(user?.role)) {
             return (
@@ -899,7 +898,7 @@ export default function AssignmentPage() {
                 size="lg"
             />
 
-            {uploadModalOpen && user?.role === "Super Admin" && (
+            {uploadModalOpen && user?.role === "Student" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-10">
                     <div className="relative w-full max-w-xl rounded-[28px] bg-white px-6 py-7 shadow-[0_40px_120px_rgba(0,0,0,0.25)]">
                         <button

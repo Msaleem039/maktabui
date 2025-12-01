@@ -104,11 +104,11 @@ export const uploadSolution = createAsyncThunk(
 
 export const getAssignmentAgainstTeacher = createAsyncThunk(
   'assignment/getAssignmentAgainstTeacher',
-  async ({ teacherId }, { rejectWithValue }) => {
+  async ({ teacherId, page = 1, limit = 10, search = "" }, { rejectWithValue }) => {
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAssignmentAgainstTeacher`,
-        { teacherId }
+        { teacherId, page, limit, search }
       );
       return res.data;
     } catch (err) {
@@ -191,6 +191,14 @@ const initialState = {
   currentAssignment: null,
   studentAssignments: [],
   teacherAssignments: [],
+  teacherAssignmentsPagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  },
   status: 'idle',
   error: null,
   createStatus: 'idle',
@@ -239,6 +247,14 @@ const assignmentSlice = createSlice({
     },
     clearTeacherAssignments: (state) => {
       state.teacherAssignments = [];
+      state.teacherAssignmentsPagination = {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
       state.teacherAssignmentsStatus = 'idle';
       state.teacherAssignmentsError = null;
     },
@@ -255,6 +271,14 @@ const assignmentSlice = createSlice({
       state.assignments = state.assignments.filter(assignment => assignment._id !== assignmentId);
       state.studentAssignments = state.studentAssignments.filter(assignment => assignment._id !== assignmentId);
       state.teacherAssignments = state.teacherAssignments.filter(assignment => assignment._id !== assignmentId);
+
+      // Update pagination total
+      if (state.teacherAssignments.length < state.teacherAssignmentsPagination.total) {
+        state.teacherAssignmentsPagination.total -= 1;
+        state.teacherAssignmentsPagination.totalPages = Math.ceil(
+          state.teacherAssignmentsPagination.total / state.teacherAssignmentsPagination.limit
+        );
+      }
 
       if (state.currentAssignment && state.currentAssignment._id === assignmentId) {
         state.currentAssignment = null;
@@ -316,6 +340,14 @@ const assignmentSlice = createSlice({
         }
       }
     },
+    // Add new reducer for updating teacher assignments pagination
+    updateTeacherAssignmentsPage: (state, action) => {
+      state.teacherAssignmentsPagination.page = action.payload;
+    },
+    updateTeacherAssignmentsLimit: (state, action) => {
+      state.teacherAssignmentsPagination.limit = action.payload;
+      state.teacherAssignmentsPagination.page = 1; // Reset to first page when changing limit
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -347,6 +379,7 @@ const assignmentSlice = createSlice({
         state.fetchError = action.payload;
       })
 
+      // Update Assignment
       .addCase(updateAssignment.pending, (state) => {
         state.updateStatus = 'loading';
         state.updateError = null;
@@ -380,6 +413,7 @@ const assignmentSlice = createSlice({
         state.updateError = action.payload;
       })
 
+      // Get Assignment
       .addCase(getAssignment.pending, (state) => {
         state.fetchStatus = 'loading';
         state.fetchError = null;
@@ -397,6 +431,7 @@ const assignmentSlice = createSlice({
         state.fetchError = action.payload;
       })
 
+      // Get All Assignments
       .addCase(getAllAssignment.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -410,6 +445,7 @@ const assignmentSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Get Assignments by Student ID
       .addCase(getAssignmentByStudentId.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -423,6 +459,7 @@ const assignmentSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Upload Solution
       .addCase(uploadSolution.pending, (state) => {
         state.uploadSolutionStatus = 'loading';
         state.uploadSolutionError = null;
@@ -497,6 +534,7 @@ const assignmentSlice = createSlice({
         state.uploadSolutionError = action.payload;
       })
 
+      // Get Assignments Against Teacher (Updated with pagination)
       .addCase(getAssignmentAgainstTeacher.pending, (state) => {
         state.teacherAssignmentsStatus = 'loading';
         state.teacherAssignmentsError = null;
@@ -504,6 +542,14 @@ const assignmentSlice = createSlice({
       .addCase(getAssignmentAgainstTeacher.fulfilled, (state, action) => {
         state.teacherAssignmentsStatus = 'succeeded';
         state.teacherAssignments = action.payload.assignments;
+        state.teacherAssignmentsPagination = {
+          page: action.payload.pagination.page || 1,
+          limit: action.payload.pagination.limit || 10,
+          total: action.payload.pagination.total || 0,
+          totalPages: action.payload.pagination.totalPages || 0,
+          hasNextPage: action.payload.pagination.hasNextPage || false,
+          hasPrevPage: action.payload.pagination.hasPrevPage || false
+        };
       })
       .addCase(getAssignmentAgainstTeacher.rejected, (state, action) => {
         state.teacherAssignmentsStatus = 'failed';
@@ -523,6 +569,14 @@ const assignmentSlice = createSlice({
         state.studentAssignments = state.studentAssignments.filter(assignment => assignment._id !== deletedAssignmentId);
         state.teacherAssignments = state.teacherAssignments.filter(assignment => assignment._id !== deletedAssignmentId);
 
+        // Update pagination total
+        if (state.teacherAssignmentsPagination.total > 0) {
+          state.teacherAssignmentsPagination.total -= 1;
+          state.teacherAssignmentsPagination.totalPages = Math.ceil(
+            state.teacherAssignmentsPagination.total / state.teacherAssignmentsPagination.limit
+          );
+        }
+
         if (state.currentAssignment && state.currentAssignment._id === deletedAssignmentId) {
           state.currentAssignment = null;
         }
@@ -537,6 +591,7 @@ const assignmentSlice = createSlice({
 export const {
   clearError,
   clearCreateStatus,
+  clearUpdateStatus,
   clearCurrentAssignment,
   clearStudentAssignments,
   clearAssignments,
@@ -544,9 +599,11 @@ export const {
   clearUploadSolutionStatus,
   clearDeleteStatus,
   removeAssignmentFromState,
+  updateAssignmentInState,
   updateSolutionInCurrentAssignment,
   updateSolutionInTeacherAssignments,
-  clearUpdateStatus
+  updateTeacherAssignmentsPage,
+  updateTeacherAssignmentsLimit,
 } = assignmentSlice.actions;
 
 export default assignmentSlice.reducer;
