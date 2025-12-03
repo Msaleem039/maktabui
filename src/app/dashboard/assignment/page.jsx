@@ -24,12 +24,10 @@ export default function AssignmentPage() {
     const [marksObtained, setMarksObtained] = useState("");
     const [feedback, setFeedback] = useState("");
     
-    // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     
-    // Delete modal state
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [assignmentToDelete, setAssignmentToDelete] = useState(null);
     
