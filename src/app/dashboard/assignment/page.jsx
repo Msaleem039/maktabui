@@ -68,7 +68,6 @@ export default function AssignmentPage() {
 
     const actionMenuItems = getActionMenuItems();
 
-    // Fetch assignments with pagination and search
     useEffect(() => {
         let requestData = {
             page: currentPage,
