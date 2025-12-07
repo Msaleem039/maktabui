@@ -141,20 +141,14 @@ const StudentTable = ({
 
   return (
     <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-[#104D2E]">{title}</h2>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          >
-            See All ↗
-          </button>
-        </div>
-      </div>
+      {/* HEADING */}
+      <h2 className="text-lg font-semibold text-[#104D2E] mb-4">
+        {title}
+      </h2>
 
-      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* SEARCH BAR (CENTER) */}
+      <div className="flex flex-col gap-2 mb-4">
         <label className="relative flex w-full max-w-xl items-center">
           <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
           <input
@@ -164,16 +158,28 @@ const StudentTable = ({
             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
+
+        {/* See All Button */}
+        <div>
+          <button
+            type="button"
+            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+          >
+            See All ↗
+          </button>
+        </div>
       </div>
 
-      {loading && (
-        <div className="mt-6 flex items-center justify-center py-4">
-          <div className="flex items-center gap-2 text-[#0B4B31]">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
-            <span className="text-sm">Loading students...</span>
+      {
+        loading && (
+          <div className="mt-6 flex items-center justify-center py-4">
+            <div className="flex items-center gap-2 text-[#0B4B31]">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+              <span className="text-sm">Loading students...</span>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
@@ -250,67 +256,71 @@ const StudentTable = ({
         </table>
       </div>
 
-      {filteredStudents?.length === 0 && !loading && (
-        <div className="text-center py-8 text-[#666]">
-          {searchValue ? "No students match your search" : "No students found"}
-        </div>
-      )}
-
-      {pagination.totalCount > 0 && (
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">
-            Showing {filteredStudents?.length} of {pagination.totalCount} students
-            {searchValue && " (filtered)"}
+      {
+        filteredStudents?.length === 0 && !loading && (
+          <div className="text-center py-8 text-[#666]">
+            {searchValue ? "No students match your search" : "No students found"}
           </div>
-          <div className="flex items-center gap-3">
-            <select
-              value={pagination.limit}
-              onChange={(e) => onLimitChange?.(parseInt(e.target.value))}
-              className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-            >
-              <option value="10">Display 10</option>
-              <option value="20">Display 20</option>
-              <option value="50">Display 50</option>
-            </select>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageButtonClick(pagination.currentPage - 1)}
-                disabled={!pagination.hasPrevPage}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
-                  }`}
-              >
-                ‹
-              </button>
+        )
+      }
 
-              {getPageNumbers().map((page, index) => (
+      {
+        pagination.totalCount > 0 && (
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[#8A928F]">
+              Showing {filteredStudents?.length} of {pagination.totalCount} students
+              {searchValue && " (filtered)"}
+            </div>
+            <div className="flex items-center gap-3">
+              <select
+                value={pagination.limit}
+                onChange={(e) => onLimitChange?.(parseInt(e.target.value))}
+                className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="10">Display 10</option>
+                <option value="20">Display 20</option>
+                <option value="50">Display 50</option>
+              </select>
+              <div className="flex items-center gap-2">
                 <button
-                  key={index}
-                  onClick={() => handlePageButtonClick(page)}
-                  disabled={page === '...'}
-                  className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === pagination.currentPage
+                  onClick={() => handlePageButtonClick(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                >
+                  ‹
+                </button>
+
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageButtonClick(page)}
+                    disabled={page === '...'}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === pagination.currentPage
                       ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
                       : page === '...'
                         ? 'bg-white text-[#0B4B31] cursor-default'
                         : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageButtonClick(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
                     }`}
                 >
-                  {page}
+                  ›
                 </button>
-              ))}
-
-              <button
-                onClick={() => handlePageButtonClick(pagination.currentPage + 1)}
-                disabled={!pagination.hasNextPage}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
-                  }`}
-              >
-                ›
-              </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </section>
+        )
+      }
+    </section >
   );
 };
 

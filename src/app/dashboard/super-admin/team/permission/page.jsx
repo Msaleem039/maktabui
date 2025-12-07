@@ -45,12 +45,12 @@ export default function PermissionPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#799086]">
             Welcome to
-          </h1>
-          <p className="text-[1.75rem] font-medium text-[#000000] mb-4">
-            MaktabOS
           </p>
+          <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
+            MaktabOS
+          </h1>
         </div>
         <button
           type="button"
@@ -64,10 +64,21 @@ export default function PermissionPage() {
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-[#104D2E]">Manage Permissions</h2>
-
         </div>
 
-        <div className="mt-6 flex flex-col gap-2">
+        {/* Export Button - Above Search Bar */}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
+          >
+            <Download size={16} className="text-white" />
+            Export Data
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mt-4 flex flex-col gap-2">
           <label className="relative flex w-full max-w-xl items-center">
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
@@ -78,7 +89,7 @@ export default function PermissionPage() {
             />
           </label>
 
-          {/* See All Button */}
+          {/* See All Button - Below Search Bar */}
           <div>
             <button
               type="button"

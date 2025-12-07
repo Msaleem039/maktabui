@@ -700,18 +700,9 @@ export default function AssignmentPage() {
             <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <h2 className="text-lg font-semibold text-[#104D2E]">Manage Assignments</h2>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <button
-                            type="button"
-                            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-                        >
-                            See All ↗
-                        </button>
-                    </div>
                 </div>
 
-                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-6 flex flex-col gap-2">
                     <label className="relative flex w-full max-w-xl items-center">
                         <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
                         <input
@@ -722,6 +713,18 @@ export default function AssignmentPage() {
                         />
                     </label>
 
+                    {/* See All Button */}
+                    <div>
+                        <button
+                            type="button"
+                            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+                        >
+                            See All ↗
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     {/* Items per page selector */}
                     <div className="flex items-center gap-2">
                         <label className="text-sm text-[#8A928F]">Show:</label>

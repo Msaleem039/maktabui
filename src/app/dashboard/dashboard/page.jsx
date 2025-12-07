@@ -24,9 +24,10 @@ const Page = () => {
   }, [dispatch, selectedYear]);
 
   return (
-    <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
+    <>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-4 py-2 sm:py-4">
+      <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1">
+
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
           <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
             <Search size={16} className="text-gray-500 mr-2" />
@@ -63,171 +64,174 @@ const Page = () => {
           </div>
         </div>
       </header>
+      <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
 
-      {/* Welcome */}
-      <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
-        Welcome to
-      </h1>
-      <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
 
-      {/* Loading / Error */}
-      {loading && (
-        <p className="text-center text-gray-500 mb-4">Loading dashboard…</p>
-      )}
-      {error && (
-        <p className="text-center text-red-500 mb-4">
-          Error loading dashboard: {error}
-        </p>
-      )}
+        {/* Welcome */}
+        <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
+          Welcome to
+        </h1>
+        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
 
-      {!loading && stats && (
-        <div className="flex flex-col xl:flex-row gap-6 pb-6">
-          <div className="flex-1 flex flex-col gap-6">
-            <StatsCards stats={stats} />
+        {/* Loading / Error */}
+        {loading && (
+          <p className="text-center text-gray-500 mb-4">Loading dashboard…</p>
+        )}
+        {error && (
+          <p className="text-center text-red-500 mb-4">
+            Error loading dashboard: {error}
+          </p>
+        )}
 
-            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
-                <h3 className="font-semibold text-[#0B4B31] text-[14px] leading-[20px]">
-                  Yearly Payment Volume ({selectedYear})
-                  <span className="text-[#0B4B31] opacity-70">
-                    (${stats?.totalPaidAmount || 0})
+        {!loading && stats && (
+          <div className="flex flex-col xl:flex-row gap-6 pb-6">
+            <div className="flex-1 flex flex-col gap-6">
+              <StatsCards stats={stats} />
+
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
+                  <h3 className="font-semibold text-[#0B4B31] text-[14px] leading-[20px]">
+                    Yearly Payment Volume ({selectedYear})
+                    <span className="text-[#0B4B31] opacity-70">
+                      (${stats?.totalPaidAmount || 0})
+                    </span>
+                  </h3>
+
+                  <select
+                    className="border border-gray-200 rounded-lg px-3 py-1 text-sm text-gray-600"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  >
+                    <option>2025</option>
+                    <option>2024</option>
+                    <option>2023</option>
+                  </select>
+                </div>
+
+                {/* Chart */}
+                <div className="flex items-end justify-between gap-2 w-full overflow-x-auto">
+                  {yearlyPayments?.map((b, i) => {
+                    const maxPayment = Math.max(...yearlyPayments.map(m => m.totalPaid)) || 1;
+                    const heightPercent = maxPayment > 0 ? (b.totalPaid / maxPayment) * 100 : 0;
+                    const heightPx = (heightPercent / 100) * 256;
+
+                    return (
+                      <div key={i} className="flex flex-col items-center flex-1 min-w-[24px]">
+                        <div
+                          className="w-full bg-emerald-600 transition-all duration-300 relative rounded-t-md"
+                          style={{
+                            height: `${heightPx}px`,
+                            minHeight: b.totalPaid > 0 ? "4px" : "0px"
+                          }}
+                          title={`${b.month}: $${b.totalPaid}`}
+                        >
+                          {b.totalPaid > 0 && (
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-semibold whitespace-nowrap">
+                              ${b.totalPaid.toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-400 mt-1">{b.month}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Legend */}
+                <div className="flex justify-center gap-4 sm:gap-8 mt-6 text-sm text-gray-500 flex-wrap">
+                  <span className="flex items-center gap-2">
+                    <span className="w-3 h-3 bg-emerald-600 rounded-full"></span> Paid Volume
                   </span>
+                  <span className="flex items-center gap-2">
+                    <span className="w-3 h-3 bg-red-400 rounded-full"></span> Unpaid
+                  </span>
+                </div>
+              </div>
+
+
+
+            </div>
+
+            {/* RIGHT CARDS */}
+            <div className="w-full xl:w-80 flex flex-col gap-4">
+              {/* Total Unpaid */}
+              <div
+                className="rounded-2xl p-4 sm:p-6 shadow-md"
+                style={{
+                  background:
+                    "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
+                }}
+              >
+                <h3 className="text-white text-[1.125rem] mb-4 font-extrabold">
+                  Total Unpaid
                 </h3>
 
-                <select
-                  className="border border-gray-200 rounded-lg px-3 py-1 text-sm text-gray-600"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                >
-                  <option>2025</option>
-                  <option>2024</option>
-                  <option>2023</option>
-                </select>
-              </div>
+                <div className="bg-white rounded-xl p-4 sm:p-5 flex items-center gap-4">
+                  <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full">
+                    <img
+                      src="/Dollar Coin.png"
+                      alt="Dollar Coin"
+                      className="w-12 h-12 object-contain"
+                    />
+                  </div>
 
-              {/* Chart */}
-              <div className="flex items-end justify-between gap-2 w-full overflow-x-auto">
-                {yearlyPayments?.map((b, i) => {
-                  const maxPayment = Math.max(...yearlyPayments.map(m => m.totalPaid)) || 1;
-                  const heightPercent = maxPayment > 0 ? (b.totalPaid / maxPayment) * 100 : 0;
-                  const heightPx = (heightPercent / 100) * 256;
-
-                  return (
-                    <div key={i} className="flex flex-col items-center flex-1 min-w-[24px]">
-                      <div
-                        className="w-full bg-emerald-600 transition-all duration-300 relative rounded-t-md"
-                        style={{
-                          height: `${heightPx}px`,
-                          minHeight: b.totalPaid > 0 ? "4px" : "0px"
-                        }}
-                        title={`${b.month}: $${b.totalPaid}`}
-                      >
-                        {b.totalPaid > 0 && (
-                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-semibold whitespace-nowrap">
-                            ${b.totalPaid.toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs text-gray-400 mt-1">{b.month}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Legend */}
-              <div className="flex justify-center gap-4 sm:gap-8 mt-6 text-sm text-gray-500 flex-wrap">
-                <span className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-emerald-600 rounded-full"></span> Paid Volume
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-red-400 rounded-full"></span> Unpaid
-                </span>
-              </div>
-            </div>
-
-
-
-          </div>
-
-          {/* RIGHT CARDS */}
-          <div className="w-full xl:w-80 flex flex-col gap-4">
-            {/* Total Unpaid */}
-            <div
-              className="rounded-2xl p-4 sm:p-6 shadow-md"
-              style={{
-                background:
-                  "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
-              }}
-            >
-              <h3 className="text-white text-[1.125rem] mb-4 font-extrabold">
-                Total Unpaid
-              </h3>
-
-              <div className="bg-white rounded-xl p-4 sm:p-5 flex items-center gap-4">
-                <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full">
-                  <img
-                    src="/Dollar Coin.png"
-                    alt="Dollar Coin"
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-
-                <div>
-                  <h2 className="text-[#0B4B31] text-[1.5rem] font-extrabold">
-                    ${stats?.totalUnpaidAmount || 0}
-                  </h2>
-                  <p className="text-[#525967] text-[0.75rem] mt-2">
-                    {stats?.unpaidInvoicesCount || 0} Invoices Pending
-                  </p>
+                  <div>
+                    <h2 className="text-[#0B4B31] text-[1.5rem] font-extrabold">
+                      ${stats?.totalUnpaidAmount || 0}
+                    </h2>
+                    <p className="text-[#525967] text-[0.75rem] mt-2">
+                      {stats?.unpaidInvoicesCount || 0} Invoices Pending
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Current Income */}
-            <div
-              className="rounded-2xl p-4 sm:p-6 text-white shadow-md"
-              style={{
-                background:
-                  "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%)",
-              }}
-            >
-              <h3 className="font-extrabold text-[18px] mb-1">
-                Current Income This Month
-              </h3>
-              <p className="text-xs opacity-80 mb-4">
-                Payments this month vs last month
-              </p>
+              {/* Current Income */}
+              <div
+                className="rounded-2xl p-4 sm:p-6 text-white shadow-md"
+                style={{
+                  background:
+                    "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%)",
+                }}
+              >
+                <h3 className="font-extrabold text-[18px] mb-1">
+                  Current Income This Month
+                </h3>
+                <p className="text-xs opacity-80 mb-4">
+                  Payments this month vs last month
+                </p>
 
-              <p className="font-extrabold text-[24px]">
-                ${stats?.currentMonthIncome || 0}
-              </p>
-              <p className="text-xs opacity-80">
-                Last Month: ${stats?.lastMonthIncome || 0}
-              </p>
+                <p className="font-extrabold text-[24px]">
+                  ${stats?.currentMonthIncome || 0}
+                </p>
+                <p className="text-xs opacity-80">
+                  Last Month: ${stats?.lastMonthIncome || 0}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Tables Section */}
-      {!loading && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DashboardTable
-            title="Top Paying Parents"
-            subtitle="Parents who contributed the most"
-            btnColor="text-[#0B4B31] bg-[#c9d7d2]"
-            rows={topPayingParents}
-          />
-          <DashboardTable
-            title="Top Outstanding Balances"
-            subtitle="Parents with highest unpaid invoices"
-            btnColor="text-[#F14336] bg-[#fde1df]"
-            rows={topOutstandingParents}
-          />
-        </div>
-      )}
+        {/* Tables Section */}
+        {!loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DashboardTable
+              title="Top Paying Parents"
+              subtitle="Parents who contributed the most"
+              btnColor="text-[#0B4B31] bg-[#c9d7d2]"
+              rows={topPayingParents}
+            />
+            <DashboardTable
+              title="Top Outstanding Balances"
+              subtitle="Parents with highest unpaid invoices"
+              btnColor="text-[#F14336] bg-[#fde1df]"
+              rows={topOutstandingParents}
+            />
+          </div>
+        )}
 
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -255,7 +255,7 @@ const ParentTable = ({
       </div>
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative flex w-full max-w-xl items-center">
+        {/* <label className="relative flex w-full max-w-xl items-center">
           <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
           <input
             value={localSearch}
@@ -263,17 +263,17 @@ const ParentTable = ({
             placeholder="Search by name, email, phone, or ID..."
             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
-        </label>
+        </label> */}
 
-        {/* Loading State */}
-        {status === "loading" && (
-          <div className="flex items-center gap-2 text-sm text-[#0B4B31]">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
-            Loading parents...
-          </div>
-        )}
+        {/* Loading State
+      {status === "loading" && (
+        <div className="flex items-center gap-2 text-sm text-[#0B4B31]">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+          Loading parents...
+        </div>
+      )}
 
-        {/* Error State */}
+      {/* Error State */}
         {status === "failed" && (
           <div className="text-sm text-red-600">Error: {error}</div>
         )}
@@ -288,14 +288,16 @@ const ParentTable = ({
       </div>
 
       {/* Loading overlay for table */}
-      {loading && (
-        <div className="mt-6 flex items-center justify-center py-8">
-          <div className="flex items-center gap-2 text-[#0B4B31]">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
-            <span>Loading parents...</span>
+      {
+        loading && (
+          <div className="mt-6 flex items-center justify-center py-8">
+            <div className="flex items-center gap-2 text-[#0B4B31]">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B4B31] border-r-transparent"></div>
+              <span>Loading parents...</span>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
@@ -386,51 +388,53 @@ const ParentTable = ({
       </div>
 
       {/* Pagination */}
-      {reduxPagination.totalItems > 0 && (
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-[#8A928F]">
-            Showing {tableData.length} of {reduxPagination.totalItems} parents
-            {localSearch && " (filtered)"}
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(reduxPagination.currentPage - 1)}
-                disabled={!reduxPagination.hasPrevPage}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${reduxPagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
-                  }`}
-              >
-                ‹
-              </button>
-
-              {getPageNumbers().map((page, index) => (
+      {
+        reduxPagination.totalItems > 0 && (
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[#8A928F]">
+              Showing {tableData.length} of {reduxPagination.totalItems} parents
+              {localSearch && " (filtered)"}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
-                  key={index}
-                  onClick={() => handlePageButtonClick(page)}
-                  disabled={page === '...'}
-                  className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === reduxPagination.currentPage
-                    ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
-                    : page === '...'
-                      ? 'bg-white text-[#0B4B31] cursor-default'
-                      : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                  onClick={() => handlePageChange(reduxPagination.currentPage - 1)}
+                  disabled={!reduxPagination.hasPrevPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${reduxPagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
                     }`}
                 >
-                  {page}
+                  ‹
                 </button>
-              ))}
 
-              <button
-                onClick={() => handlePageChange(reduxPagination.currentPage + 1)}
-                disabled={!reduxPagination.hasNextPage}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${reduxPagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
-                  }`}
-              >
-                ›
-              </button>
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageButtonClick(page)}
+                    disabled={page === '...'}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${page === reduxPagination.currentPage
+                      ? 'bg-[#0B4B31] text-white border-[#0B4B31]'
+                      : page === '...'
+                        ? 'bg-white text-[#0B4B31] cursor-default'
+                        : 'bg-white text-[#0B4B31] hover:bg-[#F3F6F5]'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(reduxPagination.currentPage + 1)}
+                  disabled={!reduxPagination.hasNextPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${reduxPagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                >
+                  ›
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <DeleteConfirmModal
         isOpen={deleteModal.open}
@@ -448,18 +452,22 @@ const ParentTable = ({
         size="md"
       />
 
-      {deleteState.success && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-green-100 px-4 py-3 text-green-800 shadow-lg">
-          Parent deleted successfully!
-        </div>
-      )}
+      {
+        deleteState.success && (
+          <div className="fixed top-4 right-4 z-50 rounded-lg bg-green-100 px-4 py-3 text-green-800 shadow-lg">
+            Parent deleted successfully!
+          </div>
+        )
+      }
 
-      {deleteState.error && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-red-100 px-4 py-3 text-red-800 shadow-lg">
-          Error: {deleteState.error}
-        </div>
-      )}
-    </section>
+      {
+        deleteState.error && (
+          <div className="fixed top-4 right-4 z-50 rounded-lg bg-red-100 px-4 py-3 text-red-800 shadow-lg">
+            Error: {deleteState.error}
+          </div>
+        )
+      }
+    </section >
   );
 };
 

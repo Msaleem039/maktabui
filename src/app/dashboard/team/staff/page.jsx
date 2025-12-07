@@ -27,7 +27,7 @@ export default function StaffPage() {
 
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-2">
           <label className="relative flex w-full max-w-xl items-center">
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
@@ -37,15 +37,16 @@ export default function StaffPage() {
               className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
             />
           </label>
-        </div>
 
-        <div className="mt-4">
-          <button
-            type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          >
-            See All ↗
-          </button>
+          {/* See All Button */}
+          <div>
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 overflow-x-auto">

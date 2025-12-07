@@ -32,11 +32,46 @@ export default function SchedulePage() {
       </div>
 
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-4 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4">
+          {/* Title */}
           <h2 className="text-[1.125rem] font-semibold text-[#0B4B31]">
             Manage Text
           </h2>
+
+          {/* Export Button */}
+          <div className="flex items-start">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-normal text-white transition"
+            >
+              <Download size={16} />
+              Export Data
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center rounded-full border border-[#0B4B31] px-4 py-2 bg-white w-60">
+              <Search size={16} className="text-[#799086] mr-2" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full text-sm text-[#0B4B31] bg-white placeholder:text-[#979699] focus:outline-none"
+              />
+            </div>
+
+            {/* See All Button */}
+            <div>
+              <button
+                type="button"
+                className="rounded-full border border-[#0B4B3138] px-4 py-2 text-xs sm:text-sm font-normal text-[#0B4B31] transition hover:bg-[#F3F6F5] whitespace-nowrap"
+              >
+                See All ↗
+              </button>
+            </div>
+          </div>
         </div>
+
 
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">

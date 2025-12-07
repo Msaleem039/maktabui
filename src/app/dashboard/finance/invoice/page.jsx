@@ -268,23 +268,26 @@ export default function InvoicePage() {
             </button>
           </div>
 
-          <label className="relative flex w-full items-center">
-            <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
-            <input
-              value={localSearch}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Search by invoice number, parent or student name..."
-              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
-            />
-          </label>
+          <div className="flex flex-col gap-2">
+            <label className="relative flex w-full items-center">
+              <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+              <input
+                value={localSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search by invoice number, parent or student name..."
+                className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              />
+            </label>
 
-          <div>
-            <button
-              type="button"
-              className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
-            >
-              See All ↗
-            </button>
+            {/* See All Button */}
+            <div>
+              <button
+                type="button"
+                className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
+              >
+                See All ↗
+              </button>
+            </div>
           </div>
         </div>
 

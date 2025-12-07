@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../../redux/slices/authSlices/userLoginSlice";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
+import { LayoutGrid } from "lucide-react";
 
 const Page = () => {
 
@@ -52,7 +53,7 @@ const Page = () => {
                 }), tokenOptions);
 
                 const userRole = resultAction.payload.role;
-                
+
                 if (userRole === 'Parent') {
                     router.push('/dashboard/parent/dashboard');
                 } else if (userRole === 'Student') {
@@ -82,21 +83,25 @@ const Page = () => {
                             "linear-gradient(217.64deg, #0B4B31 -5.84%, #85A598 106.72%, #FFFFFF 106.73%)",
                     }}
                 >
-                    <p className="font-outfit text-center w-[90%] mb-8 font-medium text-[32px] leading-[54px]">
+                    <p className="font-outfit text-center w-[90%] mb-5 mt-20 font-medium text-[32px] leading-[54px]">
                         Do not withhold your knowledge, for whoever withholds it will be bridled
                         with a bridle of fire on the Day of Resurrection.
                     </p>
                     <p className="font-extrabold text-[32px] leading-[56px] text-center">
                         Sunan Abi Dawud 3658
                     </p>
+                    <div className="flex items-center gap-3 my-10">
+                        <LayoutGrid size={40} className="text-[#0B4B31] fill-[#0B4B31]" />
+                        <span className="text-[#0B4B31] text-4xl font-semibold">MaktabOS</span>
+                    </div>
 
-                    <img
+                    {/* <img
                         src="/Maktab-Logo-New.png"
                         alt="MaktabOS Logo"
                         height={200}
                         width={200}
                         className=" object-contain my-10"
-                    />
+                    /> */}
                 </div>
 
 
