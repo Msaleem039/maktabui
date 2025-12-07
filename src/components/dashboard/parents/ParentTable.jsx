@@ -100,7 +100,7 @@ const ParentTable = ({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold text-[#0B4B31]">{title}</h2>
 
-        <div className="flex flex-wrap items-center gap-3">
+        {/* <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
@@ -115,10 +115,10 @@ const ParentTable = ({
           >
             See All ↗
           </button>
-        </div>
+        </div> */}
       </div>
 
-      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <label className="relative flex w-full max-w-xl items-center">
           <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
           <input
@@ -128,7 +128,43 @@ const ParentTable = ({
             className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
           />
         </label>
+      </div> */}
+      {/* TOP CONTROLS — Export on top & See All bottom */}
+      <div className="w-full flex flex-col gap-4">
+
+        {/* Export Data (TOP) */}
+        <div className="flex justify-start">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-normal text-white transition hover:bg-[#0B4B31]/90"
+          >
+            <Download size={15} />
+            Export Data
+          </button>
+        </div>
+
+        {/* Search Bar (CENTER) */}
+        <label className="relative flex w-full max-w-xl items-center mx-0">
+          <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+          <input
+            value={searchValue}
+            onChange={handleSearchChange}
+            placeholder="Search..."
+            className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+          />
+        </label>
+
+        {/* See All (BOTTOM) */}
+        <div className="flex justify-start">
+          <button
+            type="button"
+            className="rounded-full px-4 py-2 text-sm font-normal bg-[#0B4B3138] text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+          >
+            See All ↗
+          </button>
+        </div>
       </div>
+
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">

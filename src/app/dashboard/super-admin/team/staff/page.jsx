@@ -22,9 +22,11 @@ export default function StaffPage() {
       </div>
 
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4">
+          {/* Title */}
           <h2 className="text-lg font-semibold text-[#104D2E]">Staff Data</h2>
 
+          {/* Export Data button */}
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
@@ -34,27 +36,29 @@ export default function StaffPage() {
               Export Data
             </button>
           </div>
-        </div>
 
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <label className="relative flex w-full max-w-xl items-center">
-            <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
-            <input
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Search..."
-              className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
-            />
-          </label>
-        </div>
+          {/* Search bar */}
+          <div className="mt-4">
+            <label className="relative flex w-full max-w-xl items-center">
+              <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+              <input
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="Search..."
+                className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
+              />
+            </label>
+          </div>
 
-        <div className="mt-4">
-          <button
-            type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          >
-            See All ↗
-          </button>
+          {/* See All button */}
+          <div className="mt-4">
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 overflow-x-auto">

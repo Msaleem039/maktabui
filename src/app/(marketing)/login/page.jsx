@@ -64,7 +64,7 @@ const Page = () => {
                             "linear-gradient(217.64deg, #0B4B31 -5.84%, #85A598 106.72%, #FFFFFF 106.73%)",
                     }}
                 >
-                    <p className="font-outfit text-center w-[90%] mb-8 font-medium text-[32px] leading-[54px]">
+                    <p className="font-outfit text-center w-[90%] mb-5 mt-20 font-medium text-[32px] leading-[54px]">
                         Do not withhold your knowledge, for whoever withholds it will be bridled
                         with a bridle of fire on the Day of Resurrection.
                     </p>
