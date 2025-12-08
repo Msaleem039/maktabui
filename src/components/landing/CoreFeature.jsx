@@ -72,7 +72,7 @@ const CoreFeature = () => {
     >
       <div className="mx-auto max-w-6xl px-6 md:px-10">
         <div className="mx-auto mb-16 max-w-6xl text-center">
-          <h2 className="text-3xl font-bold text-[#0B4B31] md:text-4xl lg:text-5xl">
+          <h2 className="text-3xl font-bold text-[#262626] md:text-4xl lg:text-5xl">
             Core Features
           </h2>
         </div>

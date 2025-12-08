@@ -273,18 +273,9 @@ export default function ClassPage() {
       <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-[#104D2E]">Manage Classes</h2>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-            >
-              See All ↗
-            </button>
-          </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-2">
           <label className="relative flex w-full max-w-xl items-center">
             <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
             <input
@@ -294,6 +285,16 @@ export default function ClassPage() {
               className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
             />
           </label>
+
+          {/* See All Button */}
+          <div>
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 overflow-x-auto">

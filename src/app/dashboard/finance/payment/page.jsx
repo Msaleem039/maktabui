@@ -351,15 +351,16 @@ export default function PaymentPage() {
                   className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
                 />
               </label>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-              >
-                See All ↗
-              </button>
+              {/* See All Button */}
+              <div>
+                <button
+                  type="button"
+                  className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+                >
+                  See All ↗
+                </button>
+              </div>
             </div>
           </div>
 
