@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllWaitListParents } from "@/store/slices/parentSlice"; // Adjust import path as needed
+import { getAllWaitListParents } from "@/redux/slices/parentSlices/parentSlice";
 
 export default function ParentsWaitingListPage() {
   const dispatch = useDispatch();
-  const { waitlistParents, loading, pagination } = useSelector((state) => state.parent);
+  const { waitlistParents, loading, pagination } = useSelector((state) => state.waitlistParents);
   
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,7 +15,6 @@ export default function ParentsWaitingListPage() {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
 
-  // Debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
@@ -61,7 +60,6 @@ export default function ParentsWaitingListPage() {
     return students.map(student => student.studentName).join(", ");
   };
 
-  // Generate page numbers for pagination
   const generatePageNumbers = () => {
     if (!pagination) return [];
     
@@ -69,27 +67,21 @@ export default function ParentsWaitingListPage() {
     const totalPages = pagination.totalPages;
     const current = currentPage;
     
-    // Always show first page
     pages.push(1);
     
-    // Calculate range around current page
     let start = Math.max(2, current - 1);
     let end = Math.min(totalPages - 1, current + 1);
     
-    // Add ellipsis if needed
     if (start > 2) pages.push('...');
     
-    // Add middle pages
     for (let i = start; i <= end; i++) {
       if (i > 1 && i < totalPages) {
         pages.push(i);
       }
     }
     
-    // Add ellipsis if needed
     if (end < totalPages - 1) pages.push('...');
     
-    // Always show last page if there is more than one page
     if (totalPages > 1) pages.push(totalPages);
     
     return pages;

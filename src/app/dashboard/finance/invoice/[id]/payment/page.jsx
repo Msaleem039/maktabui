@@ -12,7 +12,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { processCardPaymentAction } from "@/redux/slices/invoiceSlices/invoiceSlices";
+// import { processCardPaymentAction } from "@/redux/slices/invoiceSlices/invoiceSlices";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
 
@@ -113,22 +113,22 @@ function PaymentPageContent({ params }) {
         return;
       }
 
-      const response = await dispatch(
-        processCardPaymentAction({
-          invoiceId: params.id,
-          payload: {
-            amount: parseFloat(amount),
-            selectedDate,
-            paymentMethodId: pm.id,
-            cardDetails: {
-              brand: pm.card.brand,
-              last4: pm.card.last4,
-              expMonth: pm.card.exp_month,
-              expYear: pm.card.exp_year
-            }
-          }
-        })
-      );
+      // const response = await dispatch(
+      //   processCardPaymentAction({
+      //     invoiceId: params.id,
+      //     payload: {
+      //       amount: parseFloat(amount),
+      //       selectedDate,
+      //       paymentMethodId: pm.id,
+      //       cardDetails: {
+      //         brand: pm.card.brand,
+      //         last4: pm.card.last4,
+      //         expMonth: pm.card.exp_month,
+      //         expYear: pm.card.exp_year
+      //       }
+      //     }
+      //   })
+      // );
 
       if (!response.payload) {
         setIsProcessing(false);

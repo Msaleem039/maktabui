@@ -88,14 +88,14 @@ const Page = () => {
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-4 py-2 sm:py-4">
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
-          <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
+          {/* <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
             <Search size={16} className="text-gray-500 mr-2" />
             <input
               type="text"
               placeholder="Search..."
               className="w-full bg-transparent focus:outline-none text-sm text-[#0B4B31] placeholder:text-[#979699]"
             />
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-2">
             <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">

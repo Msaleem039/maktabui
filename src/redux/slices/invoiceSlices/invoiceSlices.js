@@ -98,7 +98,6 @@ export const createInvoiceAction = createAsyncThunk(
     }
 );
 
-// Get Invoice By ID Slice
 const getInvoiceByIdSlice = createSlice({
     name: "getInvoiceById",
     initialState: {
@@ -143,7 +142,6 @@ const getInvoiceByIdSlice = createSlice({
     },
 });
 
-// Update Invoice Slice
 const updateInvoiceSlice = createSlice({
     name: "updateInvoice",
     initialState: {

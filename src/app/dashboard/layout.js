@@ -287,15 +287,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Payments", path: `${basePath}/finance/payment` },
         ],
       },
-      activities: {
-        name: "Activities",
-        icon: "/Rubik's Cube.png",
-        hasSubmenu: true,
-        subItems: [
-          { name: "Activities", path: `${basePath}/activities` },
-          { name: "Text Log", path: `${basePath}/activities/text-log` },
-        ],
-      },
       events: {
         name: "Events",
         icon: "/Calendar.png",
@@ -311,7 +302,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Admin", path: `${basePath}/team/admin` },
-          { name: "Teachers", path: `${basePath}/team/teacher` }],
+          { name: "Teachers", path: `${basePath}/team/teacher` }
+        ],
       },
       settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/settings` },
     };
@@ -336,7 +328,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.notifications,
           allItems.attendance,
           allItems.finance,
-          allItems.activities,
           allItems.events,
           allItems.communication,
           allItems.team,

@@ -91,7 +91,7 @@ const Page = () => {
                     </p>
 
                     <img
-                        src="/Maktab-Logo-New.png"
+                        src="/Maktab-Logo-New.svg"
                         alt="MaktabOS Logo"
                         height={200}
                         width={200}
