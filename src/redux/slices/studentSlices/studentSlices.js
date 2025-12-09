@@ -29,7 +29,6 @@ export const getAllStudents = createAsyncThunk(
   `students/getAllStudents`,
   async (requestData = {}, { rejectWithValue, getState }) => {
     try {
-      // Get current state to include pagination and search if not provided
       const state = getState();
       const { allStudents } = state;
       
@@ -39,7 +38,6 @@ export const getAllStudents = createAsyncThunk(
         ...requestData
       };
 
-      // Include search from state if not explicitly provided
       if (requestData.search === undefined && allStudents.search) {
         payload.search = allStudents.search;
       }
@@ -99,7 +97,7 @@ export const removeFromWaitlistStudent = createAsyncThunk(
   `student/waitlist/remove`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeFromWaitlist`, { studentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeFromStudentWaitlist`, { studentId });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

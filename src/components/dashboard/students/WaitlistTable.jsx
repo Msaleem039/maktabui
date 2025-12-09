@@ -2,14 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllWaitlistStudents } from "@/redux/slices/studentSlices/studentSlices";
+import {
+  getAllWaitlistStudents,
+  removeFromWaitlistStudent
+} from "@/redux/slices/studentSlices/studentSlices";
+import { ToggleRight,ToggleLeft } from "lucide-react";
 
 export default function WaitlistTable() {
   const [searchValue, setSearchValue] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  
+  const [updatingStudentId, setUpdatingStudentId] = useState(null);
+
   const dispatch = useDispatch();
 
   const { students, status, error, pagination } = useSelector(
@@ -27,11 +32,23 @@ export default function WaitlistTable() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchValue);
-      setPage(1); 
+      setPage(1);
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchValue]);
+
+  const handleRemoveFromWaitlist = async (studentId) => {
+    try {
+      setUpdatingStudentId(studentId);
+      await dispatch(removeFromWaitlistStudent(studentId)).unwrap();
+      fetchWaitlistStudents();
+    } catch (err) {
+      console.error("Failed to remove from waitlist:", err);
+    } finally {
+      setUpdatingStudentId(null);
+    }
+  };
 
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return "N/A";
@@ -67,31 +84,27 @@ export default function WaitlistTable() {
   const handleLimitChange = (e) => {
     const newLimit = Number(e.target.value);
     setLimit(newLimit);
-    setPage(1); 
+    setPage(1);
   };
 
-  // Generate page buttons
   const renderPageButtons = () => {
     const buttons = [];
     const totalPages = pagination.totalPages;
     const currentPage = pagination.page;
 
-    // Always show first page
     buttons.push(
       <button
         key={1}
         onClick={() => handlePageChange(1)}
-        className={`rounded-full px-4 py-2 text-sm font-semibold ${
-          currentPage === 1
+        className={`rounded-full px-4 py-2 text-sm font-semibold ${currentPage === 1
             ? "bg-[#0B4B31] text-white"
             : "border border-[#C5D2CD] bg-white text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-        }`}
+          }`}
       >
         1
       </button>
     );
 
-    // Show ellipsis if needed
     if (currentPage > 3) {
       buttons.push(
         <span key="ellipsis-start" className="px-2 text-[#0B4B31]">
@@ -100,7 +113,6 @@ export default function WaitlistTable() {
       );
     }
 
-    // Show pages around current page
     for (
       let i = Math.max(2, currentPage - 1);
       i <= Math.min(totalPages - 1, currentPage + 1);
@@ -111,11 +123,10 @@ export default function WaitlistTable() {
           <button
             key={i}
             onClick={() => handlePageChange(i)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold ${
-              currentPage === i
+            className={`rounded-full px-4 py-2 text-sm font-semibold ${currentPage === i
                 ? "bg-[#0B4B31] text-white"
                 : "border border-[#C5D2CD] bg-white text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-            }`}
+              }`}
           >
             {i}
           </button>
@@ -123,7 +134,6 @@ export default function WaitlistTable() {
       }
     }
 
-    // Show ellipsis if needed
     if (currentPage < totalPages - 2) {
       buttons.push(
         <span key="ellipsis-end" className="px-2 text-[#0B4B31]">
@@ -132,17 +142,15 @@ export default function WaitlistTable() {
       );
     }
 
-    // Always show last page if there is more than one page
     if (totalPages > 1) {
       buttons.push(
         <button
           key={totalPages}
           onClick={() => handlePageChange(totalPages)}
-          className={`rounded-full px-4 py-2 text-sm font-semibold ${
-            currentPage === totalPages
+          className={`rounded-full px-4 py-2 text-sm font-semibold ${currentPage === totalPages
               ? "bg-[#0B4B31] text-white"
               : "border border-[#C5D2CD] bg-white text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          }`}
+            }`}
         >
           {totalPages}
         </button>
@@ -219,8 +227,8 @@ export default function WaitlistTable() {
                 <th className="px-4 font-normal text-[#0000008C]">Phone</th>
                 <th className="px-4 font-normal text-[#0000008C]">Class</th>
                 <th className="px-4 font-normal text-[#0000008C]">Added</th>
-                <th className="px-4 font-normal text-right text-[#0000008C]">
-                  Action
+                <th className="px-4 font-normal text-center text-[#0000008C]">
+                  Status
                 </th>
               </tr>
             </thead>
@@ -263,10 +271,27 @@ export default function WaitlistTable() {
                     <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">
                       {formatDate(student.createdAt)}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <button className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B4B31]/90">
-                        Take Action
-                        <span>▾</span>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFromWaitlist(student._id, student, student.addToWaitList);
+                        }}
+                        disabled={updatingStudentId === student._id}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal transition ${student.addToWaitList
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                          } ${updatingStudentId === student._id ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        {updatingStudentId === student._id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                        ) : student.addToWaitList ? (
+                          <ToggleRight className="text-green-600" size={18} />
+                        ) : (
+                          <ToggleLeft className="text-gray-400" size={18} />
+                        )}
+                        {student.addToWaitList ? "On Waitlist" : "Off Waitlist"}
                       </button>
                     </td>
                   </tr>
@@ -295,9 +320,8 @@ export default function WaitlistTable() {
               <button
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] ${
-                  pagination.page === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] ${pagination.page === 1 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 ‹
               </button>
@@ -307,11 +331,10 @@ export default function WaitlistTable() {
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages}
-                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] ${
-                  pagination.page === pagination.totalPages
+                className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] ${pagination.page === pagination.totalPages
                     ? "opacity-50 cursor-not-allowed"
                     : ""
-                }`}
+                  }`}
               >
                 ›
               </button>

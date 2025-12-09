@@ -139,7 +139,7 @@ export const removeFromWaitList = createAsyncThunk(
   `waitlist/remove`,
   async (parentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeWaitlist`, { id: parentId });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeFromWaitList`, { id: parentId });
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
