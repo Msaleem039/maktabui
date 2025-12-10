@@ -47,16 +47,6 @@ export default function ActivitiesPage() {
             All Activity Logs
           </h2>
 
-          {/* Export Button */}
-          <div className="flex items-start">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-xs sm:text-sm font-normal text-white transition"
-            >
-              <Download size={16} />
-              Export Data
-            </button>
-          </div>
 
           {/* Search Bar */}
           <div className="flex flex-col gap-2">

@@ -26,17 +26,6 @@ export default function StaffPage() {
           {/* Title */}
           <h2 className="text-lg font-semibold text-[#104D2E]">Staff Data</h2>
 
-          {/* Export Data button */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-            >
-              <Download size={16} className="text-white" />
-              Export Data
-            </button>
-          </div>
-
           {/* Search bar */}
           <div className="mt-4 flex flex-col gap-2">
             <label className="relative flex w-full max-w-xl items-center">

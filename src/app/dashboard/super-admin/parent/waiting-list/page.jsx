@@ -17,17 +17,6 @@ export default function ParentsWaitingListPage() {
           Parents in Waiting List
         </h2>
 
-        {/* EXPORT (TOP) */}
-        <div className="flex justify-start mb-4">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-          >
-            <Download size={16} />
-            Export Data
-          </button>
-        </div>
-
         {/* SEARCH (CENTER) */}
         <div className="flex flex-col gap-2 mb-6">
           <label className="relative flex w-full max-w-xl items-center">

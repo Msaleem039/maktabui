@@ -212,16 +212,6 @@ export default function InvoicePage() {
         <div className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold text-[#104D2E]">Invoices</h2>
 
-          {/* Export Button */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white px-4 py-2 text-sm font-normal bg-[#0B4B31] text-white transition"
-            >
-              <Download size={16} className="text-white" />
-              Export Data
-            </button>
-          </div>
         </div>
 
 
