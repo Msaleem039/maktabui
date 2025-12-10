@@ -146,6 +146,7 @@ export default function AttendancePage() {
   const { teacherNames, loading: teachersLoading } = useSelector((state) => state.getTeachersName);
   const { detail: teacherDetail, loading: teacherDetailLoading } = useSelector((state) => state.getTeacherDetail);
   const { loading: attendanceLoading, success: attendanceSuccess, error: attendanceError } = useSelector((state) => state.attendance);
+  console.log("teacherNames",teacherNames);
 
   // Get students from the selected class
   const getStudentsFromSelectedClass = () => {
@@ -163,7 +164,7 @@ export default function AttendancePage() {
 
   useEffect(() => {
     dispatch(getAllClassesNameAction());
-    if (role === "Admin") {
+    if (role === "Admin" || role === "Super Admin") {
       dispatch(getTeachersName());
     } else if (role === "Teacher" && user?.id) {
       setSelectedTeacher(user.id);
@@ -186,7 +187,7 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    if (role === "Admin" && selectedTeacher) {
+    if (role === "Admin" || role === "Super Admin"  && selectedTeacher) {
       dispatch(getTeacherDetail(selectedTeacher));
       setSelectedClass("");
     }
@@ -254,7 +255,7 @@ export default function AttendancePage() {
 
         <div className="mt-6 space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            {role === "Admin" && (
+            {role === "Admin" || role === "Super Admin" && (
               <div className="relative flex-1">
                 <select
                   value={selectedTeacher}

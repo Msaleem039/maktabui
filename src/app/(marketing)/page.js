@@ -46,7 +46,7 @@ export default function Home() {
           <div className="mx-auto w-full max-w-6xl gap-8 px-6 py-16 md:py-28 ">
             <div className="flex flex-col justify-center gap-6 text-left">
               <h1 className="text-[3.5rem] leading-[80.52px] tracking-[0] semi-bold text-white mb-2">
-                <span className="text-white font-bold">MaktabOS</span> – The Complete <br/> Operating System for Islamic Schools
+                <span className="text-white font-bold">MaktabOS</span> – The Complete <br /> Operating System for Islamic Schools
               </h1>
 
               <p className="max-w-240 text-[2.5rem] leading-[60.66px] tracking-[0] semi-bold text-white">
@@ -55,11 +55,12 @@ export default function Home() {
 
               <div className="flex flex-wrap items-center gap-4">
                 <a
-                  href="#get-started"
-                  className="rounded-full bg-white px-6 py-3 text-[1.0625rem] font-semibold text-[#0B4B31] shadow-lg shadow-black/10 transition hover:bg-[#F3F6F5] "
+                  href="/#contact"
+                  className="rounded-full bg-white px-6 py-3 text-[1.0625rem] font-semibold text-[#0B4B31] shadow-lg shadow-black/10 transition hover:bg-[#F3F6F5]"
                 >
                   Get Started
                 </a>
+
                 <Link href="/login"
                   className="rounded-full bg-[#0B4B31] px-6 py-3 text-[1.0625rem] font-semibold text-white transition hover:border-white hover:bg-[#0B4B31]/60"
                 >
@@ -81,5 +82,3 @@ export default function Home() {
     </>
   );
 }
-
-

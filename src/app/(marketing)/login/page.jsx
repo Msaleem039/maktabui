@@ -320,13 +320,16 @@ const Page = () => {
 
                     </form>
 
-                    {/* Register Link */}
                     <p className="text-center text-gray-600 mt-8 font-medium">
                         Don't have an account?{" "}
-                        <a href="#" className="text-green-800 hover:underline font-semibold">
+                        <a
+                            href="/#contact"
+                            className="text-green-800 hover:underline font-semibold"
+                        >
                             Register
                         </a>
                     </p>
+
                 </div>
             </div>
         </div>
