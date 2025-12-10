@@ -19,7 +19,7 @@ const FooterSection = () => {
         <div className="flex flex-col justify-between gap-12 md:flex-row md:items-start">
           {/* Logo section */}
           <div className="flex flex-col items-center gap-4 mr-20 text-center md:items-start md:text-left">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mt-0 md:mt-20">
               <LayoutGrid className="h-8 w-8 text-black fill-black" />
               <p className="text-2xl font-bold text-black">MaktabOS</p>
             </div>
@@ -102,7 +102,7 @@ const FooterSection = () => {
                     Whatsapp
                   </a>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ">
                   <Mail className="h-5 w-5 text-emerald-900" />
                   <a href="mailto:user@.com" className="transition hover:opacity-100">
                     user@.com

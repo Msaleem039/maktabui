@@ -13,7 +13,7 @@ const AboutSection = () => {
         <div className="pointer-events-none absolute inset-0 flex -translate-y-6 items-center justify-center opacity-60">
           <Landing1 />
         </div>
-        <h2 className="relative z-10 top-0 text-center text-[5rem] font-bold md:text-5xl lg-[7.125rem]">
+        <h2 className="relative z-10 top-0 text-center text-[3rem] font-bold">
           About MaktabOS
         </h2>
       </div>

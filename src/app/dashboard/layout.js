@@ -289,7 +289,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       },
       events: {
         name: "Events",
-        icon: "/Calendar.png",
+        icon: "/event.png",
         hasSubmenu: true,
         subItems: [
           { name: "Events", path: `${basePath}/events` },
