@@ -18,8 +18,8 @@ const PricingSection = () => {
 
       <div className="absolute inset-0 bg-gradient-to-l from-[#0B4B31B8] to-[#00000000]" />
 
-      <div className="relative z-10 mx-auto min-h-screen w-full max-w-6xl px-6 py-24 ">
-        <h2 className="mb-8 text-3xl ml-16 max-w-xs font-bold text-[#FAFAFA] md:text-5xl">
+      <div className="relative z-10 mx-auto min-h-screen w-full max-w-6xl px-4 py-20 ">
+        <h2 className="mb-6 text-center text-2xl font-bold text-[#FAFAFA] sm:text-3xl md:text-[2.5rem] md:text-left md:ml-24 md:max-w-xs">
           Our Pricing
         </h2>
 

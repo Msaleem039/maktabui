@@ -4,7 +4,7 @@ const OnlineQuranSection = () => {
   return (
     <section
       id="online-quran"
-      className="relative overflow-hidden bg-[#0B4B31] py-24 text-white"
+      className="relative overflow-hidden bg-[#0B4B31] py-24 px-6 text-white md:px-10 lg:px-16"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       <Image
@@ -16,14 +16,14 @@ const OnlineQuranSection = () => {
         sizes="100vw"
       />
 
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0B4B31]/90 via-[#0B4B31]/70 to-[#0B4B31]/55" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0B4B31]/90 via-[#0B4B31]/70 to-[#0B4B31]/55 px-10" />
 
       <div className="relative z-10 mx-auto flex max-w-325 flex-col gap-16 px-6 lg:flex-row lg:items-center">
         <div className="flex-1 space-y-8 text-left">
           {/* <p className="text-xs uppercase tracking-[0.4em] text-white/75">
             Online Quran
           </p> */}
-          <h2 className="text-4xl font-bold leading-tight md:text-5xl">
+          <h2 className="text-[2.5rem] font-bold leading-tight">
             Bring Your School Online —
             <br /> The Smart Way
           </h2>

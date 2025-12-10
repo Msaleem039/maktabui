@@ -45,7 +45,7 @@ const HowItWorks = () => {
         </a>
 
         <div className="space-y-4">
-          <h2 className="text-4xl font-bold text-[#262626] md:text-5xl ">
+          <h2 className="text-[3rem] font-bold text-[#262626] ">
             How It Works
           </h2>
           {/* <p className="text-base text-[#1F1F1F]/70 md:text-lg">
@@ -58,7 +58,7 @@ const HowItWorks = () => {
             <a
               key={step.number}
               href={step.href}
-              className="group flex h-full flex-col justify-between rounded-3xl bg-[var(--card-bg)] px-8 pb-10 pt-12 text-left text-white shadow-[0_40px_80px_-60px_rgba(11,75,49,0.5)] transition-transform transition-colors hover:-translate-y-2 hover:bg-[#09432C] hover:shadow-[0_45px_90px_-60px_rgba(9,67,44,0.6)] focus-visible:-translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B4B31]/30 active:bg-[#063522]"
+              className="group flex h-full flex-col justify-between rounded-3xl bg-[var(--card-bg)] px-8 pb-6 pt-6 text-left text-white shadow-[0_40px_80px_-60px_rgba(11,75,49,0.5)] transition-transform transition-colors hover:-translate-y-2 hover:bg-[#09432C] hover:shadow-[0_45px_90px_-60px_rgba(9,67,44,0.6)] focus-visible:-translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B4B31]/30 active:bg-[#063522]"
               style={{
                 "--card-bg": step.background,
               }}
@@ -67,7 +67,7 @@ const HowItWorks = () => {
                 {step.number}
               </div>
 
-              <div className="mt-8 space-y-3">
+              <div className="mt-1 space-y-3">
                 <h3 className="text-xl font-semibold text-white transition group-hover:text-white group-focus-visible:text-white">
                   {step.title}
                 </h3>
