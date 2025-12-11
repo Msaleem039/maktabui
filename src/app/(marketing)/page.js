@@ -55,12 +55,12 @@ export default function Home() {
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
-                <a
-                  href="/#contact"
+                <Link
+                  href="/login"
                   className="rounded-full bg-white px-6 py-3 text-[1.0625rem] font-semibold text-[#0B4B31] shadow-lg shadow-black/10 transition hover:bg-[#F3F6F5]"
                 >
                   Get Started
-                </a>
+                </Link>
 
                 <Link href="/login"
                   className="rounded-full bg-[#0B4B31] px-6 py-3 text-[1.0625rem] font-semibold text-white transition hover:border-white hover:bg-[#0B4B31]/60"

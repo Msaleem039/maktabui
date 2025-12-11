@@ -4,21 +4,33 @@ const PricingSection = () => {
   return (
     <section
       id="plan"
-      className="relative isolate min-h-screen overflow-hidden"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      className="relative isolate min-h-screen w-full overflow-hidden"
+      style={{ 
+        fontFamily: "Inter, sans-serif",
+        width: '100vw',
+        position: 'relative',
+        left: '50%',
+        right: '50%',
+        marginLeft: '-50vw',
+        marginRight: '-50vw'
+      }}
     >
-      <Image
-        src="/Section1.png"
-        alt="Students studying Quran"
-        fill
-        priority
-        className="absolute inset-0 object-cover"
-        sizes="100vw"
-      />
+      <div className="absolute inset-0 w-full h-full" style={{ width: '100vw', minWidth: '100%' }}>
+        <Image
+          src="/Section1.png"
+          alt="Students studying Quran"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+          quality={90}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+        />
+      </div>
 
       <div className="absolute inset-0 bg-gradient-to-l from-[#0B4B31B8] to-[#00000000]" />
 
-      <div className="relative z-10 mx-auto min-h-screen w-full max-w-6xl px-4 py-20 ">
+      <div className="relative z-10 mx-auto min-h-screen w-full max-w-6xl px-4 py-20 2xl:max-w-7xl">
         <h2 className="mb-6 text-center text-2xl leading-[1.2] font-bold text-[#FAFAFA] sm:text-3xl md:text-[2.5rem] md:leading-normal md:text-left md:ml-24 md:max-w-xs">
           Our Pricing
         </h2>

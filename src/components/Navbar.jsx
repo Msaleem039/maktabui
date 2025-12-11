@@ -44,7 +44,7 @@ const Navbar = ({ items = [] }) => {
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex lg:gap-2 xl:gap-4">
           <Link
-            href="#get-started"
+            href="/login"
             className="whitespace-nowrap rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
@@ -88,7 +88,7 @@ const Navbar = ({ items = [] }) => {
           ))}
           <div className="mt-2 flex flex-col gap-2">
             <Link
-              href="#get-started"
+              href="/login"
               onClick={closeMenu}
               className="rounded-full bg-[#0B4B31] px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
             >

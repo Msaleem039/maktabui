@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const steps = [
   {
     number: "01",
@@ -37,12 +39,12 @@ const HowItWorks = () => {
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 px-6 text-center">
-        <a
-          href="#get-started"
+        <Link
+          href="/login"
           className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
         >
           Get Started Now
-        </a>
+        </Link>
 
         <div className="space-y-4">
           <h2 className="text-3xl leading-[1.2] md:text-[3rem] md:leading-normal font-bold text-[#262626] ">
@@ -55,7 +57,7 @@ const HowItWorks = () => {
 
         <div className="grid w-full gap-8 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
-            <a
+            <Link
               key={step.number}
               href={step.href}
               className="group flex h-full flex-col justify-between rounded-3xl bg-[var(--card-bg)] px-8 pb-6 pt-6 text-left text-white shadow-[0_40px_80px_-60px_rgba(11,75,49,0.5)] transition-transform transition-colors hover:-translate-y-2 hover:bg-[#09432C] hover:shadow-[0_45px_90px_-60px_rgba(9,67,44,0.6)] focus-visible:-translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0B4B31]/30 active:bg-[#063522]"
@@ -75,16 +77,16 @@ const HowItWorks = () => {
                   {step.description}
                 </p>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 
-        <a
-          href="#get-started"
+        <Link
+          href="/login"
           className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
         >
           Get Started Now
-        </a>
+        </Link>
       </div>
     </section>
   );

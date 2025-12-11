@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const OnlineQuranSection = () => {
   return (
@@ -32,12 +33,12 @@ const OnlineQuranSection = () => {
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="#get-started"
+            <Link
+              href="/login"
               className="rounded-full bg-black px-7 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
             >
               Get Started Now
-            </a>
+            </Link>
             {/* <a
               href="#demo"
               className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white/80 transition hover:border-white hover:text-white"
