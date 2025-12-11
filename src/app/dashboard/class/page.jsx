@@ -15,7 +15,10 @@ export default function ClassPage() {
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [dropdownDirections, setDropdownDirections] = useState({});
+  const [dropdownPositions, setDropdownPositions] = useState({});
   const dropdownRefs = useRef({});
+  const buttonRefs = useRef({});
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -75,20 +78,88 @@ export default function ClassPage() {
     const handleClickOutside = (event) => {
       Object.values(dropdownRefs.current).forEach((ref) => {
         if (ref && !ref.contains(event.target)) {
-          setOpenDropdownId(null);
+          // Check if click is on the button
+          const isButtonClick = Object.values(buttonRefs.current).some(
+            (buttonRef) => buttonRef && buttonRef.contains(event.target)
+          );
+          if (!isButtonClick) {
+            setOpenDropdownId(null);
+          }
         }
       });
     };
 
+    const handleScroll = () => {
+      // Close dropdown on scroll
+      setOpenDropdownId(null);
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, []);
 
   const toggleDropdown = (id, event) => {
     event.stopPropagation();
-    setOpenDropdownId(openDropdownId === id ? null : id);
+    const isOpening = openDropdownId !== id;
+
+    if (isOpening && typeof window !== "undefined") {
+      const button = event.currentTarget;
+      const buttonRect = button.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+      const dropdownHeight = 150; // Approximate height of dropdown with 3 items
+      const dropdownWidth = 180;
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const shouldOpenUp = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+      // Calculate position
+      let top, left, right;
+      
+      if (shouldOpenUp) {
+        top = buttonRect.top - dropdownHeight - 8; // 8px margin
+      } else {
+        top = buttonRect.bottom + 8; // 8px margin
+      }
+
+      // Align to right edge of button
+      right = viewportWidth - buttonRect.right;
+      
+      // Ensure dropdown stays within viewport
+      if (right + dropdownWidth > viewportWidth) {
+        right = viewportWidth - dropdownWidth - 8;
+      }
+      if (right < 8) {
+        right = 8;
+      }
+
+      setDropdownDirections((prev) => ({
+        ...prev,
+        [id]: shouldOpenUp ? "up" : "down",
+      }));
+
+      setDropdownPositions((prev) => ({
+        ...prev,
+        [id]: { top, right },
+      }));
+    } else {
+      setDropdownDirections((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setDropdownPositions((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+
+    setOpenDropdownId(isOpening ? id : null);
   };
 
   const handleActionClick = (action, id, event) => {
@@ -330,6 +401,7 @@ export default function ClassPage() {
                     <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
                       <div className="relative inline-block">
                         <button
+                          ref={(el) => (buttonRefs.current[classItem._id] = el)}
                           type="button"
                           onClick={(e) => toggleDropdown(classItem._id, e)}
                           className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
@@ -340,8 +412,16 @@ export default function ClassPage() {
 
                         {openDropdownId === classItem._id && (
                           <div
-                            ref={(el) => (dropdownRefs.current[classItem._id] = el)}
-                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                            ref={(el) => {
+                              dropdownRefs.current[classItem._id] = el;
+                            }}
+                            style={{
+                              position: 'fixed',
+                              top: `${dropdownPositions[classItem._id]?.top || 0}px`,
+                              right: `${dropdownPositions[classItem._id]?.right || 0}px`,
+                              zIndex: 9999,
+                            }}
+                            className="min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
                           >
                             {actionMenuItems.map((item, idx) => {
                               const Icon = item.icon;

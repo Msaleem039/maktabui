@@ -117,17 +117,17 @@ const CareersSection = () => {
   return (
     <section id="careers" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="bg-white py-10 text-center">
-        <h2 className="text-[3rem] font-medium text-[#121212] ">
+        <h2 className="text-3xl leading-[1.2] md:text-[3rem] md:leading-normal font-medium text-[#121212] ">
           Careers at MaktabOS — Now <br /> Hiring!
         </h2>
       </div>
 
       <div className="bg-[#0B4B31] px-6 py-20 text-white">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-lg font-medium leading-9 text-white md:text-[1.5rem]">
+          <p className="text-base leading-6 font-medium text-white md:text-lg md:leading-8 lg:text-[1.5rem] lg:leading-9">
             We're currently hiring a motivated Sales Account Executive to help expand the reach of MaktabOS.
           </p>
-          <p className="mt-2 text-lg font-medium leading-9 text-white md:text-[1.5rem]">
+          <p className="mt-2 text-base leading-6 font-medium text-white md:text-lg md:leading-8 lg:text-[1.5rem] lg:leading-9">
             Join us in building the digital backbone for Islamic education worldwide.
           </p>
         </div>

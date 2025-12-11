@@ -45,7 +45,7 @@ const HowItWorks = () => {
         </a>
 
         <div className="space-y-4">
-          <h2 className="text-[3rem] font-bold text-[#262626] ">
+          <h2 className="text-3xl leading-[1.2] md:text-[3rem] md:leading-normal font-bold text-[#262626] ">
             How It Works
           </h2>
           {/* <p className="text-base text-[#1F1F1F]/70 md:text-lg">
@@ -68,10 +68,10 @@ const HowItWorks = () => {
               </div>
 
               <div className="mt-1 space-y-3">
-                <h3 className="text-xl font-semibold text-white transition group-hover:text-white group-focus-visible:text-white">
+                <h3 className="text-lg leading-[1.3] md:text-xl md:leading-normal font-semibold text-white transition group-hover:text-white group-focus-visible:text-white">
                   {step.title}
                 </h3>
-                <p className="text-sm leading-6 text-[#A3A3A3] group-hover:text-white group-focus-visible:text-white">
+                <p className="text-xs leading-5 md:text-sm md:leading-6 text-[#A3A3A3] group-hover:text-white group-focus-visible:text-white">
                   {step.description}
                 </p>
               </div>

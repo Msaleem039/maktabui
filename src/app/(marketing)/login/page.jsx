@@ -73,11 +73,11 @@ const Page = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-gray-100 items-center justify-center p-6">
+        <div className="min-h-screen flex bg-gray-100 items-center justify-center px-6 py-14">
             <div className="bg-white rounded-3xl shadow-lg overflow-hidden w-full max-w-6xl grid md:grid-cols-2">
                 {/* Left Section */}
                 <div
-                    className="text-white flex flex-col justify-center items-center p-12 min-h-[600px]"
+                    className="text-white flex flex-col justify-center items-center p-12 min-h-[700px]"
                     style={{
                         background:
                             "linear-gradient(217.64deg, #0B4B31 -5.84%, #85A598 106.72%, #FFFFFF 106.73%)",
@@ -106,7 +106,7 @@ const Page = () => {
 
 
                 {/* Right Section */}
-                <div className="p-12 flex flex-col justify-center bg-gray-50">
+                <div className="p-12 flex flex-col justify-center bg-gray-50 min-h-[720px]">
                     <div className="mb-1">
                         <h2 className=" font-medium text-[27px] leading-[136%] mb-1">
                             Welcome to
@@ -235,8 +235,8 @@ const Page = () => {
                                 >
                                     <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-9 9a9 9 0 1118 0H3z" />
                                 </svg>
-                                <div className="flex-1 flex flex-col">
-                                    <span className="text-gray-600 text-sm font-medium mb-1">
+                                <div className="flex-1">
+                                    <span className={`text-sm ${role ? 'text-black font-bold' : 'text-gray-600 font-medium'}`}>
                                         {role ? role : "Select Your Role"}
                                     </span>
                                 </div>

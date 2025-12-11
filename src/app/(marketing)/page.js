@@ -11,6 +11,7 @@ import PricingSection from "@/components/landing/PricingSection";
 import CareersSection from "@/components/landing/CareersSection";
 import FooterSection from "@/components/landing/FooterSection";
 import Link from "next/link";
+import Buttonstart from "@/components/landing/Buttonstart";
 
 const primaryNavItems = [
   { label: "Home", href: "#home" },
@@ -45,11 +46,11 @@ export default function Home() {
         <main className="relative z-10 flex min-h-screen items-center py-24">
           <div className="mx-auto w-full max-w-6xl gap-8 px-6 py-16 md:py-28 ">
             <div className="flex flex-col justify-center gap-6 text-left">
-              <h1 className="text-[3.5rem] leading-[80.52px] tracking-[0] semi-bold text-white mb-2">
+              <h1 className="text-3xl leading-[1.2] md:text-[3.5rem] md:leading-[80.52px] tracking-[0] semi-bold text-white mb-2">
                 <span className="text-white font-bold">MaktabOS</span> – The Complete <br /> Operating System for Islamic Schools
               </h1>
 
-              <p className="max-w-240 text-[2.5rem] leading-[60.66px] tracking-[0] semi-bold text-white">
+              <p className="max-w-240 text-xl leading-[1.3] md:text-[2.5rem] md:leading-[60.66px] tracking-[0] semi-bold text-white">
                 <span>One platform. Endless possibilities. Manage attendance, communication, billing, and analytics — all from your own branded dashboard.</span>
               </p>
 
@@ -76,6 +77,7 @@ export default function Home() {
       <CoreFeature />
       <HowItWorks />
       <PricingSection />
+{/* <Buttonstart /> */}
       <OnlineQuranSection />
       <CareersSection />
       <FooterSection />

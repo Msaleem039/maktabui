@@ -70,7 +70,7 @@ const CoreFeature = () => {
     >
       <div className="mx-auto max-w-6xl px-6 md:px-10">
         <div className="mx-auto mb-14 max-w-6xl text-center">
-          <h2 className="text-3xl font-bold text-[#262626] md:text-4xl lg:text-5xl">
+          <h2 className="text-2xl leading-[1.2] font-bold text-[#262626] md:text-4xl md:leading-normal lg:text-5xl">
             Core Features
           </h2>
         </div>
@@ -92,13 +92,13 @@ const CoreFeature = () => {
 
               <div className="space-y-3">
                 <h3
-                  className={`text-2xl font-semibold ${feature.textColor === "#FFFFFF" ? "text-white" : ""
+                  className={`text-xl leading-[1.3] md:text-2xl md:leading-normal font-semibold ${feature.textColor === "#FFFFFF" ? "text-white" : ""
                     }`}
                 >
                   {feature.title}
                 </h3>
                 <p
-                  className={`text-base leading-7 ${feature.textColor === "#FFFFFF"
+                  className={`text-sm leading-6 md:text-base md:leading-7 ${feature.textColor === "#FFFFFF"
                     ? "text-white"
                     : "text-[#737373]"
                     }`}

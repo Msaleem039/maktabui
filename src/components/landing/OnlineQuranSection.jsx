@@ -23,11 +23,11 @@ const OnlineQuranSection = () => {
           {/* <p className="text-xs uppercase tracking-[0.4em] text-white/75">
             Online Quran
           </p> */}
-          <h2 className="text-[2.5rem] font-bold leading-tight">
+          <h2 className="text-2xl leading-[1.2] md:text-[2.5rem] md:leading-tight font-bold">
             Bring Your School Online —
             <br /> The Smart Way
           </h2>
-          <p className="max-w-sm text-lg  font-light leading-10 text[#FAFAFA] md:text-xl">
+          <p className="max-w-sm text-base leading-6 font-light text[#FAFAFA] md:text-xl md:leading-10">
             Get your custom MaktabOS portal and manage everything in one place.
           </p>
 

@@ -37,7 +37,10 @@ export default function InvoicePage() {
   const [localSearch, setLocalSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [dropdownDirections, setDropdownDirections] = useState({});
+  const [dropdownPositions, setDropdownPositions] = useState({});
   const dropdownRefs = useRef({});
+  const buttonRefs = useRef({});
 
   const {
     invoices,
@@ -99,20 +102,88 @@ export default function InvoicePage() {
     const handleClickOutside = (event) => {
       Object.values(dropdownRefs.current).forEach((ref) => {
         if (ref && !ref.contains(event.target)) {
-          setOpenDropdownId(null);
+          // Check if click is on the button
+          const isButtonClick = Object.values(buttonRefs.current).some(
+            (buttonRef) => buttonRef && buttonRef.contains(event.target)
+          );
+          if (!isButtonClick) {
+            setOpenDropdownId(null);
+          }
         }
       });
     };
 
+    const handleScroll = () => {
+      // Close dropdown on scroll
+      setOpenDropdownId(null);
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, []);
 
   const toggleDropdown = (id, event) => {
     event.stopPropagation();
-    setOpenDropdownId(openDropdownId === id ? null : id);
+    const isOpening = openDropdownId !== id;
+
+    if (isOpening && typeof window !== "undefined") {
+      const button = event.currentTarget;
+      const buttonRect = button.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+      const dropdownHeight = 120; // Approximate height of dropdown with 2 items
+      const dropdownWidth = 180;
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const shouldOpenUp = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+      // Calculate position
+      let top, left, right;
+      
+      if (shouldOpenUp) {
+        top = buttonRect.top - dropdownHeight - 8; // 8px margin
+      } else {
+        top = buttonRect.bottom + 8; // 8px margin
+      }
+
+      // Align to right edge of button
+      right = viewportWidth - buttonRect.right;
+      
+      // Ensure dropdown stays within viewport
+      if (right + dropdownWidth > viewportWidth) {
+        right = viewportWidth - dropdownWidth - 8;
+      }
+      if (right < 8) {
+        right = 8;
+      }
+
+      setDropdownDirections((prev) => ({
+        ...prev,
+        [id]: shouldOpenUp ? "up" : "down",
+      }));
+
+      setDropdownPositions((prev) => ({
+        ...prev,
+        [id]: { top, right },
+      }));
+    } else {
+      setDropdownDirections((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setDropdownPositions((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+
+    setOpenDropdownId(isOpening ? id : null);
   };
 
   const handleActionClick = (action, id, originalInvoice, event) => {
@@ -352,6 +423,7 @@ export default function InvoicePage() {
                     <td className="px-4 py-3">
                       <div className="relative inline-block">
                         <button
+                          ref={(el) => (buttonRefs.current[invoice.id] = el)}
                           type="button"
                           onClick={(e) => toggleDropdown(invoice.id, e)}
                           className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-[#0B4B31] transition bg-[#0B4B3138]"
@@ -362,8 +434,16 @@ export default function InvoicePage() {
 
                         {isDropdownOpen && (
                           <div
-                            ref={(el) => (dropdownRefs.current[invoice.id] = el)}
-                            className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                            ref={(el) => {
+                              dropdownRefs.current[invoice.id] = el;
+                            }}
+                            style={{
+                              position: 'fixed',
+                              top: `${dropdownPositions[invoice.id]?.top || 0}px`,
+                              right: `${dropdownPositions[invoice.id]?.right || 0}px`,
+                              zIndex: 9999,
+                            }}
+                            className="min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
                           >
                             <button
                               type="button"

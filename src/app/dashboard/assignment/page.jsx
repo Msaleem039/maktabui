@@ -743,11 +743,7 @@ export default function AssignmentPage() {
 
                 <div className="mt-6">
                     <div
-                        className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-xl"
-                        style={{
-                            scrollbarWidth: "thin",
-                            scrollbarColor: "#c1c1c1 #f1f1f1",
-                        }}
+                        className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     >
                         <table className="min-w-[1200px] w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
 
