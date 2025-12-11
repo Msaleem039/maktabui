@@ -586,7 +586,8 @@ export default function DashboardLayout({ children }) {
     <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-[#0B4B31] text-white p-3 rounded-md shadow-md"
+        className="lg:hidden fixed top-4 left-4 z-[60] bg-[#0B4B31] text-white p-3 rounded-md shadow-md hover:bg-[#0B4B31]/90 transition-colors"
+        aria-label="Toggle menu"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path fill="currentColor" d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z" />
@@ -594,7 +595,7 @@ export default function DashboardLayout({ children }) {
       </button>
 
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 ">
+      <main className="flex-1 bg-[#f3f3f3] overflow-auto h-screen p-6 pt-20 lg:pt-6">
         {showStudentHeader && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>

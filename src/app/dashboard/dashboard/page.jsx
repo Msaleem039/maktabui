@@ -26,7 +26,7 @@ const Page = () => {
   return (
     <>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1">
+      <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1 lg:mt-1">
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
           {/* <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">

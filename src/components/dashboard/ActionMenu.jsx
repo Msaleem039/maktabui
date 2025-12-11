@@ -23,9 +23,21 @@ export default function ActionMenu({
   const toggleMenu = (event) => {
     event?.stopPropagation();
     const buttonRect = event?.currentTarget?.getBoundingClientRect();
-    const spaceBelow = buttonRect ? window.innerHeight - buttonRect.bottom : 0;
-    const estimatedHeight = Math.max(items.length * 56, 160);
-    setOpenUp(spaceBelow < estimatedHeight);
+    if (buttonRect) {
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const estimatedHeight = Math.max(items.length * 56, 160);
+      
+      // Check if button is in the bottom 40% of viewport to catch last 2 rows (last and 2nd last)
+      // This ensures both the last row and 2nd last row open upward
+      const isInBottomArea = buttonRect.bottom > window.innerHeight * 0.60;
+      
+      // Always open upward if:
+      // 1. Not enough space below, OR
+      // 2. Button is in bottom area (last 2 rows near pagination) - force upward
+      const shouldOpenUp = spaceBelow < estimatedHeight || isInBottomArea;
+      setOpenUp(shouldOpenUp);
+    }
     setIsOpen((prev) => !prev);
   };
 

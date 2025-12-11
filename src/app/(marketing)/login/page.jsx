@@ -106,7 +106,7 @@ const Page = () => {
 
 
                 {/* Right Section */}
-                <div className="p-12 flex flex-col justify-center bg-gray-50 min-h-[720px]">
+                <div className="p-2 px-12 pb-12 flex flex-col justify-center bg-gray-50 min-h-[720px]">
                     <div className="mb-1">
                         <h2 className=" font-medium text-[27px] leading-[136%] mb-1">
                             Welcome to
