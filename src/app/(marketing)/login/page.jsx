@@ -291,8 +291,8 @@ const Page = () => {
                             )}
                         </div>
 
-                        {/* Remember Me + Forgot Password */}
-                        <div className="flex items-center justify-between text-sm w-full">
+                        {/* Remember Me */}
+                        <div className="flex items-center text-sm w-full">
                             <label className="flex items-center text-gray-800 font-medium">
                                 <input
                                     type="checkbox"
@@ -302,12 +302,6 @@ const Page = () => {
                                 />
                                 Remember me
                             </label>
-                            <a
-                                href="#"
-                                className="text-green-900 font-semibold hover:underline"
-                            >
-                                Forgot Password?
-                            </a>
                         </div>
 
                         <button
@@ -319,16 +313,6 @@ const Page = () => {
                         </button>
 
                     </form>
-
-                    <p className="text-center text-gray-600 mt-8 font-medium">
-                        Don't have an account?{" "}
-                        <a
-                            href="/#contact"
-                            className="text-green-800 hover:underline font-semibold"
-                        >
-                            Register
-                        </a>
-                    </p>
 
                 </div>
             </div>

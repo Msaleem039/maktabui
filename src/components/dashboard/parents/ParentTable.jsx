@@ -138,9 +138,9 @@ const ParentTable = ({
     }));
   };
 
-  const handleView = (event, parentId) => {
-    event.stopPropagation();
+  const handleView = (parentId) => {
     setActionMenu({ id: null, openUp: false });
+    // Navigate to parent detail page
     router.push(`/dashboard/parent/${parentId}`);
   };
 
@@ -356,7 +356,10 @@ const ParentTable = ({
                         {
                           label: "View",
                           icon: Eye,
-                          onClick: () => handleView(parent.id),
+                          onClick: (e) => {
+                            e?.stopPropagation();
+                            handleView(parent.id);
+                          },
                           className: "bg-[#0B4B3138]",
                         },
                         {
