@@ -488,7 +488,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         <div className="flex flex-col space-y-8 overflow-y-auto flex-grow">
           <div
-            className={`flex items-center space-x-2 text-white p-2 pt-10 ${isCollapsed ? "justify-center" : ""
+            className={`flex items-center space-x-2 text-white p-2 pt-16 sm:pt-10 ${isCollapsed ? "justify-center" : ""
               }`}
           >
             <div className="w-6 h-6">
@@ -586,7 +586,7 @@ export default function DashboardLayout({ children }) {
     <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] bg-[#0B4B31] text-white p-3 rounded-md shadow-md hover:bg-[#0B4B31]/90 transition-colors"
+        className="lg:hidden fixed top-6 left-4 z-[60] bg-[#0B4B31] text-white p-3 rounded-md shadow-md hover:bg-[#0B4B31]/90 transition-colors"
         aria-label="Toggle menu"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
