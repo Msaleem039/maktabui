@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { ChevronDown, PlusIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
 import { useSelector } from "react-redux";
 
@@ -47,24 +47,27 @@ const NavItem = ({
         className={`
                     ${baseClasses}
                     ${isCollapsed ? collapsedClasses : unCollapsedClasses}
-                    ${isActive
-            ? "bg-[#13574A]"
-            : hasSubmenu && isOpen
-              ? "bg-[#0F5B3F]/70"
-              : "hover:bg-[#13574A]/45"
-          }
+                    ${
+                      isActive
+                        ? "bg-[#13574A]"
+                        : hasSubmenu && isOpen
+                        ? "bg-[#0F5B3F]/70"
+                        : "hover:bg-[#13574A]/45"
+                    }
                 `}
         title={isCollapsed ? name : undefined}
       >
         <div
-          className={`flex items-center ${isCollapsed ? "space-x-0" : "space-x-4"
-            }`}
+          className={`flex items-center ${
+            isCollapsed ? "space-x-0" : "space-x-4"
+          }`}
         >
           {Icon ? (
             typeof Icon === "string" ? (
               <div
-                className={`w-5 h-5 transition-all duration-200 ${isActive ? "opacity-100" : "opacity-80"
-                  }`}
+                className={`w-5 h-5 transition-all duration-200 ${
+                  isActive ? "opacity-100" : "opacity-80"
+                }`}
               >
                 <Image
                   src={Icon}
@@ -76,8 +79,9 @@ const NavItem = ({
               </div>
             ) : (
               <Icon
-                className={`w-5 h-5 transition-all duration-200 ${isActive ? "opacity-100" : "opacity-80"
-                  }`}
+                className={`w-5 h-5 transition-all duration-200 ${
+                  isActive ? "opacity-100" : "opacity-80"
+                }`}
               />
             )
           ) : (
@@ -86,8 +90,9 @@ const NavItem = ({
 
           {!isCollapsed && (
             <span
-              className={`font-medium text-sm leading-5 tracking-normal transition-all duration-200 ${isActive ? "text-white" : "text-white/90"
-                }`}
+              className={`font-medium text-sm leading-5 tracking-normal transition-all duration-200 ${
+                isActive ? "text-white" : "text-white/90"
+              }`}
             >
               {name}
             </span>
@@ -99,8 +104,9 @@ const NavItem = ({
             {hasSubmenu ? (
               <ChevronDown
                 size={18}
-                className={`text-white/80 transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"
-                  }`}
+                className={`text-white/80 transition-transform duration-200 ${
+                  isOpen ? "rotate-0" : "-rotate-90"
+                }`}
               />
             ) : (
               <ChevronDown
@@ -129,10 +135,11 @@ const SubNavItem = ({ name, path, pathname, router, isCollapsed }) => {
       onClick={() => router.push(path)}
       className={`
             flex items-center w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 group relative
-            ${isActive
-          ? "bg-gradient-to-r from-[#13574A] to-[#13574A]/80 text-white shadow-md"
-          : "text-white/80 hover:bg-[#13574A]/20 hover:text-white hover:pl-6"
-        }
+            ${
+              isActive
+                ? "bg-gradient-to-r from-[#13574A] to-[#13574A]/80 text-white shadow-md"
+                : "text-white/80 hover:bg-[#13574A]/20 hover:text-white hover:pl-6"
+            }
         `}
     >
       {isActive && (
@@ -144,17 +151,19 @@ const SubNavItem = ({ name, path, pathname, router, isCollapsed }) => {
       )}
 
       <div
-        className={`w-2 h-2 mr-3 transition-all duration-200 ${isActive
-          ? "opacity-100 scale-110"
-          : "opacity-40 group-hover:opacity-70 group-hover:scale-110"
-          }`}
+        className={`w-2 h-2 mr-3 transition-all duration-200 ${
+          isActive
+            ? "opacity-100 scale-110"
+            : "opacity-40 group-hover:opacity-70 group-hover:scale-110"
+        }`}
       >
         <div className="w-full h-full bg-current rounded-full" />
       </div>
 
       <span
-        className={`font-medium transition-all duration-200 ${isActive ? "text-white" : "group-hover:text-white"
-          }`}
+        className={`font-medium transition-all duration-200 ${
+          isActive ? "text-white" : "group-hover:text-white"
+        }`}
       >
         {name}
       </span>
@@ -167,17 +176,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState({});
-  const [navItems, setNavItems] = useState([]);
+  const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
   const userCookie = getCookie("user");
 
   const reduxUser = useSelector((state) => state.user?.userInfo);
   const reduxRole = reduxUser?.role;
+  const reduxPermissions = reduxUser?.permissions;
 
-  const getUserRole = () => {
+  const getUserData = useCallback(() => {
     let role = null;
+    let permissions = null;
 
     if (reduxRole) {
       role = reduxRole;
+      permissions = reduxPermissions;
     } else {
       try {
         if (userCookie) {
@@ -186,6 +198,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               ? JSON.parse(userCookie)
               : userCookie;
           role = userData?.role;
+          permissions = userData?.permissions;
         }
       } catch (error) {
         console.error("Error parsing user cookie:", error);
@@ -194,35 +207,67 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
     if (role) {
       const normalizedRole = role.trim();
-      if (normalizedRole.toLowerCase() === "super admin" || normalizedRole === "SuperAdmin") {
-        return "Super Admin";
+      if (
+        normalizedRole.toLowerCase() === "super admin" ||
+        normalizedRole === "SuperAdmin"
+      ) {
+        return { role: "Super Admin", permissions };
       }
       if (normalizedRole.toLowerCase() === "admin") {
-        return "Admin";
+        return { role: "Admin", permissions };
+      }
+      if (
+        normalizedRole.toLowerCase() === "subadmin" ||
+        normalizedRole.toLowerCase() === "sub admin"
+      ) {
+        return { role: "Sub Admin", permissions };
       }
       if (normalizedRole.toLowerCase() === "teacher") {
-        return "Teacher";
+        return { role: "Teacher", permissions };
       }
       if (normalizedRole.toLowerCase() === "student") {
-        return "Student";
+        return { role: "Student", permissions };
       }
       if (normalizedRole.toLowerCase() === "parent") {
-        return "Parent";
+        return { role: "Parent", permissions };
       }
-      return normalizedRole;
+      return { role: normalizedRole, permissions };
     }
 
-    return "Admin";
-  };
+    return { role: null, permissions: null };
+  }, [reduxRole, reduxPermissions, userCookie]);
 
-  const userRole = getUserRole();
+  const { role: userRole, permissions: userPermissions } = useMemo(
+    () => getUserData(),
+    [getUserData]
+  );
 
-  const getNavItems = () => {
+  // Set user data loaded after role and permissions are determined
+  useEffect(() => {
+    if (userRole) {
+      setIsUserDataLoaded(true);
+    }
+  }, [userRole]);
+
+  const hasPermission = useCallback(
+    (permissionKey) => {
+      if (userRole !== "Sub Admin") return true;
+      if (!userPermissions || !Array.isArray(userPermissions)) return false;
+
+      return userPermissions.some((perm) => perm[permissionKey] === true);
+    },
+    [userRole, userPermissions]
+  );
+
+  const getNavItems = useCallback(() => {
     const basePath = "/dashboard";
 
     const allItems = {
-      dashboard: { name: "Dashboard", icon: "/01.png", path: `${basePath}/dashboard` },
-      communication: { name: "Communication", icon: "/SMS.png", path: `${basePath}/communication` },
+      communication: {
+        name: "Communication",
+        icon: "/SMS.png",
+        path: `${basePath}/communication`,
+      },
       parents: {
         name: "Parents",
         icon: "/Family Woman Woman.png",
@@ -232,6 +277,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Add Parent", path: `${basePath}/parent/add` },
           { name: "Waiting List", path: `${basePath}/parent/waitlist` },
         ],
+        permission: "manageParents",
       },
       students: {
         name: "Students",
@@ -242,6 +288,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Add Student", path: `${basePath}/student/add` },
           { name: "Waiting List", path: `${basePath}/student/waiting-list` },
         ],
+        permission: "manageStudents",
       },
       class: {
         name: "Class",
@@ -252,6 +299,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Create Class", path: `${basePath}/class/createClass` },
           { name: "Timetable", path: `${basePath}/class/timetable` },
         ],
+        permission: "manageClasses",
       },
       assignment: {
         name: "Assignment",
@@ -260,21 +308,29 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [
           { name: "Assignments", path: `${basePath}/assignment` },
           { name: "C Assignment", path: `${basePath}/assignment/add` },
-          { name: "S Assignment", path: `${basePath}/assignment/submittedAssignment` },
+          {
+            name: "S Assignment",
+            path: `${basePath}/assignment/submittedAssignment`,
+          },
           { name: "Grade", path: `${basePath}/grade` },
         ],
+        permission: "manageAssignments",
       },
       notifications: {
         name: "Notification",
         icon: "/Literature.png",
         hasSubmenu: true,
-        subItems: [{ name: "Notifications", path: `${basePath}/notifications` }],
+        subItems: [
+          { name: "Notifications", path: `${basePath}/notifications` },
+        ],
+        permission: "manageNotifications",
       },
       attendance: {
         name: "Attendance",
         icon: "/Checked User Male.png",
         hasSubmenu: true,
         subItems: [{ name: "Mark Attendance", path: `${basePath}/attendance` }],
+        permission: "manageAttendance",
       },
       finance: {
         name: "Finance",
@@ -282,10 +338,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         hasSubmenu: true,
         subItems: [
           { name: "Invoice", path: `${basePath}/finance/invoice` },
-          { name: "Invoices Report", path: `${basePath}/finance/invoice-report` },
+          {
+            name: "Invoices Report",
+            path: `${basePath}/finance/invoice-report`,
+          },
           { name: "Create Invoices", path: `${basePath}/finance/invoice/add` },
           { name: "Payments", path: `${basePath}/finance/payment` },
         ],
+        permission: "manageFinance",
       },
       events: {
         name: "Events",
@@ -295,48 +355,85 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           { name: "Events", path: `${basePath}/events` },
           { name: "Create Event", path: `${basePath}/events/create` },
         ],
+        permission: "manageEvents",
       },
       team: {
         name: "Team",
         icon: "/Staff.png",
         hasSubmenu: true,
-        subItems: []
+        subItems: [],
+        permission: "manageTeachers",
       },
-      settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/settings` },
+      settings: {
+        name: "Settings",
+        icon: "/Settings.png",
+        path: `${basePath}/settings`,
+        permission: "manageSettings",
+      },
     };
 
     const roleDashboardItems = {
-      "Super Admin": allItems.dashboard,
-      "Admin": allItems.dashboard,
-      "Teacher": { ...allItems.dashboard, path: `${basePath}/teacher/dashboard` },
-      "Student": { ...allItems.dashboard, path: `${basePath}/student/dashboard` },
-      "Parent": { ...allItems.dashboard, path: `${basePath}/parent/dashboard` }
+      "Super Admin": {
+        name: "Dashboard",
+        icon: "/01.png",
+        path: `${basePath}/dashboard`,
+      },
+      Admin: {
+        name: "Dashboard",
+        icon: "/01.png",
+        path: `${basePath}/dashboard`,
+      },
+      Teacher: {
+        name: "Dashboard",
+        icon: "/01.png",
+        path: `${basePath}/teacher/dashboard`,
+      },
+      Student: {
+        name: "Dashboard",
+        icon: "/01.png",
+        path: `${basePath}/student/dashboard`,
+      },
+      Parent: {
+        name: "Dashboard",
+        icon: "/01.png",
+        path: `${basePath}/parent/dashboard`,
+      },
     };
 
-    // Configure team subItems based on user role
-    switch (userRole) {
-      case "Super Admin":
-        allItems.team.subItems = [
-          { name: "Admin", path: `${basePath}/team/admin` }
-        ];
-        break;
-      case "Admin":
-        allItems.team.subItems = [
-          { name: "Sub Admin", path: `${basePath}/team/sub-admin` },
-          { name: "Teachers", path: `${basePath}/team/teacher` }
-        ];
-        break;
-      default:
-        allItems.team.subItems = [
-          { name: "Admin", path: `${basePath}/team/admin` },
-          { name: "Teachers", path: `${basePath}/team/teacher` }
-        ];
-        break;
+    const subAdminDashboard = {
+      name: "Dashboard",
+      icon: "/01.png",
+      path: `${basePath}/communication`,
+    };
+
+    if (userRole === "Super Admin") {
+      allItems.team.subItems = [
+        { name: "Admin", path: `${basePath}/team/admin` },
+      ];
+    } else if (userRole === "Admin") {
+      allItems.team.subItems = [
+        { name: "Sub Admin", path: `${basePath}/team/sub-admin` },
+        { name: "Teachers", path: `${basePath}/team/teacher` },
+      ];
+    } else if (userRole === "Sub Admin") {
+      allItems.team.subItems = [
+        { name: "Teachers", path: `${basePath}/team/teacher` },
+      ];
+    } else {
+      allItems.team.subItems = [
+        { name: "Admin", path: `${basePath}/team/admin` },
+        { name: "Teachers", path: `${basePath}/team/teacher` },
+      ];
     }
+
+    const shouldIncludeItem = (item) => {
+      if (userRole !== "Sub Admin") return true;
+      if (!item.permission) return true;
+      return hasPermission(item.permission);
+    };
 
     switch (userRole) {
       case "Super Admin":
-        // Super Admin: Only Dashboard, Team (only Admin), Finance, and Communication
         return [
           roleDashboardItems[userRole],
           allItems.team,
@@ -345,20 +442,42 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         ];
 
       case "Admin":
-        // Admin: All items except restricted ones
         return [
           roleDashboardItems[userRole],
-          allItems.parents,
-          allItems.students,
-          allItems.class,
-          allItems.assignment,
-          allItems.notifications,
-          allItems.attendance,
-          allItems.finance,
-          allItems.events,
-          allItems.communication,
-          allItems.team, // This will show "Sub Admin" and "Teachers" for Admin role
+          ...Object.values(allItems).filter(
+            (item) => item.name !== "Dashboard"
+          ),
         ];
+
+      case "Sub Admin":
+        const subAdminItems = [];
+
+        // Don't add dashboard for Sub Admin - they start at communication
+        // subAdminItems.push(subAdminDashboard); // REMOVED
+
+        if (shouldIncludeItem(allItems.communication))
+          subAdminItems.push(allItems.communication);
+        if (shouldIncludeItem(allItems.parents))
+          subAdminItems.push(allItems.parents);
+        if (shouldIncludeItem(allItems.students))
+          subAdminItems.push(allItems.students);
+        if (shouldIncludeItem(allItems.class))
+          subAdminItems.push(allItems.class);
+        if (shouldIncludeItem(allItems.assignment))
+          subAdminItems.push(allItems.assignment);
+        if (shouldIncludeItem(allItems.notifications))
+          subAdminItems.push(allItems.notifications);
+        if (shouldIncludeItem(allItems.attendance))
+          subAdminItems.push(allItems.attendance);
+        if (shouldIncludeItem(allItems.finance))
+          subAdminItems.push(allItems.finance);
+        if (shouldIncludeItem(allItems.events))
+          subAdminItems.push(allItems.events);
+        if (shouldIncludeItem(allItems.team)) subAdminItems.push(allItems.team);
+        if (shouldIncludeItem(allItems.settings))
+          subAdminItems.push(allItems.settings);
+
+        return subAdminItems;
 
       case "Teacher":
         return [
@@ -368,13 +487,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             ...allItems.students,
             subItems: allItems.students.subItems.filter(
               (item) => item.name === "Student"
-            )
+            ),
           },
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (item) => item.name === "C Assignment" || item.name === "S Assignment"
-            )
+              (item) =>
+                item.name === "C Assignment" || item.name === "S Assignment"
+            ),
           },
           allItems.notifications,
           allItems.attendance,
@@ -387,16 +507,17 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (item) =>
-                item.name === "Assignments" ||
-                item.name === "Grade"
-            )
+              (item) => item.name === "Assignments" || item.name === "Grade"
+            ),
           },
           {
             ...allItems.class,
             subItems: allItems.class.subItems.filter(
-              (item) => item.name !== "Subject" && item.name !== "Create Class" && item.name !== "Timetable"
-            )
+              (item) =>
+                item.name !== "Subject" &&
+                item.name !== "Create Class" &&
+                item.name !== "Timetable"
+            ),
           },
           allItems.notifications,
           allItems.communication,
@@ -422,23 +543,21 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         ];
 
       default:
-        return [allItems.dashboard, allItems.communication];
+        return [roleDashboardItems["Admin"], allItems.communication];
     }
-  };
+  }, [userRole, userPermissions, hasPermission]);
+
+  const navItems = useMemo(() => getNavItems(), [getNavItems]);
 
   const sidebarBg = "bg-[#0B4B31]";
   const activeBg = "bg-[#13574A]";
 
-  const handleToggleSubmenu = (menuName) => {
+  const handleToggleSubmenu = useCallback((menuName) => {
     setOpenSubmenus((prev) => ({
       ...prev,
       [menuName]: !prev[menuName],
     }));
-  };
-
-  useEffect(() => {
-    setNavItems(getNavItems());
-  }, [userRole, reduxRole]);
+  }, []);
 
   useEffect(() => {
     const newOpenSubmenus = {};
@@ -466,11 +585,17 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     router.push("/login");
   };
 
+  // Don't render sidebar until user data is loaded
+  if (!isUserDataLoaded) {
+    return null;
+  }
+
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
+        className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300 ${
+          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
         onClick={() => setIsOpen(false)}
       ></div>
 
@@ -478,9 +603,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         className={`
           fixed lg:static top-0 left-0 h-screen ${sidebarBg} flex flex-col justify-between p-4 shadow-2xl
           transition-all duration-300 ease-in-out z-50
-          ${isCollapsed
-            ? "w-20"
-            : "w-[70%] sm:w-[45%] md:w-[32%] lg:w-[220px] min-w-[200px] max-w-[220px]"
+          ${
+            isCollapsed
+              ? "w-20"
+              : "w-[70%] sm:w-[45%] md:w-[32%] lg:w-[220px] min-w-[200px] max-w-[220px]"
           }
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           rounded-tr-[28px] rounded-br-[28px]
@@ -500,8 +626,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <div
-            className={`transform transition-transform duration-300 ${isCollapsed ? "rotate-180" : "rotate-0"
-              }`}
+            className={`transform transition-transform duration-300 ${
+              isCollapsed ? "rotate-180" : "rotate-0"
+            }`}
           >
             <Image
               src="/collapsable-arrow.png"
@@ -515,8 +642,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         <div className="flex flex-col space-y-8 overflow-y-auto flex-grow">
           <div
-            className={`flex items-center space-x-2 text-white p-2 pt-16 sm:pt-10 ${isCollapsed ? "justify-center" : ""
-              }`}
+            className={`flex items-center space-x-2 text-white p-2 pt-16 sm:pt-10 ${
+              isCollapsed ? "justify-center" : ""
+            }`}
           >
             <div className="w-6 h-6">
               <Image
@@ -605,19 +733,72 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
 export default function DashboardLayout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
 
-  const showStudentHeader = pathname?.includes("/parent") || pathname?.includes("/student") || pathname === "/dashboard/student";
+  const showStudentHeader =
+    pathname?.includes("/parent") ||
+    pathname?.includes("/student") ||
+    pathname === "/dashboard/student";
+
+  // Handle Sub Admin redirect and initialization
+  useEffect(() => {
+    const userCookie = getCookie("user");
+    let userRole = null;
+
+    try {
+      if (userCookie) {
+        const userData =
+          typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+        userRole = userData?.role;
+      }
+    } catch (error) {
+      console.error("Error parsing user cookie:", error);
+      setIsInitializing(false);
+      return;
+    }
+
+    if (userRole) {
+      const normalizedRole = userRole.trim().toLowerCase();
+
+      if (normalizedRole === "subadmin" || normalizedRole === "sub admin") {
+        if (!pathname?.includes("/dashboard/communication")) {
+          window.location.href = "/dashboard/communication";
+          return;
+        }
+      }
+    }
+
+    setIsInitializing(false);
+  }, [pathname, router]);
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f3f3f3]"></div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex overflow-hidden relative" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div
+      className="min-h-screen flex overflow-hidden relative"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden fixed top-6 left-4 z-[60] bg-[#0B4B31] text-white p-3 rounded-md shadow-md hover:bg-[#0B4B31]/90 transition-colors"
         aria-label="Toggle menu"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="currentColor"
+            d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z"
+          />
         </svg>
       </button>
 
@@ -626,12 +807,10 @@ export default function DashboardLayout({ children }) {
         {showStudentHeader && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>
-              <p className="text-[2.5rem] font-[600]  text-[#0B4B31]">
+              <p className="text-[2.5rem] font-[600] text-[#0B4B31]">
                 Welcome to
               </p>
-              <p className="text-[1.75rem] font-[500] text-black ">
-                MaktabOS
-              </p>
+              <p className="text-[1.75rem] font-[500] text-black">MaktabOS</p>
             </div>
           </div>
         )}

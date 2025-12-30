@@ -5,11 +5,12 @@ import { Search, Grid, Moon, ChevronDown } from "lucide-react";
 import StatsCards from "@/components/StatsCard";
 import { useDispatch, useSelector } from "react-redux";
 import { getDashboardStatsAction } from "@/redux/slices/superadminSlices/superadminSlices";
+import Cookies from "js-cookie";
 
 const Page = () => {
   const dispatch = useDispatch();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
+  const user = Cookies.get("user");
   const {
     loading,
     stats,
@@ -27,7 +28,6 @@ const Page = () => {
     <>
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1 lg:mt-1">
-
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
           {/* <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
             <Search size={16} className="text-gray-500 mr-2" />
@@ -57,7 +57,7 @@ const Page = () => {
                 />
               </div>
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
-                Ahmed J.
+                {user?.role === "Super Admin" ? "Super Admin" : ""}
               </span>
               <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
@@ -65,13 +65,13 @@ const Page = () => {
         </div>
       </header>
       <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
-
-
         {/* Welcome */}
         <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
           Welcome to
         </h1>
-        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
+        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">
+          MaktabOS
+        </p>
 
         {/* Loading / Error */}
         {loading && (
@@ -111,17 +111,22 @@ const Page = () => {
                 {/* Chart */}
                 <div className="flex items-end justify-between gap-2 w-full overflow-x-auto">
                   {yearlyPayments?.map((b, i) => {
-                    const maxPayment = Math.max(...yearlyPayments.map(m => m.totalPaid)) || 1;
-                    const heightPercent = maxPayment > 0 ? (b.totalPaid / maxPayment) * 100 : 0;
+                    const maxPayment =
+                      Math.max(...yearlyPayments.map((m) => m.totalPaid)) || 1;
+                    const heightPercent =
+                      maxPayment > 0 ? (b.totalPaid / maxPayment) * 100 : 0;
                     const heightPx = (heightPercent / 100) * 256;
 
                     return (
-                      <div key={i} className="flex flex-col items-center flex-1 min-w-[24px]">
+                      <div
+                        key={i}
+                        className="flex flex-col items-center flex-1 min-w-[24px]"
+                      >
                         <div
                           className="w-full bg-emerald-600 transition-all duration-300 relative rounded-t-md"
                           style={{
                             height: `${heightPx}px`,
-                            minHeight: b.totalPaid > 0 ? "4px" : "0px"
+                            minHeight: b.totalPaid > 0 ? "4px" : "0px",
                           }}
                           title={`${b.month}: $${b.totalPaid}`}
                         >
@@ -131,7 +136,9 @@ const Page = () => {
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400 mt-1">{b.month}</span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {b.month}
+                        </span>
                       </div>
                     );
                   })}
@@ -140,16 +147,15 @@ const Page = () => {
                 {/* Legend */}
                 <div className="flex justify-center gap-4 sm:gap-8 mt-6 text-sm text-gray-500 flex-wrap">
                   <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 bg-emerald-600 rounded-full"></span> Paid Volume
+                    <span className="w-3 h-3 bg-emerald-600 rounded-full"></span>{" "}
+                    Paid Volume
                   </span>
                   <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 bg-red-400 rounded-full"></span> Unpaid
+                    <span className="w-3 h-3 bg-red-400 rounded-full"></span>{" "}
+                    Unpaid
                   </span>
                 </div>
               </div>
-
-
-
             </div>
 
             {/* RIGHT CARDS */}
@@ -229,7 +235,6 @@ const Page = () => {
             />
           </div>
         )}
-
       </div>
     </>
   );
@@ -262,8 +267,9 @@ const DashboardTable = ({ title, subtitle, btnColor, rows }) => (
             <td className="py-3 px-3">{row.name}</td>
             <td className="py-3 px-3">{row.date}</td>
             <td
-              className={`py-3 px-3 text-right font-medium ${row.amount < 0 ? "text-red-500" : "text-green-600"
-                }`}
+              className={`py-3 px-3 text-right font-medium ${
+                row.amount < 0 ? "text-red-500" : "text-green-600"
+              }`}
             >
               ${row.amount}
             </td>
