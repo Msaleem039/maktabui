@@ -13,11 +13,13 @@ export default function CreateAdmin() {
   const [formData, setFormData] = useState({
     email: "",
     address: "",
-    photo: null,
+    photo: "",
     name: "",
     password: "",
     phone: "",
   });
+  console.log("formData", formData);
+
   const router = useRouter();
 
   const [uploading, setUploading] = useState(false);
@@ -28,56 +30,39 @@ export default function CreateAdmin() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const uploadImageToSupabase = async (file) => {
-    const SUPABASE_URL = "https://rixdrbokebnvidwyzvzo.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpeGRyYm9rZWJudmlkd3l6dnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MjMzMzIsImV4cCI6MjA0ODE5OTMzMn0.Zhnz5rLRoIhtHyF52pFjzYijNdxgZBvEr9LtOxR2Lhw";
-    const fileName = `${Date.now()}_${file.name}`;
-
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", file);
-
+  const uploadImageToSupabase = (file) => {
     setUploading(true);
     setUploadProgress(0);
 
     return new Promise((resolve, reject) => {
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open(
-          "POST",
-          `${SUPABASE_URL}/storage/v1/object/maktab-system/${fileName}`
-        );
-        xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append("file", file);
 
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round(
-              (event.loaded / event.total) * 100
-            );
-            setUploadProgress(percentComplete);
-          }
-        };
+      xhr.open("POST", "/api/uploadImage");
 
-        xhr.onload = () => {
-          setUploading(false);
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(
-              `${SUPABASE_URL}/storage/v1/object/public/maktab-system/${fileName}`
-            );
-          } else {
-            reject(new Error("Upload failed"));
-          }
-        };
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
 
-        xhr.onerror = () => {
-          setUploading(false);
-          reject(new Error("Upload failed"));
-        };
-
-        xhr.send(formDataUpload);
-      } catch (error) {
+      xhr.onload = () => {
         setUploading(false);
-        reject(error);
-      }
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          resolve(res.file.url);
+        } else {
+          reject(new Error("Upload failed"));
+        }
+      };
+
+      xhr.onerror = () => {
+        setUploading(false);
+        reject(new Error("Network error"));
+      };
+
+      xhr.send(formData);
     });
   };
 
@@ -87,6 +72,8 @@ export default function CreateAdmin() {
 
     try {
       const url = await uploadImageToSupabase(file);
+      console.log("url", url);
+
       setFormData((prev) => ({ ...prev, photo: url }));
     } catch (err) {
       console.error("Image upload failed:", err);
@@ -98,9 +85,8 @@ export default function CreateAdmin() {
     dispatch(createAdminAction(formData));
 
     setTimeout(() => {
-      router.push("/dashboard/team/admin")
-    }, 3000)
-
+      router.push("/dashboard/team/admin");
+    }, 3000);
   };
 
   useEffect(() => {
@@ -133,7 +119,10 @@ export default function CreateAdmin() {
       <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
         <h2 className="text-lg font-semibold text-gray-700 mb-6">Add Admin</h2>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           <FormInput
             label="Name"
             name="name"

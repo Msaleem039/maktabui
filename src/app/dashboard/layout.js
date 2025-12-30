@@ -300,10 +300,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         name: "Team",
         icon: "/Staff.png",
         hasSubmenu: true,
-        subItems: [
-          { name: "Admin", path: `${basePath}/team/admin` },
-          { name: "Teachers", path: `${basePath}/team/teacher` }
-        ],
+        subItems: []
       },
       settings: { name: "Settings", icon: "/Settings.png", path: `${basePath}/settings` },
     };
@@ -316,9 +313,39 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       "Parent": { ...allItems.dashboard, path: `${basePath}/parent/dashboard` }
     };
 
+    // Configure team subItems based on user role
     switch (userRole) {
       case "Super Admin":
+        allItems.team.subItems = [
+          { name: "Admin", path: `${basePath}/team/admin` }
+        ];
+        break;
       case "Admin":
+        allItems.team.subItems = [
+          { name: "Sub Admin", path: `${basePath}/team/sub-admin` },
+          { name: "Teachers", path: `${basePath}/team/teacher` }
+        ];
+        break;
+      default:
+        allItems.team.subItems = [
+          { name: "Admin", path: `${basePath}/team/admin` },
+          { name: "Teachers", path: `${basePath}/team/teacher` }
+        ];
+        break;
+    }
+
+    switch (userRole) {
+      case "Super Admin":
+        // Super Admin: Only Dashboard, Team (only Admin), Finance, and Communication
+        return [
+          roleDashboardItems[userRole],
+          allItems.team,
+          allItems.finance,
+          allItems.communication,
+        ];
+
+      case "Admin":
+        // Admin: All items except restricted ones
         return [
           roleDashboardItems[userRole],
           allItems.parents,
@@ -330,7 +357,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.finance,
           allItems.events,
           allItems.communication,
-          allItems.team,
+          allItems.team, // This will show "Sub Admin" and "Teachers" for Admin role
         ];
 
       case "Teacher":

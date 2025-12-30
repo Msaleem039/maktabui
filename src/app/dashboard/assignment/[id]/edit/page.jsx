@@ -8,7 +8,7 @@ import {
   updateAssignment,
   clearUpdateStatus,
   clearError,
-  getAssignmentById
+  getAssignmentById,
 } from "@/redux/slices/assignmentSlices/assignmentSlices";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
@@ -18,7 +18,14 @@ import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { getCookie } from "cookies-next";
 import Link from "next/link";
 
-const FileUploadField = ({ label, files, onFilesChange, existingAttachments = [], onRemoveExisting, className = "" }) => {
+const FileUploadField = ({
+  label,
+  files,
+  onFilesChange,
+  existingAttachments = [],
+  onRemoveExisting,
+  className = "",
+}) => {
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files);
     onFilesChange([...files, ...selectedFiles]);
@@ -55,15 +62,22 @@ const FileUploadField = ({ label, files, onFilesChange, existingAttachments = []
           <Upload size={16} />
           Upload Files
         </label>
-        <p className="text-sm text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX, Images</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Supported formats: PDF, DOC, DOCX, Images
+        </p>
 
         {/* Existing Attachments */}
         {existingAttachments.length > 0 && (
           <div className="mt-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">Existing Attachments:</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Existing Attachments:
+            </p>
             <div className="space-y-2">
               {existingAttachments.map((attachment, index) => (
-                <div key={index} className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2">
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2"
+                >
                   <a
                     href={attachment.url}
                     target="_blank"
@@ -91,8 +105,13 @@ const FileUploadField = ({ label, files, onFilesChange, existingAttachments = []
             <p className="text-sm font-medium text-gray-700 mb-2">New Files:</p>
             <div className="space-y-2">
               {files.map((file, index) => (
-                <div key={index} className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2">
-                  <span className="text-sm text-[#0B4B31] truncate flex-1">{file.name}</span>
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-[#F3F6F5] rounded-full px-4 py-2"
+                >
+                  <span className="text-sm text-[#0B4B31] truncate flex-1">
+                    {file.name}
+                  </span>
                   <button
                     type="button"
                     onClick={() => removeFile(index)}
@@ -121,16 +140,28 @@ const Page = () => {
     updateStatus,
     updateError,
     fetchStatus,
-    fetchError
+    fetchError,
   } = useSelector((state) => state.assignment);
 
-  const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
-  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
-  const { students, status: studentsStatus, error: studentsError } = useSelector((state) => state.getStudentNamesWithIds);
+  const {
+    teacherNames,
+    status: teachersStatus,
+    error: teachersError,
+  } = useSelector((state) => state.getTeachersName);
+  const {
+    classNames,
+    loading: classesLoading,
+    error: classesError,
+  } = useSelector((state) => state.getAllClassesName);
+  const {
+    students,
+    status: studentsStatus,
+    error: studentsError,
+  } = useSelector((state) => state.getStudentNamesWithIds);
 
   const user = useMemo(() => {
     const userCookie = getCookie("user");
-    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+    return typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
   }, []);
 
   const [formData, setFormData] = useState({
@@ -143,7 +174,7 @@ const Page = () => {
     totalMarks: "",
     dueDate: "",
     attachments: [],
-    student: ""
+    student: "",
   });
 
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -163,9 +194,14 @@ const Page = () => {
   }, [dispatch, assignmentId]);
 
   useEffect(() => {
-    if (user && user.role === 'Teacher' && teacherNames && teacherNames.length > 0) {
-      const currentTeacher = teacherNames.find(teacher =>
-        teacher.user === user.id || teacher._id === user.id
+    if (
+      user &&
+      user.role === "Teacher" &&
+      teacherNames &&
+      teacherNames.length > 0
+    ) {
+      const currentTeacher = teacherNames.find(
+        (teacher) => teacher.user === user.id || teacher._id === user.id
       );
 
       if (currentTeacher) {
@@ -177,7 +213,7 @@ const Page = () => {
   useEffect(() => {
     if (currentAssignment && currentAssignment._id === assignmentId) {
       const dueDate = currentAssignment.dueDate
-        ? new Date(currentAssignment.dueDate).toISOString().split('T')[0]
+        ? new Date(currentAssignment.dueDate).toISOString().split("T")[0]
         : "";
 
       setFormData({
@@ -186,11 +222,13 @@ const Page = () => {
         type: currentAssignment.type || "",
         subject: currentAssignment.subject || "",
         classId: currentAssignment.class?._id || currentAssignment.class || "",
-        teacherId: currentAssignment.teacher?._id || currentAssignment.teacher || "",
+        teacherId:
+          currentAssignment.teacher?._id || currentAssignment.teacher || "",
         totalMarks: currentAssignment.totalMarks?.toString() || "",
         dueDate: dueDate,
         attachments: currentAssignment.attachments || [],
-        student: currentAssignment.student?._id || currentAssignment.student || ""
+        student:
+          currentAssignment.student?._id || currentAssignment.student || "",
       });
 
       setExistingAttachments(currentAssignment.attachments || []);
@@ -199,34 +237,34 @@ const Page = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleDropdownToggle = (name) => {
-    if (name === "teacherId" && user?.role === 'Teacher') {
+    if (name === "teacherId" && user?.role === "Teacher") {
       return;
     }
-    setDropdownOpen(prev => prev === name ? null : name);
+    setDropdownOpen((prev) => (prev === name ? null : name));
   };
 
   const handleDropdownSelect = (name, value, selectedItem) => {
-    if (name === "teacherId" && user?.role === 'Teacher') {
+    if (name === "teacherId" && user?.role === "Teacher") {
       return;
     }
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     setDropdownOpen(null);
   };
 
   const handleStudentSelect = (name, studentId, selectedItem) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      student: studentId
+      student: studentId,
     }));
     setDropdownOpen(null);
   };
@@ -239,55 +277,36 @@ const Page = () => {
     const newAttachments = [...existingAttachments];
     newAttachments.splice(index, 1);
     setExistingAttachments(newAttachments);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      attachments: newAttachments
+      attachments: newAttachments,
     }));
   };
 
   const uploadFileToSupabase = (file) => {
-    const SUPABASE_URL = "https://rixdrbokebnvidwyzvzo.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpeGRyYm9rZWJudmlkd3l6dnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MjMzMzIsImV4cCI6MjA0ODE5OTMzMn0.Zhnz5rLRoIhtHyF52pFjzYijNdxgZBvEr9LtOxR2Lhw";
-    const fileName = `${Date.now()}_${file.name}`;
+    const formData = new FormData();
+    formData.append("file", file);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        const xhr = new XMLHttpRequest();
-        xhr.open(
-          "POST",
-          `${SUPABASE_URL}/storage/v1/object/maktab-system/${fileName}`
-        );
-        xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
+        const response = await fetch("/api/uploadFile", {
+          method: "POST",
+          body: formData,
+        });
 
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round(
-              (event.loaded / event.total) * 100
-            );
-            setUploadProgress(percentComplete);
-          }
-        };
+        const data = await response.json();
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/maktab-system/${fileName}`;
-            resolve({
-              name: file.name,
-              url: fileUrl,
-              size: file.size,
-              type: file.type,
-              fileName: fileName
-            });
-          } else {
-            reject(new Error("Upload failed"));
-          }
-        };
-
-        xhr.onerror = () => {
-          reject(new Error("Upload failed"));
-        };
-
-        xhr.send(file);
+        if (!response.ok) {
+          reject(new Error(data.error || "Upload failed"));
+        } else {
+          resolve({
+            name: data.name,
+            url: data.url,
+            size: data.size,
+            type: data.type,
+            fileName: data.fileName,
+          });
+        }
       } catch (error) {
         reject(error);
       }
@@ -299,7 +318,7 @@ const Page = () => {
     setUploadProgress(0);
 
     try {
-      const uploadPromises = files.map(file => uploadFileToSupabase(file));
+      const uploadPromises = files.map((file) => uploadFileToSupabase(file));
       const results = await Promise.all(uploadPromises);
       setUploading(false);
       setUploadProgress(0);
@@ -314,8 +333,15 @@ const Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.type || !formData.subject || !formData.classId || !formData.teacherId || !formData.dueDate) {
-      alert('Please fill all required fields');
+    if (
+      !formData.title ||
+      !formData.type ||
+      !formData.subject ||
+      !formData.classId ||
+      !formData.teacherId ||
+      !formData.dueDate
+    ) {
+      alert("Please fill all required fields");
       return;
     }
 
@@ -326,7 +352,10 @@ const Page = () => {
         newUploadedAttachments = await uploadFilesToSupabase(selectedFiles);
       }
 
-      const allAttachments = [...existingAttachments, ...newUploadedAttachments];
+      const allAttachments = [
+        ...existingAttachments,
+        ...newUploadedAttachments,
+      ];
 
       const assignmentData = {
         assignmentId: assignmentId,
@@ -339,22 +368,21 @@ const Page = () => {
         totalMarks: formData.totalMarks ? parseInt(formData.totalMarks) : 0,
         dueDate: formData.dueDate,
         attachments: allAttachments,
-        student: formData.student
+        student: formData.student,
       };
 
       dispatch(updateAssignment(assignmentData));
-
     } catch (error) {
-      console.error('Error uploading files:', error);
-      alert('Error uploading files. Please try again.');
+      console.error("Error uploading files:", error);
+      alert("Error uploading files. Please try again.");
     }
   };
 
   // Clear status and redirect on success
   useEffect(() => {
-    if (updateStatus === 'succeeded') {
+    if (updateStatus === "succeeded") {
       setTimeout(() => {
-        router.push('/dashboard/assignment');
+        router.push("/dashboard/assignment");
       }, 2000);
     }
 
@@ -364,27 +392,26 @@ const Page = () => {
     };
   }, [dispatch, updateStatus, router]);
 
-  const assignmentTypeOptions = [
-    { value: "Assignment", label: "Assignment" }
-  ];
+  const assignmentTypeOptions = [{ value: "Assignment", label: "Assignment" }];
 
-  const classOptions = (classNames || []).map(cls => ({
+  const classOptions = (classNames || []).map((cls) => ({
     value: cls._id || cls.id,
-    label: cls.name
+    label: cls.name,
   }));
 
-  const teacherOptions = (teacherNames || []).map(teacher => ({
+  const teacherOptions = (teacherNames || []).map((teacher) => ({
     value: teacher._id || teacher.id,
-    label: teacher.fullName
+    label: teacher.fullName,
   }));
 
-  const studentOptions = (students || []).map(student => ({
+  const studentOptions = (students || []).map((student) => ({
     value: student._id || student.id,
-    label: student.name || student.fullName || "Unknown Student"
+    label: student.name || student.fullName || "Unknown Student",
   }));
 
   const currentTeacherName = currentUserTeacherId
-    ? teacherOptions.find(teacher => teacher.value === currentUserTeacherId)?.label
+    ? teacherOptions.find((teacher) => teacher.value === currentUserTeacherId)
+        ?.label
     : "";
 
   const fetchingAssignment = fetchStatus === "loading";
@@ -392,7 +419,7 @@ const Page = () => {
   const fetchingClasses = classesLoading;
   const fetchingStudents = studentsStatus === "loading";
 
-  const isSubmitting = updateStatus === 'loading' || uploading;
+  const isSubmitting = updateStatus === "loading" || uploading;
 
   if (fetchingAssignment) {
     return (
@@ -426,8 +453,12 @@ const Page = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col gap-6 p-4 sm:p-6 md:p-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</p>
-          <h1 className="text-[1.75rem] font-medium text-[#000000]">MaktabOS</h1>
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
+            Welcome to
+          </p>
+          <h1 className="text-[1.75rem] font-medium text-[#000000]">
+            MaktabOS
+          </h1>
         </div>
 
         <Link
@@ -440,7 +471,9 @@ const Page = () => {
       </div>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
-        <h2 className="text-lg font-semibold mb-6 text-[#000000]">Edit Assignment</h2>
+        <h2 className="text-lg font-semibold mb-6 text-[#000000]">
+          Edit Assignment
+        </h2>
 
         {/* Status Messages */}
         {uploading && (
@@ -461,7 +494,7 @@ const Page = () => {
           </div>
         )}
 
-        {updateStatus === 'succeeded' && (
+        {updateStatus === "succeeded" && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full text-center mb-6">
             Assignment updated successfully! Redirecting...
           </div>
@@ -533,12 +566,14 @@ const Page = () => {
               onSelect={handleDropdownSelect}
               isOpen={dropdownOpen === "classId"}
               onToggle={handleDropdownToggle}
-              placeholder={fetchingClasses ? "Loading classes..." : "Select a class"}
+              placeholder={
+                fetchingClasses ? "Loading classes..." : "Select a class"
+              }
               required={true}
             />
 
             {/* Conditional Teacher Field */}
-            {user?.role === 'Teacher' ? (
+            {user?.role === "Teacher" ? (
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Teacher <span className="text-red-500">*</span>
@@ -546,7 +581,9 @@ const Page = () => {
                 <div className="w-full px-4 py-3 border border-gray-300 rounded-full bg-gray-50 text-gray-700">
                   {currentTeacherName || "Loading..."}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Automatically assigned as you are a teacher</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Automatically assigned as you are a teacher
+                </p>
               </div>
             ) : (
               <SimpleDropdown
@@ -557,7 +594,9 @@ const Page = () => {
                 onSelect={handleDropdownSelect}
                 isOpen={dropdownOpen === "teacherId"}
                 onToggle={handleDropdownToggle}
-                placeholder={fetchingTeachers ? "Loading teachers..." : "Select a teacher"}
+                placeholder={
+                  fetchingTeachers ? "Loading teachers..." : "Select a teacher"
+                }
                 required={true}
               />
             )}
@@ -589,7 +628,9 @@ const Page = () => {
               onSelect={handleStudentSelect}
               isOpen={dropdownOpen === "student"}
               onToggle={handleDropdownToggle}
-              placeholder={fetchingStudents ? "Loading students..." : "Select a student"}
+              placeholder={
+                fetchingStudents ? "Loading students..." : "Select a student"
+              }
               required={false}
             />
           </div>
@@ -622,13 +663,26 @@ const Page = () => {
             </Link>
             <button
               type="submit"
-              disabled={isSubmitting || fetchingTeachers || fetchingClasses || fetchingStudents}
-              className={`rounded-full px-8 py-3 text-sm font-semibold transition ${isSubmitting || fetchingTeachers || fetchingClasses || fetchingStudents
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
-                }`}
+              disabled={
+                isSubmitting ||
+                fetchingTeachers ||
+                fetchingClasses ||
+                fetchingStudents
+              }
+              className={`rounded-full px-8 py-3 text-sm font-semibold transition ${
+                isSubmitting ||
+                fetchingTeachers ||
+                fetchingClasses ||
+                fetchingStudents
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
+              }`}
             >
-              {isSubmitting ? (uploading ? 'Uploading Files...' : 'Updating Assignment...') : 'Update Assignment'}
+              {isSubmitting
+                ? uploading
+                  ? "Uploading Files..."
+                  : "Updating Assignment..."
+                : "Update Assignment"}
             </button>
           </div>
         </form>

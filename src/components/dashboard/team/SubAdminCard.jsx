@@ -18,8 +18,7 @@ import {
 } from "@/redux/slices/adminSlices/adminSlices";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
-const AdminCard = ({
-  key,
+const SubAdminCard = ({
   admin,
   onDelete,
   isExpanded,
@@ -102,15 +101,16 @@ const AdminCard = ({
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Background image */}
-        <div className="absolute inset-0 w-full h-full">
-          <Image
-            src={admin.photo}
-            alt="Admin card background"
-            fill
-            priority
-            className="object-cover object-center"
-          />
-        </div>
+<div className="absolute inset-0 w-full h-full">
+  <Image
+    src={admin.photo}
+    alt="Admin card background"
+    fill
+    priority
+    className="object-cover object-center"
+  />
+</div>
+
 
         {/* Glassmorphism overlay */}
         <div
@@ -151,7 +151,7 @@ const AdminCard = ({
           {/* Status Badges */}
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="inline-flex items-center px-3 py-2 rounded-full bg-[#0B4B31] text-white text-xs font-semibold">
-              Administrator
+              Sub Admin
             </span>
             {admin.createdAt && (
               <span className="inline-flex items-center px-3 py-2 rounded-full bg-[#F16957] text-white text-xs font-semibold">
@@ -207,7 +207,7 @@ const AdminCard = ({
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() =>
-                      router.push(`/dashboard/team/admin/${admin._id}/detail`)
+                      router.push(`/dashboard/team/sub-admin/${admin._id}`)
                     }
                     className="flex-1 rounded-full bg-white border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-md flex items-center justify-center gap-2"
                   >
@@ -216,7 +216,7 @@ const AdminCard = ({
                   </button>
                   <button
                     onClick={() =>
-                      router.push(`/dashboard/team/admin/${admin._id}/edit`)
+                      router.push(`/dashboard/team/sub-admin/${admin._id}/edit`)
                     }
                     className="flex-1 rounded-full bg-white border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-md flex items-center justify-center gap-2"
                   >
@@ -280,4 +280,4 @@ const AdminCard = ({
   );
 };
 
-export default AdminCard;
+export default SubAdminCard;

@@ -1,9 +1,9 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from "@reduxjs/toolkit";
 
-import userReducer from './slices/authSlices/userLoginSlice';
+import userReducer from "./slices/authSlices/userLoginSlice";
 
-import messageReducer from './slices/messagesSlices/messagesSlices';
-import socketReducer from './slices/messagesSlices/socketSlices';
+import messageReducer from "./slices/messagesSlices/messagesSlices";
+import socketReducer from "./slices/messagesSlices/socketSlices";
 
 import {
   addToWaitListReducer,
@@ -17,8 +17,8 @@ import {
   setDefaultCardReducer,
   removeCardReducer,
   parentDashboardReducer,
-  deleteParentReducer
-} from './slices/parentSlices/parentSlice';
+  deleteParentReducer,
+} from "./slices/parentSlices/parentSlice";
 
 import {
   createStudentReducer,
@@ -30,8 +30,8 @@ import {
   getStudentNamesWithIdsReducer,
   getStudentDashboardStatsReducer,
   updateStudentReducer,
-  deleteStudentReducer
-} from './slices/studentSlices/studentSlices';
+  deleteStudentReducer,
+} from "./slices/studentSlices/studentSlices";
 
 import {
   createClassReducer,
@@ -39,8 +39,8 @@ import {
   getAllClassesNameReducer,
   getClassByIDReducer,
   updateClassReducer,
-  deleteClassReducer
-} from './slices/classSlices/classSlice';
+  deleteClassReducer,
+} from "./slices/classSlices/classSlice";
 
 import {
   createTeacherReducer,
@@ -50,45 +50,52 @@ import {
   deleteTeacherReducer,
   getTeachersNameReducer,
   getTeacherDetailReducer,
-  teacherDashboardReducer
-} from './slices/teacherSlices/teacherSlices';
+  teacherDashboardReducer,
+} from "./slices/teacherSlices/teacherSlices";
 
 import {
   createAdminReducer,
   getAllAdminsReducer,
   getAdminByIdReducer,
   updateAdminReducer,
-  deleteAdminReducer
-} from './slices/adminSlices/adminSlices';
+  deleteAdminReducer,
+} from "./slices/adminSlices/adminSlices";
+
+// Import SubAdmin reducers
+import {
+  createSubAdminReducer,
+  getAllSubAdminsReducer,
+  getSubAdminByIdReducer,
+  updateSubAdminReducer,
+  deleteSubAdminReducer,
+} from "./slices/subadminSlices/subAdminSlices";
 
 import {
   createTimetableReducer,
   getAllTimetablesReducer,
   deleteTimeTableReducer,
   getTimetableByIdReducer,
-  updateTimetableByIdReducer
-} from './slices/timetableSlices/timetableSlices';
+  updateTimetableByIdReducer,
+} from "./slices/timetableSlices/timetableSlices";
 
 import {
   getAllInvoicesReducer,
   getInvoicesStatsReducer,
   createInvoiceReducer,
   getInvoiceByIdReducer,
-  updateInvoiceReducer
-} from './slices/invoiceSlices/invoiceSlices';
+  updateInvoiceReducer,
+} from "./slices/invoiceSlices/invoiceSlices";
 
-import {
-  getAllPaymentStatsReducer
-} from './slices/paymentSlices/paymentSlices';
+import { getAllPaymentStatsReducer } from "./slices/paymentSlices/paymentSlices";
 
 import { dashboardReducer } from "./slices/superadminSlices/superadminSlices";
 
-import attendanceReducer from './slices/attendanceSlices/attendanceSlices';
-import gradeReducer from './slices/gradeSlices/gradeSlices';
-import assignmentReducer from './slices/assignmentSlices/assignmentSlices';
-import notificationsReducer from './slices/notificationSlices/notificationSlices';
+import attendanceReducer from "./slices/attendanceSlices/attendanceSlices";
+import gradeReducer from "./slices/gradeSlices/gradeSlices";
+import assignmentReducer from "./slices/assignmentSlices/assignmentSlices";
+import notificationsReducer from "./slices/notificationSlices/notificationSlices";
 
-import eventReducer from './slices/eventSlices/eventSlices';
+import eventReducer from "./slices/eventSlices/eventSlices";
 
 export const store = configureStore({
   reducer: {
@@ -150,6 +157,14 @@ export const store = configureStore({
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
     deleteAdmin: deleteAdminReducer,
+
+    // SubAdmin management
+    createSubAdmin: createSubAdminReducer,
+    getAllSubAdmins: getAllSubAdminsReducer,
+    getSubAdminById: getSubAdminByIdReducer,
+    updateSubAdmin: updateSubAdminReducer,
+    deleteSubAdmin: deleteSubAdminReducer,
+
     // Academic management
     createTimetable: createTimetableReducer,
     getAllTimetables: getAllTimetablesReducer,
@@ -177,7 +192,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['socket/socketConnected'],
+        ignoredActions: ["socket/socketConnected"],
       },
     }),
 });
