@@ -61,6 +61,21 @@ export const updateAdminAction = createAsyncThunk(
   }
 );
 
+export const updateThemeAction = createAsyncThunk(
+  "admins/updateTheme",
+  async (themeData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateTheme`,
+        themeData
+      );
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const createAdminSlice = createSlice({
   name: "createAdmin",
   initialState: { loading: false, admin: null, error: null },
@@ -184,11 +199,53 @@ const deleteAdminSlice = createSlice({
   },
 });
 
-export const { resetState } = updateAdminSlice.actions;
+const updateThemeSlice = createSlice({
+  name: "updateTheme",
+  initialState: { 
+    loading: false, 
+    success: false, 
+    data: null, 
+    error: null 
+  },
+  reducers: {
+    resetUpdateThemeState: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.data = null;
+      state.error = null;
+    },
+    clearUpdateThemeError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(updateThemeAction.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(updateThemeAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(updateThemeAction.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  },
+});
 
+export const { resetState } = updateAdminSlice.actions;
+export const { resetDeleteAdminState } = deleteAdminSlice.actions;
+export const { resetUpdateThemeState, clearUpdateThemeError } = updateThemeSlice.actions;
 
 export const createAdminReducer = createAdminSlice.reducer;
 export const getAllAdminsReducer = getAllAdminsSlice.reducer;
 export const getAdminByIdReducer = getAdminByIdSlice.reducer;
 export const updateAdminReducer = updateAdminSlice.reducer;
 export const deleteAdminReducer = deleteAdminSlice.reducer;
+export const updateThemeReducer = updateThemeSlice.reducer;
