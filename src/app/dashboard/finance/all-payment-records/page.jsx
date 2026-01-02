@@ -46,14 +46,14 @@ export default function AllPaymentRecordsPage() {
             </label>
 
             {/* See All Button */}
-            <div>
+            {/* <div>
               <button
                 type="button"
                 className="rounded-full border border-[#0B4B31]/30 bg-[#E5EFEB] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
               >
                 See All ↗
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 

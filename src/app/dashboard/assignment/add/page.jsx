@@ -13,6 +13,7 @@ import { getStudentNamesWithIds } from "@/redux/slices/studentSlices/studentSlic
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { getCookie } from "cookies-next";
+import { getAdminId } from "@/utils/getCookies";
 
 const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
   const handleFileSelect = (e) => {
@@ -77,7 +78,8 @@ const FileUploadField = ({ label, files, onFilesChange, className = "" }) => {
 
 const Page = () => {
   const dispatch = useDispatch();
-
+    const adminId = getAdminId();
+  
   const { createStatus, createError } = useSelector(
     (state) => state.assignment
   );
@@ -122,7 +124,7 @@ const Page = () => {
   const [currentUserTeacherId, setCurrentUserTeacherId] = useState(null);
 
   useEffect(() => {
-    dispatch(getTeachersName());
+    dispatch(getTeachersName(adminId));
     dispatch(getAllClassesNameAction());
     dispatch(getStudentNamesWithIds());
   }, [dispatch]);

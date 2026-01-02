@@ -60,14 +60,14 @@ export default function ActivitiesPage() {
             </div>
 
             {/* See All Button */}
-            <div>
+            {/* <div>
               <button
                 type="button"
                 className="rounded-full border border-[#0B4B3138] px-4 py-2 text-xs sm:text-sm font-normal text-[#0B4B31] transition hover:bg-[#F3F6F5] whitespace-nowrap"
               >
                 See All ↗
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 

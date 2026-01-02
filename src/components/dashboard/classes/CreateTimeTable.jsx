@@ -6,18 +6,26 @@ import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { getAdminId } from "@/utils/getCookies";
 
 const CreateTimeTable = () => {
+  const adminId = getAdminId();
   const dispatch = useDispatch();
-  const { loading: creatingTimetable, timetable: createdTimetable, error: timetableError } = useSelector(
-    (state) => state.createTimetable
-  );
-  const { classNames, loading: classesLoading, error: classesError } = useSelector(
-    (state) => state.getAllClassesName
-  );
-  const { teacherNames, status: teachersStatus, error: teachersError } = useSelector(
-    (state) => state.getTeachersName
-  );
+  const {
+    loading: creatingTimetable,
+    timetable: createdTimetable,
+    error: timetableError,
+  } = useSelector((state) => state.createTimetable);
+  const {
+    classNames,
+    loading: classesLoading,
+    error: classesError,
+  } = useSelector((state) => state.getAllClassesName);
+  const {
+    teacherNames,
+    status: teachersStatus,
+    error: teachersError,
+  } = useSelector((state) => state.getTeachersName);
 
   const [formData, setFormData] = useState({
     classId: "",
@@ -26,7 +34,7 @@ const CreateTimeTable = () => {
     startTime: "",
     endTime: "",
     subject: "",
-    topic: ""
+    topic: "",
   });
 
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -39,34 +47,44 @@ const CreateTimeTable = () => {
     { value: "Thursday", label: "Thursday" },
     { value: "Friday", label: "Friday" },
     { value: "Saturday", label: "Saturday" },
-    { value: "Sunday", label: "Sunday" }
+    { value: "Sunday", label: "Sunday" },
   ];
 
   useEffect(() => {
     dispatch(getAllClassesNameAction());
-    dispatch(getTeachersName());
+    dispatch(getTeachersName(adminId));
   }, [dispatch]);
 
   const handleDropdownToggle = (name) => {
-    setDropdownOpen(prev => prev === name ? null : name);
+    setDropdownOpen((prev) => (prev === name ? null : name));
   };
 
   const handleSelect = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setDropdownOpen(null);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const { classId, teacherId, dayOfWeek, startTime, endTime, subject } = formData;
-    if (!classId || !teacherId || !dayOfWeek || !startTime || !endTime || !subject) {
-      alert("Please fill all required fields: Class, Teacher, Day, Start Time, End Time, and Subject");
+    const { classId, teacherId, dayOfWeek, startTime, endTime, subject } =
+      formData;
+    if (
+      !classId ||
+      !teacherId ||
+      !dayOfWeek ||
+      !startTime ||
+      !endTime ||
+      !subject
+    ) {
+      alert(
+        "Please fill all required fields: Class, Teacher, Day, Start Time, End Time, and Subject"
+      );
       return;
     }
 
@@ -82,7 +100,7 @@ const CreateTimeTable = () => {
         startTime: "",
         endTime: "",
         subject: "",
-        topic: ""
+        topic: "",
       });
     }
   }, [createdTimetable]);
@@ -90,23 +108,29 @@ const CreateTimeTable = () => {
   const fetchingTeachers = teachersStatus === "loading";
   const fetchingClasses = classesLoading;
 
-  const classOptions = classNames.map(cls => ({
+  const classOptions = classNames.map((cls) => ({
     value: cls._id || cls.id,
-    label: cls.name
+    label: cls.name,
   }));
 
-  const teacherOptions = teacherNames.map(teacher => ({
+  const teacherOptions = teacherNames.map((teacher) => ({
     value: teacher._id || teacher.id,
-    label: `${teacher.fullName} - ${teacher.specialization}`
+    label: `${teacher.fullName} - ${teacher.specialization}`,
   }));
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
-      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
+      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">
+        Welcome to
+      </h1>
+      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">
+        MaktabOS
+      </p>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
-        <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Timetable</h2>
+        <h2 className="text-lg font-semibold mb-6 text-[#000000]">
+          Create Timetable
+        </h2>
 
         {/* Status Messages */}
         {creatingTimetable && (
@@ -148,7 +172,9 @@ const CreateTimeTable = () => {
               options={classOptions}
               isOpen={dropdownOpen === "classId"}
               onToggle={handleDropdownToggle}
-              placeholder={fetchingClasses ? "Loading classes..." : "Select a class"}
+              placeholder={
+                fetchingClasses ? "Loading classes..." : "Select a class"
+              }
               required
               onSelect={handleSelect}
               disabled={fetchingClasses}
@@ -161,7 +187,9 @@ const CreateTimeTable = () => {
               options={teacherOptions}
               isOpen={dropdownOpen === "teacherId"}
               onToggle={handleDropdownToggle}
-              placeholder={fetchingTeachers ? "Loading teachers..." : "Select a teacher"}
+              placeholder={
+                fetchingTeachers ? "Loading teachers..." : "Select a teacher"
+              }
               required
               onSelect={handleSelect}
               disabled={fetchingTeachers}
@@ -221,14 +249,16 @@ const CreateTimeTable = () => {
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              disabled={creatingTimetable || fetchingTeachers || fetchingClasses}
+              disabled={
+                creatingTimetable || fetchingTeachers || fetchingClasses
+              }
               className={`rounded-full px-8 py-3 text-sm font-semibold transition ${
                 creatingTimetable || fetchingTeachers || fetchingClasses
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
               }`}
             >
-              {creatingTimetable ? 'Creating Timetable...' : 'Create Timetable'}
+              {creatingTimetable ? "Creating Timetable..." : "Create Timetable"}
             </button>
           </div>
         </form>

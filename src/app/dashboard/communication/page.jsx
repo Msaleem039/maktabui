@@ -2,11 +2,24 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Search, Grid, Moon, ChevronDown, Users, ShieldCheck, GraduationCap } from "lucide-react";
+import {
+  Search,
+  Grid,
+  Moon,
+  ChevronDown,
+  Users,
+  ShieldCheck,
+  GraduationCap,
+} from "lucide-react";
 import CommunicationPanel from "@/components/dashboard/CommunicationPanel";
 import { useDispatch, useSelector } from "react-redux";
-import { getUsersData, getInbox, getUserConversations } from "@/redux/slices/messagesSlices/messagesSlices";
+import {
+  getUsersData,
+  getInbox,
+  getUserConversations,
+} from "@/redux/slices/messagesSlices/messagesSlices";
 import { getCookie } from "cookies-next";
+import { getUserName } from "@/utils/getCookies";
 
 const roleOptions = [
   {
@@ -14,28 +27,42 @@ const roleOptions = [
     title: "Admin Team",
     description: "Coordinate with leadership and support teams.",
     icon: ShieldCheck,
-    role: "Admin"
+    role: "Admin",
+  },
+  {
+    id: "subadmin",
+    title: "Sub Admin",
+    description: "Coordinate with leadership and support teams.",
+    icon: ShieldCheck,
+    role: "SubAdmin",
   },
   {
     id: "teacher",
     title: "Teachers",
     description: "Discuss classes, assignments, and academic updates.",
     icon: GraduationCap,
-    role: "Teacher"
+    role: "Teacher",
   },
   {
     id: "parent",
     title: "Parents",
     description: "Stay connected with guardians for student progress.",
     icon: Users,
-    role: "Parent"
+    role: "Parent",
   },
   {
     id: "student",
     title: "Students",
     description: "Stay connected with guardians for student progress.",
     icon: Users,
-    role: "Student"
+    role: "Student",
+  },
+  {
+    id: "superadmin",
+    title: "Super Admin",
+    description: "Coordinate with all administrative roles.",
+    icon: ShieldCheck,
+    role: "SuperAdmin",
   },
 ];
 
@@ -57,12 +84,12 @@ const roleCopy = {
 const parseUserCookie = (cookieValue) => {
   if (!cookieValue) return null;
   try {
-    if (typeof cookieValue === 'object') return cookieValue;
-    if (typeof cookieValue === 'string') {
+    if (typeof cookieValue === "object") return cookieValue;
+    if (typeof cookieValue === "string") {
       let decodedValue = cookieValue;
       try {
         decodedValue = decodeURIComponent(cookieValue);
-      } catch (e) { }
+      } catch (e) {}
       return JSON.parse(decodedValue);
     }
     return null;
@@ -78,9 +105,11 @@ const CommunicationPage = () => {
     loading,
     error,
     inbox,
-    conversations: userConversations
+    conversations: userConversations,
   } = useSelector((state) => state.message);
-
+  const userName = getUserName();
+  console.log("userName",userName);
+  
   const [roleChoice, setRoleChoice] = useState("");
   const [selectedRole, setSelectedRole] = useState(null);
   const [selectedRoleOption, setSelectedRoleOption] = useState(null);
@@ -101,7 +130,7 @@ const CommunicationPage = () => {
     return {
       id: userData.id || userData._id || "unknown-id",
       role: userData.role || "Unknown",
-      name: userData.name || "User"
+      name: userData.name || "User",
     };
   }, [userData]);
 
@@ -112,28 +141,31 @@ const CommunicationPage = () => {
 
     switch (userRole) {
       case "super admin":
-        return roleOptions;
+        return roleOptions.filter((role) => role.id === "admin");
 
       case "admin":
-        return roleOptions; 
+        return roleOptions.filter((role) =>
+          ["superadmin", "subadmin", "teacher", "student", "parent"].includes(
+            role.id
+          )
+        );
+
+      case "subadmin":
+        return roleOptions.filter((role) => role.id === "admin");
 
       case "teacher":
-        return roleOptions.filter(role =>
-          role.id === "parent" || role.id === "student" || role.id === "super admin"
+        return roleOptions.filter((role) =>
+          ["parent", "student"].includes(role.id)
         );
 
       case "parent":
-        return roleOptions.filter(role =>
-          role.id === "teacher"
-        );
+        return roleOptions.filter((role) => role.id === "teacher");
 
       case "student":
-        return roleOptions.filter(role =>
-          role.id === "teacher"
-        );
+        return roleOptions.filter((role) => role.id === "teacher");
 
       default:
-        return roleOptions;
+        return [];
     }
   }, [currentUser?.role]);
 
@@ -141,7 +173,13 @@ const CommunicationPage = () => {
     if (!currentUser?.id) return;
 
     dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
-    dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
+    dispatch(
+      getUserConversations({
+        userId: currentUser.id,
+        userModel:
+          currentUser.role === "Super Admin" ? "User" : currentUser.role,
+      })
+    );
   }, [currentUser?.id, currentUser?.role, dispatch]);
 
   const activeRoleCopy = useMemo(() => {
@@ -149,15 +187,47 @@ const CommunicationPage = () => {
     return roleCopy[selectedRole];
   }, [selectedRole]);
 
-  const handleRoleSelect = useCallback((roleId) => {
-    const roleOption = filteredRoleOptions.find(role => role.id === roleId);
-    if (roleOption) {
-      setRoleChoice(roleId);
-      setSelectedRole(roleId);
-      setSelectedRoleOption(roleOption);
-      dispatch(getUsersData({ role: roleOption.role,id:userData?.id }));
-    }
-  }, [dispatch, filteredRoleOptions]);
+  const handleRoleSelect = useCallback(
+    (roleId) => {
+      const roleOption = filteredRoleOptions.find((role) => role.id === roleId);
+      if (roleOption) {
+        setRoleChoice(roleId);
+        setSelectedRole(roleId);
+        setSelectedRoleOption(roleOption);
+
+        const currentUserRole = currentUser?.role.toLowerCase();
+        const targetRoleId = roleOption.id;
+        const targetRole = roleOption.role;
+
+        if (currentUserRole === "admin" && targetRoleId === "superadmin") {
+          dispatch(
+            getUsersData({
+              role: "superadmin",
+              id: "get_superadmin",
+            })
+          );
+        } else if (
+          currentUserRole === "super admin" &&
+          targetRoleId === "admin"
+        ) {
+          dispatch(
+            getUsersData({
+              role: "admin",
+              id: "super_admin_all_admins",
+            })
+          );
+        } else {
+          dispatch(
+            getUsersData({
+              role: targetRole,
+              id: currentUser.id,
+            })
+          );
+        }
+      }
+    },
+    [dispatch, filteredRoleOptions, currentUser]
+  );
 
   const handleStartChat = useCallback(() => {
     if (roleChoice) {
@@ -175,13 +245,16 @@ const CommunicationPage = () => {
 
     if (userConversations && userConversations.length > 0) {
       userConversations
-        .filter(conv => {
-          const convModel = conv.participantModel === "Super Admin" ? "User" : conv.participantModel;
+        .filter((conv) => {
+          const convModel =
+            conv.participantModel === "Super Admin"
+              ? "User"
+              : conv.participantModel;
           const selectedModel = selectedRoleOption?.role || "";
           return convModel === selectedModel;
         })
-        .forEach(conv => {
-          const roomId = [currentUser.id, conv.participantId].sort().join('_');
+        .forEach((conv) => {
+          const roomId = [currentUser.id, conv.participantId].sort().join("_");
 
           let lastMessage = conv.lastMessage || "Start a conversation...";
           let lastMessageTime = "Online";
@@ -189,7 +262,10 @@ const CommunicationPage = () => {
           if (conv.lastMessageTime) {
             try {
               const msgDate = new Date(conv.lastMessageTime);
-              lastMessageTime = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              lastMessageTime = msgDate.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
             } catch (e) {
               lastMessageTime = "Online";
             }
@@ -207,7 +283,7 @@ const CommunicationPage = () => {
             roomId: roomId,
             hasExistingConversation: true,
             unreadCount: conv.unreadCount || 0,
-            conversationMessages: conv.messages || []
+            conversationMessages: conv.messages || [],
           });
 
           addedUserIds.add(conv.participantId);
@@ -216,21 +292,42 @@ const CommunicationPage = () => {
 
     if (usersList && usersList.length > 0) {
       usersList.forEach((user) => {
-        if (!addedUserIds.has(user._id)) {
-          const roomId = [currentUser.id, user._id].sort().join('_');
+        let userData = user;
+        let userId = user._id;
+
+        if (user.subAdmin && typeof user.subAdmin === "object") {
+          userData = { ...user.subAdmin, role: "SubAdmin" };
+          userId = userData._id;
+
+          if (user.parentAdmin) {
+            userData.parentAdmin = user.parentAdmin;
+          }
+        }
+
+        if (!addedUserIds.has(userId)) {
+          const roomId = [currentUser.id, userId].sort().join("_");
+
+          const userName =
+            userData.name ||
+            userData.fullName ||
+            userData.username ||
+            userData.studentName ||
+            `${userData.role} User`;
+
           conversations.push({
-            id: user._id,
-            name: user.name || user.fullName || user.username || user.studentName || `${user.role} User`,
+            id: userId,
+            name: userName,
             snippet: "Start a conversation...",
             time: "Online",
             status: "Active",
-            tag: user.role,
-            role: user.role,
-            receiverModel: selectedRoleOption?.role || user.role,
+            tag: userData.role,
+            role: userData.role,
+            receiverModel: selectedRoleOption?.role || userData.role,
             roomId: roomId,
             hasExistingConversation: false,
             unreadCount: 0,
-            conversationMessages: []
+            conversationMessages: [],
+            userData: userData,
           });
         }
       });
@@ -241,14 +338,26 @@ const CommunicationPage = () => {
       if (!a.hasExistingConversation && b.hasExistingConversation) return 1;
 
       if (a.hasExistingConversation && b.hasExistingConversation) {
-        const timeA = new Date(userConversations.find(c => c.participantId === a.id)?.lastMessageTime || 0);
-        const timeB = new Date(userConversations.find(c => c.participantId === b.id)?.lastMessageTime || 0);
+        const timeA = new Date(
+          userConversations.find((c) => c.participantId === a.id)
+            ?.lastMessageTime || 0
+        );
+        const timeB = new Date(
+          userConversations.find((c) => c.participantId === b.id)
+            ?.lastMessageTime || 0
+        );
         return timeB - timeA;
       }
 
       return a.name.localeCompare(b.name);
     });
-  }, [usersList, currentUser?.id, selectedRoleOption, userConversations, selectedRole]);
+  }, [
+    usersList,
+    currentUser?.id,
+    selectedRoleOption,
+    userConversations,
+    selectedRole,
+  ]);
 
   const resetRoleSelection = useCallback(() => {
     setSelectedRole(null);
@@ -258,21 +367,41 @@ const CommunicationPage = () => {
 
   const handleRefresh = useCallback(() => {
     if (currentUser?.id && currentUser?.role) {
-      dispatch(getInbox({ userId: currentUser.id, userModel: currentUser.role }));
-      dispatch(getUserConversations({ userId: currentUser.id, userModel: currentUser.role === "Super Admin" ? "User" : currentUser.role }));
+      dispatch(
+        getInbox({ userId: currentUser.id, userModel: currentUser.role })
+      );
+      dispatch(
+        getUserConversations({
+          userId: currentUser.id,
+          userModel:
+            currentUser.role === "Super Admin" ? "User" : currentUser.role,
+        })
+      );
     }
   }, [currentUser?.id, currentUser?.role, dispatch]);
 
-  const communicationPanelProps = useMemo(() => ({
-    panelTitle: activeRoleCopy?.title || "Live Conversations",
-    subtitle: activeRoleCopy?.subtitle || "Monitor, reply, and collaborate across roles",
-    conversations: usersConversations,
-    showUsersList: true,
-    currentUser: currentUser,
-    selectedRoleOption: selectedRoleOption,
-    onRefresh: handleRefresh,
-    userConversations: userConversations
-  }), [activeRoleCopy, usersConversations, currentUser, selectedRoleOption, handleRefresh, userConversations]);
+  const communicationPanelProps = useMemo(
+    () => ({
+      panelTitle: activeRoleCopy?.title || "Live Conversations",
+      subtitle:
+        activeRoleCopy?.subtitle ||
+        "Monitor, reply, and collaborate across roles",
+      conversations: usersConversations,
+      showUsersList: true,
+      currentUser: currentUser,
+      selectedRoleOption: selectedRoleOption,
+      onRefresh: handleRefresh,
+      userConversations: userConversations,
+    }),
+    [
+      activeRoleCopy,
+      usersConversations,
+      currentUser,
+      selectedRoleOption,
+      handleRefresh,
+      userConversations,
+    ]
+  );
 
   if (!currentUser) {
     return (
@@ -314,7 +443,7 @@ const CommunicationPage = () => {
                 />
               </div>
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
-                {currentUser.name}
+                {userName}
               </span>
               <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
@@ -327,16 +456,20 @@ const CommunicationPage = () => {
           Communication Center
         </p>
         <p className="text-[1.25rem] text-[#5E6C64]">
-          Seamless conversations between administrators, teachers, parents, and students
+          Seamless conversations between administrators, teachers, parents, and
+          students
         </p>
       </div>
 
       {!selectedRole ? (
         <section className="rounded-[32px] border border-[#E2E7E4] bg-white p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col gap-3 mb-6">
-            <h2 className="text-2xl font-semibold text-[#0B4B31]">Choose who you'd like to chat with</h2>
+            <h2 className="text-2xl font-semibold text-[#0B4B31]">
+              Choose who you'd like to chat with
+            </h2>
             <p className="text-sm text-[#5E6C64]">
-              Select a role to filter conversations and keep your communication focused.
+              Select a role to filter conversations and keep your communication
+              focused.
             </p>
           </div>
 
@@ -345,14 +478,21 @@ const CommunicationPage = () => {
               <button
                 key={role.id}
                 onClick={() => handleRoleSelect(role.id)}
-                className={`rounded-3xl border px-5 py-6 text-left transition shadow-sm ${roleChoice === role.id ? "border-[#0B4B31] bg-[#F2F7F5]" : "border-[#E2E7E4] bg-white hover:border-[#0B4B31]/40"
-                  }`}
+                className={`rounded-3xl border px-5 py-6 text-left transition shadow-sm ${
+                  roleChoice === role.id
+                    ? "border-[#0B4B31] bg-[#F2F7F5]"
+                    : "border-[#E2E7E4] bg-white hover:border-[#0B4B31]/40"
+                }`}
               >
                 <div className="w-12 h-12 rounded-2xl bg-[#0B4B31]/10 flex items-center justify-center text-[#0B4B31] mb-4">
                   <role.icon size={24} />
                 </div>
-                <p className="text-lg font-semibold text-[#0B4B31]">{role.title}</p>
-                <p className="text-sm text-[#5E6C64] mt-2">{role.description}</p>
+                <p className="text-lg font-semibold text-[#0B4B31]">
+                  {role.title}
+                </p>
+                <p className="text-sm text-[#5E6C64] mt-2">
+                  {role.description}
+                </p>
               </button>
             ))}
           </div>
@@ -379,8 +519,11 @@ const CommunicationPage = () => {
             <button
               onClick={handleStartChat}
               disabled={!roleChoice}
-              className={`rounded-full px-8 py-3 text-sm font-semibold text-white transition ${roleChoice ? "bg-[#0B4B31] hover:bg-[#0a3f27]" : "bg-gray-300 cursor-not-allowed"
-                }`}
+              className={`rounded-full px-8 py-3 text-sm font-semibold text-white transition ${
+                roleChoice
+                  ? "bg-[#0B4B31] hover:bg-[#0a3f27]"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
             >
               Start Chat
             </button>
@@ -397,7 +540,11 @@ const CommunicationPage = () => {
 
           {loading && (
             <div className="text-center py-8">
-              <p className="text-[#0B4B31]">Loading {filteredRoleOptions.find(r => r.id === selectedRole)?.title}...</p>
+              <p className="text-[#0B4B31]">
+                Loading{" "}
+                {filteredRoleOptions.find((r) => r.id === selectedRole)?.title}
+                ...
+              </p>
             </div>
           )}
 
@@ -407,9 +554,7 @@ const CommunicationPage = () => {
             </div>
           )}
 
-          {!error && (
-            <CommunicationPanel {...communicationPanelProps} />
-          )}
+          {!error && <CommunicationPanel {...communicationPanelProps} />}
         </div>
       )}
     </div>

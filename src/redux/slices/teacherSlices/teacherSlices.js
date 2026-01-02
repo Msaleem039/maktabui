@@ -16,9 +16,9 @@ export const createTeacher = createAsyncThunk(
 
 export const getAllTeachers = createAsyncThunk(
   `teacher/getAllTeachers`,
-  async (params = {}, { rejectWithValue }) => {
+  async (adminId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllTeachers`, params);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllTeachers`, {adminId});
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -64,9 +64,12 @@ export const deleteTeacher = createAsyncThunk(
 
 export const getTeachersName = createAsyncThunk(
   `teacher/getTeachersName`,
-  async (_, { rejectWithValue }) => {
+  async (adminId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getTeachersName`);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getTeachersName`,
+        { adminId } 
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -157,7 +160,7 @@ const getAllTeachersSlice = createSlice({
       })
       .addCase(getAllTeachers.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.teachers = action.payload.teachers || [];
+        state.teachers = action.payload.data || [];
         state.pagination = action.payload.pagination || null;
       })
       .addCase(getAllTeachers.rejected, (state, action) => {
@@ -279,7 +282,7 @@ const getTeachersNameSlice = createSlice({
       })
       .addCase(getTeachersName.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.teacherNames = action.payload.teachers || [];
+        state.teacherNames = action.payload.data || [];
       })
       .addCase(getTeachersName.rejected, (state, action) => {
         state.status = "failed";

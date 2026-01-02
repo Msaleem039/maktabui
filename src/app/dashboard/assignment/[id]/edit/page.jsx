@@ -17,6 +17,7 @@ import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { getCookie } from "cookies-next";
 import Link from "next/link";
+import { getAdminId } from "@/utils/getCookies";
 
 const FileUploadField = ({
   label,
@@ -30,7 +31,7 @@ const FileUploadField = ({
     const selectedFiles = Array.from(e.target.files);
     onFilesChange([...files, ...selectedFiles]);
   };
-
+  const adminId = getAdminId();
   const removeFile = (index) => {
     const newFiles = files.filter((_, i) => i !== index);
     onFilesChange(newFiles);
@@ -188,7 +189,7 @@ const Page = () => {
     if (assignmentId) {
       dispatch(getAssignmentById(assignmentId));
     }
-    dispatch(getTeachersName());
+    dispatch(getTeachersName(adminId));
     dispatch(getAllClassesNameAction());
     dispatch(getStudentNamesWithIds());
   }, [dispatch, assignmentId]);

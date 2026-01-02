@@ -738,14 +738,14 @@ export default function AssignmentPage() {
           </label>
 
           {/* See All Button */}
-          <div>
+          {/* <div>
             <button
               type="button"
               className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
             >
               See All ↗
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

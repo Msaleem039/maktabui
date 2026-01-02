@@ -13,6 +13,18 @@ export const createAdminAction = createAsyncThunk(
   }
 );
 
+export const getAdminDashboardStats = createAsyncThunk(
+  "admins/createAdmin",
+  async (adminId, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAdminDashboardStats`, adminId);
+      return res.data.admin;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const getAllAdminsAction = createAsyncThunk(
   "admins/getAllAdmins",
   async (_, { rejectWithValue }) => {
@@ -75,6 +87,25 @@ export const updateThemeAction = createAsyncThunk(
     }
   }
 );
+
+export const getAdminDashboardStatsAction = createAsyncThunk(
+  "admins/getAdminDashboardStats",
+  async ({ adminId, year }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAdminDashboardStats`,
+        { adminId, year }
+      );
+
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message
+      );
+    }
+  }
+);
+
 
 const createAdminSlice = createSlice({
   name: "createAdmin",
@@ -239,6 +270,48 @@ const updateThemeSlice = createSlice({
   },
 });
 
+const adminDashboardSlice = createSlice({
+  name: "adminDashboard",
+  initialState: {
+    loading: false,
+    stats: null,
+    yearlyPayments: [],
+    topPayingParents: [],
+    topOutstandingParents: [],
+    error: null,
+  },
+  reducers: {
+    resetAdminDashboardState: (state) => {
+      state.loading = false;
+      state.stats = null;
+      state.yearlyPayments = [];
+      state.topPayingParents = [];
+      state.topOutstandingParents = [];
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getAdminDashboardStatsAction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAdminDashboardStatsAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.stats = action.payload.stats;
+        state.yearlyPayments = action.payload.yearlyPayments;
+        state.topPayingParents = action.payload.topPayingParents;
+        state.topOutstandingParents =
+          action.payload.topOutstandingParents;
+      })
+      .addCase(getAdminDashboardStatsAction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
+
+
 export const { resetState } = updateAdminSlice.actions;
 export const { resetDeleteAdminState } = deleteAdminSlice.actions;
 export const { resetUpdateThemeState, clearUpdateThemeError } = updateThemeSlice.actions;
@@ -249,3 +322,5 @@ export const getAdminByIdReducer = getAdminByIdSlice.reducer;
 export const updateAdminReducer = updateAdminSlice.reducer;
 export const deleteAdminReducer = deleteAdminSlice.reducer;
 export const updateThemeReducer = updateThemeSlice.reducer;
+export const { resetAdminDashboardState } = adminDashboardSlice.actions;
+export const adminDashboardReducer = adminDashboardSlice.reducer;

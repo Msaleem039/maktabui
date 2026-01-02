@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import { GraduationCap, Users, UserCog, BookOpen, Shield } from "lucide-react";
+import { getUserRole } from "@/utils/getCookies";
 
 export default function StatsCards({ stats }) {
   const [activeIndex, setActiveIndex] = useState(null);
+  const userRole = getUserRole();
 
   const statCards = [
     {
@@ -14,12 +16,17 @@ export default function StatsCards({ stats }) {
     { title: "Parents", value: stats?.totalParents || 0, icon: Users },
     { title: "Teachers", value: stats?.totalTeachers || 0, icon: UserCog },
     { title: "Invoices", value: stats?.totalInvoices || 0, icon: BookOpen },
-    { title: "Admin", value: stats?.totalAdmins || 0, icon: Shield }, // <-- Updated icon
+    { title: "Admin", value: stats?.totalAdmins || 0, icon: Shield },
   ];
+
+  const filteredStatCards =
+    userRole === "Admin"
+      ? statCards.filter((item) => item.title !== "Admin")
+      : statCards;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 [@media(min-width:1366px)]:grid-cols-4 gap-5 w-full max-w-[1280px] mx-auto mb-6">
-      {statCards.map((item, index) => {
+      {filteredStatCards.map((item, index) => {
         const isActive = activeIndex === index;
         const borderClass = isActive
           ? "border-[#0B4B31]"

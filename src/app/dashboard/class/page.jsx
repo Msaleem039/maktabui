@@ -10,6 +10,7 @@ import {
   setAllClassesPage 
 } from "@/redux/slices/classSlices/classSlice";
 import { getCookie } from "cookies-next";
+import { getAdminId } from "@/utils/getCookies";
 
 export default function ClassPage() {
   const [searchValue, setSearchValue] = useState("");
@@ -21,7 +22,8 @@ export default function ClassPage() {
   const buttonRefs = useRef({});
   const router = useRouter();
   const dispatch = useDispatch();
-
+  const adminId = getAdminId();
+  
   const { 
     classes, 
     loading, 
@@ -55,7 +57,8 @@ export default function ClassPage() {
     let requestData = {
       page: pagination.currentPage,
       limit: 10,
-      search: debouncedSearch
+      search: debouncedSearch,
+      adminId
     };
 
     if (user?.role === "Student" && user?.id) {
@@ -358,14 +361,14 @@ export default function ClassPage() {
           </label>
 
           {/* See All Button */}
-          <div>
+          {/* <div>
             <button
               type="button"
               className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
             >
               See All ↗
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 overflow-x-auto">

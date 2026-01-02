@@ -5,7 +5,10 @@ export const createClassAction = createAsyncThunk(
   `classes/createClass`,
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createClass`, formData);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createClass`,
+        formData
+      );
       return res.data.class;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -14,23 +17,26 @@ export const createClassAction = createAsyncThunk(
 );
 
 export const getAllClassesAction = createAsyncThunk(
-  `classes/getAllClasses`,
+  "classes/getAllClasses",
   async (requestData = {}, { rejectWithValue, getState }) => {
     try {
       const state = getState();
       const { getAllClasses } = state;
-      
+
       const payload = {
         page: requestData.page || getAllClasses.pagination.currentPage,
         limit: requestData.limit || 10,
-        ...requestData
+        ...requestData,
       };
 
       if (requestData.search === undefined && getAllClasses.search) {
         payload.search = getAllClasses.search;
       }
 
-      if (requestData.filters === undefined && Object.keys(getAllClasses.filters).length > 0) {
+      if (
+        requestData.filters === undefined &&
+        Object.keys(getAllClasses.filters).length > 0
+      ) {
         payload.filters = getAllClasses.filters;
       }
 
@@ -38,6 +44,7 @@ export const getAllClassesAction = createAsyncThunk(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClasses`,
         payload
       );
+
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -49,7 +56,9 @@ export const getAllClassesNameAction = createAsyncThunk(
   `classes/getAllClassesName`,
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClassesName`);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClassesName`
+      );
       return res.data.classes;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -62,7 +71,8 @@ export const getClassByIDAction = createAsyncThunk(
   async (classId, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getClassByID`,{classId}
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getClassByID`,
+        { classId }
       );
       return res.data;
     } catch (error) {
@@ -90,7 +100,10 @@ export const deleteClass = createAsyncThunk(
   `class/deleteClass`,
   async (classId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteClass`, { classId });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteClass`,
+        { classId }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -109,7 +122,7 @@ const createClassSlice = createSlice({
       state.loading = false;
       state.class = null;
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -131,19 +144,19 @@ const createClassSlice = createSlice({
 
 const getAllClassesSlice = createSlice({
   name: "getAllClasses",
-  initialState: { 
-    loading: false, 
-    classes: [], 
+  initialState: {
+    loading: false,
+    classes: [],
     error: null,
     pagination: {
       currentPage: 1,
       totalPages: 0,
       totalCount: 0,
       hasNextPage: false,
-      hasPrevPage: false
+      hasPrevPage: false,
     },
     search: "",
-    filters: {}
+    filters: {},
   },
   reducers: {
     clearAllClassesError: (state) => {
@@ -158,7 +171,7 @@ const getAllClassesSlice = createSlice({
         totalPages: 0,
         totalCount: 0,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
       };
       state.search = "";
       state.filters = {};
@@ -171,7 +184,7 @@ const getAllClassesSlice = createSlice({
     },
     setAllClassesFilters: (state, action) => {
       state.filters = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -182,7 +195,7 @@ const getAllClassesSlice = createSlice({
       .addCase(getAllClassesAction.fulfilled, (state, action) => {
         state.loading = false;
         state.classes = action.payload.classes || action.payload;
-        
+
         if (action.payload.classes !== undefined) {
           state.classes = action.payload.classes;
           state.pagination = {
@@ -190,7 +203,7 @@ const getAllClassesSlice = createSlice({
             totalPages: action.payload.totalPages || 0,
             totalCount: action.payload.totalCount || action.payload.count || 0,
             hasNextPage: action.payload.hasNextPage || false,
-            hasPrevPage: action.payload.hasPrevPage || false
+            hasPrevPage: action.payload.hasPrevPage || false,
           };
         } else {
           // Old format without pagination
@@ -200,10 +213,10 @@ const getAllClassesSlice = createSlice({
             totalPages: 1,
             totalCount: action.payload.length || 0,
             hasNextPage: false,
-            hasPrevPage: false
+            hasPrevPage: false,
           };
         }
-        
+
         state.error = null;
       })
       .addCase(getAllClassesAction.rejected, (state, action) => {
@@ -224,7 +237,7 @@ const getAllClassesNameSlice = createSlice({
       state.loading = false;
       state.classNames = [];
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -246,11 +259,11 @@ const getAllClassesNameSlice = createSlice({
 
 const getClassByIDSlice = createSlice({
   name: "getClassByID",
-  initialState: { 
-    loading: false, 
-    classDetails: null, 
-    students: [], 
-    error: null 
+  initialState: {
+    loading: false,
+    classDetails: null,
+    students: [],
+    error: null,
   },
   reducers: {
     clearClassDetailsError: (state) => {
@@ -269,18 +282,25 @@ const getClassByIDSlice = createSlice({
     },
     updateStudentInClass: (state, action) => {
       const { studentId, updates } = action.payload;
-      const studentIndex = state.students.findIndex(student => student._id === studentId);
+      const studentIndex = state.students.findIndex(
+        (student) => student._id === studentId
+      );
       if (studentIndex !== -1) {
-        state.students[studentIndex] = { ...state.students[studentIndex], ...updates };
+        state.students[studentIndex] = {
+          ...state.students[studentIndex],
+          ...updates,
+        };
       }
     },
     removeStudentFromClass: (state, action) => {
       const studentId = action.payload;
-      state.students = state.students.filter(student => student._id !== studentId);
+      state.students = state.students.filter(
+        (student) => student._id !== studentId
+      );
       if (state.classDetails && state.classDetails.studentCount) {
         state.classDetails.studentCount -= 1;
       }
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -312,7 +332,7 @@ const updateClassSlice = createSlice({
       state.loading = false;
       state.class = null;
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -333,12 +353,12 @@ const updateClassSlice = createSlice({
 });
 
 const deleteClassSlice = createSlice({
-  name: 'deleteClass',
+  name: "deleteClass",
   initialState: {
     loading: false,
     success: false,
     error: null,
-    data: null
+    data: null,
   },
   reducers: {
     resetDeleteClass: (state) => {
@@ -349,7 +369,7 @@ const deleteClassSlice = createSlice({
     },
     clearDeleteClassError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -369,42 +389,30 @@ const deleteClassSlice = createSlice({
         state.success = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
-export const { 
-  clearClassError, 
-  resetClassState 
-} = createClassSlice.actions;
+export const { clearClassError, resetClassState } = createClassSlice.actions;
 
-export const { 
-  clearAllClassesError, 
-  resetAllClassesState,
-  setAllClassesPage
-} = getAllClassesSlice.actions;
+export const { clearAllClassesError, resetAllClassesState, setAllClassesPage } =
+  getAllClassesSlice.actions;
 
-export const { 
-  clearClassNamesError, 
-  resetClassNamesState 
-} = getAllClassesNameSlice.actions;
+export const { clearClassNamesError, resetClassNamesState } =
+  getAllClassesNameSlice.actions;
 
-export const { 
-  clearClassDetailsError, 
+export const {
+  clearClassDetailsError,
   resetClassDetailsState,
   updateClassDetails,
   updateStudentInClass,
-  removeStudentFromClass
+  removeStudentFromClass,
 } = getClassByIDSlice.actions;
 
-export const { 
-  clearUpdateClassError, 
-  resetUpdateClassState 
-} = updateClassSlice.actions;
+export const { clearUpdateClassError, resetUpdateClassState } =
+  updateClassSlice.actions;
 
-export const { 
-  resetDeleteClass, 
-  clearDeleteClassError 
-} = deleteClassSlice.actions;
+export const { resetDeleteClass, clearDeleteClassError } =
+  deleteClassSlice.actions;
 
 export const createClassReducer = createClassSlice.reducer;
 export const getAllClassesReducer = getAllClassesSlice.reducer;
@@ -419,5 +427,5 @@ export const classReducer = {
   getAllClassesName: getAllClassesNameReducer,
   getClassByID: getClassByIDReducer,
   updateClass: updateClassReducer,
-  deleteClass: deleteClassReducer, 
+  deleteClass: deleteClassReducer,
 };

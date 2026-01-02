@@ -353,14 +353,14 @@ export default function PaymentPage() {
               </label>
 
               {/* See All Button */}
-              <div>
+              {/* <div>
                 <button
                   type="button"
                   className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
                 >
                   See All ↗
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
 

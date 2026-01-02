@@ -198,9 +198,9 @@ export default function SendEventPage() {
                 className="w-full bg-transparent focus:outline-none text-sm text-[#0B4B31] placeholder:text-[#979699]"
               />
             </div>
-            <button className="inline-flex items-center justify-center gap-2 rounded-full border border-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#0B4B31] hover:bg-[#F2F7F5]">
+            {/* <button className="inline-flex items-center justify-center gap-2 rounded-full border border-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#0B4B31] hover:bg-[#F2F7F5]">
               See All ↗
-            </button>
+            </button> */}
           </div>
 
           {/* Loading State */}

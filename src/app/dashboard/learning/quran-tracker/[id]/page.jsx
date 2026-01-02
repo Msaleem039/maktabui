@@ -170,14 +170,14 @@ export default function QuranTrackerDetailPage({ params }) {
           </label>
 
           {/* See All Button */}
-          <div>
+          {/* <div>
             <button
               type="button"
               className="rounded-full text-[#0B4B31] px-4 py-2 text-sm font-normal transition bg-[#0B4B3138]"
             >
               See All ↗
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 overflow-x-auto">

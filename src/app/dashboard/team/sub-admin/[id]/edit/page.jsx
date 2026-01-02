@@ -15,7 +15,6 @@ export default function EditSubAdminPage(props) {
   const { loading, subAdmin, error } = useSelector(
     (state) => state.getSubAdminById
   );
-  console.log("subAdmin",subAdmin)
   const [currentAdminId, setCurrentAdminId] = useState(null);
 
   useEffect(() => {

@@ -23,7 +23,6 @@ const StudentTable = ({
   onLimitChange,
   loading = false
 }) => {
-
   const router = useRouter();
 
   const transformedStudents = useMemo(() => {
@@ -32,7 +31,7 @@ const StudentTable = ({
       name: student.studentName,
       parentName: student.parent?.fullName || "N/A",
       phone: student.phone,
-      class: student.class?.name || "Not Present",
+      class: student.classes?.[0]?.name || student.class?.name || "Not Assigned",
       email: student.email,
       gender: student.gender,
       dateOfBirth: student.dateOfBirth,
@@ -81,7 +80,7 @@ const StudentTable = ({
   const getPageNumbers = () => {
     const pages = [];
     const current = pagination.currentPage;
-    const total = pagination.totalPages;
+    const total = Math.max(1, pagination.totalPages || 0);
 
     if (total <= 7) {
       for (let i = 1; i <= total; i++) {
@@ -115,7 +114,7 @@ const StudentTable = ({
   };
 
   const handlePageButtonClick = (page) => {
-    if (typeof page === 'number' && page >= 1 && page <= pagination.totalPages) {
+    if (typeof page === 'number' && page >= 1 && page <= Math.max(1, pagination.totalPages || 0)) {
       onPageChange?.(page);
     }
   };
@@ -139,15 +138,16 @@ const StudentTable = ({
     },
   ];
 
+  const startIndex = (pagination.currentPage - 1) * pagination.limit + 1;
+  const endIndex = Math.min(pagination.currentPage * pagination.limit, pagination.totalCount || 0);
+
   return (
     <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
 
-      {/* HEADING */}
       <h2 className="text-lg font-semibold text-[#104D2E] mb-4">
         {title}
       </h2>
 
-      {/* SEARCH BAR (CENTER) */}
       <div className="flex flex-col gap-2 mb-4">
         <label className="relative flex w-full max-w-xl items-center">
           <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
@@ -159,7 +159,6 @@ const StudentTable = ({
           />
         </label>
 
-        {/* See All Button */}
         <div>
           <button
             type="button"
@@ -264,27 +263,19 @@ const StudentTable = ({
         )
       }
 
+      {/* Always show pagination if there are students OR if we have pagination data */}
       {
-        pagination.totalCount > 0 && (
+        (pagination.totalCount > 0 || filteredStudents?.length > 0) && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[#8A928F]">
-              Showing {filteredStudents?.length} of {pagination.totalCount} students
+              Showing {startIndex} to {endIndex} of {pagination.totalCount || filteredStudents?.length} students
               {searchValue && " (filtered)"}
             </div>
             <div className="flex items-center gap-3">
-              <select
-                value={pagination.limit}
-                onChange={(e) => onLimitChange?.(parseInt(e.target.value))}
-                className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
-              >
-                <option value="10">Display 10</option>
-                <option value="20">Display 20</option>
-                <option value="50">Display 50</option>
-              </select>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handlePageButtonClick(pagination.currentPage - 1)}
-                  disabled={!pagination.hasPrevPage}
+                  disabled={!pagination.hasPrevPage || pagination.currentPage === 1}
                   className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasPrevPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
                     }`}
                 >
@@ -309,7 +300,7 @@ const StudentTable = ({
 
                 <button
                   onClick={() => handlePageButtonClick(pagination.currentPage + 1)}
-                  disabled={!pagination.hasNextPage}
+                  disabled={!pagination.hasNextPage || pagination.currentPage === (pagination.totalPages || 0)}
                   className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${pagination.hasNextPage ? 'hover:bg-[#F3F6F5]' : 'opacity-50 cursor-not-allowed'
                     }`}
                 >

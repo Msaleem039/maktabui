@@ -342,7 +342,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             name: "Invoices Report",
             path: `${basePath}/finance/invoice-report`,
           },
-          { name: "Create Invoices", path: `${basePath}/finance/invoice/add` },
+          {
+            name: "Create Invoices",
+            path: `${basePath}/finance/invoice/add`,
+            hideForRoles: ["Super Admin"],
+          },
           { name: "Payments", path: `${basePath}/finance/payment` },
         ],
         permission: "manageFinance",
@@ -364,12 +368,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [],
         permission: "manageTeachers",
       },
-      settings: {
-        name: "Settings",
-        icon: "/Settings.png",
-        path: `${basePath}/settings`,
-        permission: "manageSettings",
-      },
     };
 
     const roleDashboardItems = {
@@ -381,7 +379,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       Admin: {
         name: "Dashboard",
         icon: "/01.png",
-        path: `${basePath}/dashboard`,
+        path: `${basePath}/admin-dashboard`,
+      },
+      "Sub Admin": {
+        name: "Dashboard",
+        icon: "/01.png",
+        path: `${basePath}/admin-dashboard`,
       },
       Teacher: {
         name: "Dashboard",
@@ -398,12 +401,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         icon: "/01.png",
         path: `${basePath}/parent/dashboard`,
       },
-    };
-
-    const subAdminDashboard = {
-      name: "Dashboard",
-      icon: "/01.png",
-      path: `${basePath}/communication`,
     };
 
     if (userRole === "Super Admin") {
@@ -437,23 +434,30 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         return [
           roleDashboardItems[userRole],
           allItems.team,
-          allItems.finance,
+          {
+            ...allItems.finance,
+            subItems: allItems.finance.subItems.filter(
+              (item) => !item.hideForRoles?.includes("Super Admin")
+            ),
+          },
           allItems.communication,
         ];
 
       case "Admin":
         return [
           roleDashboardItems[userRole],
-          ...Object.values(allItems).filter(
-            (item) => item.name !== "Dashboard"
-          ),
+          allItems.communication,
+          allItems.parents,
+          allItems.students,
+          allItems.class,
+          allItems.notifications,
+          allItems.finance,
+          allItems.events,
+          allItems.team,
         ];
 
       case "Sub Admin":
-        const subAdminItems = [];
-
-        // Don't add dashboard for Sub Admin - they start at communication
-        // subAdminItems.push(subAdminDashboard); // REMOVED
+        const subAdminItems = [roleDashboardItems[userRole]];
 
         if (shouldIncludeItem(allItems.communication))
           subAdminItems.push(allItems.communication);
@@ -474,8 +478,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         if (shouldIncludeItem(allItems.events))
           subAdminItems.push(allItems.events);
         if (shouldIncludeItem(allItems.team)) subAdminItems.push(allItems.team);
-        if (shouldIncludeItem(allItems.settings))
-          subAdminItems.push(allItems.settings);
 
         return subAdminItems;
 
@@ -543,7 +545,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         ];
 
       default:
-        return [roleDashboardItems["Admin"], allItems.communication];
+        return [
+          roleDashboardItems["Admin"],
+          allItems.communication,
+          allItems.parents,
+          allItems.students,
+          allItems.class,
+          allItems.assignment,
+          allItems.notifications,
+          allItems.attendance,
+          allItems.finance,
+          allItems.events,
+          allItems.team,
+        ];
     }
   }, [userRole, userPermissions, hasPermission]);
 
@@ -763,8 +777,18 @@ export default function DashboardLayout({ children }) {
       const normalizedRole = userRole.trim().toLowerCase();
 
       if (normalizedRole === "subadmin" || normalizedRole === "sub admin") {
-        if (!pathname?.includes("/dashboard/communication")) {
+        // Only redirect if they're on the root dashboard path
+        if (pathname === "/dashboard") {
           window.location.href = "/dashboard/communication";
+          return;
+        }
+        // Don't redirect if they're already on a valid dashboard page
+        if (
+          pathname === "/dashboard/admin-dashboard" ||
+          pathname === "/dashboard/communication" ||
+          pathname?.startsWith("/dashboard/communication/")
+        ) {
+          setIsInitializing(false);
           return;
         }
       }

@@ -7,10 +7,12 @@ import { FormInput } from "@/components/FormInput";
 import { useRouter } from "next/navigation";
 import { getAllParentsWithStudents } from "@/redux/slices/parentSlices/parentSlice";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { getAdminId } from "@/utils/getCookies";
 
 export default function CreateInvoice() {
     const dispatch = useDispatch();
     const router = useRouter();
+    const adminId = getAdminId();
 
     const { loading, invoice, success, error } = useSelector(
         (state) => state.createInvoice
@@ -34,24 +36,8 @@ export default function CreateInvoice() {
     const [dropdownOpen, setDropdownOpen] = useState({ parentId: false, studentId: false });
 
     useEffect(() => {
-        dispatch(getAllParentsWithStudents());
+        dispatch(getAllParentsWithStudents(adminId));
     }, [dispatch]);
-
-    useEffect(() => {
-        if (formData.parentId) {
-            const parent = parentsWithStudents.find(
-                (p) => p._id === formData.parentId
-            );
-            if (parent && parent.students?.length > 0) {
-                setFormData((prev) => ({
-                    ...prev,
-                    studentId: parent.students[0]._id,
-                }));
-            } else {
-                setFormData((prev) => ({ ...prev, studentId: "" }));
-            }
-        }
-    }, [formData.parentId, parentsWithStudents]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -99,7 +85,20 @@ export default function CreateInvoice() {
     };
 
     const handleDropdownSelect = (name, value) => {
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        // If selecting a parent, also set the first student automatically
+        if (name === "parentId") {
+            const parent = parentsWithStudents.find((p) => p._id === value);
+            const firstStudentId = parent?.students?.[0]?._id || "";
+            
+            setFormData((prev) => ({ 
+                ...prev, 
+                [name]: value,
+                studentId: firstStudentId 
+            }));
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
+        
         setDropdownOpen((prev) => ({ ...prev, [name]: false }));
     };
 
@@ -110,6 +109,12 @@ export default function CreateInvoice() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Validation
+        if (!formData.parentId || !formData.studentId) {
+            alert("Please select both parent and student");
+            return;
+        }
+
         const payload = {
             parentId: formData.parentId,
             studentId: formData.studentId,
@@ -119,10 +124,9 @@ export default function CreateInvoice() {
             notes: formData.notes,
         };
 
+        console.log("Submitting payload:", payload);
         dispatch(createInvoiceAction(payload));
     };
-
-
 
     useEffect(() => {
         if (success) {
@@ -143,18 +147,18 @@ export default function CreateInvoice() {
         }
     }, [success, router]);
 
+    // Prepare dropdown options
     const parentOptions = parentsWithStudents?.map((p) => ({
         value: p._id,
         label: `${p.fullName}`,
-    }));
+    })) || [];
 
-    const studentOptions =
-        parentsWithStudents
-            ?.find((p) => p._id === formData.parentId)
-            ?.students?.map((s) => ({
-                value: s._id,
-                label: `${s.studentName}`,
-            })) || [];
+    // Get students for selected parent
+    const selectedParent = parentsWithStudents?.find((p) => p._id === formData.parentId);
+    const studentOptions = selectedParent?.students?.map((s) => ({
+        value: s._id,
+        label: `${s.studentName}`,
+    })) || [];
 
     return (
         <div className="space-y-8">
@@ -193,7 +197,7 @@ export default function CreateInvoice() {
                             label="Parent"
                             name="parentId"
                             value={formData.parentId}
-                            options={parentOptions || []}
+                            options={parentOptions}
                             onSelect={handleDropdownSelect}
                             isOpen={dropdownOpen.parentId}
                             onToggle={toggleDropdown}
@@ -206,12 +210,13 @@ export default function CreateInvoice() {
                             label="Student"
                             name="studentId"
                             value={formData.studentId}
-                            options={studentOptions || []}
+                            options={studentOptions}
                             onSelect={handleDropdownSelect}
                             isOpen={dropdownOpen.studentId}
                             onToggle={toggleDropdown}
-                            placeholder="Select Student"
+                            placeholder={formData.parentId ? "Select Student" : "Select parent first"}
                             required
+                            disabled={!formData.parentId}
                         />
 
                         {/* Due Date */}

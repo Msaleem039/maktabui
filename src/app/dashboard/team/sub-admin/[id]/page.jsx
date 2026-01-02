@@ -31,7 +31,6 @@ export default function ViewSubAdminPage() {
   const [subAdminData, setSubAdminData] = useState(null);
   const [currentAdminId, setCurrentAdminId] = useState(null);
 
-  // Get admin ID from cookie
   useEffect(() => {
     const userCookie = Cookies.get("user");
     if (userCookie) {
@@ -50,7 +49,6 @@ export default function ViewSubAdminPage() {
     }
   }, []);
 
-  // Fetch sub-admin data when adminId and params.id are available
   useEffect(() => {
     if (currentAdminId && params?.id) {
       dispatch(

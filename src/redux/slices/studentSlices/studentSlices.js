@@ -46,7 +46,9 @@ export const getAllStudents = createAsyncThunk(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllStudent`,
         payload
       );
-      return response.data;
+      console.log("response",response);
+
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -69,10 +71,10 @@ export const getAllWaitlistStudents = createAsyncThunk(
   'waitlistStudents/getAllWaitlistStudents',
   async (params = {}, { rejectWithValue }) => {
     try {
-      const { limit = 10, page = 1, search = '' } = params;
+      const { limit = 10, page = 1, search = '',adminId } = params;
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitlistStudent`,
-        { limit, page, search }
+        { limit, page, search,adminId }
       );
       return response.data;
     } catch (error) {
@@ -234,9 +236,27 @@ const getAllStudentsSlice = createSlice({
       })
       .addCase(getAllStudents.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.students = action.payload.students || [];
         
-        if (action.payload.pagination) {
+        // Handle both possible response structures
+        if (Array.isArray(action.payload)) {
+          // If payload is directly an array
+          state.students = action.payload;
+        } else if (action.payload?.data && Array.isArray(action.payload.data)) {
+          // If payload has a data property that's an array
+          state.students = action.payload.data;
+          if (action.payload.pagination) {
+            state.pagination = {
+              ...state.pagination,
+              ...action.payload.pagination
+            };
+          }
+        } else {
+          // Fallback to empty array
+          state.students = action.payload || [];
+        }
+        
+        // Handle pagination if available
+        if (action.payload?.pagination) {
           state.pagination = {
             ...state.pagination,
             ...action.payload.pagination

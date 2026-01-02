@@ -10,8 +10,8 @@ import {
 import { getTeachersName, resetTeachersNameState, getTeacherDetail } from "@/redux/slices/teacherSlices/teacherSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getCookie } from "cookies-next";
+import { getAdminId } from "@/utils/getCookies";
 
-// CalendarWidget component remains the same
 const CalendarWidget = ({ selectedDate, onDateChange }) => {
   const [viewDate, setViewDate] = useState(selectedDate || new Date());
 
@@ -80,7 +80,6 @@ const CalendarWidget = ({ selectedDate, onDateChange }) => {
   );
 };
 
-// StatusDropdown component remains the same
 const StatusDropdown = ({ studentId, currentStatus, onStatusChange, onReasonChange }) => {
   const [status, setStatus] = useState(currentStatus);
   const [reason, setReason] = useState("");
@@ -134,6 +133,7 @@ export default function AttendancePage() {
   const [statusDropdowns, setStatusDropdowns] = useState({});
   const [reasons, setReasons] = useState({});
   const datePickerRef = useRef(null);
+   const adminId = getAdminId();
 
   const user = useMemo(() => {
     const userCookie = getCookie("user");
@@ -165,7 +165,7 @@ export default function AttendancePage() {
   useEffect(() => {
     dispatch(getAllClassesNameAction());
     if (role === "Admin" || role === "Super Admin") {
-      dispatch(getTeachersName());
+      dispatch(getTeachersName(adminId));
     } else if (role === "Teacher" && user?.id) {
       setSelectedTeacher(user.id);
       dispatch(getTeacherDetail(user.id));

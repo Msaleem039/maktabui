@@ -7,6 +7,7 @@ import {
   removeFromWaitlistStudent
 } from "@/redux/slices/studentSlices/studentSlices";
 import { ToggleRight,ToggleLeft } from "lucide-react";
+import { getAdminId } from "@/utils/getCookies";
 
 export default function WaitlistTable() {
   const [searchValue, setSearchValue] = useState("");
@@ -14,6 +15,7 @@ export default function WaitlistTable() {
   const [limit, setLimit] = useState(10);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [updatingStudentId, setUpdatingStudentId] = useState(null);
+  const adminId = getAdminId();
 
   const dispatch = useDispatch();
 
@@ -22,7 +24,7 @@ export default function WaitlistTable() {
   );
 
   const fetchWaitlistStudents = useCallback(() => {
-    dispatch(getAllWaitlistStudents({ limit, page, search: debouncedSearch }));
+    dispatch(getAllWaitlistStudents({ limit, page, search: debouncedSearch,adminId }));
   }, [dispatch, limit, page, debouncedSearch]);
 
   useEffect(() => {

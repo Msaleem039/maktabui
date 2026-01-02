@@ -59,6 +59,7 @@ import {
   getAdminByIdReducer,
   updateAdminReducer,
   deleteAdminReducer,
+  adminDashboardReducer
 } from "./slices/adminSlices/adminSlices";
 
 // Import SubAdmin reducers
@@ -157,6 +158,7 @@ export const store = configureStore({
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
     deleteAdmin: deleteAdminReducer,
+    getAdminDashboard:adminDashboardReducer,
 
     // SubAdmin management
     createSubAdmin: createSubAdminReducer,

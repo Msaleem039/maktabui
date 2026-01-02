@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllWaitListParents } from "@/redux/slices/parentSlices/parentSlice";
+import { getAdminId } from "@/utils/getCookies";
 
 export default function ParentsWaitingListPage() {
   const dispatch = useDispatch();
   const { waitlistParents, loading, pagination } = useSelector((state) => state.waitlistParents);
-  
+    const adminId = getAdminId();
+
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -30,7 +32,8 @@ export default function ParentsWaitingListPage() {
       limit: itemsPerPage,
       search: searchValue,
       sortBy,
-      sortOrder
+      sortOrder,
+      adminId
     }));
   };
 
@@ -106,14 +109,14 @@ export default function ParentsWaitingListPage() {
           </label>
 
           {/* See All Button */}
-          <div>
+          {/* <div>
             <button
               type="button"
               className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
             >
               See All ↗
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 overflow-x-auto">

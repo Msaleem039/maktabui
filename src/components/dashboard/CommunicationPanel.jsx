@@ -111,6 +111,8 @@ const CommunicationPanel = memo(({
   onRefresh = null,
   userConversations = [],
 }) => {
+  console.log("currentUser",currentUser);
+  
   const dispatch = useDispatch();
   const isConnected = useSocketStatus();
 

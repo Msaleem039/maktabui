@@ -12,6 +12,7 @@ import {
   CardElement,
 } from "@stripe/react-stripe-js";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
+import { getAdminId } from "@/utils/getCookies";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
 
@@ -121,6 +122,7 @@ function AddParentFormContent() {
   const stripe = useStripe();
   const elements = useElements();
   const { status, error, parent, student } = useSelector((state) => state.createParent);
+  const adminId = getAdminId();
 
   const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
 
@@ -301,7 +303,8 @@ function AddParentFormContent() {
           fee: child.fee ? Number(child.fee) : 0,
           gender: child.gender === "male" ? "Male" :
             child.gender === "female" ? "Female" : "Other",
-        }))
+        })),
+        adminId
       };
 
       const result = await dispatch(createParent(submissionData)).unwrap();

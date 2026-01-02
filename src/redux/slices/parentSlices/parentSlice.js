@@ -108,24 +108,12 @@ export const getParentById = createAsyncThunk(
 
 export const getAllWaitListParents = createAsyncThunk(
   `parent/getAllWaitListParents`,
-  async (params = {}, { rejectWithValue }) => {
+  async (adminId, { rejectWithValue }) => {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search = "",
-        sortBy = "createdAt",
-        sortOrder = "desc"
-      } = params;
-
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitListParents`,
         {
-          page,
-          limit,
-          search,
-          sortBy,
-          sortOrder
+          adminId
         }
       );
       return response.data;
@@ -149,9 +137,9 @@ export const removeFromWaitList = createAsyncThunk(
 
 export const getAllParentsWithStudents = createAsyncThunk(
   `parentsWithStudents/fetch`,
-  async (_, { rejectWithValue }) => {
+  async (adminId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllParentsWithStudents`);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllParentsWithStudents`,{adminId});
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

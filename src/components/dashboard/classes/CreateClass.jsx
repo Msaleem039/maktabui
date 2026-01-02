@@ -4,6 +4,7 @@ import { Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createClassAction } from "@/redux/slices/classSlices/classSlice";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices"; 
+import { getAdminId } from "@/utils/getCookies";
 
 const CustomField = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   if (type === "textarea") {
@@ -123,7 +124,7 @@ const CreateClass = () => {
     const dispatch = useDispatch();
     const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
     const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
-    
+      const adminId = getAdminId();
     const [formData, setFormData] = useState({
         name: "",
         code: "",
@@ -136,7 +137,7 @@ const CreateClass = () => {
     const [dropdownOpen, setDropdownOpen] = useState(null);
 
     useEffect(() => {
-        dispatch(getTeachersName());
+        dispatch(getTeachersName(adminId));
     }, [dispatch]);
 
     const handleInputChange = (e) => {

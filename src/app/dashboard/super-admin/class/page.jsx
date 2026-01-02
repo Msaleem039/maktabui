@@ -93,14 +93,14 @@ export default function ClassPage() {
           </label>
 
           {/* See All Button - Below Search Bar */}
-          <div>
+          {/* <div>
             <button
               type="button"
               className="rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
             >
               See All ↗
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 overflow-x-auto">

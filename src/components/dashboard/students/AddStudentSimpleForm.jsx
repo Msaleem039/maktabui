@@ -8,6 +8,7 @@ import { FormInput } from "@/components/FormInput";
 import { FormCheckbox } from "@/components/FormCheckbox";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import CustomDatePicker from "@/components/DatePicker";
+import { getAdminId } from "@/utils/getCookies";
 
 const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
   const formatDateForDisplay = (dateString) => {
@@ -90,6 +91,7 @@ export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
   const { status, error, student, parent, existingParent } = useSelector((state) => state.createStudent);
   const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
+  const adminId = getAdminId();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -195,7 +197,8 @@ export default function AddStudentSimpleForm() {
       fee: formData.fee,
       studentEmail: formData.studentEmail,
       studentPassword: formData.studentPassword,
-      class: formData.class, // This now contains the class ID
+      class: formData.class,
+      adminId
     };
 
     dispatch(createStudent(studentData));

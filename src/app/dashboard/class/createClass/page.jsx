@@ -7,12 +7,13 @@ import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { getCookie } from "cookies-next";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { getAdminId } from "@/utils/getCookies";
 
 const Page = () => {
   const dispatch = useDispatch();
   const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
   const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
-
+    const adminId = getAdminId();
   const user = useMemo(() => {
     const userCookie = getCookie("user");
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
@@ -33,7 +34,7 @@ const Page = () => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
 
   useEffect(() => {
-    dispatch(getTeachersName());
+    dispatch(getTeachersName(adminId));
   }, [dispatch]);
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { deleteTeacher, getAllTeachers } from "@/redux/slices/teacherSlices/teacherSlices";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import { getAdminId } from "@/utils/getCookies";
 
 const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -14,7 +15,7 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
-
+    const adminId = getAdminId();
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
   };
@@ -26,7 +27,7 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
       
       onDelete?.(teacher);
       
-      await dispatch(getAllTeachers()).unwrap();
+      await dispatch(getAllTeachers(adminId)).unwrap();
       
       setShowDeleteModal(false);
     } catch (error) {

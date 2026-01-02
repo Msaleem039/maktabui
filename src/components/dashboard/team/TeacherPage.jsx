@@ -5,18 +5,24 @@ import Link from "next/link";
 import TeacherCard from "@/components/dashboard/team/TeacherCard";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllTeachers, resetAllTeachersState } from "@/redux/slices/teacherSlices/teacherSlices";
+import {
+  getAllTeachers,
+  resetAllTeachersState,
+} from "@/redux/slices/teacherSlices/teacherSlices";
+import { getAdminId } from "@/utils/getCookies";
 
 export default function TeacherPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-
-  const { teachers, status, error } = useSelector((state) => state.getAllTeachers);
+  const adminId = getAdminId();
+  const { teachers, status, error } = useSelector(
+    (state) => state.getAllTeachers
+  );
 
   const [expandedCardId, setExpandedCardId] = useState(null);
 
   useEffect(() => {
-    dispatch(getAllTeachers());
+    dispatch(getAllTeachers(adminId));
 
     return () => {
       dispatch(resetAllTeachersState());
@@ -35,9 +41,8 @@ export default function TeacherPage() {
     setExpandedCardId(expandedCardId === teacherId ? null : teacherId);
   };
 
-
   const handleRetry = () => {
-    dispatch(getAllTeachers());
+    dispatch(getAllTeachers(adminId));
   };
 
   if (status === "loading") {
@@ -118,17 +123,17 @@ export default function TeacherPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {teachers && teachers.map((teacher) => (
-          <TeacherCard
-            key={teacher._id}
-            teacher={teacher}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isExpanded={expandedCardId === teacher._id}
-            onToggle={() => handleToggleCard(teacher._id)}
-          />
-        ))}
-
+        {teachers &&
+          teachers.map((teacher) => (
+            <TeacherCard
+              key={teacher._id}
+              teacher={teacher}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              isExpanded={expandedCardId === teacher._id}
+              onToggle={() => handleToggleCard(teacher._id)}
+            />
+          ))}
       </div>
 
       {(!teachers || teachers.length === 0) && status === "succeeded" && (

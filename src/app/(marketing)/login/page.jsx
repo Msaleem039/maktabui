@@ -51,8 +51,8 @@ const Page = () => {
         const tokenOptions = rememberMe ? { maxAge: 60 * 60 * 24 * 7 } : {};
 
         const payload = resultAction.payload;
-        console.log("payload",payload);
-        
+        console.log("payload", payload);
+
         setCookie("token", payload.token, tokenOptions);
 
         const userCookie = {
@@ -75,6 +75,8 @@ const Page = () => {
           router.push("/dashboard/student/dashboard");
         } else if (userRole === "Teacher") {
           router.push("/dashboard/teacher/dashboard");
+        } else if (userRole === "Admin") {
+          router.push("/dashboard/admin-dashboard");
         } else {
           router.push("/dashboard");
         }

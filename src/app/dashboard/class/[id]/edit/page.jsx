@@ -8,6 +8,7 @@ import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { updateClassAction } from "@/redux/slices/classSlices/classSlice";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { getAdminId } from "@/utils/getCookies";
 
 const defaultForm = {
   name: "",
@@ -22,7 +23,7 @@ const defaultForm = {
 export default function EditClassPage({ params }) {
   const router = useRouter();
   const dispatch = useDispatch();
-
+  const adminId = getAdminId();
   const unwrappedParams = use(params);
   const classId = unwrappedParams.id;
 
@@ -37,7 +38,7 @@ export default function EditClassPage({ params }) {
   useEffect(() => {
     if (classId) {
       dispatch(getClassByIDAction(classId));
-      dispatch(getTeachersName());
+      dispatch(getTeachersName(adminId));
     }
   }, [classId, dispatch]);
 

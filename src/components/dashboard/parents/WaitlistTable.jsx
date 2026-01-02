@@ -4,12 +4,19 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { Download, ToggleLeft, ToggleRight } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { 
-  getAllWaitListParents, 
-  resetWaitListParentsState 
+import {
+  getAllWaitListParents,
+  resetWaitListParentsState,
 } from "@/redux/slices/parentSlices/parentSlice";
-import { removeFromWaitList, resetRemoveWaitList } from "@/redux/slices/parentSlices/parentSlice";
-import { addToWaitList, resetAddWaitList } from "@/redux/slices/parentSlices/parentSlice";
+import {
+  removeFromWaitList,
+  resetRemoveWaitList,
+} from "@/redux/slices/parentSlices/parentSlice";
+import {
+  addToWaitList,
+  resetAddWaitList,
+} from "@/redux/slices/parentSlices/parentSlice";
+import { getAdminId } from "@/utils/getCookies";
 
 const WaitlistTable = ({
   title = "Waitlist Parents",
@@ -18,19 +25,24 @@ const WaitlistTable = ({
   parents = [],
 }) => {
   const dispatch = useDispatch();
+  const adminId = getAdminId();
+  console.log("adminId",adminId);
   
-  
-  const { parents: waitlistParents, status, error } = useSelector((state) => state.waitlistParents);
-  const { 
-    loading: removeLoading, 
+  const {
+    parents: waitlistParents,
+    status,
+    error,
+  } = useSelector((state) => state.waitlistParents);
+  const {
+    loading: removeLoading,
     error: removeError,
-    success: removeSuccess 
+    success: removeSuccess,
   } = useSelector((state) => state.removeFromWaitList);
-  
+
   const {
     loading: addLoading,
     error: addError,
-    success: addSuccess
+    success: addSuccess,
   } = useSelector((state) => state.addToWaitList);
 
   const [selectedId, setSelectedId] = useState(null);
@@ -38,7 +50,7 @@ const WaitlistTable = ({
   const [updatingParents, setUpdatingParents] = useState(new Set());
 
   useEffect(() => {
-    dispatch(getAllWaitListParents());
+    dispatch(getAllWaitListParents(adminId));
 
     return () => {
       dispatch(resetWaitListParentsState());
@@ -49,7 +61,7 @@ const WaitlistTable = ({
 
   useEffect(() => {
     if (removeSuccess || addSuccess) {
-      dispatch(getAllWaitListParents());
+      dispatch(getAllWaitListParents(adminId));
       if (removeSuccess) dispatch(resetRemoveWaitList());
       if (addSuccess) dispatch(resetAddWaitList());
     }
@@ -76,7 +88,7 @@ const WaitlistTable = ({
 
   const handleToggleWaitlist = async (parentId, parentData, currentStatus) => {
     try {
-      setUpdatingParents(prev => new Set(prev).add(parentId));
+      setUpdatingParents((prev) => new Set(prev).add(parentId));
 
       if (currentStatus) {
         await dispatch(removeFromWaitList(parentId)).unwrap();
@@ -86,7 +98,7 @@ const WaitlistTable = ({
     } catch (error) {
       console.error("Error updating waitlist status:", error);
     } finally {
-      setUpdatingParents(prev => {
+      setUpdatingParents((prev) => {
         const newSet = new Set(prev);
         newSet.delete(parentId);
         return newSet;
@@ -97,22 +109,25 @@ const WaitlistTable = ({
   const filteredParents = useMemo(() => {
     if (!waitlistParents || waitlistParents.length === 0) return [];
 
-    const waitlistOnly = waitlistParents.filter(parent => parent.addToWaitList === true);
+    const waitlistOnly = waitlistParents.filter(
+      (parent) => parent.addToWaitList === true
+    );
 
     if (!localSearch) return waitlistOnly;
 
     const searchTerm = localSearch.toLowerCase();
-    return waitlistOnly.filter(parent =>
-      parent.fullName?.toLowerCase().includes(searchTerm) ||
-      parent.email?.toLowerCase().includes(searchTerm) ||
-      parent.phone?.toLowerCase().includes(searchTerm) ||
-      parent.identityNumber?.toLowerCase().includes(searchTerm)
+    return waitlistOnly.filter(
+      (parent) =>
+        parent.fullName?.toLowerCase().includes(searchTerm) ||
+        parent.email?.toLowerCase().includes(searchTerm) ||
+        parent.phone?.toLowerCase().includes(searchTerm) ||
+        parent.identityNumber?.toLowerCase().includes(searchTerm)
     );
   }, [waitlistParents, localSearch]);
 
   const tableData = useMemo(() => {
     if (filteredParents.length > 0) {
-      return filteredParents.map(parent => ({
+      return filteredParents.map((parent) => ({
         id: parent._id,
         name: parent.fullName,
         address: parent.address,
@@ -122,7 +137,7 @@ const WaitlistTable = ({
         email: parent.email,
         identityNumber: parent.identityNumber,
         addToWaitList: parent.addToWaitList,
-        originalData: parent
+        originalData: parent,
       }));
     }
 
@@ -137,7 +152,6 @@ const WaitlistTable = ({
         <h2 className="text-lg font-semibold text-[#0B4B31]">{title}</h2>
 
         <div className="flex flex-wrap items-center gap-3">
-
           <button
             type="button"
             className="rounded-full px-4 py-2 text-sm font-normal bg-[#0B4B3138] text-[#0B4B31] transition hover:bg-[#F3F6F5]"
@@ -159,7 +173,9 @@ const WaitlistTable = ({
         </label>
 
         {status === "loading" && (
-          <div className="text-sm text-[#0B4B31]">Loading waitlist parents...</div>
+          <div className="text-sm text-[#0B4B31]">
+            Loading waitlist parents...
+          </div>
         )}
 
         {status === "failed" && (
@@ -178,12 +194,18 @@ const WaitlistTable = ({
         <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
           <thead className="text-xs font-normal uppercase tracking-wide text-black/40">
             <tr>
-              <th className="px-4 font-normal text-[#0000008C]">Primary Parent</th>
+              <th className="px-4 font-normal text-[#0000008C]">
+                Primary Parent
+              </th>
               <th className="px-4 font-normal text-[#0000008C]">Address</th>
-              <th className="px-4 font-normal text-[#0000008C]">Phone Number</th>
+              <th className="px-4 font-normal text-[#0000008C]">
+                Phone Number
+              </th>
               <th className="px-4 font-normal text-[#0000008C]">Spouse</th>
               <th className="px-4 font-normal text-[#0000008C]">Children</th>
-              <th className="px-4 font-normal text-center text-[#0000008C]">Waitlist Status</th>
+              <th className="px-4 font-normal text-center text-[#0000008C]">
+                Waitlist Status
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -195,14 +217,18 @@ const WaitlistTable = ({
                 <tr
                   key={parent.id}
                   onClick={() => handleRowSelect(parent.id)}
-                  className={`group cursor-pointer rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm transition hover:shadow-md ${isSelected ? "bg-[#C9DCD4] border-[#AECDBF]" : ""
-                    } ${isUpdating ? "opacity-50" : ""}`}
+                  className={`group cursor-pointer rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm transition hover:shadow-md ${
+                    isSelected ? "bg-[#C9DCD4] border-[#AECDBF]" : ""
+                  } ${isUpdating ? "opacity-50" : ""}`}
                 >
                   <td className="px-4 py-3 font-medium text-[#0B4B31]">
                     <div className="relative flex items-center gap-3 pl-3">
                       <span
-                        className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${isSelected ? "bg-[#0B4B31]" : "bg-transparent group-hover:bg-[#0B4B31]/50"
-                          }`}
+                        className={`absolute left-0 inline-flex h-2 w-2 rounded-full transition ${
+                          isSelected
+                            ? "bg-[#0B4B31]"
+                            : "bg-transparent group-hover:bg-[#0B4B31]/50"
+                        }`}
                       ></span>
                       <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F5EF] text-sm">
                         👤
@@ -222,8 +248,12 @@ const WaitlistTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">{parent.address}</td>
-                  <td className="px-4 py-3 font-normal text-black">{parent.phone}</td>
+                  <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">
+                    {parent.address}
+                  </td>
+                  <td className="px-4 py-3 font-normal text-black">
+                    {parent.phone}
+                  </td>
                   <td className="px-4 py-3 text-black">{parent.spouse}</td>
                   <td className="px-4 py-3 text-black">{parent.children}</td>
                   <td className="px-4 py-3 text-center">
@@ -231,13 +261,18 @@ const WaitlistTable = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleToggleWaitlist(parent.id, parent, parent.addToWaitList);
+                        handleToggleWaitlist(
+                          parent.id,
+                          parent,
+                          parent.addToWaitList
+                        );
                       }}
                       disabled={isUpdating}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal transition ${parent.addToWaitList
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal transition ${
+                        parent.addToWaitList
                           ? "bg-green-100 text-green-800 hover:bg-green-200"
                           : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                        } ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
+                      } ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       {isUpdating ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
@@ -257,7 +292,9 @@ const WaitlistTable = ({
 
         {status === "succeeded" && tableData.length === 0 && (
           <div className="text-center py-8 text-[#0B4B31]">
-            {localSearch ? `No waitlist parents found for "${localSearch}"` : "No parents in waitlist"}
+            {localSearch
+              ? `No waitlist parents found for "${localSearch}"`
+              : "No parents in waitlist"}
           </div>
         )}
 

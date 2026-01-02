@@ -1,16 +1,23 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Search, Grid, Moon, ChevronDown } from "lucide-react";
+import { Grid, Moon, ChevronDown } from "lucide-react";
 import StatsCards from "@/components/StatsCard";
 import { useDispatch, useSelector } from "react-redux";
-import { getDashboardStatsAction } from "@/redux/slices/superadminSlices/superadminSlices";
+import { getAdminDashboardStatsAction } from "@/redux/slices/adminSlices/adminSlices";
 import Cookies from "js-cookie";
+import { getAdminId } from "@/utils/getCookies";
 
 const Page = () => {
   const dispatch = useDispatch();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const user = Cookies.get("user");
+
+  const userCookie = Cookies.get("user");
+  const user = userCookie ? JSON.parse(userCookie) : null;
+
+  const adminId = getAdminId();
+  console.log("adminId",adminId);
+  
   const {
     loading,
     stats,
@@ -18,11 +25,18 @@ const Page = () => {
     topPayingParents,
     topOutstandingParents,
     error,
-  } = useSelector((state) => state.dashboard);
+  } = useSelector((state) => state.getAdminDashboard);
 
   useEffect(() => {
-    dispatch(getDashboardStatsAction(selectedYear));
-  }, [dispatch, selectedYear]);
+    if (!adminId) return;
+
+    dispatch(
+      getAdminDashboardStatsAction({
+        adminId,
+        year: selectedYear,
+      })
+    );
+  }, [dispatch, adminId, selectedYear]);
 
   return (
     <>

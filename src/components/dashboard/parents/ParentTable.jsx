@@ -14,6 +14,7 @@ import {
 } from "@/redux/slices/parentSlices/parentSlice";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import ActionMenu from "../ActionMenu";
+import { getAdminId } from "@/utils/getCookies";
 
 const ParentTable = ({
   title = "Parents",
@@ -41,6 +42,7 @@ const ParentTable = ({
     error,
     search: storeSearch
   } = useSelector((state) => state.getAllParents);
+  const adminId = getAdminId();
 
   const deleteState = useSelector((state) => state.deleteParent);
 
@@ -70,7 +72,8 @@ const ParentTable = ({
       limit: reduxPagination.itemsPerPage,
       search: debouncedSearch,
       sortBy: "createdAt",
-      sortOrder: "desc"
+      sortOrder: "desc",
+      adminId
     }));
   }, [dispatch, debouncedSearch, reduxPagination.currentPage, reduxPagination.itemsPerPage]);
 
@@ -83,7 +86,8 @@ const ParentTable = ({
         limit: reduxPagination.itemsPerPage,
         search: debouncedSearch,
         sortBy: "createdAt",
-        sortOrder: "desc"
+        sortOrder: "desc",
+        adminId
       }));
 
       setTimeout(() => {
