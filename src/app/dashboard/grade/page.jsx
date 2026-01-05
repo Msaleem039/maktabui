@@ -4,10 +4,12 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2, X, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import { getGrades, setGradesPage } from "@/redux/slices/gradeSlices/gradeSlices";
 import { getCookie } from "cookies-next";
 
 export default function GradesPage() {
+  const { mainText } = useTheme();
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, grade: null });
@@ -293,7 +295,7 @@ export default function GradesPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
         </div>
@@ -319,7 +321,7 @@ export default function GradesPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
         </div>

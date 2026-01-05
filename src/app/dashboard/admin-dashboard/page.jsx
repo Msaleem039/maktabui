@@ -7,9 +7,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAdminDashboardStatsAction } from "@/redux/slices/adminSlices/adminSlices";
 import Cookies from "js-cookie";
 import { getAdminId } from "@/utils/getCookies";
+import { useTheme } from "@/hooks/useTheme";
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex, alpha = 1) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 const Page = () => {
   const dispatch = useDispatch();
+  const { themeColor, secondaryColor, mainText } = useTheme();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const userCookie = Cookies.get("user");
@@ -53,13 +63,13 @@ const Page = () => {
           </div> */}
 
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
-              <Grid size={18} className="text-[#0B4B31]" />
+            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
+              <Grid size={18} style={{ color: themeColor }} />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
-              <Moon size={18} className="text-[#0B4B31]" />
+            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
+              <Moon size={18} style={{ color: themeColor }} />
             </button>
-            <div className="flex items-center gap-2 bg-white border border-[#0B4B31] rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+            <div style={{ borderColor: themeColor }} className="flex items-center gap-2 bg-white border rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
               <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
                 <Image
                   src="/main-dashboard.jpg"
@@ -73,18 +83,18 @@ const Page = () => {
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
                 {user?.role === "Super Admin" ? "Super Admin" : ""}
               </span>
-              <ChevronDown size={16} className="text-[#0B4B31]" />
+              <ChevronDown size={16} style={{ color: themeColor }} />
             </div>
           </div>
         </div>
       </header>
       <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
         {/* Welcome */}
-        <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
+        <h1 className="text-[2.5rem] font-semibold mb-1" style={{ color: themeColor }}>
           Welcome to
         </h1>
         <p className="text-[1.75rem] font-medium text-[#000000] mb-8">
-          MaktabOS
+          {mainText || "MaktabOS"}
         </p>
 
         {/* Loading / Error */}
@@ -104,9 +114,9 @@ const Page = () => {
 
               <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
-                  <h3 className="font-semibold text-[#0B4B31] text-[14px] leading-[20px]">
+                  <h3 className="font-semibold text-[14px] leading-[20px]" style={{ color: themeColor }}>
                     Yearly Payment Volume ({selectedYear})
-                    <span className="text-[#0B4B31] opacity-70">
+                    <span style={{ color: themeColor, opacity: 0.7 }}>
                       (${stats?.totalPaidAmount || 0})
                     </span>
                   </h3>
@@ -178,8 +188,7 @@ const Page = () => {
               <div
                 className="rounded-2xl p-4 sm:p-6 shadow-md"
                 style={{
-                  background:
-                    "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
+                  background: `linear-gradient(53.14deg, ${hexToRgba(themeColor, 0.93)} 13.66%, ${hexToRgba(secondaryColor || themeColor, 0.965)} 99.29%)`,
                 }}
               >
                 <h3 className="text-white text-[1.125rem] mb-4 font-extrabold">
@@ -187,7 +196,7 @@ const Page = () => {
                 </h3>
 
                 <div className="bg-white rounded-xl p-4 sm:p-5 flex items-center gap-4">
-                  <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full" style={{ backgroundColor: themeColor }}>
                     <img
                       src="/Dollar Coin.png"
                       alt="Dollar Coin"
@@ -196,7 +205,7 @@ const Page = () => {
                   </div>
 
                   <div>
-                    <h2 className="text-[#0B4B31] text-[1.5rem] font-extrabold">
+                    <h2 className="text-[1.5rem] font-extrabold" style={{ color: themeColor }}>
                       ${stats?.totalUnpaidAmount || 0}
                     </h2>
                     <p className="text-[#525967] text-[0.75rem] mt-2">
@@ -210,8 +219,7 @@ const Page = () => {
               <div
                 className="rounded-2xl p-4 sm:p-6 text-white shadow-md"
                 style={{
-                  background:
-                    "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%)",
+                  background: `linear-gradient(53.14deg, ${hexToRgba(themeColor, 0.93)} 29.92%, ${hexToRgba(secondaryColor || themeColor, 0.965)} 99.29%)`,
                 }}
               >
                 <h3 className="font-extrabold text-[18px] mb-1">
@@ -238,7 +246,7 @@ const Page = () => {
             <DashboardTable
               title="Top Paying Parents"
               subtitle="Parents who contributed the most"
-              btnColor="text-[#0B4B31] bg-[#c9d7d2]"
+              btnColor={`text-[var(--theme-color)] bg-[var(--theme-color)]/20`}
               rows={topPayingParents}
             />
             <DashboardTable
@@ -255,26 +263,29 @@ const Page = () => {
 };
 
 // Table Component
-const DashboardTable = ({ title, subtitle, btnColor, rows }) => (
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-    <div className="flex justify-between items-center mb-3">
-      <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">
-        {title}
-      </h3>
-      {/* <button className={`text-[12px] px-3 py-[2px] rounded-full ${btnColor}`}>
-        See All ↗
-      </button> */}
-    </div>
-    <p className="text-[#000000] text-sm mb-4">{subtitle}</p>
+const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
+  const { themeColor } = useTheme();
+  
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-[18px] font-semibold uppercase tracking-wide" style={{ color: themeColor }}>
+          {title}
+        </h3>
+        {/* <button className={`text-[12px] px-3 py-[2px] rounded-full ${btnColor}`}>
+          See All ↗
+        </button> */}
+      </div>
+      <p className="text-[#000000] text-sm mb-4">{subtitle}</p>
 
-    <table className="w-full text-sm min-w-[400px]">
-      <thead>
-        <tr className="bg-[#0B4B31] text-white">
-          <th className="text-left px-3 py-2 rounded-tl-md">Name ↕</th>
-          <th className="text-left px-3 py-2">Date ↕</th>
-          <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
-        </tr>
-      </thead>
+      <table className="w-full text-sm min-w-[400px]">
+        <thead>
+          <tr style={{ backgroundColor: themeColor }} className="text-white">
+            <th className="text-left px-3 py-2 rounded-tl-md">Name ↕</th>
+            <th className="text-left px-3 py-2">Date ↕</th>
+            <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+          </tr>
+        </thead>
       <tbody>
         {rows?.map((row, idx) => (
           <tr key={idx} className="border-b border-gray-100">
@@ -292,6 +303,7 @@ const DashboardTable = ({ title, subtitle, btnColor, rows }) => (
       </tbody>
     </table>
   </div>
-);
+  );
+};
 
 export default Page;

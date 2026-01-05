@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
+import { useTheme } from "@/hooks/useTheme";
 import {
   Search,
   Grid,
@@ -30,6 +31,7 @@ export default function TeacherDashboardPage() {
     error
   } = useSelector(state => state.teacherDashboard);
 
+  const { mainText } = useTheme();
 
   const user = useMemo(() => {
     const userCookie = getCookie("user");
@@ -127,7 +129,7 @@ export default function TeacherDashboardPage() {
         <div>
           <p className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</p>
           <h1 className="text-[1.75rem] font-medium text-[#000000]">
-            MaktabOS — Teacher Dashboard
+            {mainText || "MaktabOS"} — Teacher Dashboard
           </h1>
         </div>
       </div>

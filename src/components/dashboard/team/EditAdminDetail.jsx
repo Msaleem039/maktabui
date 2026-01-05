@@ -77,7 +77,7 @@ export default function EditAdminDetail({ admin }) {
 
       formData.append("file", file);
 
-      xhr.open("POST", "/api/uploadImage");
+      xhr.open("PUT", "/api/uploadImage");
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {

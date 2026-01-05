@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Search } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 const mockActivityData = [
   {
@@ -27,6 +28,8 @@ const mockActivityData = [
 ];
 
 export default function ActivitiesPage() {
+  const { mainText } = useTheme();
+  
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -35,7 +38,7 @@ export default function ActivitiesPage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

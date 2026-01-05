@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Search } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 const mockSchedules = [
   {
@@ -20,6 +21,8 @@ const mockSchedules = [
 ];
 
 export default function SchedulePage() {
+  const { mainText } = useTheme();
+  
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-1">
@@ -27,7 +30,7 @@ export default function SchedulePage() {
           Welcome to
         </h1>
         <p className="text-[1.75rem] font-medium text-[#000000]">
-          MaktabOS
+          {mainText || "MaktabOS"}
         </p>
       </div>
 

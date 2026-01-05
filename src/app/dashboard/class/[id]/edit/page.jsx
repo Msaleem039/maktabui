@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import { getClassByIDAction } from "@/redux/slices/classSlices/classSlice";
 import { getTeachersName } from "@/redux/slices/teacherSlices/teacherSlices";
 import { updateClassAction } from "@/redux/slices/classSlices/classSlice";
@@ -23,6 +24,7 @@ const defaultForm = {
 export default function EditClassPage({ params }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { mainText } = useTheme();
   const adminId = getAdminId();
   const unwrappedParams = use(params);
   const classId = unwrappedParams.id;
@@ -163,7 +165,7 @@ const selectedTeacherValue = formData.teacherId;
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
       <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</h1>
-      <p className="text-[1.75rem] font-medium text-[#000000] mb-4">MaktabOS</p>
+      <p className="text-[1.75rem] font-medium text-[#000000] mb-4">{mainText || "MaktabOS"}</p>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl mx-auto">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">

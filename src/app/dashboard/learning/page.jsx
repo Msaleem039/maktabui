@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Download } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function LearningPage() {
   const [searchValue, setSearchValue] = useState("");
+  const { mainText } = useTheme();
 
   const tableData = []; // Empty for now as shown in screenshot
 
@@ -16,7 +18,7 @@ export default function LearningPage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
         <button

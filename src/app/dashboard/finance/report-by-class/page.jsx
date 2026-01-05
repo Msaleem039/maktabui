@@ -1,6 +1,10 @@
 "use client";
 
+import { useTheme } from "@/hooks/useTheme";
+
 export default function ReportByClassPage() {
+  const { mainText } = useTheme();
+  
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -9,7 +13,7 @@ export default function ReportByClassPage() {
             Welcome to
           </p>
           <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

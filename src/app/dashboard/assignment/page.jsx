@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/hooks/useTheme";
 import {
   Download,
   Eye,
@@ -25,6 +26,7 @@ import { getCookie } from "cookies-next";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 export default function AssignmentPage() {
+  const { mainText } = useTheme();
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownDirections, setDropdownDirections] = useState({});
@@ -638,7 +640,7 @@ export default function AssignmentPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
           {renderAddAssignmentButton()}
@@ -665,7 +667,7 @@ export default function AssignmentPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
           {renderAddAssignmentButton()}
@@ -713,7 +715,7 @@ export default function AssignmentPage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
         {renderAddAssignmentButton()}

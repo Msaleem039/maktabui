@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Search, Bell, Check, X } from "lucide-react";
 import { getCookie } from "cookies-next";
+import { useTheme } from "@/hooks/useTheme";
 import { 
   fetchNotifications, 
   markNotificationRead, 
@@ -13,6 +14,7 @@ import {
 
 export default function NotificationsPage() {
   const dispatch = useDispatch();
+  const { mainText } = useTheme();
   const { 
     notifications, 
     loading, 
@@ -176,7 +178,7 @@ export default function NotificationsPage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[#0B4B31] text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
 

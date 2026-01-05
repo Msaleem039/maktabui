@@ -153,7 +153,8 @@ const userSlice = createSlice({
                 state.userInfo = { 
                     email: action.payload.email, 
                     role: action.payload.role,
-                    id: action.payload.id 
+                    id: action.payload.id,
+                    admin: action.payload.admin
                 };
                 state.token = action.payload.token;
             })

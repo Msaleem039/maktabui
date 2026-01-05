@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 const defaultBars = [
   { month: "Jan", value: 18, className: "bg-[#0B4B31]" },
@@ -40,11 +41,15 @@ const YearlyPaymentOverview = ({
 
           <button
             type="button"
-            className="inline-flex items-center gap-3 rounded-full border border-[#0B4B31]/30 px-5 py-2 text-sm font-medium text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            style={{
+              borderColor: `${themeColor}4D`,
+              color: themeColor,
+            }}
+            className="inline-flex items-center gap-3 rounded-full border px-5 py-2 text-sm font-medium transition hover:bg-[#F3F6F5]"
             aria-label={`Switch year. Current year ${year}`}
           >
             {year}
-            <ChevronDown size={16} className="text-[#0B4B31]" />
+            <ChevronDown size={16} style={{ color: themeColor }} />
           </button>
         </div>
 
@@ -80,7 +85,7 @@ const YearlyPaymentOverview = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-[#E2E7E4] bg-[#F4F7F6] px-6 py-5 text-sm text-[#0B4B31] sm:flex-row sm:items-center sm:justify-around sm:px-8">
+      <div className="flex flex-col gap-3 border-t border-[#E2E7E4] bg-[#F4F7F6] px-6 py-5 text-sm sm:flex-row sm:items-center sm:justify-around sm:px-8" style={{ color: themeColor }}>
         <span className="flex items-center gap-3 font-medium">
           <span className="inline-block h-3 w-3 rounded-full bg-black" />
           {paidLabel} <span className="text-[#3F4A46]">({paidValue})</span>

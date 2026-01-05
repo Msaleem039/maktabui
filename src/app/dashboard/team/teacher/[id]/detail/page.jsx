@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import { getTeacherById, resetTeacherByIdState } from "@/redux/slices/teacherSlices/teacherSlices";
 import { ArrowLeft, Edit, Mail, Phone, User, Calendar, MapPin, BookOpen, GraduationCap, Users, Languages, Clock } from "lucide-react";
 import Image from "next/image";
@@ -11,6 +12,7 @@ export default function ViewTeacherPage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { mainText } = useTheme();
   
   const { teacher, status, error } = useSelector((state) => state.getTeacherById);
   const [teacherData, setTeacherData] = useState(null);
@@ -98,7 +100,7 @@ export default function ViewTeacherPage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

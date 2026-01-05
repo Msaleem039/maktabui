@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { Download } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -34,6 +35,7 @@ ChartJS.register(
 export default function InvoicePage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { mainText } = useTheme();
   const [localSearch, setLocalSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -279,7 +281,7 @@ export default function InvoicePage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

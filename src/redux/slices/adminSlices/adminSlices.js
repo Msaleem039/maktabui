@@ -73,13 +73,55 @@ export const updateAdminAction = createAsyncThunk(
   }
 );
 
+export const getThemeByBranchAction = createAsyncThunk(
+  "admins/getThemeByBranch",
+  async (branch, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getThemeByBranch`,
+        { branch }
+      );
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const updateThemeAction = createAsyncThunk(
   "admins/updateTheme",
   async (themeData, { rejectWithValue }) => {
     try {
+      // If themeData is FormData, use it directly
+      // Otherwise, create FormData from the object
+      let formData;
+      if (themeData instanceof FormData) {
+        formData = themeData;
+      } else {
+        formData = new FormData();
+        if (themeData.adminId) formData.append("adminId", themeData.adminId);
+        if (themeData.themeColor) formData.append("themeColor", themeData.themeColor);
+        if (themeData.secondaryColor) formData.append("secondaryColor", themeData.secondaryColor);
+        if (themeData.logo) {
+          if (themeData.logo instanceof File) {
+            formData.append("logo", themeData.logo);
+          } else if (typeof themeData.logo === "string" && themeData.logo) {
+            formData.append("logo", themeData.logo);
+          }
+        }
+        if (themeData.favicon) {
+          if (themeData.favicon instanceof File) {
+            formData.append("favicon", themeData.favicon);
+          } else if (typeof themeData.favicon === "string" && themeData.favicon) {
+            formData.append("favicon", themeData.favicon);
+          }
+        }
+        if (themeData.mainText) formData.append("mainText", themeData.mainText);
+      }
+
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateTheme`,
-        themeData
+        formData
       );
       return res.data;
     } catch (error) {
@@ -92,7 +134,7 @@ export const getAdminDashboardStatsAction = createAsyncThunk(
   "admins/getAdminDashboardStats",
   async ({ adminId, year }, { rejectWithValue }) => {
     try {
-      const res = await axios.post(
+      const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAdminDashboardStats`,
         { adminId, year }
       );
@@ -229,6 +271,42 @@ const deleteAdminSlice = createSlice({
   },
 });
 
+const getThemeByBranchSlice = createSlice({
+  name: "getThemeByBranch",
+  initialState: { 
+    loading: false, 
+    theme: null, 
+    error: null 
+  },
+  reducers: {
+    resetGetThemeByBranchState: (state) => {
+      state.loading = false;
+      state.theme = null;
+      state.error = null;
+    },
+    clearGetThemeByBranchError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getThemeByBranchAction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getThemeByBranchAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.theme = action.payload?.theme || null;
+        state.error = null;
+      })
+      .addCase(getThemeByBranchAction.rejected, (state, action) => {
+        state.loading = false;
+        state.theme = null;
+        state.error = action.payload;
+      });
+  },
+});
+
 const updateThemeSlice = createSlice({
   name: "updateTheme",
   initialState: { 
@@ -320,6 +398,8 @@ export const getAllAdminsReducer = getAllAdminsSlice.reducer;
 export const getAdminByIdReducer = getAdminByIdSlice.reducer;
 export const updateAdminReducer = updateAdminSlice.reducer;
 export const deleteAdminReducer = deleteAdminSlice.reducer;
+export const getThemeByBranchReducer = getThemeByBranchSlice.reducer;
 export const updateThemeReducer = updateThemeSlice.reducer;
+export const { resetGetThemeByBranchState, clearGetThemeByBranchError } = getThemeByBranchSlice.actions;
 export const { resetAdminDashboardState } = adminDashboardSlice.actions;
 export const adminDashboardReducer = adminDashboardSlice.reducer;

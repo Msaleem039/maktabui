@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import {
   markAttendance,
   resetAttendanceState
@@ -126,6 +127,7 @@ const StatusDropdown = ({ studentId, currentStatus, onStatusChange, onReasonChan
 
 export default function AttendancePage() {
   const dispatch = useDispatch();
+  const { mainText } = useTheme();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
@@ -240,7 +242,7 @@ export default function AttendancePage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import CommunicationPanel from "@/components/dashboard/CommunicationPanel";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import {
   getUsersData,
   getInbox,
@@ -107,6 +108,7 @@ const CommunicationPage = () => {
     inbox,
     conversations: userConversations,
   } = useSelector((state) => state.message);
+  const { themeColor } = useTheme();
   const userName = getUserName();
   console.log("userName",userName);
   
@@ -412,7 +414,7 @@ const CommunicationPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen flex flex-col">
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-4 py-2 sm:py-4">
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
           {/* <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
@@ -425,13 +427,13 @@ const CommunicationPage = () => {
           </div> */}
 
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
-              <Grid size={18} className="text-[#0B4B31]" />
+            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
+              <Grid size={18} style={{ color: themeColor }} />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B4B31] bg-white shadow-sm">
-              <Moon size={18} className="text-[#0B4B31]" />
+            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
+              <Moon size={18} style={{ color: themeColor }} />
             </button>
-            <div className="flex items-center gap-2 bg-white border border-[#0B4B31] rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+            <div style={{ borderColor: themeColor }} className="flex items-center gap-2 bg-white border rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
               <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
                 <Image
                   src="/main-dashboard.jpg"
@@ -445,14 +447,14 @@ const CommunicationPage = () => {
               <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
                 {userName}
               </span>
-              <ChevronDown size={16} className="text-[#0B4B31]" />
+              <ChevronDown size={16} style={{ color: themeColor }} />
             </div>
           </div>
         </div>
       </header>
 
       <div className="mb-6">
-        <p className="text-[2.5rem] font-semibold text-[#0B4B31] leading-tight">
+        <p className="text-[2.5rem] font-semibold leading-tight" style={{ color: themeColor }}>
           Communication Center
         </p>
         <p className="text-[1.25rem] text-[#5E6C64]">
@@ -464,7 +466,7 @@ const CommunicationPage = () => {
       {!selectedRole ? (
         <section className="rounded-[32px] border border-[#E2E7E4] bg-white p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col gap-3 mb-6">
-            <h2 className="text-2xl font-semibold text-[#0B4B31]">
+            <h2 className="text-2xl font-semibold" style={{ color: themeColor }}>
               Choose who you'd like to chat with
             </h2>
             <p className="text-sm text-[#5E6C64]">
@@ -474,27 +476,32 @@ const CommunicationPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {filteredRoleOptions.map((role) => (
+            {filteredRoleOptions.map((role) => {
+              const rgb = themeColor ? /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(themeColor) : null;
+              const bgColor = rgb ? `rgba(${parseInt(rgb[1], 16)}, ${parseInt(rgb[2], 16)}, ${parseInt(rgb[3], 16)}, 0.1)` : "#0B4B311A";
+              
+              return (
               <button
                 key={role.id}
                 onClick={() => handleRoleSelect(role.id)}
-                className={`rounded-3xl border px-5 py-6 text-left transition shadow-sm ${
-                  roleChoice === role.id
-                    ? "border-[#0B4B31] bg-[#F2F7F5]"
-                    : "border-[#E2E7E4] bg-white hover:border-[#0B4B31]/40"
-                }`}
+                style={{
+                  borderColor: roleChoice === role.id ? themeColor : "#E2E7E4",
+                  backgroundColor: roleChoice === role.id ? "#F2F7F5" : "white",
+                }}
+                className="rounded-3xl border px-5 py-6 text-left transition shadow-sm hover:border-opacity-40"
               >
-                <div className="w-12 h-12 rounded-2xl bg-[#0B4B31]/10 flex items-center justify-center text-[#0B4B31] mb-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: bgColor, color: themeColor }}>
                   <role.icon size={24} />
                 </div>
-                <p className="text-lg font-semibold text-[#0B4B31]">
+                <p className="text-lg font-semibold" style={{ color: themeColor }}>
                   {role.title}
                 </p>
                 <p className="text-sm text-[#5E6C64] mt-2">
                   {role.description}
                 </p>
               </button>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -533,14 +540,15 @@ const CommunicationPage = () => {
         <div className="space-y-4">
           <button
             onClick={resetRoleSelection}
-            className="inline-flex items-center text-sm text-[#0B4B31] font-semibold hover:underline"
+            className="inline-flex items-center text-sm font-semibold hover:underline"
+            style={{ color: themeColor }}
           >
             ← Choose another role
           </button>
 
           {loading && (
             <div className="text-center py-8">
-              <p className="text-[#0B4B31]">
+              <p style={{ color: themeColor }}>
                 Loading{" "}
                 {filteredRoleOptions.find((r) => r.id === selectedRole)?.title}
                 ...

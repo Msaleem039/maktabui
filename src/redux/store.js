@@ -60,6 +60,8 @@ import {
   getAdminByIdReducer,
   updateAdminReducer,
   deleteAdminReducer,
+  getThemeByBranchReducer,
+  updateThemeReducer,
   adminDashboardReducer
 } from "./slices/adminSlices/adminSlices";
 
@@ -98,6 +100,7 @@ import assignmentReducer from "./slices/assignmentSlices/assignmentSlices";
 import notificationsReducer from "./slices/notificationSlices/notificationSlices";
 
 import eventReducer from "./slices/eventSlices/eventSlices";
+import themeReducer from "./slices/themeSlices/themeSlice";
 
 export const store = configureStore({
   reducer: {
@@ -160,6 +163,8 @@ export const store = configureStore({
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
     deleteAdmin: deleteAdminReducer,
+    getThemeByBranch: getThemeByBranchReducer,
+    updateTheme: updateThemeReducer,
     getAdminDashboard:adminDashboardReducer,
 
     // SubAdmin management
@@ -192,6 +197,9 @@ export const store = configureStore({
 
     // Event management
     events: eventReducer,
+
+    // Theme management
+    theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

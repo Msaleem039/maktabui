@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Download, Eye, Edit, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import { 
   getAllClassesAction, 
   setAllClassesPage 
@@ -13,6 +14,7 @@ import { getCookie } from "cookies-next";
 import { getAdminId } from "@/utils/getCookies";
 
 export default function ClassPage() {
+  const { mainText } = useTheme();
   const [searchValue, setSearchValue] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -256,7 +258,7 @@ export default function ClassPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
           {(user?.role === "Admin" || user?.role === "Super Admin") && (
@@ -291,7 +293,7 @@ export default function ClassPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
           {(user?.role === "Admin" || user?.role === "Super Admin") && (
@@ -330,7 +332,7 @@ export default function ClassPage() {
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000]  text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
         {(user?.role === "Admin" || user?.role === "Super Admin") && (
