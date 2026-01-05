@@ -19,13 +19,14 @@ import {
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 const AdminCard = ({
-  key,
   admin,
   onDelete,
   isExpanded,
   onToggle,
   isInstitute = false,
 }) => {
+  console.log("admin",admin);
+  
   const [isHovered, setIsHovered] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
