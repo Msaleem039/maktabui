@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { GraduationCap, Users, UserCog, BookOpen, Shield } from "lucide-react";
 import { getUserRole } from "@/utils/getCookies";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function StatsCards({ stats }) {
   const [activeIndex, setActiveIndex] = useState(null);
   const userRole = getUserRole();
+  const { themeColor } = useTheme();
 
   const statCards = [
     {
@@ -36,13 +38,16 @@ export default function StatsCards({ stats }) {
           <div
             key={index}
             onClick={() => setActiveIndex(index)}
-            className={`p-6 rounded-2xl border ${borderClass} bg-white flex flex-col items-start text-left cursor-pointer transition-all duration-200`}
+            style={{
+              borderColor: isActive ? themeColor : "transparent",
+            }}
+            className="p-6 rounded-2xl border bg-white flex flex-col items-start text-left cursor-pointer transition-all duration-200"
           >
             <item.icon className="text-emerald-900 mb-3" size={26} />
-            <h3 className="text-sm font-normal text-[#0B4B31] mb-1">
+            <h3 className="text-sm font-normal mb-1" style={{ color: themeColor }}>
               {item.title}
             </h3>
-            <h2 className="text-3xl font-semibold text-[#0B4B31] mb-1">
+            <h2 className="text-3xl font-semibold mb-1" style={{ color: themeColor }}>
               {item.value}
             </h2>
             <p className="text-[0.625rem] text-black mt-1">

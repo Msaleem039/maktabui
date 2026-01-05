@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
 import { getSubAdminByIdAction } from "@/redux/slices/subadminSlices/subAdminSlices";
 import {
   ArrowLeft,
@@ -24,6 +25,7 @@ export default function ViewSubAdminPage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { mainText } = useTheme();
 
   const { loading, subAdmin, error } = useSelector(
     (state) => state.getSubAdminById
@@ -125,7 +127,7 @@ export default function ViewSubAdminPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
         </div>
@@ -148,7 +150,7 @@ export default function ViewSubAdminPage() {
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText || "MaktabOS"}
             </h1>
           </div>
         </div>

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Download } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function PermissionPage() {
   const [searchValue, setSearchValue] = useState("");
+  const { mainText } = useTheme();
 
   const permissions = [
     {
@@ -49,7 +51,7 @@ export default function PermissionPage() {
             Welcome to
           </h1>
           <p className="text-[1.75rem] font-medium text-[#000000] mb-4">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </p>
         </div>
         <button

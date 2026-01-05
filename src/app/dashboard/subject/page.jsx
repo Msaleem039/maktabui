@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Download } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function SubjectPage() {
   const [searchValue, setSearchValue] = useState("");
+  const { mainText } = useTheme();
 
   const tableData = []; // Empty for now as shown in screenshot
 
@@ -17,7 +19,7 @@ export default function SubjectPage() {
             Welcome to
           </h1>
           <p className="text-[1.75rem] font-medium text-[#000000] mb-4">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </p>
         </div>
         <Link

@@ -6,9 +6,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { getAllSubAdminsAction } from "@/redux/slices/subadminSlices/subAdminSlices";
 import Cookies from "js-cookie";
 import SubAdminCard from "./SubAdminCard";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function SubAdmin() {
   const dispatch = useDispatch();
+  const { themeColor, mainText } = useTheme();
   const { subAdmins, loading, error, adminId } = useSelector(
     (state) => state.getAllSubAdmins
   );
@@ -51,14 +53,14 @@ export default function SubAdmin() {
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText}
             </h1>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm font-semibold text-[#0B4B31] opacity-50">
+          <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold opacity-50" style={{ borderColor: themeColor, color: themeColor }}>
             <span className="text-lg">+</span>
             Add New Sub Admin
           </div>
@@ -75,16 +77,17 @@ export default function SubAdmin() {
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText}
             </h1>
           </div>
           <Link
             href="/dashboard/team/sub-admin/add"
-            className="inline-flex items-center gap-2 rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[#F3F6F5]"
+            style={{ borderColor: themeColor, color: themeColor }}
           >
             <span className="text-lg">+</span>
             Add New Sub Admin
@@ -105,11 +108,11 @@ export default function SubAdmin() {
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
               Welcome to
             </p>
             <h1 className="font-medium text-[#000000] text-[1.75rem]">
-              MaktabOS
+              {mainText}
             </h1>
           </div>
         </div>
@@ -126,17 +129,18 @@ export default function SubAdmin() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+          <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
-            MaktabOS
+            {mainText}
           </h1>
         </div>
         <div className="flex gap-2">
           <Link
             href="/dashboard/team/sub-admin/add"
-            className="inline-flex items-center gap-2 rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[#F3F6F5]"
+            style={{ borderColor: themeColor, color: themeColor }}
           >
             <span className="text-lg">+</span>
             Add New Sub Admin

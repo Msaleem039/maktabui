@@ -40,7 +40,7 @@ export default function CreateAdmin() {
       const formData = new FormData();
       formData.append("file", file);
 
-      xhr.open("POST", "/api/uploadImage");
+      xhr.open("PUT", "/api/uploadImage");
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {

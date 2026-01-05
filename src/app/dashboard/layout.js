@@ -4,7 +4,20 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { getCookie, deleteCookie } from "cookies-next";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setTheme } from "@/redux/slices/themeSlices/themeSlice";
+import { getThemeByBranchAction } from "@/redux/slices/adminSlices/adminSlices";
+
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 19, g: 87, b: 74 };
+};
 
 const NavItem = ({
   name,
@@ -12,7 +25,7 @@ const NavItem = ({
   path,
   pathname,
   router,
-  activeBg,
+  activeBgColor = "#13574A",
   isCollapsed,
   hasSubmenu,
   isOpen,
@@ -40,20 +53,41 @@ const NavItem = ({
   const collapsedClasses = "justify-center p-2 w-10 h-10 mx-auto";
   const unCollapsedClasses = "px-3 py-3";
 
+  const getBgColor = () => {
+    if (isActive) return activeBgColor;
+    if (hasSubmenu && isOpen) {
+      // Calculate 70% opacity
+      const rgb = hexToRgb(activeBgColor);
+      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.7)`;
+    }
+    return "transparent";
+  };
+
+  const getHoverColor = () => {
+    const rgb = hexToRgb(activeBgColor);
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.45)`;
+  };
+
   return (
     <div>
       <button
         onClick={() => (hasSubmenu ? onToggle() : router.push(path))}
+        style={{
+          backgroundColor: getBgColor(),
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive && !(hasSubmenu && isOpen)) {
+            e.currentTarget.style.backgroundColor = getHoverColor();
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive && !(hasSubmenu && isOpen)) {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }
+        }}
         className={`
                     ${baseClasses}
                     ${isCollapsed ? collapsedClasses : unCollapsedClasses}
-                    ${
-                      isActive
-                        ? "bg-[#13574A]"
-                        : hasSubmenu && isOpen
-                        ? "bg-[#0F5B3F]/70"
-                        : "hover:bg-[#13574A]/45"
-                    }
                 `}
         title={isCollapsed ? name : undefined}
       >
@@ -127,18 +161,34 @@ const NavItem = ({
   );
 };
 
-const SubNavItem = ({ name, path, pathname, router, isCollapsed }) => {
+const SubNavItem = ({ name, path, pathname, router, isCollapsed, activeBgColor }) => {
   const isActive = pathname === path;
+  const rgb = hexToRgb(activeBgColor || "#13574A");
 
   return (
     <button
       onClick={() => router.push(path)}
+      style={{
+        background: isActive
+          ? `linear-gradient(to right, ${activeBgColor || "#13574A"}, ${activeBgColor || "#13574A"}CC)`
+          : "transparent",
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.backgroundColor = "transparent";
+        }
+      }}
       className={`
             flex items-center w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 group relative
             ${
               isActive
-                ? "bg-gradient-to-r from-[#13574A] to-[#13574A]/80 text-white shadow-md"
-                : "text-white/80 hover:bg-[#13574A]/20 hover:text-white hover:pl-6"
+                ? "text-white shadow-md"
+                : "text-white/80 hover:text-white hover:pl-6"
             }
         `}
     >
@@ -182,6 +232,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const reduxUser = useSelector((state) => state.user?.userInfo);
   const reduxRole = reduxUser?.role;
   const reduxPermissions = reduxUser?.permissions;
+  const theme = useSelector((state) => state.theme);
+  const sidebarBgColor = theme.themeColor || "#0B4B31";
+  const activeBgColor = theme.secondaryColor || "#13574A";
+  const logoUrl = theme.logo || "/01.png";
 
   const getUserData = useCallback(() => {
     let role = null;
@@ -462,6 +516,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.finance,
           allItems.events,
           allItems.team,
+          {
+            name: "Settings",
+            icon: "/Settings.png",
+            path: `${basePath}/settings`,
+          },
         ];
 
       case "Sub Admin":
@@ -623,8 +682,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       ></div>
 
       <div
+        style={{ backgroundColor: sidebarBgColor }}
         className={`
-          fixed lg:static top-0 left-0 h-screen ${sidebarBg} flex flex-col justify-between p-4 shadow-2xl
+          fixed lg:static top-0 left-0 h-screen flex flex-col justify-between p-4 shadow-2xl
           transition-all duration-300 ease-in-out z-50
           ${
             isCollapsed
@@ -671,15 +731,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           >
             <div className="w-6 h-6">
               <Image
-                src="/01.png"
-                alt="MaktabOS"
+                src={logoUrl}
+                alt={theme.mainText || "MaktabOS"}
                 width={24}
                 height={24}
                 className="w-full h-full object-contain"
+                unoptimized={logoUrl.startsWith("http")}
               />
             </div>
             {!isCollapsed && (
-              <h1 className="text-xl font-bold tracking-wider">MaktabOS</h1>
+              <h1 className="text-xl font-bold tracking-wider">{theme.mainText || "MaktabOS"}</h1>
             )}
           </div>
 
@@ -698,7 +759,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   path={item.path}
                   pathname={pathname}
                   router={router}
-                  activeBg={activeBg}
+                  activeBgColor={activeBgColor}
                   isCollapsed={isCollapsed}
                   hasSubmenu={item.hasSubmenu}
                   isOpen={openSubmenus[item.name]}
@@ -714,6 +775,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                         pathname={pathname}
                         router={router}
                         isCollapsed={isCollapsed}
+                        activeBgColor={activeBgColor}
                       />
                     ))}
                 </NavItem>
@@ -725,7 +787,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className="p-4 mt-2">
           <button
             onClick={handleLogout}
-            className="w-full bg-white text-[#0B4B31] font-normal rounded-2xl py-3 flex items-center justify-center gap-2 shadow-sm hover:bg-gray-100 transition-all"
+            style={{ color: sidebarBgColor }}
+            className="w-full bg-white font-normal rounded-2xl py-3 flex items-center justify-center gap-2 shadow-sm hover:bg-gray-100 transition-all"
           >
             <Image
               src="/Logout.png"
@@ -759,11 +822,73 @@ export default function DashboardLayout({ children }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
+  const theme = useSelector((state) => state.theme);
+  const reduxUser = useSelector((state) => state.user?.userInfo);
+  const sidebarBgColor = theme.themeColor || "#0B4B31";
 
   const showStudentHeader =
     pathname?.includes("/parent") ||
     pathname?.includes("/student") ||
     pathname === "/dashboard/student";
+
+  // Load theme from branch on mount
+  useEffect(() => {
+    const loadThemeByBranch = async () => {
+      // Try to get branch from user data
+      const branch = reduxUser?.admin?.branch || reduxUser?.branch || reduxUser?.admin?.branchName;
+      
+      // If no branch in Redux, try to get from cookie
+      let userBranch = branch;
+      if (!userBranch) {
+        try {
+          const userCookie = getCookie("user");
+          if (userCookie) {
+            const userData = typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+            userBranch = userData?.branch || userData?.admin?.branch;
+          }
+        } catch (error) {
+          console.error("Error parsing user cookie:", error);
+        }
+      }
+
+      // If still no branch, use default
+      const branchToUse = userBranch || "Main Branch";
+
+      // Only fetch if theme is not already loaded (check current theme state)
+      const isDefaultTheme = !theme.themeColor || theme.themeColor === "#0B4B31";
+      if (isDefaultTheme) {
+        try {
+          const themeResult = await dispatch(getThemeByBranchAction(branchToUse)).unwrap();
+          if (themeResult?.success && themeResult?.theme) {
+            const theme = themeResult.theme;
+            dispatch(setTheme({
+              themeColor: theme.themeColor || "#0B4B31",
+              secondaryColor: theme.secondaryColor || "#13574A",
+              logo: theme.logo || "",
+              favicon: theme.favicon || "",
+              mainText: theme.mainText || "MaktabOS",
+            }));
+          }
+        } catch (themeError) {
+          console.error("Failed to fetch theme by branch:", themeError);
+          // Fallback to websiteSettings if available
+          if (reduxUser?.admin?.websiteSettings) {
+            const websiteSettings = reduxUser.admin.websiteSettings;
+            dispatch(setTheme({
+              themeColor: websiteSettings.themeColor || "#0B4B31",
+              secondaryColor: websiteSettings.secondaryColor || "#13574A",
+              logo: websiteSettings.logo || "",
+              favicon: websiteSettings.favicon || "",
+              mainText: websiteSettings.mainText || "MaktabOS",
+            }));
+          }
+        }
+      }
+    };
+
+    loadThemeByBranch();
+  }, [reduxUser, dispatch]);
 
   // Handle Sub Admin redirect and initialization
   useEffect(() => {
@@ -817,11 +942,12 @@ export default function DashboardLayout({ children }) {
       className="min-h-screen flex overflow-hidden relative"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-6 left-4 z-[60] bg-[#0B4B31] text-white p-3 rounded-md shadow-md hover:bg-[#0B4B31]/90 transition-colors"
-        aria-label="Toggle menu"
-      >
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          style={{ backgroundColor: sidebarBgColor }}
+          className="lg:hidden fixed top-6 left-4 z-[60] text-white p-3 rounded-md shadow-md transition-colors hover:opacity-90"
+          aria-label="Toggle menu"
+        >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -840,10 +966,10 @@ export default function DashboardLayout({ children }) {
         {showStudentHeader && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>
-              <p className="text-[2.5rem] font-[600] text-[#0B4B31]">
+              <p className="text-[2.5rem] font-[600]" style={{ color: sidebarBgColor }}>
                 Welcome to
               </p>
-              <p className="text-[1.75rem] font-[500] text-black">MaktabOS</p>
+              <p className="text-[1.75rem] font-[500] text-black">{theme.mainText || "MaktabOS"}</p>
             </div>
           </div>
         )}

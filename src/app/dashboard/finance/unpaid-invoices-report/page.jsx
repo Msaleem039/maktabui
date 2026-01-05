@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function UnpaidInvoicesReportPage() {
+  const { mainText } = useTheme();
   const [searchValue, setSearchValue] = useState("");
   const [filterBy, setFilterBy] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -57,7 +59,7 @@ export default function UnpaidInvoicesReportPage() {
             Welcome to
           </p>
           <h1 className="text-3xl font-black text-[#0B4B31] leading-tight sm:text-4xl">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

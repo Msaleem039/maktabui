@@ -3,8 +3,11 @@ import React from "react";
 import Image from "next/image";
 import { Search, Grid, Moon, ChevronDown } from "lucide-react";
 import StatsCards from "@/components/StatsCard";
+import { useTheme } from "@/hooks/useTheme";
 
 const Page = () => {
+  const { mainText } = useTheme();
+  
   return (
     <>
       {/* Header */}
@@ -48,7 +51,7 @@ const Page = () => {
 
         {/* Welcome */}
         <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</h1>
-        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">MaktabOS</p>
+        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">{mainText || "MaktabOS"}</p>
 
         {/* Stats & Charts */}
         <div className="flex flex-col xl:flex-row gap-6 pb-6">

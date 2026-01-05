@@ -17,6 +17,7 @@ import {
   getAllAdminsAction,
 } from "@/redux/slices/adminSlices/adminSlices";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import { useTheme } from "@/hooks/useTheme";
 
 const SubAdminCard = ({
   admin,
@@ -30,6 +31,7 @@ const SubAdminCard = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
+  const { themeColor } = useTheme();
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
@@ -77,13 +79,13 @@ const SubAdminCard = ({
               <h3 className="font-bold text-gray-900">{admin.name}</h3>
               <p className="text-sm text-gray-600">{admin.email}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-[#0B4B31]/10 flex items-center justify-center">
-              <Building2 size={20} className="text-[#0B4B31]" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${themeColor}1A` }}>
+              <Building2 size={20} style={{ color: themeColor }} />
             </div>
           </div>
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="w-6 h-6 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center">
-              <span className="text-[#0B4B31] text-xs">▾</span>
+              <span className="text-xs" style={{ color: themeColor }}>▾</span>
             </div>
           </div>
         </div>
@@ -127,9 +129,9 @@ const SubAdminCard = ({
               }`}
             >
               {isExpanded ? (
-                <ChevronUp size={16} className="text-[#0B4B31]" />
+                <ChevronUp size={16} style={{ color: themeColor }} />
               ) : (
-                <ChevronDown size={16} className="text-[#0B4B31]" />
+                <ChevronDown size={16} style={{ color: themeColor }} />
               )}
             </button>
           </div>
@@ -143,14 +145,14 @@ const SubAdminCard = ({
               )}
               <p className="text-sm text-gray-600 mt-1">{admin.email}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-[#0B4B31]/10 flex items-center justify-center ml-4">
-              <User size={24} className="text-[#0B4B31]" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center ml-4" style={{ backgroundColor: `${themeColor}1A` }}>
+              <User size={24} style={{ color: themeColor }} />
             </div>
           </div>
 
           {/* Status Badges */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="inline-flex items-center px-3 py-2 rounded-full bg-[#0B4B31] text-white text-xs font-semibold">
+            <span className="inline-flex items-center px-3 py-2 rounded-full text-white text-xs font-semibold" style={{ backgroundColor: themeColor }}>
               Sub Admin
             </span>
             {admin.createdAt && (
@@ -168,7 +170,7 @@ const SubAdminCard = ({
                 {admin.createdAt && (
                   <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40">
                     <p className="text-gray-500 font-medium">Joined Date</p>
-                    <p className="text-[#0B4B31] font-semibold mt-1">
+                    <p className="font-semibold mt-1" style={{ color: themeColor }}>
                       {new Date(admin.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -182,7 +184,7 @@ const SubAdminCard = ({
                 {admin.phone && (
                   <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40">
                     <p className="text-gray-500 font-medium">Phone</p>
-                    <p className="text-[#0B4B31] font-semibold mt-1">
+                    <p className="font-semibold mt-1" style={{ color: themeColor }}>
                       {admin.phone}
                     </p>
                   </div>
@@ -192,7 +194,7 @@ const SubAdminCard = ({
                 {admin.address && (
                   <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40 sm:col-span-2">
                     <p className="text-gray-500 font-medium">Address</p>
-                    <p className="text-[#0B4B31] font-semibold mt-1">
+                    <p className="font-semibold mt-1" style={{ color: themeColor }}>
                       {admin.address}
                     </p>
                   </div>
@@ -251,7 +253,10 @@ const SubAdminCard = ({
               </button>
               <button
                 onClick={handleDeleteClick}
-                className="flex-1 rounded-full bg-[#0B4B31] px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0B4B31]/90 hover:shadow-md flex items-center justify-center gap-2"
+                className="flex-1 rounded-full px-4 py-3 text-sm font-semibold text-white transition-all hover:shadow-md flex items-center justify-center gap-2"
+                style={{ backgroundColor: themeColor }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = `${themeColor}E6`}
+                onMouseLeave={(e) => e.target.style.backgroundColor = themeColor}
               >
                 <Trash2 size={16} />
                 Delete

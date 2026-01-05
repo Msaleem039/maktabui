@@ -16,6 +16,7 @@ import {
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
 import { getInvoicesStatsAction, setUnpaidPage, setUnpaidLimit } from "@/redux/slices/invoiceSlices/invoiceSlices";
+import { useTheme } from "@/hooks/useTheme";
 
 ChartJS.register(
   ArcElement,
@@ -30,6 +31,7 @@ ChartJS.register(
 export default function InvoiceReportPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { themeColor, mainText } = useTheme();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [filterBy, setFilterBy] = useState("");
@@ -142,7 +144,7 @@ export default function InvoiceReportPage() {
     datasets: [
       {
         data: [chartData.totalPaid, chartData.totalUnpaid],
-        backgroundColor: ["#0B4B31", "#CFE6DB"],
+        backgroundColor: [themeColor, "#CFE6DB"],
         borderWidth: 0,
       },
     ],
@@ -174,7 +176,7 @@ export default function InvoiceReportPage() {
     datasets: [
       {
         data: [chartData.paymentMethods.stripe, chartData.paymentMethods.other],
-        backgroundColor: ["#1D8C6C", "#0B4B31"],
+        backgroundColor: ["#1D8C6C", themeColor],
         borderWidth: 0,
       },
     ],
@@ -357,18 +359,18 @@ export default function InvoiceReportPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+        <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
           Welcome to
         </p>
         <h1 className="font-medium text-[#000000] sm:text-[1.75rem]">
-          MaktabOS
+          {mainText}
         </h1>
       </div>
 
       {loading && (
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31]"></div>
-          <p className="mt-2 text-[#0B4B31]">Loading invoice statistics...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: themeColor }}></div>
+          <p className="mt-2" style={{ color: themeColor }}>Loading invoice statistics...</p>
         </div>
       )}
 
@@ -389,7 +391,8 @@ export default function InvoiceReportPage() {
               };
               dispatch(getInvoicesStatsAction(filters));
             }}
-            className="mt-2 rounded-full bg-[#0B4B31] px-4 py-2 text-white"
+            className="mt-2 rounded-full px-4 py-2 text-white"
+            style={{ backgroundColor: themeColor }}
           >
             Retry
           </button>
@@ -401,25 +404,25 @@ export default function InvoiceReportPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 rounded-[18px] bg-[#E5EFEB] px-8 py-6">
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[1.5rem] font-semibold" style={{ color: themeColor }}>
               {stats?.totalInvoices || 0}
             </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Total Invoices</p>
           </div>
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[1.5rem] font-semibold" style={{ color: themeColor }}>
               ${stats?.totalAmount?.toLocaleString() || '0.00'}
             </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Total Amount</p>
           </div>
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[1.5rem] font-semibold" style={{ color: themeColor }}>
               ${stats?.totalPaidAmount?.toLocaleString() || '0.00'}
             </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Paid Amount</p>
           </div>
           <div>
-            <p className="text-[1.5rem] font-semibold text-[#0B4B31]">
+            <p className="text-[1.5rem] font-semibold" style={{ color: themeColor }}>
               ${stats?.totalUnpaidAmount?.toLocaleString() || '0.00'}
             </p>
             <p className="text-[1.5rem] font-normal text-[#0000008C] mt-1">Unpaid Amount</p>
@@ -435,7 +438,9 @@ export default function InvoiceReportPage() {
               <select
                 value={selectedStatus}
                 onChange={handleStatusChange}
-                className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+                className="rounded-full border bg-white px-4 py-2 text-xs outline-none"
+                style={{ borderColor: themeColor, color: themeColor }}
+                onFocus={(e) => e.target.style.borderColor = themeColor}
               >
                 <option value="">All Time</option>
                 <option value="this_month">This month</option>
@@ -449,9 +454,9 @@ export default function InvoiceReportPage() {
                 <Doughnut data={donutChartData} options={donutOptions} />
               </div>
 
-              <div className="space-y-4 text-sm font-medium text-[#0B4B31]">
+              <div className="space-y-4 text-sm font-medium" style={{ color: themeColor }}>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-3 w-3 rounded-full bg-[#0B4B31]"></span>
+                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: themeColor }}></span>
                   <div>
                     <p className="text-[0.8125rem] font-normal text-[#979699]">Paid</p>
                     <p className="text-[1.0625rem] font-semibold text-[#000000]">
@@ -479,7 +484,9 @@ export default function InvoiceReportPage() {
               <select
                 value={selectedDate}
                 onChange={handleDateChange}
-                className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+                className="rounded-full border bg-white px-4 py-2 text-xs outline-none"
+                style={{ borderColor: themeColor, color: themeColor }}
+                onFocus={(e) => e.target.style.borderColor = themeColor}
               >
                 <option value="">All Time</option>
                 <option value="this_month">This month</option>
@@ -501,7 +508,7 @@ export default function InvoiceReportPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: "#0B4B31" }}></span>
+                  <span className="inline-flex h-3 w-3 rounded-full" style={{ backgroundColor: themeColor }}></span>
                   <span className="text-[0.8125rem] font-normal text-[#0000008C]">Other Methods</span>
                   <span className="text-[0.8125rem] font-semibold text-[#000000]">
                     ${chartData.paymentMethods.other.toLocaleString()}
@@ -519,7 +526,9 @@ export default function InvoiceReportPage() {
             <select
               value={filterBy}
               onChange={handleFilterChange}
-              className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              className="rounded-full border bg-white px-4 py-2 text-xs outline-none"
+              style={{ borderColor: themeColor, color: themeColor }}
+              onFocus={(e) => e.target.style.borderColor = themeColor}
             >
               <option value="">All Time</option>
               <option value="this_year">This Year</option>
@@ -531,7 +540,7 @@ export default function InvoiceReportPage() {
             <div className="flex-1 h-64">
               <Bar data={barChartData} options={barChartOptions} />
             </div>
-            <div className="flex items-center gap-8 text-sm font-semibold text-[#0B4B31]">
+            <div className="flex items-center gap-8 text-sm font-semibold" style={{ color: themeColor }}>
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-3 w-3 rounded-full bg-[#A4E4CE]"></span>
                 <div>
@@ -562,33 +571,37 @@ export default function InvoiceReportPage() {
         {/* Unpaid Invoices Filters */}
         <div className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <label className="text-sm font-normal text-[#0B4B31] whitespace-nowrap">
+            <label className="text-sm font-normal whitespace-nowrap" style={{ color: themeColor }}>
               Filter By Status:
             </label>
             <div className="relative flex-1">
               <select
                 value={unpaidFilterBy}
                 onChange={handleUnpaidFilterChange}
-                className="w-full appearance-none rounded-full border border-[#0B4B31] bg-white py-3 pl-4 pr-10 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+                className="w-full appearance-none rounded-full border bg-white py-3 pl-4 pr-10 text-sm outline-none"
+                style={{ borderColor: themeColor, color: themeColor }}
+                onFocus={(e) => e.target.style.borderColor = themeColor}
               >
                 <option value="">All Unpaid</option>
                 <option value="pending">Pending</option>
                 <option value="overdue">Overdue</option>
                 <option value="partially_paid">Partially Paid</option>
               </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" style={{ color: themeColor }}>
                 ▾
               </span>
             </div>
           </div>
 
           <label className="relative flex w-full items-center">
-            <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+            <span className="absolute left-4" style={{ color: `${themeColor}99` }}>🔍</span>
             <input
               value={unpaidSearch}
               onChange={handleUnpaidSearchChange}
               placeholder="Search by parent name, phone, or invoice number..."
-              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              className="w-full rounded-full border bg-white py-3 pl-10 pr-4 text-sm outline-none"
+              style={{ borderColor: themeColor, color: themeColor }}
+              onFocus={(e) => e.target.style.borderColor = themeColor}
             />
           </label>
         </div>
@@ -643,7 +656,13 @@ export default function InvoiceReportPage() {
                         <button
                           type="button"
                           onClick={(e) => toggleDropdown(invoice.id, e)}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition hover:bg-[#0B4B31]/90"
+                          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal transition"
+                          style={{ 
+                            backgroundColor: `${themeColor}38`,
+                            color: themeColor
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = `${themeColor}90`}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = `${themeColor}38`}
                         >
                           Action
                           <span>▾</span>
@@ -694,7 +713,9 @@ export default function InvoiceReportPage() {
             <select
               value={unpaidLimit}
               onChange={handleLimitChange}
-              className="rounded-full border border-[#0B4B31] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              className="rounded-full border bg-white px-4 py-2 text-sm outline-none"
+              style={{ borderColor: themeColor, color: themeColor }}
+              onFocus={(e) => e.target.style.borderColor = themeColor}
             >
               <option value={10}>Display 10</option>
               <option value={20}>Display 20</option>
@@ -704,7 +725,8 @@ export default function InvoiceReportPage() {
               <button
                 onClick={() => handlePageChange(Math.max(unpaidPage - 1, 1))}
                 disabled={unpaidPage === 1}
-                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ color: themeColor }}
               >
                 ‹
               </button>
@@ -713,10 +735,12 @@ export default function InvoiceReportPage() {
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`rounded-full px-4 py-2 text-sm transition ${unpaidPage === pageNum
-                      ? "bg-[#0B4B31] text-white"
-                      : "border border-[#C5D2CD] bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
-                    }`}
+                  className={`rounded-full px-4 py-2 text-sm transition ${
+                    unpaidPage === pageNum
+                      ? "text-white"
+                      : "border border-[#C5D2CD] bg-white hover:bg-[#F3F6F5]"
+                  }`}
+                  style={unpaidPage === pageNum ? { backgroundColor: themeColor } : { color: themeColor }}
                 >
                   {pageNum}
                 </button>
@@ -725,7 +749,8 @@ export default function InvoiceReportPage() {
               <button
                 onClick={() => handlePageChange(Math.min(unpaidPage + 1, totalUnpaidPages))}
                 disabled={unpaidPage === totalUnpaidPages || totalUnpaidPages === 0}
-                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm transition hover:bg-[#F3F6F5] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ color: themeColor }}
               >
                 ›
               </button>

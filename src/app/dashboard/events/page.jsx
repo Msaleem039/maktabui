@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, Search, Eye, Edit, Trash2 } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import { getEvents, deleteEvent } from "@/redux/slices/eventSlices/eventSlices";
 import ActionMenu from "@/components/dashboard/ActionMenu";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 export default function SendEventPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { mainText } = useTheme();
 
   const { events, loading, error, pagination } = useSelector(state => state.events);
 
@@ -176,7 +178,7 @@ export default function SendEventPage() {
             Welcome to
           </h1>
           <p className="text-[1.75rem] font-medium text-[#000000]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </p>
         </div>
 

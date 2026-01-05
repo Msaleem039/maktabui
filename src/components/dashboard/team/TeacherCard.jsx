@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { deleteTeacher, getAllTeachers } from "@/redux/slices/teacherSlices/teacherSlices";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { getAdminId } from "@/utils/getCookies";
+import { useTheme } from "@/hooks/useTheme";
 
 const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -15,7 +16,8 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
-    const adminId = getAdminId();
+  const { themeColor } = useTheme();
+  const adminId = getAdminId();
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
   };
@@ -70,9 +72,9 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
                 }`}
             >
               {isExpanded ? (
-                <ChevronUp size={16} className="text-[#0B4B31]" />
+                <ChevronUp size={16} style={{ color: themeColor }} />
               ) : (
-                <ChevronDown size={16} className="text-[#0B4B31]" />
+                <ChevronDown size={16} style={{ color: themeColor }} />
               )}
             </button>
           </div>
@@ -85,14 +87,14 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
               )}
               <p className="text-sm text-gray-600 mt-1">{teacher.email}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-[#0B4B31]/10 flex items-center justify-center ml-4">
-              <User size={24} className="text-[#0B4B31]" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center ml-4" style={{ backgroundColor: `${themeColor}1A` }}>
+              <User size={24} style={{ color: themeColor }} />
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
             {teacher.students !== undefined && teacher.students !== null && (
-              <span className="inline-flex items-center px-3 py-2 rounded-full bg-[#0B4B31] text-white text-xs font-semibold">
+              <span className="inline-flex items-center px-3 py-2 rounded-full text-white text-xs font-semibold" style={{ backgroundColor: themeColor }}>
                 Students ({teacher.students})
               </span>
             )}
@@ -118,27 +120,27 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40">
                   <p className="text-gray-500 font-medium">Status</p>
-                  <p className="text-[#0B4B31] font-semibold mt-1">
+                  <p className="font-semibold mt-1" style={{ color: themeColor }}>
                     {teacher.role === "Owner" ? "Administrator" : "Active"}
                   </p>
                 </div>
 
                 <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40">
                   <p className="text-gray-500 font-medium">Account Type</p>
-                  <p className="text-[#0B4B31] font-semibold mt-1">Teacher</p>
+                  <p className="font-semibold mt-1" style={{ color: themeColor }}>Teacher</p>
                 </div>
 
                 {teacher.joinedDate && (
                   <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40">
                     <p className="text-gray-500 font-medium">Joined</p>
-                    <p className="text-[#0B4B31] font-semibold mt-1">{teacher.joinedDate}</p>
+                    <p className="font-semibold mt-1" style={{ color: themeColor }}>{teacher.joinedDate}</p>
                   </div>
                 )}
 
                 {teacher.phone && (
                   <div className="bg-white/60 rounded-xl p-4 shadow-sm border border-white/40">
                     <p className="text-gray-500 font-medium">Phone</p>
-                    <p className="text-[#0B4B31] font-semibold mt-1">{teacher.phone}</p>
+                    <p className="font-semibold mt-1" style={{ color: themeColor }}>{teacher.phone}</p>
                   </div>
                 )}
               </div>
@@ -186,7 +188,10 @@ const TeacherCard = ({ teacher, onDelete, isExpanded, onToggle }) => {
               </button>
               <button
                 onClick={handleDeleteClick}
-                className="flex-1 rounded-full bg-[#0B4B31] px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0B4B31]/90 hover:shadow-md flex items-center justify-center gap-2"
+                className="flex-1 rounded-full px-4 py-3 text-sm font-semibold text-white transition-all hover:shadow-md flex items-center justify-center gap-2"
+                style={{ backgroundColor: themeColor }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = `${themeColor}E6`}
+                onMouseLeave={(e) => e.target.style.backgroundColor = themeColor}
               >
                 <Trash2 size={16} />
                 Delete
