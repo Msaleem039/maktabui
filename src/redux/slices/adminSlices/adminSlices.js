@@ -134,7 +134,7 @@ export const getAdminDashboardStatsAction = createAsyncThunk(
   "admins/getAdminDashboardStats",
   async ({ adminId, year }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(
+      const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAdminDashboardStats`,
         { adminId, year }
       );

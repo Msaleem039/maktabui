@@ -9,11 +9,61 @@ import { useDispatch, useSelector } from "react-redux";
 import { getDashboardStatsAction } from "@/redux/slices/superadminSlices/superadminSlices";
 import Cookies from "js-cookie";
 
+const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
+  const { themeColor } = useTheme();
+  
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
+      <div className="flex justify-between items-center mb-3">
+        <h3 
+          className="text-[18px] font-semibold uppercase tracking-wide" 
+          style={{ color: themeColor }}
+        >
+          {title}
+        </h3>
+        {/* <button className={`text-[12px] px-3 py-[2px] rounded-full ${btnColor}`}>
+          See All ↗
+        </button> */}
+      </div>
+      <p className="text-[#000000] text-sm mb-4">{subtitle}</p>
+
+      <table className="w-full text-sm min-w-[400px]">
+        <thead>
+          <tr 
+            style={{ backgroundColor: themeColor }} 
+            className="text-white"
+          >
+            <th className="text-left px-3 py-2 rounded-tl-md">Name ↕</th>
+            <th className="text-left px-3 py-2">Date ↕</th>
+            <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows?.map((row, idx) => (
+            <tr key={idx} className="border-b border-gray-100">
+              <td className="py-3 px-3">{row.name}</td>
+              <td className="py-3 px-3">{row.date}</td>
+              <td
+                className={`py-3 px-3 text-right font-medium ${
+                  row.amount < 0 ? "text-red-500" : "text-green-600"
+                }`}
+              >
+                ${row.amount}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 const Page = () => {
   const dispatch = useDispatch();
   const { themeColor, mainText } = useTheme();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const user = Cookies.get("user");
+  
   const {
     loading,
     stats,
@@ -32,23 +82,25 @@ const Page = () => {
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1 lg:mt-1">
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
-          {/* <div className="flex items-center border border-[#0B4B31] bg-white rounded-full px-4 py-2 flex-1 sm:flex-none min-w-[200px] shadow-sm">
-            <Search size={16} className="text-gray-500 mr-2" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full bg-transparent focus:outline-none text-sm text-[#0B4B31] placeholder:text-[#979699]"
-            />
-          </div> */}
-
+          {/* Search bar removed */}
+          
           <div className="flex items-center gap-2">
-            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
+            <button 
+              style={{ borderColor: themeColor }} 
+              className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm"
+            >
               <Grid size={18} style={{ color: themeColor }} />
             </button>
-            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
+            <button 
+              style={{ borderColor: themeColor }} 
+              className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm"
+            >
               <Moon size={18} style={{ color: themeColor }} />
             </button>
-            <div style={{ borderColor: themeColor }} className="flex items-center gap-2 bg-white border rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
+            <div 
+              style={{ borderColor: themeColor }} 
+              className="flex items-center gap-2 bg-white border rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm"
+            >
               <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
                 <Image
                   src="/main-dashboard.jpg"
@@ -67,9 +119,13 @@ const Page = () => {
           </div>
         </div>
       </header>
+      
       <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
         {/* Welcome */}
-        <h1 className="text-[2.5rem] font-semibold mb-1" style={{ color: themeColor }}>
+        <h1 
+          className="text-[2.5rem] font-semibold mb-1" 
+          style={{ color: themeColor }}
+        >
           Welcome to
         </h1>
         <p className="text-[1.75rem] font-medium text-[#000000] mb-8">
@@ -93,7 +149,10 @@ const Page = () => {
 
               <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
-                  <h3 className="font-semibold text-[14px] leading-[20px]" style={{ color: themeColor }}>
+                  <h3 
+                    className="font-semibold text-[14px] leading-[20px]" 
+                    style={{ color: themeColor }}
+                  >
                     Yearly Payment Volume ({selectedYear})
                     <span style={{ color: themeColor, opacity: 0.7 }}>
                       (${stats?.totalPaidAmount || 0})
@@ -242,48 +301,5 @@ const Page = () => {
     </>
   );
 };
-
-// Table Component
-const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
-  const { themeColor } = useTheme();
-  
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-[18px] font-semibold uppercase tracking-wide" style={{ color: themeColor }}>
-          {title}
-        </h3>
-        {/* <button className={`text-[12px] px-3 py-[2px] rounded-full ${btnColor}`}>
-          See All ↗
-        </button> */}
-      </div>
-      <p className="text-[#000000] text-sm mb-4">{subtitle}</p>
-
-      <table className="w-full text-sm min-w-[400px]">
-        <thead>
-          <tr style={{ backgroundColor: themeColor }} className="text-white">
-            <th className="text-left px-3 py-2 rounded-tl-md">Name ↕</th>
-            <th className="text-left px-3 py-2">Date ↕</th>
-            <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
-          </tr>
-        </thead>
-      <tbody>
-        {rows?.map((row, idx) => (
-          <tr key={idx} className="border-b border-gray-100">
-            <td className="py-3 px-3">{row.name}</td>
-            <td className="py-3 px-3">{row.date}</td>
-            <td
-              className={`py-3 px-3 text-right font-medium ${
-                row.amount < 0 ? "text-red-500" : "text-green-600"
-              }`}
-            >
-              ${row.amount}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 export default Page;
