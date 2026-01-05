@@ -17,6 +17,7 @@ export default function CreateAdmin() {
     name: "",
     password: "",
     phone: "",
+    branch: "",
   });
   console.log("formData", formData);
 
@@ -80,13 +81,16 @@ export default function CreateAdmin() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(createAdminAction(formData));
 
-    setTimeout(() => {
+    try {
+      const result = await dispatch(createAdminAction(formData)).unwrap();
+
       router.push("/dashboard/team/admin");
-    }, 3000);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -163,6 +167,14 @@ export default function CreateAdmin() {
             value={formData.phone}
             onChange={handleInputChange}
             placeholder="Phone"
+          />
+
+          <FormInput
+            label="Branch"
+            name="branch"
+            value={formData.branch}
+            onChange={handleInputChange}
+            placeholder="Branch"
           />
 
           <div>

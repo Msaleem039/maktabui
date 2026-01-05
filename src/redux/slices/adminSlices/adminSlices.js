@@ -106,7 +106,6 @@ export const getAdminDashboardStatsAction = createAsyncThunk(
   }
 );
 
-
 const createAdminSlice = createSlice({
   name: "createAdmin",
   initialState: { loading: false, admin: null, error: null },
