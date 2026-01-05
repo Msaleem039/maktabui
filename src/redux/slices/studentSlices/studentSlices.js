@@ -1,11 +1,14 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 export const createStudent = createAsyncThunk(
   `student/createStudent`,
   async (studentData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createStudent`, studentData);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createStudent`,
+        studentData
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -17,7 +20,9 @@ export const getStudentNamesWithIds = createAsyncThunk(
   `students/getStudentNamesWithIds`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentNamesWithIds`);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentNamesWithIds`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -31,11 +36,11 @@ export const getAllStudents = createAsyncThunk(
     try {
       const state = getState();
       const { allStudents } = state;
-      
+
       const payload = {
         page: requestData.page || allStudents.pagination.currentPage,
         limit: requestData.limit || allStudents.pagination.limit,
-        ...requestData
+        ...requestData,
       };
 
       if (requestData.search === undefined && allStudents.search) {
@@ -46,7 +51,7 @@ export const getAllStudents = createAsyncThunk(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllStudent`,
         payload
       );
-      console.log("response",response);
+      console.log("response", response);
 
       return response.data.data;
     } catch (error) {
@@ -59,7 +64,10 @@ export const getStudentById = createAsyncThunk(
   `student/getStudentById`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentById`, { studentId });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentById`,
+        { studentId }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -68,13 +76,13 @@ export const getStudentById = createAsyncThunk(
 );
 
 export const getAllWaitlistStudents = createAsyncThunk(
-  'waitlistStudents/getAllWaitlistStudents',
+  "waitlistStudents/getAllWaitlistStudents",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const { limit = 10, page = 1, search = '',adminId } = params;
+      const { limit = 10, page = 1, search = "", adminId } = params;
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllWaitlistStudent`,
-        { limit, page, search,adminId }
+        { limit, page, search, adminId }
       );
       return response.data;
     } catch (error) {
@@ -87,7 +95,10 @@ export const addToWaitlistStudent = createAsyncThunk(
   `student/waitlist/add`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/addToWaitlist`, { studentId });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/addToWaitlist`,
+        { studentId }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -99,7 +110,10 @@ export const removeFromWaitlistStudent = createAsyncThunk(
   `student/waitlist/remove`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeFromStudentWaitlist`, { studentId });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/removeFromStudentWaitlist`,
+        { studentId }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -111,7 +125,10 @@ export const getStudentDashboardStats = createAsyncThunk(
   `student/getStudentDashboardStats`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentDashboardStats`, { studentId });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentDashboardStats`,
+        { studentId }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -138,7 +155,10 @@ export const deleteStudent = createAsyncThunk(
   `student/deleteStudent`,
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteStudent`, { studentId });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/deleteStudent`,
+        { studentId }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -146,7 +166,23 @@ export const deleteStudent = createAsyncThunk(
   }
 );
 
-// Slices
+export const getParentChildById = createAsyncThunk(
+  `student/getParentChildById`,
+  async (requestData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getParentChildById`,
+        requestData
+      );
+            console.log("API Response:", response.data); // 🔥 check students here
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const createStudentSlice = createSlice({
   name: "createStudent",
   initialState: {
@@ -197,8 +233,8 @@ const getAllStudentsSlice = createSlice({
       totalCount: 0,
       limit: 10,
       hasNextPage: false,
-      hasPrevPage: false
-    }
+      hasPrevPage: false,
+    },
   },
   reducers: {
     resetAllStudentsState: (state) => {
@@ -212,7 +248,7 @@ const getAllStudentsSlice = createSlice({
         totalCount: 0,
         limit: 10,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
       };
     },
     setStudentsPage: (state, action) => {
@@ -226,7 +262,7 @@ const getAllStudentsSlice = createSlice({
     },
     clearStudentsError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -236,30 +272,25 @@ const getAllStudentsSlice = createSlice({
       })
       .addCase(getAllStudents.fulfilled, (state, action) => {
         state.status = "succeeded";
-        
-        // Handle both possible response structures
+
         if (Array.isArray(action.payload)) {
-          // If payload is directly an array
           state.students = action.payload;
         } else if (action.payload?.data && Array.isArray(action.payload.data)) {
-          // If payload has a data property that's an array
           state.students = action.payload.data;
           if (action.payload.pagination) {
             state.pagination = {
               ...state.pagination,
-              ...action.payload.pagination
+              ...action.payload.pagination,
             };
           }
         } else {
-          // Fallback to empty array
           state.students = action.payload || [];
         }
-        
-        // Handle pagination if available
+
         if (action.payload?.pagination) {
           state.pagination = {
             ...state.pagination,
-            ...action.payload.pagination
+            ...action.payload.pagination,
           };
         }
       })
@@ -326,10 +357,10 @@ const getStudentByIdSlice = createSlice({
 });
 
 const getAllWaitlistStudentsSlice = createSlice({
-  name: 'waitlistStudents',
+  name: "waitlistStudents",
   initialState: {
     students: [],
-    status: 'idle', 
+    status: "idle",
     error: null,
     pagination: {
       page: 1,
@@ -341,7 +372,7 @@ const getAllWaitlistStudentsSlice = createSlice({
   reducers: {
     resetWaitlistStudentsState: (state) => {
       state.students = [];
-      state.status = 'idle';
+      state.status = "idle";
       state.error = null;
       state.pagination = {
         page: 1,
@@ -368,11 +399,11 @@ const getAllWaitlistStudentsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getAllWaitlistStudents.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
         state.error = null;
       })
       .addCase(getAllWaitlistStudents.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         state.students = action.payload.waitlist || [];
         state.pagination = {
           page: action.payload.page || 1,
@@ -382,19 +413,19 @@ const getAllWaitlistStudentsSlice = createSlice({
         };
       })
       .addCase(getAllWaitlistStudents.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload || 'Failed to fetch waitlist students';
+        state.status = "failed";
+        state.error = action.payload || "Failed to fetch waitlist students";
       });
   },
 });
 
 const addToWaitlistStudentSlice = createSlice({
-  name: 'addToWaitlistStudent',
+  name: "addToWaitlistStudent",
   initialState: {
     loading: false,
     success: false,
     error: null,
-    data: null
+    data: null,
   },
   reducers: {
     resetAddWaitlistStudent: (state) => {
@@ -402,7 +433,7 @@ const addToWaitlistStudentSlice = createSlice({
       state.success = false;
       state.error = null;
       state.data = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -423,16 +454,16 @@ const addToWaitlistStudentSlice = createSlice({
         state.error = action.payload;
         state.data = null;
       });
-  }
+  },
 });
 
 const removeFromWaitlistStudentSlice = createSlice({
-  name: 'removeFromWaitlistStudent',
+  name: "removeFromWaitlistStudent",
   initialState: {
     loading: false,
     success: false,
     error: null,
-    data: null
+    data: null,
   },
   reducers: {
     resetRemoveWaitlistStudent: (state) => {
@@ -440,7 +471,7 @@ const removeFromWaitlistStudentSlice = createSlice({
       state.success = false;
       state.error = null;
       state.data = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -461,7 +492,7 @@ const removeFromWaitlistStudentSlice = createSlice({
         state.error = action.payload;
         state.data = null;
       });
-  }
+  },
 });
 
 const getStudentNamesWithIdsSlice = createSlice({
@@ -523,7 +554,7 @@ const getStudentDashboardStatsSlice = createSlice({
       if (state.data && state.data.studentAttendance) {
         state.data.studentAttendance = {
           ...state.data.studentAttendance,
-          ...action.payload
+          ...action.payload,
         };
       }
     },
@@ -531,7 +562,7 @@ const getStudentDashboardStatsSlice = createSlice({
       if (state.data && state.data.academicPerformance) {
         state.data.academicPerformance = {
           ...state.data.academicPerformance,
-          ...action.payload
+          ...action.payload,
         };
       }
     },
@@ -539,7 +570,7 @@ const getStudentDashboardStatsSlice = createSlice({
       if (state.data && state.data.keyMetrics) {
         state.data.keyMetrics = {
           ...state.data.keyMetrics,
-          ...action.payload
+          ...action.payload,
         };
       }
     },
@@ -551,14 +582,14 @@ const getStudentDashboardStatsSlice = createSlice({
     removeAssignment: (state, action) => {
       if (state.data && state.data.assignmentsDueSoon) {
         state.data.assignmentsDueSoon = state.data.assignmentsDueSoon.filter(
-          assignment => assignment._id !== action.payload
+          (assignment) => assignment._id !== action.payload
         );
       }
     },
     markAssignmentCompleted: (state, action) => {
       if (state.data && state.data.assignmentsDueSoon) {
         const assignment = state.data.assignmentsDueSoon.find(
-          assignment => assignment._id === action.payload
+          (assignment) => assignment._id === action.payload
         );
         if (assignment) {
           assignment.completed = true;
@@ -634,12 +665,12 @@ const updateStudentSlice = createSlice({
 });
 
 const deleteStudentSlice = createSlice({
-  name: 'deleteStudent',
+  name: "deleteStudent",
   initialState: {
     loading: false,
     success: false,
     error: null,
-    data: null
+    data: null,
   },
   reducers: {
     resetDeleteStudent: (state) => {
@@ -650,7 +681,7 @@ const deleteStudentSlice = createSlice({
     },
     clearDeleteStudentError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -670,29 +701,125 @@ const deleteStudentSlice = createSlice({
         state.success = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
+const getParentChildByIdSlice = createSlice({
+  name: "parentChildById",
+  initialState: {
+    parent: null,
+    students: [],
+    totalStudents: 0,
+    status: "idle",
+    error: null,
+  },
+  reducers: {
+    resetParentChildState: (state) => {
+      state.parent = null;
+      state.students = [];
+      state.totalStudents = 0;
+      state.status = "idle";
+      state.error = null;
+    },
+    clearParentChildError: (state) => {
+      state.error = null;
+    },
+    updateParentData: (state, action) => {
+      if (state.parent) {
+        state.parent = { ...state.parent, ...action.payload };
+      }
+    },
+    updateStudentInList: (state, action) => {
+      const index = state.students.findIndex(
+        (student) => student._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.students[index] = { ...state.students[index], ...action.payload };
+      }
+    },
+    addNewStudent: (state, action) => {
+      state.students.unshift(action.payload);
+      state.totalStudents += 1;
+    },
+    removeStudentFromList: (state, action) => {
+      state.students = state.students.filter(
+        (student) => student._id !== action.payload
+      );
+      state.totalStudents = Math.max(0, state.totalStudents - 1);
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getParentChildById.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(getParentChildById.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.parent = action.payload.parent || null;
+        state.students = action.payload.students || [];
+        // Set totalStudents from pagination.totalStudents if exists
+        state.totalStudents =
+          action.payload.pagination?.totalStudents || state.students.length;
+        state.error = null;
+      })
+      .addCase(getParentChildById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Something went wrong";
+        state.parent = null;
+        state.students = [];
+        state.totalStudents = 0;
+      });
+  },
+});
+
+export const {
+  resetParentChildState,
+  clearParentChildError,
+  updateParentData,
+  updateStudentInList,
+  addNewStudent,
+  removeStudentFromList,
+} = getParentChildByIdSlice.actions;
+
+// Export reducer
 export const { resetCreateStudentState } = createStudentSlice.actions;
-export const { resetAllStudentsState,setStudentsPage } = getAllStudentsSlice.actions;
+export const { resetAllStudentsState, setStudentsPage } =
+  getAllStudentsSlice.actions;
 export const { resetStudentByIdState } = getStudentByIdSlice.actions;
-export const { resetWaitlistStudentsState } = getAllWaitlistStudentsSlice.actions;
+export const { resetWaitlistStudentsState } =
+  getAllWaitlistStudentsSlice.actions;
 export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;
-export const { resetRemoveWaitlistStudent } = removeFromWaitlistStudentSlice.actions;
-export const { resetStudentNamesState, clearStudentNamesError } = getStudentNamesWithIdsSlice.actions;
-export const { resetDashboardStatsState, clearDashboardStatsError, updateDashboardStats } = getStudentDashboardStatsSlice.actions;
-export const { resetUpdateStudentState, clearUpdateStudentError, resetSuccessStatus } = updateStudentSlice.actions;
+export const { resetRemoveWaitlistStudent } =
+  removeFromWaitlistStudentSlice.actions;
+export const { resetStudentNamesState, clearStudentNamesError } =
+  getStudentNamesWithIdsSlice.actions;
+export const {
+  resetDashboardStatsState,
+  clearDashboardStatsError,
+  updateDashboardStats,
+} = getStudentDashboardStatsSlice.actions;
+export const {
+  resetUpdateStudentState,
+  clearUpdateStudentError,
+  resetSuccessStatus,
+} = updateStudentSlice.actions;
 
-export const { resetDeleteStudent, clearDeleteStudentError } = deleteStudentSlice.actions;
-
+export const { resetDeleteStudent, clearDeleteStudentError } =
+  deleteStudentSlice.actions;
+export const getParentChildByIdReducer = getParentChildByIdSlice.reducer;
 export const createStudentReducer = createStudentSlice.reducer;
 export const getAllStudentsReducer = getAllStudentsSlice.reducer;
 export const getStudentByIdReducer = getStudentByIdSlice.reducer;
-export const getAllWaitlistStudentsReducer = getAllWaitlistStudentsSlice.reducer;
+export const getAllWaitlistStudentsReducer =
+  getAllWaitlistStudentsSlice.reducer;
 export const addToWaitlistStudentReducer = addToWaitlistStudentSlice.reducer;
-export const removeFromWaitlistStudentReducer = removeFromWaitlistStudentSlice.reducer;
-export const getStudentNamesWithIdsReducer = getStudentNamesWithIdsSlice.reducer;
-export const getStudentDashboardStatsReducer = getStudentDashboardStatsSlice.reducer;
+export const removeFromWaitlistStudentReducer =
+  removeFromWaitlistStudentSlice.reducer;
+export const getStudentNamesWithIdsReducer =
+  getStudentNamesWithIdsSlice.reducer;
+export const getStudentDashboardStatsReducer =
+  getStudentDashboardStatsSlice.reducer;
 export const updateStudentReducer = updateStudentSlice.reducer;
 export const deleteStudentReducer = deleteStudentSlice.reducer;
 
@@ -706,5 +833,6 @@ export const studentReducer = {
   getStudentNamesWithIds: getStudentNamesWithIdsReducer,
   getStudentDashboardStats: getStudentDashboardStatsReducer,
   updateStudent: updateStudentReducer,
-  deleteStudent: deleteStudentReducer
+  deleteStudent: deleteStudentReducer,
+  getParentChildById: getParentChildByIdReducer,
 };

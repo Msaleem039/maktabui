@@ -368,6 +368,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         subItems: [],
         permission: "manageTeachers",
       },
+      myChildren: {
+        name: "My Children",
+        icon: "/Children.png",
+        hasSubmenu: true,
+        subItems: [
+          { name: "My Children", path: `${basePath}/parent/my-children` },
+        ],
+      },
     };
 
     const roleDashboardItems = {
@@ -528,6 +536,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       case "Parent":
         return [
           roleDashboardItems[userRole],
+          allItems.myChildren, // Add My Children menu for Parent role
           {
             ...allItems.finance,
             subItems: allItems.finance.subItems.filter(

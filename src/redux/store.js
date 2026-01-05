@@ -31,6 +31,7 @@ import {
   getStudentDashboardStatsReducer,
   updateStudentReducer,
   deleteStudentReducer,
+  getParentChildByIdReducer
 } from "./slices/studentSlices/studentSlices";
 
 import {
@@ -133,6 +134,7 @@ export const store = configureStore({
     getStudentDashboardStats: getStudentDashboardStatsReducer,
     updateStudent: updateStudentReducer,
     deleteStudent: deleteStudentReducer,
+    getParentChildById: getParentChildByIdReducer,
 
     // Class management
     createClass: createClassReducer,

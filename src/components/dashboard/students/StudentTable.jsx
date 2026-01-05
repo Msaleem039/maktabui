@@ -29,7 +29,7 @@ const StudentTable = ({
     return students.map((student) => ({
       id: student._id,
       name: student.studentName,
-      parentName: student.parent?.fullName || "N/A",
+      parentName: student.parent?.fullName || student.parentName || "Not Present",
       phone: student.phone,
       class: student.classes?.[0]?.name || student.class?.name || "Not Assigned",
       email: student.email,
@@ -159,14 +159,6 @@ const StudentTable = ({
           />
         </label>
 
-        <div>
-          <button
-            type="button"
-            className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
-          >
-            See All ↗
-          </button>
-        </div>
       </div>
 
       {
@@ -210,9 +202,6 @@ const StudentTable = ({
                           : "bg-transparent group-hover:bg-[#0B4B31]/50"
                           }`}
                       ></span>
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F5EF] text-sm">
-                        {student.gender === "Female" ? "👩" : "👨"}
-                      </span>
                       <div className="flex flex-col">
                         <Link
                           href={`/dashboard/student/${student.id}`}
@@ -228,9 +217,6 @@ const StudentTable = ({
                   </td>
                   <td className="px-4 py-3 text-[#1E1E1E] font-medium text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#E8F5EF] text-xs">
-                        👤
-                      </span>
                       <span className="font-medium text-[#1E1E1E]">{student.parentName}</span>
                     </div>
                   </td>

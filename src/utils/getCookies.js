@@ -23,7 +23,7 @@ export function getAdminId() {
 
 export function getUserId() {
   const user = parseUserCookie();
-  return user?.userId || null;
+  return user?.id || null;
 }
 
 export function getUserName() {
