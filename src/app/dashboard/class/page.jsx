@@ -39,11 +39,24 @@ export default function ClassPage() {
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
   }, []);
 
-  const actionMenuItems = [
-    { label: "View Detail", icon: Eye, action: "view" },
-    { label: "Edit", icon: Edit, action: "edit" },
-    { label: "Remove", icon: Trash2, action: "remove" },
-  ];
+  // Get action menu items based on user role
+  const actionMenuItems = useMemo(() => {
+    const isStudent = user?.role === "Student";
+    
+    const items = [
+      { label: "View Detail", icon: Eye, action: "view" },
+    ];
+
+    // Only show Edit and Remove for non-students
+    if (!isStudent) {
+      items.push(
+        { label: "Edit", icon: Edit, action: "edit" },
+        { label: "Remove", icon: Trash2, action: "remove" }
+      );
+    }
+
+    return items;
+  }, [user?.role]);
 
   // Debounce search input
   useEffect(() => {

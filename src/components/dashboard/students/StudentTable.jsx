@@ -121,7 +121,7 @@ const StudentTable = ({
 
   const actionMenuItems = [
     {
-      label: "View Profile",
+      label: "View",
       icon: Eye,
       onClick: (studentId) => handleView(studentId),
     },
@@ -131,7 +131,7 @@ const StudentTable = ({
       onClick: (studentId) => handleEdit(studentId),
     },
     {
-      label: "Remove",
+      label: "Delete",
       icon: Trash2,
       onClick: (studentId) => handleRemove(studentId),
       iconClassName: "text-[#C43B30]",

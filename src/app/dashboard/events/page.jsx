@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, Search, Eye, Edit, Trash2 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -8,11 +8,17 @@ import { getEvents, deleteEvent } from "@/redux/slices/eventSlices/eventSlices";
 import ActionMenu from "@/components/dashboard/ActionMenu";
 import { useRouter } from "next/navigation";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import { getCookie } from "cookies-next";
 
 export default function SendEventPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { mainText } = useTheme();
+
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+  }, []);
 
   const { events, loading, error, pagination } = useSelector(state => state.events);
 
@@ -92,25 +98,37 @@ export default function SendEventPage() {
     }
   };
 
-  const getActionMenuItems = (event) => [
-    {
-      label: "View",
-      icon: Eye,
-      onClick: handleViewEvent(event),
-    },
-    {
-      label: "Edit",
-      icon: Edit,
-      onClick: handleEditEvent(event),
-    },
-    {
-      label: "Remove",
-      icon: Trash2,
-      onClick: handleRemoveEvent(event),
-      className: "text-red-600 hover:text-red-700",
-      iconClassName: "text-red-600",
-    },
-  ];
+  const getActionMenuItems = (event) => {
+    const isStudent = user?.role === "Student";
+    
+    const items = [
+      {
+        label: "View",
+        icon: Eye,
+        onClick: handleViewEvent(event),
+      },
+    ];
+
+    // Only show Edit and Remove for non-students
+    if (!isStudent) {
+      items.push(
+        {
+          label: "Edit",
+          icon: Edit,
+          onClick: handleEditEvent(event),
+        },
+        {
+          label: "Remove",
+          icon: Trash2,
+          onClick: handleRemoveEvent(event),
+          className: "text-red-600 hover:text-red-700",
+          iconClassName: "text-red-600",
+        }
+      );
+    }
+
+    return items;
+  };
 
   const renderPaginationButtons = () => {
     const buttons = [];
