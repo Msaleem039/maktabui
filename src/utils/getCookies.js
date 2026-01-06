@@ -35,3 +35,8 @@ export function getUserRole() {
   const user = parseUserCookie();
   return user?.role || null;
 }
+
+export function getUserBranch() {
+  const user = parseUserCookie();
+  return user?.branch || null;
+}

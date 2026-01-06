@@ -10,11 +10,13 @@ import {
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { MultiSelectDropdown } from "@/components/MultiSelectDropdown";
-import { getAdminId } from "@/utils/getCookies";
+import { getAdminId, getUserBranch } from "@/utils/getCookies";
 
 const CreateTeacher = () => {
   const dispatch = useDispatch();
   const adminId = getAdminId();
+  const branch = getUserBranch();
+
   const classNames = useSelector((state) => state.getAllClassesName.classNames);
   const classesLoading = useSelector(
     (state) => state.getAllClassesName.loading
@@ -247,6 +249,7 @@ const CreateTeacher = () => {
           ? formData.languages.split(",").map((item) => item.trim())
           : [],
         adminId,
+        branch,
       };
 
       console.log("Submitting payload:", payload);

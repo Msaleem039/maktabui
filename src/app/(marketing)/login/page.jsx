@@ -60,6 +60,7 @@ const Page = () => {
           email: payload.email,
           role: payload.role,
           id: payload.id || "",
+          branch:payload.branch
         };
 
         if (payload.role === "SubAdmin") {
@@ -69,7 +70,6 @@ const Page = () => {
 
         setCookie("user", JSON.stringify(userCookie), tokenOptions);
 
-        // Fetch theme by branch after login
         const branch = payload.admin?.branch || payload.branch || payload.admin?.branchName || "Main Branch";
         
         try {
@@ -86,7 +86,6 @@ const Page = () => {
           }
         } catch (themeError) {
           console.error("Failed to fetch theme by branch:", themeError);
-          // Fallback to default theme or websiteSettings if available
           if (payload.role === "Admin" && payload.admin?.websiteSettings) {
             const websiteSettings = payload.admin.websiteSettings;
             dispatch(setTheme({

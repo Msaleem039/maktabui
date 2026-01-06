@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { Trash2, Calendar, CreditCard, Repeat } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
+import {
+  createParent,
+  resetAllParentsState,
+} from "@/redux/slices/parentSlices/parentSlice";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -12,9 +15,12 @@ import {
   CardElement,
 } from "@stripe/react-stripe-js";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
-import { getAdminId } from "@/utils/getCookies";
+import { getAdminId, getUserBranch } from "@/utils/getCookies";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+    "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X"
+);
 
 const StripeCardInput = ({ label, className = "", onCardChange }) => {
   return (
@@ -24,9 +30,7 @@ const StripeCardInput = ({ label, className = "", onCardChange }) => {
       </label>
       <div className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 min-h-[50px] flex items-center">
         <div className="w-full">
-          <CardElement
-            onChange={onCardChange}
-          />
+          <CardElement onChange={onCardChange} />
         </div>
       </div>
       <p className="text-xs text-gray-500 mt-2">
@@ -36,7 +40,16 @@ const StripeCardInput = ({ label, className = "", onCardChange }) => {
   );
 };
 
-const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
+const FormInput = ({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  className = "",
+}) => {
   return (
     <div className={className}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -55,10 +68,18 @@ const FormInput = ({ label, name, type = "text", value, onChange, placeholder, r
   );
 };
 
-const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Select", className = "" }) => {
+const FormDropdown = ({
+  label,
+  name,
+  value,
+  options,
+  onChange,
+  placeholder = "Select",
+  className = "",
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedOption = options.find(option => option.value === value);
+  const selectedOption = options.find((option) => option.value === value);
 
   return (
     <div className={`relative ${className}`}>
@@ -83,8 +104,11 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
                 onChange({ target: { name, value: option.value } });
                 setIsOpen(false);
               }}
-              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${value === option.value ? "bg-[#0B4B31] text-white" : "text-[#0B4B31]"
-                }`}
+              className={`px-4 py-3 cursor-pointer hover:bg-[#E5EFEB] ${
+                value === option.value
+                  ? "bg-[#0B4B31] text-white"
+                  : "text-[#0B4B31]"
+              }`}
             >
               {option.label}
             </div>
@@ -95,7 +119,15 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
   );
 };
 
-const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
+const DateInput = ({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  className = "",
+}) => {
   return (
     <div className={className}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -121,10 +153,17 @@ function AddParentFormContent() {
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
-  const { status, error, parent, student } = useSelector((state) => state.createParent);
+  const { status, error, parent, student } = useSelector(
+    (state) => state.createParent
+  );
   const adminId = getAdminId();
+  const branch = getUserBranch();
 
-  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
+  const {
+    classNames,
+    loading: classesLoading,
+    error: classesError,
+  } = useSelector((state) => state.getAllClassesName);
 
   const [parentData, setParentData] = useState({
     fullName: "",
@@ -168,10 +207,10 @@ function AddParentFormContent() {
   }, [dispatch]);
 
   const classOptions = Array.isArray(classNames)
-    ? classNames.map(classItem => ({
-      label: classItem.name || classItem.className || 'Unnamed Class',
-      value: classItem._id || classItem.id
-    }))
+    ? classNames.map((classItem) => ({
+        label: classItem.name || classItem.className || "Unnamed Class",
+        value: classItem._id || classItem.id,
+      }))
     : [];
 
   // Recurring frequency options
@@ -185,7 +224,7 @@ function AddParentFormContent() {
     const { name, value, type, checked } = e.target;
     setParentData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -195,7 +234,7 @@ function AddParentFormContent() {
       const updated = [...prev];
       updated[index] = {
         ...updated[index],
-        [name]: type === 'checkbox' ? checked : value
+        [name]: type === "checkbox" ? checked : value,
       };
       return updated;
     });
@@ -210,7 +249,7 @@ function AddParentFormContent() {
         brand: event.brand,
         last4: event.last4,
         expMonth: event.exp_month,
-        expYear: event.exp_year
+        expYear: event.exp_year,
       });
     } else {
       setCardDetails(null);
@@ -264,18 +303,19 @@ function AddParentFormContent() {
     setStripeError("");
 
     try {
-      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: {
-          name: parentData.fullName,
-          email: parentData.email,
-          phone: parentData.phone,
-          address: {
-            line1: parentData.address,
+      const { error: stripeError, paymentMethod } =
+        await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+          billing_details: {
+            name: parentData.fullName,
+            email: parentData.email,
+            phone: parentData.phone,
+            address: {
+              line1: parentData.address,
+            },
           },
-        },
-      });
+        });
 
       if (stripeError) {
         console.error("Stripe error:", stripeError);
@@ -293,18 +333,25 @@ function AddParentFormContent() {
             brand: paymentMethod.card.brand,
             last4: paymentMethod.card.last4,
             expMonth: paymentMethod.card.exp_month,
-            expYear: paymentMethod.card.exp_year
-          }
+            expYear: paymentMethod.card.exp_year,
+          },
         },
-        children: children.map(child => ({
+        children: children.map((child) => ({
           ...child,
           dateOfBirth: child.dateOfBirth ? new Date(child.dateOfBirth) : null,
-          enrollDate: child.enrollDate ? new Date(child.enrollDate) : new Date(),
+          enrollDate: child.enrollDate
+            ? new Date(child.enrollDate)
+            : new Date(),
           fee: child.fee ? Number(child.fee) : 0,
-          gender: child.gender === "male" ? "Male" :
-            child.gender === "female" ? "Female" : "Other",
+          gender:
+            child.gender === "male"
+              ? "Male"
+              : child.gender === "female"
+              ? "Female"
+              : "Other",
         })),
-        adminId
+        adminId,
+        branch,
       };
 
       const result = await dispatch(createParent(submissionData)).unwrap();
@@ -319,8 +366,10 @@ function AddParentFormContent() {
         }, 5000);
       }
     } catch (error) {
-      console.error('Error creating parent:', error);
-      setStripeError(error.message || "An error occurred while processing your request.");
+      console.error("Error creating parent:", error);
+      setStripeError(
+        error.message || "An error occurred while processing your request."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -374,7 +423,9 @@ function AddParentFormContent() {
       {showSuccess && (
         <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
           <p className="font-semibold">Family added successfully!</p>
-          <p>Parent and student records have been created with payment method.</p>
+          <p>
+            Parent and student records have been created with payment method.
+          </p>
           {parent && (
             <p className="text-sm mt-1">
               Stripe Customer ID: {parent.stripeCustomerId}
@@ -416,7 +467,9 @@ function AddParentFormContent() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-700">Parent/Guardian</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Parent/Guardian
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormInput
               label="Full Name"
@@ -494,9 +547,11 @@ function AddParentFormContent() {
             <div className="md:col-span-2 border-t pt-6 mt-4">
               <div className="flex items-center gap-3 mb-4">
                 <Repeat size={20} className="text-[#0B4B31]" />
-                <h4 className="text-lg font-semibold text-gray-700">Recurring Payments</h4>
+                <h4 className="text-lg font-semibold text-gray-700">
+                  Recurring Payments
+                </h4>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                   <input
@@ -507,7 +562,10 @@ function AddParentFormContent() {
                     className="rounded border-gray-300 text-[#0B4B31] focus:ring-[#0B4B31]"
                     id="recurringEnabled"
                   />
-                  <label htmlFor="recurringEnabled" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  <label
+                    htmlFor="recurringEnabled"
+                    className="text-sm font-semibold text-gray-700 cursor-pointer"
+                  >
                     Enable Recurring Payments
                   </label>
                 </div>
@@ -519,17 +577,26 @@ function AddParentFormContent() {
                   onChange={handleParentChange}
                   options={recurringOptions}
                   placeholder="Select Frequency"
-                  className={!parentData.recurringEnabled ? "opacity-50 cursor-not-allowed" : ""}
+                  className={
+                    !parentData.recurringEnabled
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }
                 />
               </div>
-              
+
               {parentData.recurringEnabled && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700">
-                    Recurring payments will be automatically processed {parentData.recurringFrequency} 
-                    {parentData.recurringFrequency === 'weekly' && ' every week'}
-                    {parentData.recurringFrequency === 'monthly' && ' on the same day each month'}
-                    {parentData.recurringFrequency === 'quarterly' && ' every 3 months'}.
+                    Recurring payments will be automatically processed{" "}
+                    {parentData.recurringFrequency}
+                    {parentData.recurringFrequency === "weekly" &&
+                      " every week"}
+                    {parentData.recurringFrequency === "monthly" &&
+                      " on the same day each month"}
+                    {parentData.recurringFrequency === "quarterly" &&
+                      " every 3 months"}
+                    .
                   </p>
                 </div>
               )}
@@ -544,7 +611,10 @@ function AddParentFormContent() {
                 <div className="flex items-center gap-2 mt-2 p-2 bg-green-50 rounded-lg">
                   <CreditCard size={16} className="text-green-600" />
                   <span className="text-green-700 text-sm font-medium">
-                    Card verified: {cardDetails.brand.charAt(0).toUpperCase() + cardDetails.brand.slice(1)} ending in {cardDetails.last4}
+                    Card verified:{" "}
+                    {cardDetails.brand.charAt(0).toUpperCase() +
+                      cardDetails.brand.slice(1)}{" "}
+                    ending in {cardDetails.last4}
                   </span>
                 </div>
               )}
@@ -569,7 +639,9 @@ function AddParentFormContent() {
         {children.map((child, index) => (
           <div key={index} className="space-y-6 border-t pt-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-700">Student {index + 1}</h3>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Student {index + 1}
+              </h3>
               {children.length > 1 && (
                 <button
                   type="button"
@@ -638,7 +710,7 @@ function AddParentFormContent() {
                 options={[
                   { label: "Male", value: "male" },
                   { label: "Female", value: "female" },
-                  { label: "Other", value: "other" }
+                  { label: "Other", value: "other" },
                 ]}
                 placeholder="Select Gender"
               />
@@ -663,8 +735,12 @@ function AddParentFormContent() {
                 value={child.class}
                 onChange={(e) => handleChildChange(index, e)}
                 options={classOptions}
-                placeholder={classesLoading ? "Loading classes..." : "Select Class"}
-                className={classesLoading ? "opacity-50 cursor-not-allowed" : ""}
+                placeholder={
+                  classesLoading ? "Loading classes..." : "Select Class"
+                }
+                className={
+                  classesLoading ? "opacity-50 cursor-not-allowed" : ""
+                }
               />
               <div className="flex items-center gap-2 md:col-span-2">
                 <input
@@ -692,12 +768,20 @@ function AddParentFormContent() {
           </button>
           <button
             type="submit"
-            disabled={status === "loading" || !stripe || !cardComplete || isProcessing || classesLoading}
+            disabled={
+              status === "loading" ||
+              !stripe ||
+              !cardComplete ||
+              isProcessing ||
+              classesLoading
+            }
             className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing Payment..." :
-              status === "loading" ? "Adding Family..." :
-                "Add Family & Setup Payment"}
+            {isProcessing
+              ? "Processing Payment..."
+              : status === "loading"
+              ? "Adding Family..."
+              : "Add Family & Setup Payment"}
           </button>
         </div>
       </form>
