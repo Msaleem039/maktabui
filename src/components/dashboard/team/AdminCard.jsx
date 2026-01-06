@@ -30,6 +30,7 @@ const AdminCard = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -104,13 +105,34 @@ const AdminCard = ({
       >
         {/* Background image */}
         <div className="absolute inset-0 w-full h-full">
-          <Image
-            src={admin.photo}
-            alt="Admin card background"
-            fill
-            priority
-            className="object-cover object-center"
-          />
+          {imageError || !admin.photo ? (
+            // Fallback to default image
+            <Image
+              src="/proofile card 4.svg"
+              alt="Admin card background"
+              fill
+              priority
+              className="object-cover object-center"
+            />
+          ) : admin.photo.startsWith('http') && !admin.photo.includes('rixdrbokebnvidwyzvzo.supabase.co') ? (
+            // Use regular img for external domains not in next.config
+            <img
+              src={admin.photo}
+              alt="Admin card background"
+              className="w-full h-full object-cover object-center"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            // Use Next.js Image for Supabase URLs or local paths
+            <Image
+              src={admin.photo}
+              alt="Admin card background"
+              fill
+              priority
+              className="object-cover object-center"
+              onError={() => setImageError(true)}
+            />
+          )}
         </div>
 
         {/* Glassmorphism overlay */}

@@ -835,6 +835,32 @@ export default function DashboardLayout({ children }) {
   // Load theme from branch on mount
   useEffect(() => {
     const loadThemeByBranch = async () => {
+      // Get user role to check if they have permission
+      let userRole = null;
+      try {
+        const userCookie = getCookie("user");
+        if (userCookie) {
+          const userData = typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+          userRole = userData?.role;
+        }
+      } catch (error) {
+        console.error("Error parsing user cookie:", error);
+      }
+
+      // Normalize role
+      const normalizedRole = userRole?.trim().toLowerCase();
+      const isAdminOrSubAdmin = 
+        normalizedRole === "admin" || 
+        normalizedRole === "subadmin" || 
+        normalizedRole === "sub admin" ||
+        normalizedRole === "super admin" ||
+        normalizedRole === "superadmin";
+
+      // Only fetch theme for Admin or SubAdmin users
+      if (!isAdminOrSubAdmin) {
+        return;
+      }
+
       // Try to get branch from user data
       const branch = reduxUser?.admin?.branch || reduxUser?.branch || reduxUser?.admin?.branchName;
       
@@ -871,7 +897,10 @@ export default function DashboardLayout({ children }) {
             }));
           }
         } catch (themeError) {
-          console.error("Failed to fetch theme by branch:", themeError);
+          // Only log error if it's not a permission error
+          if (!themeError?.includes?.("Access denied") && !themeError?.includes?.("role required")) {
+            console.error("Failed to fetch theme by branch:", themeError);
+          }
           // Fallback to websiteSettings if available
           if (reduxUser?.admin?.websiteSettings) {
             const websiteSettings = reduxUser.admin.websiteSettings;
@@ -888,7 +917,7 @@ export default function DashboardLayout({ children }) {
     };
 
     loadThemeByBranch();
-  }, [reduxUser, dispatch]);
+  }, [reduxUser, dispatch, theme.themeColor]);
 
   // Handle Sub Admin redirect and initialization
   useEffect(() => {
