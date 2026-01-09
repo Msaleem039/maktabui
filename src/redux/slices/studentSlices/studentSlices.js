@@ -773,6 +773,57 @@ const getParentChildByIdSlice = createSlice({
   },
 });
 
+export const { resetCreateStudentState } = createStudentSlice.actions;
+
+export const {
+  resetAllStudentsState,
+  setStudentsPage,
+  setStudentsSearch,
+  setStudentsLimit,
+  clearStudentsError,
+} = getAllStudentsSlice.actions;
+
+export const {
+  resetStudentByIdState,
+  clearError,
+  updateStudentData,
+  updateAttendance,
+  updateAssignments,
+} = getStudentByIdSlice.actions;
+
+export const {
+  resetWaitlistStudentsState,
+  updateWaitlistStudent,
+  removeWaitlistStudent,
+} = getAllWaitlistStudentsSlice.actions;
+
+export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;
+
+export const { resetRemoveWaitlistStudent } = removeFromWaitlistStudentSlice.actions;
+
+export const { resetStudentNamesState, clearStudentNamesError } = getStudentNamesWithIdsSlice.actions;
+
+export const {
+  resetDashboardStatsState,
+  clearDashboardStatsError,
+  updateDashboardStats,
+  updateAttendanceData,
+  updateAcademicPerformance,
+  updateKeyMetrics,
+  addNewAssignment,
+  removeAssignment,
+  markAssignmentCompleted,
+} = getStudentDashboardStatsSlice.actions;
+
+export const {
+  resetUpdateStudentState,
+  clearUpdateStudentError,
+  resetSuccessStatus,
+  updateStudentLocally,
+} = updateStudentSlice.actions;
+
+export const { resetDeleteStudent, clearDeleteStudentError } = deleteStudentSlice.actions;
+
 export const {
   resetParentChildState,
   clearParentChildError,
@@ -782,46 +833,17 @@ export const {
   removeStudentFromList,
 } = getParentChildByIdSlice.actions;
 
-// Export reducer
-export const { resetCreateStudentState } = createStudentSlice.actions;
-export const { resetAllStudentsState, setStudentsPage } =
-  getAllStudentsSlice.actions;
-export const { resetStudentByIdState } = getStudentByIdSlice.actions;
-export const { resetWaitlistStudentsState } =
-  getAllWaitlistStudentsSlice.actions;
-export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;
-export const { resetRemoveWaitlistStudent } =
-  removeFromWaitlistStudentSlice.actions;
-export const { resetStudentNamesState, clearStudentNamesError } =
-  getStudentNamesWithIdsSlice.actions;
-export const {
-  resetDashboardStatsState,
-  clearDashboardStatsError,
-  updateDashboardStats,
-} = getStudentDashboardStatsSlice.actions;
-export const {
-  resetUpdateStudentState,
-  clearUpdateStudentError,
-  resetSuccessStatus,
-} = updateStudentSlice.actions;
-
-export const { resetDeleteStudent, clearDeleteStudentError } =
-  deleteStudentSlice.actions;
-export const getParentChildByIdReducer = getParentChildByIdSlice.reducer;
 export const createStudentReducer = createStudentSlice.reducer;
 export const getAllStudentsReducer = getAllStudentsSlice.reducer;
 export const getStudentByIdReducer = getStudentByIdSlice.reducer;
-export const getAllWaitlistStudentsReducer =
-  getAllWaitlistStudentsSlice.reducer;
+export const getAllWaitlistStudentsReducer = getAllWaitlistStudentsSlice.reducer;
 export const addToWaitlistStudentReducer = addToWaitlistStudentSlice.reducer;
-export const removeFromWaitlistStudentReducer =
-  removeFromWaitlistStudentSlice.reducer;
-export const getStudentNamesWithIdsReducer =
-  getStudentNamesWithIdsSlice.reducer;
-export const getStudentDashboardStatsReducer =
-  getStudentDashboardStatsSlice.reducer;
+export const removeFromWaitlistStudentReducer = removeFromWaitlistStudentSlice.reducer;
+export const getStudentNamesWithIdsReducer = getStudentNamesWithIdsSlice.reducer;
+export const getStudentDashboardStatsReducer = getStudentDashboardStatsSlice.reducer;
 export const updateStudentReducer = updateStudentSlice.reducer;
 export const deleteStudentReducer = deleteStudentSlice.reducer;
+export const getParentChildByIdReducer = getParentChildByIdSlice.reducer;
 
 export const studentReducer = {
   createStudent: createStudentReducer,
@@ -835,4 +857,18 @@ export const studentReducer = {
   updateStudent: updateStudentReducer,
   deleteStudent: deleteStudentReducer,
   getParentChildById: getParentChildByIdReducer,
+};
+
+export {
+  createStudent,
+  getStudentNamesWithIds,
+  getAllStudents,
+  getStudentById,
+  getAllWaitlistStudents,
+  addToWaitlistStudent,
+  removeFromWaitlistStudent,
+  getStudentDashboardStats,
+  updateStudentById,
+  deleteStudent,
+  getParentChildById,
 };
