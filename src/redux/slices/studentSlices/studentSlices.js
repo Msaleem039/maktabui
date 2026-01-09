@@ -861,8 +861,6 @@ export const updateStudentReducer = updateStudentSlice.reducer;
 export const deleteStudentReducer = deleteStudentSlice.reducer;
 export const getParentChildByIdReducer = getParentChildByIdSlice.reducer;
 
-/* ------------------ COMBINED REDUCER ------------------ */
-
 export const studentReducer = {
   createStudent: createStudentReducer,
   getAllStudents: getAllStudentsReducer,
