@@ -773,8 +773,22 @@ const getParentChildByIdSlice = createSlice({
   },
 });
 
-export const { resetCreateStudentState } = createStudentSlice.actions;
+// src/redux/slices/studentSlices/studentSlices.js
+import { createStudentSlice } from "./createStudentSlice";
+import { getAllStudentsSlice } from "./getAllStudentsSlice";
+import { getStudentByIdSlice } from "./getStudentByIdSlice";
+import { getAllWaitlistStudentsSlice } from "./getAllWaitlistStudentsSlice";
+import { addToWaitlistStudentSlice } from "./addToWaitlistStudentSlice";
+import { removeFromWaitlistStudentSlice } from "./removeFromWaitlistStudentSlice";
+import { getStudentNamesWithIdsSlice } from "./getStudentNamesWithIdsSlice";
+import { getStudentDashboardStatsSlice } from "./getStudentDashboardStatsSlice";
+import { updateStudentSlice } from "./updateStudentSlice";
+import { deleteStudentSlice } from "./deleteStudentSlice";
+import { getParentChildByIdSlice } from "./getParentChildByIdSlice";
 
+/* ------------------ ACTIONS ------------------ */
+
+export const { resetCreateStudentState } = createStudentSlice.actions;
 
 export const {
   resetAllStudentsState,
@@ -799,7 +813,6 @@ export const {
 } = getAllWaitlistStudentsSlice.actions;
 
 export const { resetAddWaitlistStudent } = addToWaitlistStudentSlice.actions;
-
 export const { resetRemoveWaitlistStudent } = removeFromWaitlistStudentSlice.actions;
 
 export const { resetStudentNamesState, clearStudentNamesError } = getStudentNamesWithIdsSlice.actions;
@@ -834,6 +847,8 @@ export const {
   removeStudentFromList,
 } = getParentChildByIdSlice.actions;
 
+/* ------------------ REDUCERS ------------------ */
+
 export const createStudentReducer = createStudentSlice.reducer;
 export const getAllStudentsReducer = getAllStudentsSlice.reducer;
 export const getStudentByIdReducer = getStudentByIdSlice.reducer;
@@ -845,6 +860,8 @@ export const getStudentDashboardStatsReducer = getStudentDashboardStatsSlice.red
 export const updateStudentReducer = updateStudentSlice.reducer;
 export const deleteStudentReducer = deleteStudentSlice.reducer;
 export const getParentChildByIdReducer = getParentChildByIdSlice.reducer;
+
+/* ------------------ COMBINED REDUCER ------------------ */
 
 export const studentReducer = {
   createStudent: createStudentReducer,
@@ -858,18 +875,4 @@ export const studentReducer = {
   updateStudent: updateStudentReducer,
   deleteStudent: deleteStudentReducer,
   getParentChildById: getParentChildByIdReducer,
-};
-
-export {
-  createStudent,
-  getStudentNamesWithIds,
-  getAllStudents,
-  getStudentById,
-  getAllWaitlistStudents,
-  addToWaitlistStudent,
-  removeFromWaitlistStudent,
-  getStudentDashboardStats,
-  updateStudentById,
-  deleteStudent,
-  getParentChildById,
 };
