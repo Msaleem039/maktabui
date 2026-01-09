@@ -773,20 +773,6 @@ const getParentChildByIdSlice = createSlice({
   },
 });
 
-// src/redux/slices/studentSlices/studentSlices.js
-import { createStudentSlice } from "./createStudentSlice";
-import { getAllStudentsSlice } from "./getAllStudentsSlice";
-import { getStudentByIdSlice } from "./getStudentByIdSlice";
-import { getAllWaitlistStudentsSlice } from "./getAllWaitlistStudentsSlice";
-import { addToWaitlistStudentSlice } from "./addToWaitlistStudentSlice";
-import { removeFromWaitlistStudentSlice } from "./removeFromWaitlistStudentSlice";
-import { getStudentNamesWithIdsSlice } from "./getStudentNamesWithIdsSlice";
-import { getStudentDashboardStatsSlice } from "./getStudentDashboardStatsSlice";
-import { updateStudentSlice } from "./updateStudentSlice";
-import { deleteStudentSlice } from "./deleteStudentSlice";
-import { getParentChildByIdSlice } from "./getParentChildByIdSlice";
-
-/* ------------------ ACTIONS ------------------ */
 
 export const { resetCreateStudentState } = createStudentSlice.actions;
 
