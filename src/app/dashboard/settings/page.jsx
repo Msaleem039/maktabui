@@ -298,7 +298,7 @@ export default function SettingsPage() {
 
         {success && (
           <div className="mb-6 rounded-lg bg-green-50 p-4 border border-green-200">
-            <p className="text-green-700 text-sm font-medium">Theme updated successfully!</p>
+            <p className="text-green-700 text-sm font-medium">Theme new updated successfully!</p>
           </div>
         )}
 
