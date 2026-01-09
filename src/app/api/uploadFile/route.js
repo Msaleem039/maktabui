@@ -1,12 +1,14 @@
-import supabase from "@/lib/supabaseServer";
+import { NextResponse } from "next/server";
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function POST(req) {
   try {
+    const supabase = getSupabaseServerClient();
     const formData = await req.formData();
     const file = formData.get("file");
 
     if (!file) {
-      return Response.json({ error: "No file provided" }, { status: 400 });
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -24,7 +26,7 @@ export async function POST(req) {
 
     const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
-    return Response.json({
+    return NextResponse.json({
       name: file.name,
       fileName,
       url: data.publicUrl,
@@ -33,6 +35,6 @@ export async function POST(req) {
       uploadedAt: new Date().toISOString(),
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
