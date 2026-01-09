@@ -219,14 +219,12 @@ export default function SettingsPage() {
       submitFormData.append("themeColor", formData.themeColor);
       submitFormData.append("secondaryColor", formData.secondaryColor);
       
-      // Append logo: File if new file selected, otherwise existing URL string
       if (selectedFiles.logo) {
         submitFormData.append("logo", selectedFiles.logo);
       } else if (formData.logo) {
         submitFormData.append("logo", formData.logo);
       }
       
-      // Append favicon: File if new file selected, otherwise existing URL string
       if (selectedFiles.favicon) {
         submitFormData.append("favicon", selectedFiles.favicon);
       } else if (formData.favicon) {
@@ -298,7 +296,7 @@ export default function SettingsPage() {
 
         {success && (
           <div className="mb-6 rounded-lg bg-green-50 p-4 border border-green-200">
-            <p className="text-green-700 text-sm font-medium">Theme updated successfully!</p>
+            <p className="text-green-700 text-sm font-medium">Theme new updated successfully!</p>
           </div>
         )}
 
