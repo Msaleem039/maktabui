@@ -29,6 +29,7 @@ export default function CreateSubAdmin() {
   });
 
   const router = useRouter();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -75,7 +76,7 @@ export default function CreateSubAdmin() {
       const formData = new FormData();
       formData.append("file", file);
 
-      xhr.open("PUT", "/api/uploadImage");
+      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {

@@ -20,6 +20,7 @@ export default function CreateAdmin() {
     branch: "",
   });
   console.log("formData", formData);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const router = useRouter();
 
@@ -40,7 +41,7 @@ export default function CreateAdmin() {
       const formData = new FormData();
       formData.append("file", file);
 
-      xhr.open("PUT", "/api/uploadImage");
+      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {

@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 
 export default function EditSubAdminDetail({ subAdmin }) {
   console.log("subAdmin data received in component:", subAdmin);
-  
+
   const dispatch = useDispatch();
   const {
     loading: updateLoading,
@@ -21,7 +21,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
     updatedSubAdmin,
     success: updateSuccess,
   } = useSelector((state) => state.updateSubAdmin);
-  
+
   const router = useRouter();
   const [currentAdminId, setCurrentAdminId] = useState(null);
 
@@ -41,8 +41,8 @@ export default function EditSubAdminDetail({ subAdmin }) {
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  // Get admin ID from cookie
   useEffect(() => {
     const userCookie = Cookies.get("user");
     if (userCookie) {
@@ -61,21 +61,22 @@ export default function EditSubAdminDetail({ subAdmin }) {
     }
   }, []);
 
-  // Initialize form data when subAdmin prop changes
   useEffect(() => {
     if (subAdmin) {
       console.log("Setting form data from subAdmin:", subAdmin);
-      
-      // Extract permissions from array if it exists
+
       let permissionsData = {
         manageStudents: false,
         manageParents: false,
         manageTeachers: false,
         manageClasses: false,
       };
-      
-      if (subAdmin.permissions && Array.isArray(subAdmin.permissions) && subAdmin.permissions.length > 0) {
-        // Get permissions from first object in array
+
+      if (
+        subAdmin.permissions &&
+        Array.isArray(subAdmin.permissions) &&
+        subAdmin.permissions.length > 0
+      ) {
         const permissionObj = subAdmin.permissions[0];
         permissionsData = {
           manageStudents: permissionObj.manageStudents || false,
@@ -85,7 +86,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
         };
         console.log("Extracted permissions:", permissionsData);
       }
-      
+
       setFormData({
         name: subAdmin.name || "",
         phone: subAdmin.phone || "",
@@ -98,7 +99,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (name.startsWith("permissions.")) {
       const permissionName = name.split(".")[1];
       setFormData((prev) => ({
@@ -126,39 +127,37 @@ export default function EditSubAdminDetail({ subAdmin }) {
       return;
     }
 
-    // Prepare the data EXACTLY as the backend expects
     const submitData = {
       adminId: currentAdminId,
       subAdminId: subAdmin._id,
       name: formData.name,
       phone: formData.phone,
       photo: formData.photo,
-      // Send permissions as an array of objects
       permissions: [
         {
           manageStudents: formData.permissions.manageStudents,
           manageParents: formData.permissions.manageParents,
           manageTeachers: formData.permissions.manageTeachers,
           manageClasses: formData.permissions.manageClasses,
-        }
+        },
       ],
       isActive: formData.isActive,
     };
 
-    console.log("Submitting data to backend:", JSON.stringify(submitData, null, 2));
+    console.log(
+      "Submitting data to backend:",
+      JSON.stringify(submitData, null, 2)
+    );
 
     try {
-      // Dispatch the action with the properly structured formData
       await dispatch(updateSubAdminAction(submitData)).unwrap();
     } catch (error) {
       console.error("Failed to update sub-admin:", error);
     }
   };
 
-  // Handle success redirect
   useEffect(() => {
     if (updateSuccess && updatedSubAdmin) {
-      // Redirect after delay
       setTimeout(() => {
         router.push("/dashboard/team/sub-admin");
       }, 2000);
@@ -181,7 +180,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
 
       formData.append("file", file);
 
-      xhr.open("PUT", "/api/uploadImage");
+      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
@@ -219,7 +218,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
         ...prev,
         photo: url,
       }));
-      
+
       // Show success message
       alert("Photo uploaded successfully!");
     } catch (error) {
@@ -232,11 +231,19 @@ export default function EditSubAdminDetail({ subAdmin }) {
     <div className="space-y-8">
       <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-gray-700">Edit Sub-Admin</h2>
+          <h2 className="text-lg font-semibold text-gray-700">
+            Edit Sub-Admin
+          </h2>
           <div className="text-sm text-gray-500">
-            Status: 
-            <span className={`ml-2 px-3 py-1 rounded-full ${formData.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {formData.isActive ? 'Active' : 'Inactive'}
+            Status:
+            <span
+              className={`ml-2 px-3 py-1 rounded-full ${
+                formData.isActive
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {formData.isActive ? "Active" : "Inactive"}
             </span>
           </div>
         </div>
@@ -323,13 +330,17 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   className="rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0a3d27] disabled:opacity-50"
                   disabled={uploading}
                 >
-                  {uploading ? `Uploading ${uploadProgress}%` : "Upload New Photo"}
+                  {uploading
+                    ? `Uploading ${uploadProgress}%`
+                    : "Upload New Photo"}
                 </button>
 
                 {formData.photo && (
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, photo: "" }))}
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, photo: "" }))
+                    }
                     className="rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-200"
                   >
                     Remove Photo
@@ -367,7 +378,10 @@ export default function EditSubAdminDetail({ subAdmin }) {
             {formData.photo && !uploading && (
               <div className="mt-3">
                 <p className="text-xs text-gray-500">
-                  Current photo: {formData.photo.length > 50 ? formData.photo.substring(0, 50) + "..." : formData.photo}
+                  Current photo:{" "}
+                  {formData.photo.length > 50
+                    ? formData.photo.substring(0, 50) + "..."
+                    : formData.photo}
                 </p>
               </div>
             )}
@@ -388,7 +402,10 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-[#0B4B31] border-gray-300 rounded focus:ring-[#0B4B31]"
                 />
-                <label htmlFor="manageStudents" className="ml-2 text-sm text-gray-700">
+                <label
+                  htmlFor="manageStudents"
+                  className="ml-2 text-sm text-gray-700"
+                >
                   Manage Students
                 </label>
               </div>
@@ -402,7 +419,10 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-[#0B4B31] border-gray-300 rounded focus:ring-[#0B4B31]"
                 />
-                <label htmlFor="manageParents" className="ml-2 text-sm text-gray-700">
+                <label
+                  htmlFor="manageParents"
+                  className="ml-2 text-sm text-gray-700"
+                >
                   Manage Parents
                 </label>
               </div>
@@ -416,7 +436,10 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-[#0B4B31] border-gray-300 rounded focus:ring-[#0B4B31]"
                 />
-                <label htmlFor="manageTeachers" className="ml-2 text-sm text-gray-700">
+                <label
+                  htmlFor="manageTeachers"
+                  className="ml-2 text-sm text-gray-700"
+                >
                   Manage Teachers
                 </label>
               </div>
@@ -430,7 +453,10 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-[#0B4B31] border-gray-300 rounded focus:ring-[#0B4B31]"
                 />
-                <label htmlFor="manageClasses" className="ml-2 text-sm text-gray-700">
+                <label
+                  htmlFor="manageClasses"
+                  className="ml-2 text-sm text-gray-700"
+                >
                   Manage Classes
                 </label>
               </div>
@@ -466,14 +492,14 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   Manage Classes
                 </span>
               )}
-              {!formData.permissions.manageStudents && 
-               !formData.permissions.manageParents && 
-               !formData.permissions.manageTeachers && 
-               !formData.permissions.manageClasses && (
-                <span className="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                  No permissions selected
-                </span>
-              )}
+              {!formData.permissions.manageStudents &&
+                !formData.permissions.manageParents &&
+                !formData.permissions.manageTeachers &&
+                !formData.permissions.manageClasses && (
+                  <span className="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                    No permissions selected
+                  </span>
+                )}
             </div>
           </div>
 
@@ -496,8 +522,8 @@ export default function EditSubAdminDetail({ subAdmin }) {
               </label>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {formData.isActive 
-                ? "Sub-admin can access the system" 
+              {formData.isActive
+                ? "Sub-admin can access the system"
                 : "Sub-admin account is disabled"}
             </p>
           </div>
@@ -564,7 +590,9 @@ export default function EditSubAdminDetail({ subAdmin }) {
               ✖
             </button>
 
-            <h3 className="font-semibold text-lg mb-4">Profile Photo Preview</h3>
+            <h3 className="font-semibold text-lg mb-4">
+              Profile Photo Preview
+            </h3>
 
             {formData.photo ? (
               <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-gray-200">
@@ -573,8 +601,8 @@ export default function EditSubAdminDetail({ subAdmin }) {
                   alt="Sub-Admin Photo"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextElementSibling.style.display = 'flex';
+                    e.target.style.display = "none";
+                    e.target.nextElementSibling.style.display = "flex";
                   }}
                 />
                 <div className="absolute inset-0 hidden items-center justify-center bg-gray-100">
@@ -586,7 +614,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
                 <p className="text-gray-500">No photo available</p>
               </div>
             )}
-            
+
             <div className="mt-4 text-center">
               <button
                 onClick={() => setShowPhotoPreview(false)}

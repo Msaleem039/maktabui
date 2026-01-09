@@ -24,6 +24,7 @@ export default function EditAdminDetail({ admin }) {
     phone: "",
     photo: "",
   });
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -77,7 +78,7 @@ export default function EditAdminDetail({ admin }) {
 
       formData.append("file", file);
 
-      xhr.open("PUT", "/api/uploadImage");
+      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
