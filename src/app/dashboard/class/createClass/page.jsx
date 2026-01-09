@@ -139,7 +139,7 @@ const Page = () => {
       <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
       <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
 
-      <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-5xl">
+      <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-7xl">
         <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Class</h2>
 
         {/* Status Messages */}

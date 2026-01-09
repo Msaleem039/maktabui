@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const createAdminAction = createAsyncThunk(
   "admins/createAdmin",
@@ -77,9 +78,15 @@ export const getThemeByBranchAction = createAsyncThunk(
   "admins/getThemeByBranch",
   async (branch, { rejectWithValue }) => {
     try {
+      const token = Cookies.get("token");
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getThemeByBranch`,
-        { branch }
+        { branch },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
       );
       return res.data;
     } catch (error) {
