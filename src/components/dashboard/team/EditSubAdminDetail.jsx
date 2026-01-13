@@ -180,7 +180,7 @@ export default function EditSubAdminDetail({ subAdmin }) {
 
       formData.append("file", file);
 
-      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
+      xhr.open("PUT", `/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {

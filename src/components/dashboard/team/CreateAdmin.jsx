@@ -26,6 +26,7 @@ export default function CreateAdmin() {
 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileName, setFileName] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -41,7 +42,7 @@ export default function CreateAdmin() {
       const formData = new FormData();
       formData.append("file", file);
 
-      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
+      xhr.open("PUT", `/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
@@ -72,6 +73,8 @@ export default function CreateAdmin() {
     const file = e.target.files[0];
     if (!file) return;
 
+    setFileName(file.name);
+
     try {
       const url = await uploadImageToSupabase(file);
       console.log("url", url);
@@ -79,6 +82,7 @@ export default function CreateAdmin() {
       setFormData((prev) => ({ ...prev, photo: url }));
     } catch (err) {
       console.error("Image upload failed:", err);
+      setFileName(""); 
     }
   };
 
@@ -103,8 +107,10 @@ export default function CreateAdmin() {
         name: "",
         password: "",
         phone: "",
+        branch: "",
       });
       setUploadProgress(0);
+      setFileName(""); // Clear file name on successful submission
     }
   }, [admin]);
 
@@ -200,7 +206,7 @@ export default function CreateAdmin() {
                 id="photo-upload"
               />
               <span className="text-[#0B4B31]/60 text-sm">
-                {formData.photo ? "File uploaded" : "No file chosen"}
+                {fileName || "No file chosen"}
               </span>
             </div>
           </div>

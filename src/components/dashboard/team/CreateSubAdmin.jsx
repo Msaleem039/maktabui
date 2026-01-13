@@ -76,7 +76,7 @@ export default function CreateSubAdmin() {
       const formData = new FormData();
       formData.append("file", file);
 
-      xhr.open("PUT", `${backendUrl}/api/uploadImage`);
+      xhr.open("PUT", `/api/uploadImage`);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
