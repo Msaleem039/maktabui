@@ -51,7 +51,7 @@ const Navbar = ({ items = [] }) => {
             Get Started →
           </Link>
           <Link
-            href="#contact"
+            href="#careers"
             className="whitespace-nowrap rounded-tr-xl rounded-bl-xl rounded-tl-none rounded-br-none bg-white px-3 py-1.5 text-xs font-bold text-[#0B4B31] transition hover:bg-[#F3F6F5] lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
@@ -95,7 +95,7 @@ const Navbar = ({ items = [] }) => {
               Get Started →
             </Link>
             <Link
-              href="#contact"
+              href="#careers"
               onClick={closeMenu}
               className="rounded-full bg-[#0B4B31]/10 px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-[#0B4B31] transition hover:bg-[#0B4B31]/15"
             >
