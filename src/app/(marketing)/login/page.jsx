@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../../redux/slices/authSlices/userLoginSlice";
 import { setTheme } from "../../../redux/slices/themeSlices/themeSlice";
+import { getThemeByBranchAction } from "../../../redux/slices/adminSlices/adminSlices";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
+import Image from "next/image";
 
 const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -124,33 +126,30 @@ const Page = () => {
       <div className="bg-white rounded-3xl shadow-lg overflow-hidden w-full max-w-6xl grid md:grid-cols-2">
         {/* Left Section */}
         <div
-          className="text-white flex flex-col justify-center items-center p-12 min-h-[700px]"
+          className="text-white flex flex-col justify-center items-center p-12 min-h-[700px] relative overflow-hidden"
           style={{
             background:
               "linear-gradient(217.64deg, #0B4B31 -5.84%, #85A598 106.72%, #FFFFFF 106.73%)",
           }}
         >
-          <p className="font-outfit text-center w-[90%] mb-5 mt-20 font-medium text-[32px] leading-[54px]">
-            Do not withhold your knowledge, for whoever withholds it will be
-            bridled with a bridle of fire on the Day of Resurrection.
-          </p>
-          <p className="font-extrabold text-[32px] leading-[56px] text-center">
-            Sunan Abi Dawud 3658
-          </p>
-          <div className="flex items-center gap-3 my-10">
+          {/* MaktabOS Learning Management System Image */}
+          <div className="my-10 relative z-10 w-full flex justify-center">
+            <Image
+              src="/matkktab.png"
+              alt="Maktab OS Learning Management System"
+              width={600}
+              height={400}
+              className="object-contain max-w-full h-auto"
+              priority
+            />
+          </div>
+
+          <div className="flex items-center gap-3 relative z-10">
             <LayoutGrid size={40} className="text-[#0B4B31] fill-[#0B4B31]" />
             <span className="text-[#0B4B31] text-4xl font-semibold">
               MaktabOS
             </span>
           </div>
-
-          {/* <img
-                        src="/Maktab-Logo-New.png"
-                        alt="MaktabOS Logo"
-                        height={200}
-                        width={200}
-                        className=" object-contain my-10"
-                    /> */}
         </div>
 
         {/* Right Section */}
