@@ -87,7 +87,6 @@ export const getInvoicesStatsAction = createAsyncThunk(
 export const createInvoiceAction = createAsyncThunk(
     `invoices/createInvoice`,
     async (invoiceData, { rejectWithValue }) => {
-        console.log(`invoiceData`, invoiceData);
 
         try {
             const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/createInvoice`, invoiceData);

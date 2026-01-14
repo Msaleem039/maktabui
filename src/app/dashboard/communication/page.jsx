@@ -110,7 +110,6 @@ const CommunicationPage = () => {
   } = useSelector((state) => state.message);
   const { themeColor } = useTheme();
   const userName = getUserName();
-  console.log("userName",userName);
   
   const [roleChoice, setRoleChoice] = useState("");
   const [selectedRole, setSelectedRole] = useState(null);

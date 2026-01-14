@@ -26,7 +26,6 @@ const Page = () => {
   const user = userCookie ? JSON.parse(userCookie) : null;
 
   const adminId = getAdminId();
-  console.log("adminId", adminId);
 
   const {
     loading,

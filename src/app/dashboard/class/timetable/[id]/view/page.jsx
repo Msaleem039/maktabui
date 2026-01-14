@@ -83,10 +83,6 @@ export default function TimetableDetailPage(props) {
     router.push('/dashboard/class/timetable');
   };
 
-  console.log("Timetable ID:", timetableId);
-  console.log("Current Timetable:", currentTimetable);
-  console.log("Loading:", loading);
-  console.log("Error:", error);
 
   if (loading) {
     return (

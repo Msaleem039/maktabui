@@ -54,7 +54,6 @@ const Page = () => {
         const tokenOptions = rememberMe ? { maxAge: 60 * 60 * 24 * 7 } : {};
 
         const payload = resultAction.payload;
-        console.log("payload", payload);
 
         setCookie("token", payload.token, tokenOptions);
 

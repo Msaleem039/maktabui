@@ -148,7 +148,6 @@ export default function AttendancePage() {
   const { teacherNames, loading: teachersLoading } = useSelector((state) => state.getTeachersName);
   const { detail: teacherDetail, loading: teacherDetailLoading } = useSelector((state) => state.getTeacherDetail);
   const { loading: attendanceLoading, success: attendanceSuccess, error: attendanceError } = useSelector((state) => state.attendance);
-  console.log("teacherNames",teacherNames);
 
   // Get students from the selected class
   const getStudentsFromSelectedClass = () => {

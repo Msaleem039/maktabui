@@ -34,7 +34,6 @@ export const removeCard = createAsyncThunk(
 export const addCardDetail = createAsyncThunk(
   `parent/addCardDetail`,
   async (cardData, { rejectWithValue }) => {
-    console.log(`cardData`, cardData);
 
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/addCardDetail`, cardData);

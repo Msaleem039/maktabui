@@ -5,7 +5,10 @@ export const getDashboardStatsAction = createAsyncThunk(
   `dashboard/getStats`,
   async (year, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getDashboardStats`, { year });
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getDashboardStats`,
+        { year }
+      );
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -19,8 +22,8 @@ const dashboardSlice = createSlice({
     loading: false,
     stats: null,
     yearlyPayments: [],
-    topPayingParents: [],
-    topOutstandingParents: [],
+    topPayingAdmins: [],
+    topOutstandingAdmins: [],
     error: null,
   },
   reducers: {},
@@ -34,8 +37,8 @@ const dashboardSlice = createSlice({
         state.loading = false;
         state.stats = action.payload.stats;
         state.yearlyPayments = action.payload.yearlyPayments;
-        state.topPayingParents = action.payload.topPayingParents;
-        state.topOutstandingParents = action.payload.topOutstandingParents;
+        state.topPayingAdmins = action.payload.topPayingAdmins;
+        state.topOutstandingAdmins = action.payload.topOutstandingAdmins;
       })
       .addCase(getDashboardStatsAction.rejected, (state, action) => {
         state.loading = false;

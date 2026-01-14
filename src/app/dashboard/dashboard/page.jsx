@@ -2,14 +2,33 @@
 
 import { useTheme } from "@/hooks/useTheme";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { Search, Grid, Moon, ChevronDown } from "lucide-react";
-import StatsCards from "@/components/StatsCard";
 import { useDispatch, useSelector } from "react-redux";
 import { getDashboardStatsAction } from "@/redux/slices/superadminSlices/superadminSlices";
+import StatsCards from "@/components/StatsCard";
 import Cookies from "js-cookie";
 
-const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
+/* =======================
+   HELPERS
+======================= */
+const formatDate = (date) => {
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+/* =======================
+   TABLE COMPONENT
+======================= */
+const DashboardTable = ({
+  title,
+  subtitle,
+  btnColor,
+  rows,
+  amountType = "paid", // "paid" | "unpaid"
+}) => {
   const { themeColor } = useTheme();
 
   return (
@@ -21,31 +40,43 @@ const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
         >
           {title}
         </h3>
-        {/* <button className={`text-[12px] px-3 py-[2px] rounded-full ${btnColor}`}>
-          See All ↗
-        </button> */}
       </div>
+
       <p className="text-[#000000] text-sm mb-4">{subtitle}</p>
 
       <table className="w-full text-sm min-w-[400px]">
         <thead>
           <tr style={{ backgroundColor: themeColor }} className="text-white">
-            <th className="text-left px-3 py-2 rounded-tl-md">Name ↕</th>
-            <th className="text-left px-3 py-2">Date ↕</th>
-            <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+            <th className="text-left px-3 py-2 rounded-tl-md">Name</th>
+            <th className="text-left px-3 py-2">Date</th>
+            <th className="text-right px-3 py-2 rounded-tr-md">Amount</th>
           </tr>
         </thead>
+
         <tbody>
+          {rows?.length === 0 && (
+            <tr>
+              <td
+                colSpan={3}
+                className="text-center py-4 text-gray-400"
+              >
+                No data available
+              </td>
+            </tr>
+          )}
+
           {rows?.map((row, idx) => (
             <tr key={idx} className="border-b border-gray-100">
               <td className="py-3 px-3">{row.name}</td>
-              <td className="py-3 px-3">{row.date}</td>
+              <td className="py-3 px-3">{formatDate(row.date)}</td>
               <td
                 className={`py-3 px-3 text-right font-medium ${
-                  row.amount < 0 ? "text-red-500" : "text-green-600"
+                  amountType === "unpaid"
+                    ? "text-red-500"
+                    : "text-green-600"
                 }`}
               >
-                ${row.amount}
+                ${row.amount.toLocaleString()}
               </td>
             </tr>
           ))}
@@ -55,6 +86,9 @@ const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
   );
 };
 
+/* =======================
+   PAGE
+======================= */
 const Page = () => {
   const dispatch = useDispatch();
   const { themeColor, mainText } = useTheme();
@@ -65,206 +99,153 @@ const Page = () => {
     loading,
     stats,
     yearlyPayments,
-    topPayingParents,
-    topOutstandingParents,
+    topPayingAdmins,
+    topOutstandingAdmins,
     error,
   } = useSelector((state) => state.dashboard);
-
+  console.log("topOutstandingAdmins",topOutstandingAdmins)
   useEffect(() => {
     dispatch(getDashboardStatsAction(selectedYear));
   }, [dispatch, selectedYear]);
 
   return (
-    <>
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1 lg:mt-1">
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
-          {/* Search bar removed */}
+    <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
+      {/* WELCOME */}
+      <h1
+        className="text-[2.5rem] font-semibold mb-1"
+        style={{ color: themeColor }}
+      >
+        Welcome to
+      </h1>
+      <p className="text-[1.75rem] font-medium text-black mb-8">
+        {mainText || "MaktabOS"}
+      </p>
 
-        </div>
-      </header>
-
-      <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
-        {/* Welcome */}
-        <h1
-          className="text-[2.5rem] font-semibold mb-1"
-          style={{ color: themeColor }}
-        >
-          Welcome to
-        </h1>
-        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">
-          {mainText || "MaktabOS"}
+      {/* LOADING / ERROR */}
+      {loading && (
+        <p className="text-center text-gray-500 mb-4">
+          Loading dashboard…
         </p>
+      )}
+      {error && (
+        <p className="text-center text-red-500 mb-4">
+          Error loading dashboard: {error}
+        </p>
+      )}
 
-        {/* Loading / Error */}
-        {loading && (
-          <p className="text-center text-gray-500 mb-4">Loading dashboard…</p>
-        )}
-        {error && (
-          <p className="text-center text-red-500 mb-4">
-            Error loading dashboard: {error}
-          </p>
-        )}
+      {/* MAIN CONTENT */}
+      {!loading && stats && (
+        <div className="flex flex-col xl:flex-row gap-6 pb-6">
+          {/* LEFT */}
+          <div className="flex-1 flex flex-col gap-6">
+            <StatsCards stats={stats} />
 
-        {!loading && stats && (
-          <div className="flex flex-col xl:flex-row gap-6 pb-6">
-            <div className="flex-1 flex flex-col gap-6">
-              <StatsCards stats={stats} />
+            {/* YEARLY PAYMENTS */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h3
+                  className="font-semibold text-sm"
+                  style={{ color: themeColor }}
+                >
+                  Yearly Payment Volume ({selectedYear}) — $
+                  {stats.totalPaidAmount}
+                </h3>
 
-              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
-                  <h3
-                    className="font-semibold text-[14px] leading-[20px]"
-                    style={{ color: themeColor }}
-                  >
-                    Yearly Payment Volume ({selectedYear})
-                    <span style={{ color: themeColor, opacity: 0.7 }}>
-                      (${stats?.totalPaidAmount || 0})
-                    </span>
-                  </h3>
+                <select
+                  className="border border-gray-200 rounded-lg px-3 py-1 text-sm"
+                  value={selectedYear}
+                  onChange={(e) =>
+                    setSelectedYear(Number(e.target.value))
+                  }
+                >
+                  <option>2026</option>
+                  <option>2025</option>
+                  <option>2024</option>
+                  <option>2023</option>
+                </select>
+              </div>
 
-                  <select
-                    className="border border-gray-200 rounded-lg px-3 py-1 text-sm text-gray-600"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  >
-                    <option>2026</option>
+              <div className="flex items-end justify-between gap-2">
+                {yearlyPayments.map((b, i) => {
+                  const max =
+                    Math.max(
+                      ...yearlyPayments.map((m) => m.totalPaid)
+                    ) || 1;
 
-                    <option>2025</option>
-                    <option>2024</option>
-                    <option>2023</option>
-                  </select>
-                </div>
+                  const height =
+                    (b.totalPaid / max) * 200;
 
-                {/* Chart */}
-                <div className="flex items-end justify-between gap-2 w-full overflow-x-auto">
-                  {yearlyPayments?.map((b, i) => {
-                    const maxPayment =
-                      Math.max(...yearlyPayments.map((m) => m.totalPaid)) || 1;
-                    const heightPercent =
-                      maxPayment > 0 ? (b.totalPaid / maxPayment) * 100 : 0;
-                    const heightPx = (heightPercent / 100) * 256;
-
-                    return (
+                  return (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center flex-1"
+                    >
                       <div
-                        key={i}
-                        className="flex flex-col items-center flex-1 min-w-[24px]"
-                      >
-                        <div
-                          className="w-full bg-emerald-600 transition-all duration-300 relative rounded-t-md"
-                          style={{
-                            height: `${heightPx}px`,
-                            minHeight: b.totalPaid > 0 ? "4px" : "0px",
-                          }}
-                          title={`${b.month}: $${b.totalPaid}`}
-                        >
-                          {b.totalPaid > 0 && (
-                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-semibold whitespace-nowrap">
-                              ${b.totalPaid.toLocaleString()}
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-xs text-gray-400 mt-1">
-                          {b.month}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Legend */}
-                <div className="flex justify-center gap-4 sm:gap-8 mt-6 text-sm text-gray-500 flex-wrap">
-                  <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 bg-emerald-600 rounded-full"></span>{" "}
-                    Paid Volume
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 bg-red-400 rounded-full"></span>{" "}
-                    Unpaid
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT CARDS */}
-            <div className="w-full xl:w-80 flex flex-col gap-4">
-              {/* Total Unpaid */}
-              <div
-                className="rounded-2xl p-4 sm:p-6 shadow-md"
-                style={{
-                  background:
-                    "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
-                }}
-              >
-                <h3 className="text-white text-[1.125rem] mb-4 font-extrabold">
-                  Total Unpaid
-                </h3>
-
-                <div className="bg-white rounded-xl p-4 sm:p-5 flex items-center gap-4">
-                  <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full">
-                    <img
-                      src="/Dollar Coin.png"
-                      alt="Dollar Coin"
-                      className="w-12 h-12 object-contain"
-                    />
-                  </div>
-
-                  <div>
-                    <h2 className="text-[#0B4B31] text-[1.5rem] font-extrabold">
-                      ${stats?.totalUnpaidAmount || 0}
-                    </h2>
-                    <p className="text-[#525967] text-[0.75rem] mt-2">
-                      {stats?.unpaidInvoicesCount || 0} Invoices Pending
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Current Income */}
-              <div
-                className="rounded-2xl p-4 sm:p-6 text-white shadow-md"
-                style={{
-                  background:
-                    "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%)",
-                }}
-              >
-                <h3 className="font-extrabold text-[18px] mb-1">
-                  Current Income This Month
-                </h3>
-                <p className="text-xs opacity-80 mb-4">
-                  Payments this month vs last month
-                </p>
-
-                <p className="font-extrabold text-[24px]">
-                  ${stats?.currentMonthIncome || 0}
-                </p>
-                <p className="text-xs opacity-80">
-                  Last Month: ${stats?.lastMonthIncome || 0}
-                </p>
+                        className="w-full bg-emerald-600 rounded-t-md"
+                        style={{ height }}
+                        title={`$${b.totalPaid}`}
+                      />
+                      <span className="text-xs text-gray-400 mt-1">
+                        {b.month}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
-        )}
 
-        {/* Tables Section */}
-        {!loading && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DashboardTable
-              title="Top Paying Parents"
-              subtitle="Parents who contributed the most"
-              btnColor="text-[#0B4B31] bg-[#c9d7d2]"
-              rows={topPayingParents}
-            />
-            <DashboardTable
-              title="Top Outstanding Balances"
-              subtitle="Parents with highest unpaid invoices"
-              btnColor="text-[#F14336] bg-[#fde1df]"
-              rows={topOutstandingParents}
-            />
+          {/* RIGHT */}
+          <div className="w-full xl:w-80 flex flex-col gap-4">
+            {/* TOTAL UNPAID */}
+            <div className="rounded-2xl p-6 shadow-md bg-gradient-to-br from-[#0b4b31] to-[#85a598] text-white">
+              <h3 className="font-extrabold mb-4">Total Unpaid</h3>
+
+              <div className="bg-white rounded-xl p-4 text-black">
+                <h2 className="text-2xl font-extrabold text-[#0b4b31]">
+                  ${stats.totalUnpaidAmount}
+                </h2>
+                <p className="text-xs mt-2">
+                  {stats.totalInvoices} Invoices Pending
+                </p>
+              </div>
+            </div>
+
+            {/* CURRENT INCOME */}
+            <div className="rounded-2xl p-6 shadow-md bg-gradient-to-br from-[#0b4b31] to-[#85a598] text-white">
+              <h3 className="font-extrabold mb-1">
+                Current Month Income
+              </h3>
+              <p className="text-xl font-extrabold">
+                ${stats.currentMonthIncome}
+              </p>
+              <p className="text-xs opacity-80">
+                Last Month: ${stats.lastMonthIncome}
+              </p>
+            </div>
           </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+
+      {/* TABLES */}
+      {!loading && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <DashboardTable
+            title="Top Paying Admins"
+            subtitle="Admins who contributed the most"
+            rows={topPayingAdmins || []}
+            amountType="paid"
+          />
+
+          <DashboardTable
+            title="Top Outstanding Balances"
+            subtitle="Admins with highest unpaid invoices"
+            rows={topOutstandingAdmins || []}
+            amountType="unpaid"
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
