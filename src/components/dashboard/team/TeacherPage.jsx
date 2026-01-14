@@ -118,7 +118,7 @@ export default function TeacherPage() {
           </h1>
         </div>
         <Link
-          href="/dashboard/super-admin/team/teacher/createTeacher"
+          href="/dashboard/team/teacher/createTeacher"
           className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[#F3F6F5]"
           style={{ borderColor: themeColor, color: themeColor }}
         >

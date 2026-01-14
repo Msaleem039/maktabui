@@ -161,7 +161,14 @@ const NavItem = ({
   );
 };
 
-const SubNavItem = ({ name, path, pathname, router, isCollapsed, activeBgColor }) => {
+const SubNavItem = ({
+  name,
+  path,
+  pathname,
+  router,
+  isCollapsed,
+  activeBgColor,
+}) => {
   const isActive = pathname === path;
   const rgb = hexToRgb(activeBgColor || "#13574A");
 
@@ -170,7 +177,9 @@ const SubNavItem = ({ name, path, pathname, router, isCollapsed, activeBgColor }
       onClick={() => router.push(path)}
       style={{
         background: isActive
-          ? `linear-gradient(to right, ${activeBgColor || "#13574A"}, ${activeBgColor || "#13574A"}CC)`
+          ? `linear-gradient(to right, ${activeBgColor || "#13574A"}, ${
+              activeBgColor || "#13574A"
+            }CC)`
           : "transparent",
       }}
       onMouseEnter={(e) => {
@@ -323,7 +332,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     [getUserData]
   );
 
-  // Set user data loaded after role and permissions are determined
   useEffect(() => {
     if (userRole) {
       setIsUserDataLoaded(true);
@@ -423,14 +431,29 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             name: "Invoices Report",
             path: `${basePath}/finance/invoice-report`,
           },
-          {
-            name: "Create Invoices",
-            path: `${basePath}/finance/invoice/add`,
-            hideForRoles: ["Super Admin"],
-          },
+          { name: "Create Invoices", path: `${basePath}/finance/invoice/add` },
           { name: "Payments", path: `${basePath}/finance/payment` },
         ],
         permission: "manageFinance",
+      },
+      instituteFinance: {
+        name: "Institute Finance",
+        icon: "/Coins.png",
+        hasSubmenu: true,
+        subItems: [
+          {
+            name: "Institute Invoice",
+            path: `${basePath}/institute-finance/invoice`,
+          },
+          {
+            name: "Invoices Report",
+            path: `${basePath}/institute-finance/invoice-report`,
+          },
+          {
+            name: "Create Invoices",
+            path: `${basePath}/institute-finance/invoice/add`,
+          }
+        ],
       },
       events: {
         name: "Events",
@@ -523,12 +546,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         return [
           roleDashboardItems[userRole],
           allItems.team,
-          {
-            ...allItems.finance,
-            subItems: allItems.finance.subItems.filter(
-              (item) => !item.hideForRoles?.includes("Super Admin")
-            ),
-          },
+          allItems.instituteFinance,
           allItems.communication,
         ];
 
@@ -550,46 +568,35 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
         ];
 
-      case "Sub Admin":
+      case "Sub Admin": {
         const subAdminItems = [roleDashboardItems[userRole]];
 
-        if (shouldIncludeItem(allItems.communication))
-          subAdminItems.push(allItems.communication);
-        if (shouldIncludeItem(allItems.parents))
-          subAdminItems.push(allItems.parents);
-        if (shouldIncludeItem(allItems.students))
-          subAdminItems.push(allItems.students);
-        if (shouldIncludeItem(allItems.class))
-          subAdminItems.push(allItems.class);
-        if (shouldIncludeItem(allItems.assignment))
-          subAdminItems.push(allItems.assignment);
-        if (shouldIncludeItem(allItems.notifications))
-          subAdminItems.push(allItems.notifications);
-        if (shouldIncludeItem(allItems.attendance))
-          subAdminItems.push(allItems.attendance);
-        if (shouldIncludeItem(allItems.finance))
-          subAdminItems.push(allItems.finance);
-        if (shouldIncludeItem(allItems.events))
-          subAdminItems.push(allItems.events);
-        if (shouldIncludeItem(allItems.team)) subAdminItems.push(allItems.team);
+        Object.values(allItems).forEach((item) => {
+          if (shouldIncludeItem(item)) subAdminItems.push(item);
+        });
 
         return subAdminItems;
+      }
 
       case "Teacher":
         return [
           roleDashboardItems[userRole],
-          allItems.class,
+          {
+            ...allItems.class,
+            subItems: allItems.class.subItems.filter(
+              (i) => i.name !== "Create Class"
+            ),
+          },
           {
             ...allItems.students,
             subItems: allItems.students.subItems.filter(
-              (item) => item.name === "Student"
+              (i) => i.name === "Student"
             ),
           },
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (item) =>
-                item.name === "C Assignment" || item.name === "S Assignment"
+              (i) => i.name === "C Assignment" || i.name === "S Assignment"
             ),
           },
           allItems.notifications,
@@ -603,16 +610,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (item) => item.name === "Assignments" || item.name === "Grade"
-            ),
-          },
-          {
-            ...allItems.class,
-            subItems: allItems.class.subItems.filter(
-              (item) =>
-                item.name !== "Subject" &&
-                item.name !== "Create Class" &&
-                item.name !== "Timetable"
+              (i) => i.name === "Assignments" || i.name === "Grade"
             ),
           },
           allItems.notifications,
@@ -622,17 +620,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       case "Parent":
         return [
           roleDashboardItems[userRole],
-          allItems.myChildren, // Add My Children menu for Parent role
+          allItems.myChildren,
           {
             ...allItems.finance,
             subItems: allItems.finance.subItems.filter(
               (i) => i.name === "Invoice" || i.name === "Payments"
-            ),
-          },
-          {
-            ...allItems.assignment,
-            subItems: allItems.assignment.subItems.filter(
-              (i) => i.name === "Assignments" || i.name === "Grade"
             ),
           },
           allItems.notifications,
@@ -640,21 +632,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         ];
 
       default:
-        return [
-          roleDashboardItems["Admin"],
-          allItems.communication,
-          allItems.parents,
-          allItems.students,
-          allItems.class,
-          allItems.assignment,
-          allItems.notifications,
-          allItems.attendance,
-          allItems.finance,
-          allItems.events,
-          allItems.team,
-        ];
+        return [];
     }
-  }, [userRole, userPermissions, hasPermission]);
+  }, [userRole, hasPermission]);
 
   const navItems = useMemo(() => getNavItems(), [getNavItems]);
 
@@ -863,43 +843,49 @@ export default function DashboardLayout({ children }) {
     pathname?.includes("/student") ||
     pathname === "/dashboard/student";
 
-  // Load theme from branch on mount
   useEffect(() => {
     const loadThemeByBranch = async () => {
-      // Get user role to check if they have permission
       let userRole = null;
       try {
         const userCookie = getCookie("user");
         if (userCookie) {
-          const userData = typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+          const userData =
+            typeof userCookie === "string"
+              ? JSON.parse(userCookie)
+              : userCookie;
           userRole = userData?.role;
         }
       } catch (error) {
         console.error("Error parsing user cookie:", error);
       }
 
-      // Normalize role
       const normalizedRole = userRole?.trim().toLowerCase();
+
       const isAdminOrSubAdmin = 
         normalizedRole === "admin" || 
         normalizedRole === "subadmin" || 
         normalizedRole === "sub admin";
 
       // Only fetch theme for Admin or SubAdmin users (NOT Super Admin)
+
       if (!isAdminOrSubAdmin) {
         return;
       }
 
-      // Try to get branch from user data
-      const branch = reduxUser?.admin?.branch || reduxUser?.branch || reduxUser?.admin?.branchName;
-      
-      // If no branch in Redux, try to get from cookie
+      const branch =
+        reduxUser?.admin?.branch ||
+        reduxUser?.branch ||
+        reduxUser?.admin?.branchName;
+
       let userBranch = branch;
       if (!userBranch) {
         try {
           const userCookie = getCookie("user");
           if (userCookie) {
-            const userData = typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+            const userData =
+              typeof userCookie === "string"
+                ? JSON.parse(userCookie)
+                : userCookie;
             userBranch = userData?.branch || userData?.admin?.branch;
           }
         } catch (error) {
@@ -907,16 +893,18 @@ export default function DashboardLayout({ children }) {
         }
       }
 
-      // If still no branch, use default
       const branchToUse = userBranch || "Main Branch";
 
-      // Only fetch if theme is not already loaded (check current theme state)
-      const isDefaultTheme = !theme.themeColor || theme.themeColor === "#0B4B31";
+      const isDefaultTheme =
+        !theme.themeColor || theme.themeColor === "#0B4B31";
       if (isDefaultTheme) {
         try {
-          const themeResult = await dispatch(getThemeByBranchAction(branchToUse)).unwrap();
+          const themeResult = await dispatch(
+            getThemeByBranchAction(branchToUse)
+          ).unwrap();
           if (themeResult?.success && themeResult?.theme) {
             const theme = themeResult.theme;
+
             // Validate colors - reject black colors
             const validThemeColor = theme.themeColor && 
                                     theme.themeColor !== "#000000" && 
@@ -933,21 +921,23 @@ export default function DashboardLayout({ children }) {
                                         : "#13574A";
             
             dispatch(setTheme({
-              themeColor: validThemeColor,
-              secondaryColor: validSecondaryColor,
+              themeColor: theme.themeColor || "#0B4B31",
+              secondaryColor: theme.secondaryColor || "#13574A",
               logo: theme.logo || "",
               favicon: theme.favicon || "",
               mainText: theme.mainText || "MaktabOS",
             }));
           }
         } catch (themeError) {
-          // Only log error if it's not a permission error
-          if (!themeError?.includes?.("Access denied") && !themeError?.includes?.("role required")) {
+          if (
+            !themeError?.includes?.("Access denied") &&
+            !themeError?.includes?.("role required")
+          ) {
             console.error("Failed to fetch theme by branch:", themeError);
           }
-          // Fallback to websiteSettings if available
           if (reduxUser?.admin?.websiteSettings) {
             const websiteSettings = reduxUser.admin.websiteSettings;
+
             // Validate colors - reject black colors
             const validThemeColor = websiteSettings.themeColor && 
                                     websiteSettings.themeColor !== "#000000" && 
@@ -973,11 +963,11 @@ export default function DashboardLayout({ children }) {
           } else {
             // Ensure defaults are set even if API fails and no websiteSettings
             dispatch(setTheme({
-              themeColor: "#0B4B31",
-              secondaryColor: "#13574A",
-              logo: "",
-              favicon: "",
-              mainText: "MaktabOS",
+              themeColor: websiteSettings.themeColor || "#0B4B31",
+              secondaryColor: websiteSettings.secondaryColor || "#13574A",
+              logo: websiteSettings.logo || "",
+              favicon: websiteSettings.favicon || "",
+              mainText: websiteSettings.mainText || "MaktabOS",
             }));
           }
         }
@@ -1039,12 +1029,12 @@ export default function DashboardLayout({ children }) {
       className="min-h-screen flex overflow-hidden relative"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          style={{ backgroundColor: sidebarBgColor }}
-          className="lg:hidden fixed top-6 left-4 z-[60] text-white p-3 rounded-md shadow-md transition-colors hover:opacity-90"
-          aria-label="Toggle menu"
-        >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ backgroundColor: sidebarBgColor }}
+        className="lg:hidden fixed top-6 left-4 z-[60] text-white p-3 rounded-md shadow-md transition-colors hover:opacity-90"
+        aria-label="Toggle menu"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -1063,10 +1053,15 @@ export default function DashboardLayout({ children }) {
         {showStudentHeader && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div>
-              <p className="text-[2.5rem] font-[600]" style={{ color: sidebarBgColor }}>
+              <p
+                className="text-[2.5rem] font-[600]"
+                style={{ color: sidebarBgColor }}
+              >
                 Welcome to
               </p>
-              <p className="text-[1.75rem] font-[500] text-black">{theme.mainText || "MaktabOS"}</p>
+              <p className="text-[1.75rem] font-[500] text-black">
+                {theme.mainText || "MaktabOS"}
+              </p>
             </div>
           </div>
         )}

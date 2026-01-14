@@ -6,12 +6,16 @@ import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { updateTeacher } from "@/redux/slices/teacherSlices/teacherSlices";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { getAdminId } from "@/utils/getCookies";
 
 export default function EditTeacherDetail({ teacher }) {
   const dispatch = useDispatch();
   const { classNames } = useSelector((state) => state.getAllClassesName);
-  const { status: updateStatus, error: updateError } = useSelector((state) => state.updateTeacher);
-  
+  const { status: updateStatus, error: updateError } = useSelector(
+    (state) => state.updateTeacher
+  );
+  const adminId = getAdminId();
+
   const [formData, setFormData] = useState({
     fullName: "",
     gender: "",
@@ -25,9 +29,9 @@ export default function EditTeacherDetail({ teacher }) {
     subjects: "",
     languages: "",
     status: "",
-    assignedClasses: []
+    assignedClasses: [],
   });
-  
+
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [classesDropdownOpen, setClassesDropdownOpen] = useState(false);
 
@@ -64,27 +68,30 @@ export default function EditTeacherDetail({ teacher }) {
   ];
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
+    dispatch(getAllClassesNameAction(adminId));
   }, [dispatch]);
 
   useEffect(() => {
     if (teacher) {
-      const assignedClassIds = teacher.assignedClasses?.map(cls => cls._id) || [];
-      
+      const assignedClassIds =
+        teacher.assignedClasses?.map((cls) => cls._id) || [];
+
       setFormData({
         fullName: teacher.fullName || "",
         gender: teacher.gender || "",
-        dateOfBirth: teacher.dateOfBirth ? teacher.dateOfBirth.split('T')[0] : "",
+        dateOfBirth: teacher.dateOfBirth
+          ? teacher.dateOfBirth.split("T")[0]
+          : "",
         address: teacher.address || "",
         phone: teacher.phone || "",
         qualification: teacher.qualification || "",
         specialization: teacher.specialization || "",
         experienceYears: teacher.experienceYears || "",
-        hireDate: teacher.hireDate ? teacher.hireDate.split('T')[0] : "",
+        hireDate: teacher.hireDate ? teacher.hireDate.split("T")[0] : "",
         subjects: teacher.subjects?.join(", ") || "",
         languages: teacher.languages?.join(", ") || "",
         status: teacher.status || "Active",
-        assignedClasses: assignedClassIds
+        assignedClasses: assignedClassIds,
       });
     }
   }, [teacher]);
@@ -107,13 +114,13 @@ export default function EditTeacherDetail({ teacher }) {
     setFormData((prev) => {
       const currentClasses = [...prev.assignedClasses];
       const classIndex = currentClasses.indexOf(classId);
-      
+
       if (classIndex > -1) {
         currentClasses.splice(classIndex, 1);
       } else {
         currentClasses.push(classId);
       }
-      
+
       return { ...prev, assignedClasses: currentClasses };
     });
   };
@@ -123,15 +130,17 @@ export default function EditTeacherDetail({ teacher }) {
   };
 
   const getSelectedClassNames = () => {
-    return classNames
-      ?.filter(cls => formData.assignedClasses.includes(cls._id))
-      ?.map(cls => cls.name)
-      ?.join(", ") || "Select classes";
+    return (
+      classNames
+        ?.filter((cls) => formData.assignedClasses.includes(cls._id))
+        ?.map((cls) => cls.name)
+        ?.join(", ") || "Select classes"
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const submitData = {
       id: teacher._id,
       fullName: formData.fullName,
@@ -144,14 +153,19 @@ export default function EditTeacherDetail({ teacher }) {
       experienceYears: formData.experienceYears,
       hireDate: formData.hireDate,
       assignedClasses: formData.assignedClasses,
-      subjects: formData.subjects.split(",").map(subject => subject.trim()).filter(subject => subject),
-      languages: formData.languages.split(",").map(language => language.trim()).filter(language => language),
-      status: formData.status
+      subjects: formData.subjects
+        .split(",")
+        .map((subject) => subject.trim())
+        .filter((subject) => subject),
+      languages: formData.languages
+        .split(",")
+        .map((language) => language.trim())
+        .filter((language) => language),
+      status: formData.status,
     };
-    
+
     try {
       const result = await dispatch(updateTeacher(submitData)).unwrap();
-      
     } catch (error) {
       console.error("Failed to update teacher:", error);
     }
@@ -168,7 +182,9 @@ export default function EditTeacherDetail({ teacher }) {
   return (
     <div className="space-y-8">
       <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-10 py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
-        <h2 className="text-lg font-semibold text-gray-700 mb-6">Edit Teacher</h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-6">
+          Edit Teacher
+        </h2>
 
         {updateStatus === "failed" && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -182,7 +198,10 @@ export default function EditTeacherDetail({ teacher }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           <FormInput
             label="Full Name"
             name="fullName"
@@ -275,16 +294,29 @@ export default function EditTeacherDetail({ teacher }) {
               onClick={() => setClassesDropdownOpen(!classesDropdownOpen)}
               className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 text-left flex justify-between items-center"
             >
-              <span className={formData.assignedClasses.length === 0 ? "text-[#0B4B31]/60" : "text-[#0B4B31]"}>
+              <span
+                className={
+                  formData.assignedClasses.length === 0
+                    ? "text-[#0B4B31]/60"
+                    : "text-[#0B4B31]"
+                }
+              >
                 {getSelectedClassNames()}
               </span>
               <svg
-                className={`w-4 h-4 transition-transform ${classesDropdownOpen ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${
+                  classesDropdownOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
@@ -303,11 +335,15 @@ export default function EditTeacherDetail({ teacher }) {
                           onChange={() => handleClassToggle(classItem._id)}
                           className="w-4 h-4 text-[#0B4B31] bg-gray-100 border-gray-300 rounded focus:ring-[#0B4B31]"
                         />
-                        <span className="ml-3 text-sm text-gray-700">{classItem.name}</span>
+                        <span className="ml-3 text-sm text-gray-700">
+                          {classItem.name}
+                        </span>
                       </label>
                     ))
                   ) : (
-                    <div className="px-3 py-2 text-sm text-gray-500">No classes available</div>
+                    <div className="px-3 py-2 text-sm text-gray-500">
+                      No classes available
+                    </div>
                   )}
                 </div>
               </div>
@@ -328,19 +364,34 @@ export default function EditTeacherDetail({ teacher }) {
             </label>
             <button
               type="button"
-              onClick={() => setDropdownOpen(dropdownOpen === "languages" ? null : "languages")}
+              onClick={() =>
+                setDropdownOpen(
+                  dropdownOpen === "languages" ? null : "languages"
+                )
+              }
               className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 text-left flex justify-between items-center"
             >
-              <span className={!formData.languages ? "text-[#0B4B31]/60" : "text-[#0B4B31]"}>
+              <span
+                className={
+                  !formData.languages ? "text-[#0B4B31]/60" : "text-[#0B4B31]"
+                }
+              >
                 {formData.languages || "Select languages"}
               </span>
               <svg
-                className={`w-4 h-4 transition-transform ${dropdownOpen === "languages" ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${
+                  dropdownOpen === "languages" ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
@@ -356,23 +407,30 @@ export default function EditTeacherDetail({ teacher }) {
                         type="checkbox"
                         checked={formData.languages.includes(language.value)}
                         onChange={() => {
-                          const currentLanguages = formData.languages.split(",").map(lang => lang.trim()).filter(lang => lang);
-                          const languageIndex = currentLanguages.indexOf(language.value);
-                          
+                          const currentLanguages = formData.languages
+                            .split(",")
+                            .map((lang) => lang.trim())
+                            .filter((lang) => lang);
+                          const languageIndex = currentLanguages.indexOf(
+                            language.value
+                          );
+
                           if (languageIndex > -1) {
                             currentLanguages.splice(languageIndex, 1);
                           } else {
                             currentLanguages.push(language.value);
                           }
-                          
-                          setFormData(prev => ({
+
+                          setFormData((prev) => ({
                             ...prev,
-                            languages: currentLanguages.join(", ")
+                            languages: currentLanguages.join(", "),
                           }));
                         }}
                         className="w-4 h-4 text-[#0B4B31] bg-gray-100 border-gray-300 rounded focus:ring-[#0B4B31]"
                       />
-                      <span className="ml-3 text-sm text-gray-700">{language.label}</span>
+                      <span className="ml-3 text-sm text-gray-700">
+                        {language.label}
+                      </span>
                     </label>
                   ))}
                 </div>

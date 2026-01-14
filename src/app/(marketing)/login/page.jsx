@@ -62,7 +62,8 @@ const Page = () => {
           email: payload.email,
           role: payload.role,
           id: payload.id || "",
-          branch:payload.branch
+          branch: payload.branch,
+          adminId: payload.adminId,
         };
 
         if (payload.role === "SubAdmin") {
@@ -71,6 +72,7 @@ const Page = () => {
         }
 
         setCookie("user", JSON.stringify(userCookie), tokenOptions);
+
 
         // Only fetch theme for Admin or SubAdmin users (NOT Super Admin)
         const normalizedRole = payload.role?.trim().toLowerCase();
@@ -163,6 +165,8 @@ const Page = () => {
                 mainText: "MaktabOS",
               }));
             }
+
+  
           }
         } else {
           // For non-admin users, ensure default theme is set

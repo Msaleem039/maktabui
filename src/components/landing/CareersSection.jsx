@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import axios from "axios";
 
 const CareersSection = () => {
   const [formData, setFormData] = useState({
@@ -81,21 +82,31 @@ const CareersSection = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
-      // Here you would typically send the data to your API
-      console.log("Form submitted:", formData);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Reset form on success
+      const { data } = await axios.post(
+        `https://backend.maktabos.com/api/addContactUs`,
+        {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          interest: formData.availability,
+          address: formData.address,
+          experience: formData.experience,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       setFormData({
         name: "",
         phone: "",
@@ -105,10 +116,17 @@ const CareersSection = () => {
         experience: "",
       });
       setErrors({});
+
       alert("Thank you! Your application has been submitted successfully.");
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("An error occurred. Please try again.");
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "An error occurred. Please try again.";
+
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -125,17 +143,24 @@ const CareersSection = () => {
       <div className="bg-[#0B4B31] px-6 py-20 text-white">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-base leading-6 font-medium text-white md:text-lg md:leading-8 lg:text-[1.5rem] lg:leading-9">
-            We're currently hiring a motivated Sales Account Executive to help expand the reach of MaktabOS.
+            We're currently hiring a motivated Sales Account Executive to help
+            expand the reach of MaktabOS.
           </p>
           <p className="mt-2 text-base leading-6 font-medium text-white md:text-lg md:leading-8 lg:text-[1.5rem] lg:leading-9">
-            Join us in building the digital backbone for Islamic education worldwide.
+            Join us in building the digital backbone for Islamic education
+            worldwide.
           </p>
         </div>
 
         <div className="mx-auto mt-12 max-w-5xl bg-[#D9D9D9] px-10 py-12 text-left text-[#0B4B31] shadow-[0_40px_120px_-60px_rgba(0,0,0,0.65)]">
-          <h3 className="text-lg font-medium text-[#000000]">Fill Out The Form</h3>
+          <h3 className="text-lg font-medium text-[#000000]">
+            Fill Out The Form
+          </h3>
 
-          <form onSubmit={handleSubmit} className="mt-8 grid gap-6 text-sm font-normal text-[#000000] md:grid-cols-2 md:gap-8">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 grid gap-6 text-sm font-normal text-[#000000] md:grid-cols-2 md:gap-8"
+          >
             <div className="space-y-2">
               <label htmlFor="career-name" className="block mb-3">
                 Name
@@ -201,7 +226,9 @@ const CareersSection = () => {
                 className="w-full rounded-full bg-[#0B4B3199] px-6 py-3 text-white placeholder:text-[#000000] focus:outline-none"
               />
               {errors.availability && (
-                <p className="mt-1 text-sm text-red-500">{errors.availability}</p>
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.availability}
+                </p>
               )}
             </div>
             <div className="md:col-span-2 space-y-2">
@@ -255,5 +282,3 @@ const CareersSection = () => {
 };
 
 export default CareersSection;
-
-

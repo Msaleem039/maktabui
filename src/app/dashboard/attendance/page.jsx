@@ -165,7 +165,7 @@ export default function AttendancePage() {
   const teacherClasses = teacherDetail?.assignedClasses || [];
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
+    dispatch(getAllClassesNameAction(adminId));
     if (role === "Admin" || role === "Super Admin") {
       dispatch(getTeachersName(adminId));
     } else if (role === "Teacher" && user?.id) {

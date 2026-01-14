@@ -51,7 +51,7 @@ const CreateTimeTable = () => {
   ];
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
+    dispatch(getAllClassesNameAction(adminId));
     dispatch(getTeachersName(adminId));
   }, [dispatch]);
 

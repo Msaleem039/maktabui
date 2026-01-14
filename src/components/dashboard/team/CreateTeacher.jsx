@@ -17,11 +17,6 @@ const CreateTeacher = () => {
   const adminId = getAdminId();
   const branch = getUserBranch();
 
-  const classNames = useSelector((state) => state.getAllClassesName.classNames);
-  const classesLoading = useSelector(
-    (state) => state.getAllClassesName.loading
-  );
-  const classesError = useSelector((state) => state.getAllClassesName.error);
   const teacherStatus = useSelector((state) => state.createTeacher.status);
   const teacherError = useSelector((state) => state.createTeacher.error);
 
@@ -37,17 +32,11 @@ const CreateTeacher = () => {
     specialization: "",
     experienceYears: "",
     hireDate: "",
-    assignedClasses: "",
     subjects: "",
     languages: "",
   });
 
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [selectedClasses, setSelectedClasses] = useState([]);
-
-  const classes = useMemo(() => {
-    return Array.isArray(classNames) ? classNames : [];
-  }, [classNames]);
 
   const genderOptions = useMemo(
     () => [
@@ -94,10 +83,6 @@ const CreateTeacher = () => {
   );
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
-  }, [dispatch]);
-
-  useEffect(() => {
     if (teacherStatus === "succeeded") {
       setFormData({
         fullName: "",
@@ -111,11 +96,9 @@ const CreateTeacher = () => {
         specialization: "",
         experienceYears: "",
         hireDate: "",
-        assignedClasses: "",
         subjects: "",
         languages: "",
       });
-      setSelectedClasses([]);
 
       setTimeout(() => {
         dispatch(resetCreateTeacherState());
@@ -153,35 +136,6 @@ const CreateTeacher = () => {
     setOpenDropdown(null);
   }, []);
 
-  const handleClassSelection = useCallback((classId, className) => {
-    setSelectedClasses((prev) => {
-      const isAlreadySelected = prev.find((cls) => cls.id === classId);
-
-      if (isAlreadySelected) {
-        const updated = prev.filter((cls) => cls.id !== classId);
-        // Update form data separately to avoid re-render during typing
-        setTimeout(() => {
-          const classNames = updated.map((cls) => cls.name).join(", ");
-          setFormData((prevForm) => ({
-            ...prevForm,
-            assignedClasses: classNames,
-          }));
-        }, 0);
-        return updated;
-      } else {
-        const updated = [...prev, { id: classId, name: className }];
-        setTimeout(() => {
-          const classNames = updated.map((cls) => cls.name).join(", ");
-          setFormData((prevForm) => ({
-            ...prevForm,
-            assignedClasses: classNames,
-          }));
-        }, 0);
-        return updated;
-      }
-    });
-  }, []);
-
   const handleLanguageToggle = useCallback((language) => {
     setFormData((prev) => {
       const currentLanguages = prev.languages
@@ -204,13 +158,6 @@ const CreateTeacher = () => {
       };
     });
   }, []);
-
-  const isClassSelected = useCallback(
-    (classId) => {
-      return selectedClasses.some((cls) => cls.id === classId);
-    },
-    [selectedClasses]
-  );
 
   const isLanguageSelected = useCallback(
     (language) => {
@@ -240,8 +187,6 @@ const CreateTeacher = () => {
 
       const payload = {
         ...formData,
-        assignedClasses: selectedClasses.map((cls) => cls.id),
-        assignedClassIds: selectedClasses.map((cls) => cls.id),
         subjects: formData.subjects
           ? formData.subjects.split(",").map((item) => item.trim())
           : [],
@@ -255,7 +200,7 @@ const CreateTeacher = () => {
       console.log("Submitting payload:", payload);
       dispatch(createTeacher(payload));
     },
-    [formData, selectedClasses, dispatch]
+    [formData, dispatch]
   );
 
   const StyledDateField = useCallback(
@@ -316,7 +261,7 @@ const CreateTeacher = () => {
         {teacherStatus === "succeeded" && (
           <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
             <p className="font-semibold">Teacher created successfully!</p>
-            <p>Teacher account has been created with assigned classes.</p>
+            <p>Teacher account has been created successfully.</p>
           </div>
         )}
 
@@ -324,20 +269,6 @@ const CreateTeacher = () => {
           <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             <p className="font-semibold">Error:</p>
             <p>{teacherError}</p>
-          </div>
-        )}
-
-        {/* Classes Loading/Error Messages */}
-        {classesLoading && (
-          <div className="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
-            <p className="font-semibold">Loading classes...</p>
-          </div>
-        )}
-
-        {classesError && (
-          <div className="mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
-            <p className="font-semibold">Warning:</p>
-            <p>Could not load classes - {classesError}</p>
           </div>
         )}
 
@@ -457,26 +388,7 @@ const CreateTeacher = () => {
               placeholder="MM-DD-YYYY"
             />
 
-            {/* Assigned Classes Multi-Select Dropdown */}
-            <MultiSelectDropdown
-              label="Assigned Classes"
-              name="assignedClasses"
-              value={formData.assignedClasses}
-              options={classes}
-              isOpen={openDropdown === "assignedClasses"}
-              onToggle={toggleDropdown}
-              placeholder={
-                classesLoading ? "Loading classes..." : "Select classes"
-              }
-              onItemToggle={handleClassSelection}
-              isItemSelected={isClassSelected}
-              getDisplayValue={() =>
-                selectedClasses.map((cls) => cls.name).join(", ") ||
-                "Select classes"
-              }
-              disabled={classesLoading}
-            />
-
+            {/* Subjects */}
             <FormInput
               label="Subjects"
               name="subjects"
@@ -485,6 +397,7 @@ const CreateTeacher = () => {
               placeholder="e.g. English, Math"
             />
 
+            {/* Languages Multi-Select Dropdown */}
             <MultiSelectDropdown
               label="Languages"
               name="languages"
@@ -502,17 +415,15 @@ const CreateTeacher = () => {
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              disabled={teacherStatus === "loading" || classesLoading}
+              disabled={teacherStatus === "loading"}
               className={`rounded-full px-8 py-3 text-sm font-semibold ${
-                teacherStatus === "loading" || classesLoading
+                teacherStatus === "loading"
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
               }`}
             >
               {teacherStatus === "loading"
                 ? "Creating Teacher..."
-                : classesLoading
-                ? "Loading Classes..."
                 : "Create Teacher"}
             </button>
           </div>

@@ -1,19 +1,35 @@
 "use client";
 import React, { useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Search, Grid, Moon, ChevronDown, Users, GraduationCap, Calendar, CalendarCheck, TrendingUp, DollarSign, Clock } from "lucide-react";
+import {
+  Search,
+  Grid,
+  Moon,
+  ChevronDown,
+  Users,
+  GraduationCap,
+  Calendar,
+  CalendarCheck,
+  TrendingUp,
+  DollarSign,
+  Clock,
+} from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { getParentDashboard, setAttendanceYear, clearDashboardError } from "@/redux/slices/parentSlices/parentSlice";
+import {
+  getParentDashboard,
+  setAttendanceYear,
+  clearDashboardError,
+} from "@/redux/slices/parentSlices/parentSlice";
 import { getCookie } from "cookies-next";
 
 const Page = () => {
   const dispatch = useDispatch();
   const dashboard = useSelector((state) => state.parentDashboard);
 
-    const user = useMemo(() => {
-      const userCookie = getCookie("user");
-      return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
-    }, []);
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+  }, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -35,45 +51,54 @@ const Page = () => {
   // Format date function
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   // Calculate overall attendance percentage from childAttendance
   const calculateOverallAttendance = () => {
-    if (!dashboard.childAttendance.data || dashboard.childAttendance.data.length === 0) return 0;
-    
+    if (
+      !dashboard.childAttendance.data ||
+      dashboard.childAttendance.data.length === 0
+    )
+      return 0;
+
     let totalPresent = 0;
     let totalDays = 0;
-    
-    dashboard.childAttendance.data.forEach(child => {
+
+    dashboard.childAttendance.data.forEach((child) => {
       if (child.attendance) {
         totalPresent += child.attendance.present || 0;
         totalDays += child.attendance.total || 0;
       }
     });
-    
+
     return totalDays > 0 ? Math.round((totalPresent / totalDays) * 100) : 0;
   };
 
   // Get attendance status color
   const getAttendanceStatusColor = (percentage) => {
-    if (percentage >= 80) return 'text-green-600 bg-green-50';
-    if (percentage >= 60) return 'text-amber-600 bg-amber-50';
-    return 'text-red-600 bg-red-50';
+    if (percentage >= 80) return "text-green-600 bg-green-50";
+    if (percentage >= 60) return "text-amber-600 bg-amber-50";
+    return "text-red-600 bg-red-50";
   };
 
   // Get status badge color
   const getStatusBadgeColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'excellent': return 'bg-green-100 text-green-800';
-      case 'good': return 'bg-blue-100 text-blue-800';
-      case 'average': return 'bg-amber-100 text-amber-800';
-      case 'poor': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "excellent":
+        return "bg-green-100 text-green-800";
+      case "good":
+        return "bg-blue-100 text-blue-800";
+      case "average":
+        return "bg-amber-100 text-amber-800";
+      case "poor":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -96,7 +121,9 @@ const Page = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-4">Error loading dashboard</div>
+          <div className="text-red-500 text-lg mb-4">
+            Error loading dashboard
+          </div>
           <p className="text-gray-600 mb-4">{dashboard.error}</p>
           <button
             onClick={handleRetry}
@@ -228,12 +255,13 @@ const Page = () => {
               <h3 className="font-semibold text-[#0B4B31] text-[14px] leading-[20px]">
                 Child Attendance Overview
               </h3>
-              
-              <select 
+
+              <select
                 value={dashboard.monthlyAttendance.selectedYear}
                 onChange={(e) => handleYearChange(parseInt(e.target.value))}
                 className="border border-gray-200 rounded-lg px-3 py-1 text-sm text-gray-600 focus:outline-none focus:ring-emerald-500"
               >
+                <option value={2026}>2026</option>
                 <option value={2025}>2025</option>
                 <option value={2024}>2024</option>
                 <option value={2023}>2023</option>
@@ -248,30 +276,46 @@ const Page = () => {
               <div className="space-y-6">
                 {/* Attendance Cards for each child */}
                 {dashboard.childAttendance.data.map((child, index) => (
-                  <div key={child.studentId} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                  <div
+                    key={child.studentId}
+                    className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-[#E5EFEB] flex items-center justify-center flex-shrink-0">
                           <Users size={20} className="text-[#0B4B31]" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900">{child.studentName}</h4>
+                          <h4 className="font-semibold text-gray-900">
+                            {child.studentName}
+                          </h4>
                           <p className="text-sm text-gray-500">{child.email}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(child.status)}`}>
-                          {child.status || 'No Status'}
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(
+                            child.status
+                          )}`}
+                        >
+                          {child.status || "No Status"}
                         </span>
                         <div className="text-right">
-                          <div className={`text-2xl font-bold ${
-                            (child.attendance?.percentage || 0) >= 80 ? 'text-green-600' :
-                            (child.attendance?.percentage || 0) >= 60 ? 'text-amber-600' : 'text-red-600'
-                          }`}>
+                          <div
+                            className={`text-2xl font-bold ${
+                              (child.attendance?.percentage || 0) >= 80
+                                ? "text-green-600"
+                                : (child.attendance?.percentage || 0) >= 60
+                                ? "text-amber-600"
+                                : "text-red-600"
+                            }`}
+                          >
                             {child.attendance?.percentage || 0}%
                           </div>
-                          <div className="text-xs text-gray-500">Attendance</div>
+                          <div className="text-xs text-gray-500">
+                            Attendance
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -279,19 +323,27 @@ const Page = () => {
                     {/* Attendance Stats */}
                     <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-green-600 font-bold text-lg">{child.attendance?.present || 0}</div>
+                        <div className="text-green-600 font-bold text-lg">
+                          {child.attendance?.present || 0}
+                        </div>
                         <div className="text-green-700 text-sm">Present</div>
                       </div>
                       <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="text-red-600 font-bold text-lg">{child.attendance?.absent || 0}</div>
+                        <div className="text-red-600 font-bold text-lg">
+                          {child.attendance?.absent || 0}
+                        </div>
                         <div className="text-red-700 text-sm">Absent</div>
                       </div>
                       <div className="text-center p-3 bg-amber-50 rounded-lg">
-                        <div className="text-amber-600 font-bold text-lg">{child.attendance?.late || 0}</div>
+                        <div className="text-amber-600 font-bold text-lg">
+                          {child.attendance?.late || 0}
+                        </div>
                         <div className="text-amber-700 text-sm">Late</div>
                       </div>
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-blue-600 font-bold text-lg">{child.attendance?.total || 0}</div>
+                        <div className="text-blue-600 font-bold text-lg">
+                          {child.attendance?.total || 0}
+                        </div>
                         <div className="text-blue-700 text-sm">Total Days</div>
                       </div>
                     </div>
@@ -303,12 +355,17 @@ const Page = () => {
                         <span>{child.attendance?.percentage || 0}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full ${
-                            (child.attendance?.percentage || 0) >= 80 ? 'bg-green-500' :
-                            (child.attendance?.percentage || 0) >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                            (child.attendance?.percentage || 0) >= 80
+                              ? "bg-green-500"
+                              : (child.attendance?.percentage || 0) >= 60
+                              ? "bg-amber-500"
+                              : "bg-red-500"
                           }`}
-                          style={{ width: `${child.attendance?.percentage || 0}%` }}
+                          style={{
+                            width: `${child.attendance?.percentage || 0}%`,
+                          }}
                         ></div>
                       </div>
                     </div>
@@ -320,8 +377,12 @@ const Page = () => {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                   <Calendar size={24} className="text-gray-400" />
                 </div>
-                <p className="text-gray-500 text-lg">No attendance data available</p>
-                <p className="text-gray-400 text-sm mt-1">Attendance records will appear here once available</p>
+                <p className="text-gray-500 text-lg">
+                  No attendance data available
+                </p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Attendance records will appear here once available
+                </p>
               </div>
             )}
           </div>
@@ -337,7 +398,9 @@ const Page = () => {
                 "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
             }}
           >
-            <h3 className="text-white text-[1.125rem] leading-[100%] mb-4 font-extrabold">Fee Summary</h3>
+            <h3 className="text-white text-[1.125rem] leading-[100%] mb-4 font-extrabold">
+              Fee Summary
+            </h3>
 
             <div className="bg-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full flex-shrink-0">
@@ -355,7 +418,9 @@ const Page = () => {
             <div className="mt-4 space-y-2 text-white text-sm">
               <div className="flex justify-between">
                 <span className="opacity-90">Pending Fees:</span>
-                <span className="font-semibold">${(dashboard.feeStats.pendingFees || 0).toLocaleString()}</span>
+                <span className="font-semibold">
+                  ${(dashboard.feeStats.pendingFees || 0).toLocaleString()}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="opacity-90">Next Due Date:</span>
@@ -365,7 +430,9 @@ const Page = () => {
               </div>
               <div className="flex justify-between">
                 <span className="opacity-90">Pending Payments:</span>
-                <span className="font-semibold">{dashboard.pendingPayments.data.length}</span>
+                <span className="font-semibold">
+                  {dashboard.pendingPayments.data.length}
+                </span>
               </div>
             </div>
           </div>
@@ -378,25 +445,36 @@ const Page = () => {
                 "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%, #FFFFFF 99.3%)",
             }}
           >
-            <h3 className="font-outfit font-extrabold text-[18px] leading-[100%] mb-1">Upcoming Events</h3>
-            <p className="text-xs opacity-80 mb-4">Events scheduled for your children</p>
+            <h3 className="font-outfit font-extrabold text-[18px] leading-[100%] mb-1">
+              Upcoming Events
+            </h3>
+            <p className="text-xs opacity-80 mb-4">
+              Events scheduled for your children
+            </p>
 
             <div className="space-y-3 text-sm">
               {dashboard.upcomingEvents.data.length > 0 ? (
-                dashboard.upcomingEvents.data.slice(0, 3).map((event, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <Clock size={14} className="opacity-80 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">{event.title}</p>
-                      <p className="text-xs opacity-80">
-                        {formatDate(event.date)} | {event.description}
-                      </p>
+                dashboard.upcomingEvents.data
+                  .slice(0, 3)
+                  .map((event, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <Clock
+                        size={14}
+                        className="opacity-80 mt-0.5 flex-shrink-0"
+                      />
+                      <div>
+                        <p className="font-semibold">{event.title}</p>
+                        <p className="text-xs opacity-80">
+                          {formatDate(event.date)} | {event.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-white/70 text-sm">No upcoming events found</p>
+                  <p className="text-white/70 text-sm">
+                    No upcoming events found
+                  </p>
                 </div>
               )}
             </div>
@@ -409,18 +487,28 @@ const Page = () => {
         {/* Recent Fee Payments */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
           <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-            <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">RECENT FEE PAYMENTS</h3>
-            <button className="text-[12px] px-3 py-[2px] rounded-full transition text-[#0B4B31] bg-[#c9d7d2] hover:bg-[#E3F1EB]">See All ↗</button>
+            <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">
+              RECENT FEE PAYMENTS
+            </h3>
+            <button className="text-[12px] px-3 py-[2px] rounded-full transition text-[#0B4B31] bg-[#c9d7d2] hover:bg-[#E3F1EB]">
+              See All ↗
+            </button>
           </div>
-          <p className="text-[#000000] text-sm mb-4">Your recent fee payment history</p>
+          <p className="text-[#000000] text-sm mb-4">
+            Your recent fee payment history
+          </p>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[400px] sm:min-w-full">
               <thead>
                 <tr className="bg-[#0B4B31] text-white">
-                  <th className="text-left px-3 py-2 rounded-tl-md">Child Name ↕</th>
+                  <th className="text-left px-3 py-2 rounded-tl-md">
+                    Child Name ↕
+                  </th>
                   <th className="text-left px-3 py-2">Date ↕</th>
-                  <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+                  <th className="text-right px-3 py-2 rounded-tr-md">
+                    Amount ↕
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -429,9 +517,13 @@ const Page = () => {
                     <tr key={idx} className="border-b border-gray-100">
                       <td className="py-3 px-3">{payment.childName}</td>
                       <td className="py-3 px-3">{payment.date}</td>
-                      <td className={`py-3 px-3 text-right font-medium ${
-                        payment.amount.startsWith('+') ? 'text-green-600' : 'text-red-500'
-                      }`}>
+                      <td
+                        className={`py-3 px-3 text-right font-medium ${
+                          payment.amount.startsWith("+")
+                            ? "text-green-600"
+                            : "text-red-500"
+                        }`}
+                      >
                         {payment.amount}
                       </td>
                     </tr>
@@ -451,18 +543,28 @@ const Page = () => {
         {/* Pending Fee Payments - Fixed */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
           <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-            <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">PENDING FEE PAYMENTS</h3>
-            <button className="text-[12px] px-3 py-[2px] rounded-full transition text-[#F14336] bg-[#fde1df] hover:bg-[#FADDDD]">See All ↗</button>
+            <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">
+              PENDING FEE PAYMENTS
+            </h3>
+            <button className="text-[12px] px-3 py-[2px] rounded-full transition text-[#F14336] bg-[#fde1df] hover:bg-[#FADDDD]">
+              See All ↗
+            </button>
           </div>
-          <p className="text-[#000000] text-sm mb-4">Outstanding fees for your children</p>
+          <p className="text-[#000000] text-sm mb-4">
+            Outstanding fees for your children
+          </p>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[400px] sm:min-w-full">
               <thead>
                 <tr className="bg-[#0B4B31] text-white">
-                  <th className="text-left px-3 py-2 rounded-tl-md">Child Name ↕</th>
+                  <th className="text-left px-3 py-2 rounded-tl-md">
+                    Child Name ↕
+                  </th>
                   <th className="text-left px-3 py-2">Due Date ↕</th>
-                  <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+                  <th className="text-right px-3 py-2 rounded-tr-md">
+                    Amount ↕
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -488,7 +590,6 @@ const Page = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

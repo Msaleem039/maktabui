@@ -31,7 +31,7 @@ import {
   getStudentDashboardStatsReducer,
   updateStudentReducer,
   deleteStudentReducer,
-  getParentChildByIdReducer
+  getParentChildByIdReducer,
 } from "./slices/studentSlices/studentSlices";
 
 import {
@@ -62,10 +62,10 @@ import {
   deleteAdminReducer,
   getThemeByBranchReducer,
   updateThemeReducer,
-  adminDashboardReducer
+  adminDashboardReducer,
+  getAllAdminsNameReducer,
 } from "./slices/adminSlices/adminSlices";
 
-// Import SubAdmin reducers
 import {
   createSubAdminReducer,
   getAllSubAdminsReducer,
@@ -89,6 +89,15 @@ import {
   getInvoiceByIdReducer,
   updateInvoiceReducer,
 } from "./slices/invoiceSlices/invoiceSlices";
+
+import {
+  createAdminInvoiceReducer,
+  getAllAdminInvoicesReducer,
+  updateAdminInvoiceReducer,
+  getAdminInvoiceByIdReducer,
+  getAdminInvoicesStatsReducer,
+  adminInvoiceReducer,
+} from "./slices/adminInvoiceSlices/adminInvoiceSlices";
 
 import { getAllPaymentStatsReducer } from "./slices/paymentSlices/paymentSlices";
 
@@ -160,12 +169,14 @@ export const store = configureStore({
     // Admin management
     createAdmin: createAdminReducer,
     getAllAdmins: getAllAdminsReducer,
+    getAllAdminsName: getAllAdminsNameReducer,
+
     getAdminById: getAdminByIdReducer,
     updateAdmin: updateAdminReducer,
     deleteAdmin: deleteAdminReducer,
     getThemeByBranch: getThemeByBranchReducer,
     updateTheme: updateThemeReducer,
-    getAdminDashboard:adminDashboardReducer,
+    getAdminDashboard: adminDashboardReducer,
 
     // SubAdmin management
     createSubAdmin: createSubAdminReducer,
@@ -184,7 +195,7 @@ export const store = configureStore({
     grade: gradeReducer,
     assignment: assignmentReducer,
 
-    // Financial management
+    // Financial management (Regular Invoices)
     getAllInvoices: getAllInvoicesReducer,
     getInvoicesStats: getInvoicesStatsReducer,
     createInvoice: createInvoiceReducer,
@@ -192,13 +203,16 @@ export const store = configureStore({
     getInvoiceById: getInvoiceByIdReducer,
     updateInvoice: updateInvoiceReducer,
 
-    // Dashboard
+    createAdminInvoice: createAdminInvoiceReducer,
+    getAllAdminInvoices: getAllAdminInvoicesReducer,
+    getAdminInvoiceById: getAdminInvoiceByIdReducer,
+    updateAdminInvoice: updateAdminInvoiceReducer,
+    getAdminInvoicesStats: getAdminInvoicesStatsReducer,
+    adminInvoice: adminInvoiceReducer,
     dashboard: dashboardReducer,
 
-    // Event management
     events: eventReducer,
 
-    // Theme management
     theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) =>

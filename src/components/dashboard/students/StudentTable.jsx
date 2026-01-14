@@ -209,9 +209,6 @@ const StudentTable = ({
                         >
                           {student.name}
                         </Link>
-                        <span className="text-xs text-[#666]">
-                          {student.gender} • {formatDate(student.dateOfBirth)}
-                        </span>
                       </div>
                     </div>
                   </td>

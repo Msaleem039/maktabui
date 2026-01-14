@@ -11,12 +11,12 @@ import Cookies from "js-cookie";
 
 const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
   const { themeColor } = useTheme();
-  
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
       <div className="flex justify-between items-center mb-3">
-        <h3 
-          className="text-[18px] font-semibold uppercase tracking-wide" 
+        <h3
+          className="text-[18px] font-semibold uppercase tracking-wide"
           style={{ color: themeColor }}
         >
           {title}
@@ -29,10 +29,7 @@ const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
 
       <table className="w-full text-sm min-w-[400px]">
         <thead>
-          <tr 
-            style={{ backgroundColor: themeColor }} 
-            className="text-white"
-          >
+          <tr style={{ backgroundColor: themeColor }} className="text-white">
             <th className="text-left px-3 py-2 rounded-tl-md">Name ↕</th>
             <th className="text-left px-3 py-2">Date ↕</th>
             <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
@@ -63,7 +60,7 @@ const Page = () => {
   const { themeColor, mainText } = useTheme();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const user = Cookies.get("user");
-  
+
   const {
     loading,
     stats,
@@ -83,22 +80,22 @@ const Page = () => {
       <header className="flex flex-col sm:flex-row items-center sm:justify-end gap-3 mt-1 lg:mt-1">
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between">
           {/* Search bar removed */}
-          
+
           <div className="flex items-center gap-2">
-            <button 
-              style={{ borderColor: themeColor }} 
+            <button
+              style={{ borderColor: themeColor }}
               className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm"
             >
               <Grid size={18} style={{ color: themeColor }} />
             </button>
-            <button 
-              style={{ borderColor: themeColor }} 
+            <button
+              style={{ borderColor: themeColor }}
               className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm"
             >
               <Moon size={18} style={{ color: themeColor }} />
             </button>
-            <div 
-              style={{ borderColor: themeColor }} 
+            <div
+              style={{ borderColor: themeColor }}
               className="flex items-center gap-2 bg-white border rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm"
             >
               <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
@@ -119,11 +116,11 @@ const Page = () => {
           </div>
         </div>
       </header>
-      
+
       <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
         {/* Welcome */}
-        <h1 
-          className="text-[2.5rem] font-semibold mb-1" 
+        <h1
+          className="text-[2.5rem] font-semibold mb-1"
           style={{ color: themeColor }}
         >
           Welcome to
@@ -149,8 +146,8 @@ const Page = () => {
 
               <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
-                  <h3 
-                    className="font-semibold text-[14px] leading-[20px]" 
+                  <h3
+                    className="font-semibold text-[14px] leading-[20px]"
                     style={{ color: themeColor }}
                   >
                     Yearly Payment Volume ({selectedYear})
@@ -164,6 +161,8 @@ const Page = () => {
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                   >
+                    <option>2026</option>
+
                     <option>2025</option>
                     <option>2024</option>
                     <option>2023</option>

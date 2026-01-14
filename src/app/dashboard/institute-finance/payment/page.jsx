@@ -14,7 +14,10 @@ import {
   Title,
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
-import { getAllPaymentStatsAction, setCurrentPage, updateFilters } from "@/redux/slices/paymentSlices/paymentSlices";
+import {
+  getAllPaymentStatsAction,
+  setCurrentPage,
+} from "@/redux/slices/paymentSlices/paymentSlices";
 
 ChartJS.register(
   ArcElement,
@@ -28,20 +31,22 @@ ChartJS.register(
 
 export default function PaymentPage() {
   const dispatch = useDispatch();
-  const { 
-    loading, 
-    stats, 
-    tableData, 
-    paymentMethodsData, 
-    monthlyTrendsData, 
+  const {
+    loading,
+    stats,
+    tableData,
+    paymentMethodsData,
+    monthlyTrendsData,
     pagination,
-    error 
+    error,
   } = useSelector((state) => state.getAllPaymentStats);
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState(
+    new Date().getFullYear().toString()
+  );
 
   // Fetch payment stats on component mount and when filters change
   useEffect(() => {
@@ -51,11 +56,19 @@ export default function PaymentPage() {
       search: searchValue,
       startDate: selectedDate,
       status: selectedStatus,
-      year: selectedYear
+      year: selectedYear,
     };
-    
+
     dispatch(getAllPaymentStatsAction(filters));
-  }, [dispatch, pagination?.currentPage, pagination?.limit, searchValue, selectedDate, selectedStatus, selectedYear]);
+  }, [
+    dispatch,
+    pagination?.currentPage,
+    pagination?.limit,
+    searchValue,
+    selectedDate,
+    selectedStatus,
+    selectedYear,
+  ]);
 
   // Handle pagination
   const handlePageChange = (page) => {
@@ -109,7 +122,8 @@ export default function PaymentPage() {
     scales: {
       y: {
         beginAtZero: true,
-        max: Math.max(...(monthlyTrendsData?.datasets?.[0]?.data || [])) + 5 || 30,
+        max:
+          Math.max(...(monthlyTrendsData?.datasets?.[0]?.data || [])) + 5 || 30,
         ticks: {
           stepSize: 10,
           callback: function (value) {
@@ -215,7 +229,9 @@ export default function PaymentPage() {
             <option value="failed">Failed</option>
             <option value="processing">Processing</option>
           </select>
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
+            ▾
+          </span>
         </div>
         <button
           type="button"
@@ -232,14 +248,12 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* Error State */}
       {error && (
         <div className="rounded-[18px] bg-red-50 px-8 py-6">
           <p className="text-red-600">Error: {error}</p>
         </div>
       )}
 
-      {/* Key Metrics Banner */}
       {!loading && !error && stats && (
         <div className="relative rounded-[18px] bg-[#E5EFEB] px-8 py-6 overflow-hidden">
           <div
@@ -256,50 +270,62 @@ export default function PaymentPage() {
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 {stats.totalPayments?.toLocaleString() || 0}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Total Payments</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Total Payments
+              </p>
             </div>
             <div>
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 ${stats.totalAmount || "0.00"}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Total Amount</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Total Amount
+              </p>
             </div>
             <div>
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 ${stats.averagePayment?.toLocaleString() || "0.00"}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Average Payment</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Average Payment
+              </p>
             </div>
             <div>
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 {stats.lastPaymentDate || "No payments"}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Last Payment Date</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Last Payment Date
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Charts Grid */}
       {!loading && !error && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Payment Methods Distribution */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-            <h3 className="text-[0.8125rem] font-medium text-[#0000008C] mb-4">Payment Methods Distribution</h3>
+            <h3 className="text-[0.8125rem] font-medium text-[#0000008C] mb-4">
+              Payment Methods Distribution
+            </h3>
             <div className="relative h-64 flex items-center justify-center">
-              <Doughnut data={paymentMethodsData} options={paymentMethodsOptions} />
+              <Doughnut
+                data={paymentMethodsData}
+                options={paymentMethodsOptions}
+              />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="flex flex-col gap-3 items-center">
                   {paymentMethodsData.labels.map((label, i) => {
                     const value = paymentMethodsData.datasets[0].data[i];
-                    const color = paymentMethodsData.datasets[0].backgroundColor[i];
+                    const color =
+                      paymentMethodsData.datasets[0].backgroundColor[i];
                     return (
                       <div key={i} className="flex items-center gap-2">
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-xs" style={{ fontSize: '12px' }}>
+                        <span className="text-xs" style={{ fontSize: "12px" }}>
                           <span style={{ color: "#737373" }}>{label}: </span>
                           <span style={{ color: "#0A0A0A" }}>{value}%</span>
                         </span>
@@ -311,15 +337,17 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          {/* Monthly Payment Trends */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Monthly Payment Trends</h3>
-              <select 
-                value={selectedYear} 
+              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">
+                Monthly Payment Trends
+              </h3>
+              <select
+                value={selectedYear}
                 onChange={handleYearChange}
                 className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
               >
+                <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
@@ -332,15 +360,15 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* All Payment Records Section */}
       {!loading && !error && (
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">All Payment Records</h2>
+            <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">
+              All Payment Records
+            </h2>
           </div>
 
           <div className="mt-6 space-y-4">
-            {/* Search and Actions */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <label className="relative flex w-full max-w-xl items-center">
                 <span className="absolute left-4 text-[#979699]">🔍</span>
@@ -351,28 +379,25 @@ export default function PaymentPage() {
                   className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
                 />
               </label>
-
-              {/* See All Button */}
-              {/* <div>
-                <button
-                  type="button"
-                  className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-                >
-                  See All ↗
-                </button>
-              </div> */}
             </div>
           </div>
 
-          {/* Payment Records Table */}
           <div className="mt-6 overflow-x-auto">
             <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
               <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
                 <tr>
-                  <th className="px-4 font-normal text-[#0000008C]">Receipt #</th>
-                  <th className="px-4 font-normal text-[#0000008C]">Payment Date</th>
-                  <th className="px-4 font-normal text-[#0000008C]">Payment Amount</th>
-                  <th className="px-4 font-normal text-[#0000008C]">Payment Method</th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Receipt #
+                  </th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Payment Date
+                  </th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Payment Amount
+                  </th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Payment Method
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -381,23 +406,33 @@ export default function PaymentPage() {
                     key={record.id}
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.receiptNumber}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentDate}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentAmount}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentMethod}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.receiptNumber}
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.paymentDate}
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.paymentAmount}
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.paymentMethod}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* Pagination */}
           {pagination && pagination.totalRecords > 0 && (
             <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-[0.8125rem] font-normal text-[#979699]">
-                Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to{" "}
-                {Math.min(pagination.currentPage * pagination.limit, pagination.totalRecords)} of{" "}
-                {pagination.totalRecords} entries
+                Showing {(pagination.currentPage - 1) * pagination.limit + 1} to{" "}
+                {Math.min(
+                  pagination.currentPage * pagination.limit,
+                  pagination.totalRecords
+                )}{" "}
+                of {pagination.totalRecords} entries
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[0.8125rem] font-normal text-[#979699]">

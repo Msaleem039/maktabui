@@ -18,27 +18,8 @@ import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getAdminId, getUserBranch } from "@/utils/getCookies";
 
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
-    "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X"
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
-
-const StripeCardInput = ({ label, className = "", onCardChange }) => {
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} *
-      </label>
-      <div className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 min-h-[50px] flex items-center">
-        <div className="w-full">
-          <CardElement onChange={onCardChange} />
-        </div>
-      </div>
-      <p className="text-xs text-gray-500 mt-2">
-        Test card: 4242 4242 4242 4242 | Exp: 12/34 | CVC: 123 | ZIP: 12345
-      </p>
-    </div>
-  );
-};
 
 const FormInput = ({
   label,
@@ -203,7 +184,7 @@ function AddParentFormContent() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
+    dispatch(getAllClassesNameAction(adminId));
   }, [dispatch]);
 
   const classOptions = Array.isArray(classNames)
@@ -292,49 +273,13 @@ function AddParentFormContent() {
       return;
     }
 
-    const cardElement = elements.getElement(CardElement);
-
-    if (!cardComplete) {
-      setStripeError("Please complete the card details");
-      setIsProcessing(false);
-      return;
-    }
-
     setStripeError("");
 
     try {
-      const { error: stripeError, paymentMethod } =
-        await stripe.createPaymentMethod({
-          type: "card",
-          card: cardElement,
-          billing_details: {
-            name: parentData.fullName,
-            email: parentData.email,
-            phone: parentData.phone,
-            address: {
-              line1: parentData.address,
-            },
-          },
-        });
-
-      if (stripeError) {
-        console.error("Stripe error:", stripeError);
-        setStripeError(`Payment error: ${stripeError.message}`);
-        setIsProcessing(false);
-        return;
-      }
-
       const submissionData = {
         parent: {
           ...parentData,
           fee: parentData.fee ? Number(parentData.fee) : 0,
-          paymentMethodId: paymentMethod.id,
-          cardDetails: {
-            brand: paymentMethod.card.brand,
-            last4: paymentMethod.card.last4,
-            expMonth: paymentMethod.card.exp_month,
-            expYear: paymentMethod.card.exp_year,
-          },
         },
         children: children.map((child) => ({
           ...child,
@@ -386,9 +331,7 @@ function AddParentFormContent() {
       email: "",
       password: "",
       identityNumber: "",
-      addToWaitList: false,
-      recurringEnabled: false,
-      recurringFrequency: "monthly",
+      addToWaitList: false
     });
     setChildren([
       {
@@ -424,16 +367,8 @@ function AddParentFormContent() {
         <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
           <p className="font-semibold">Family added successfully!</p>
           <p>
-            Parent and student records have been created with payment method.
+            Parent and student records have been created.
           </p>
-          {parent && (
-            <p className="text-sm mt-1">
-              Stripe Customer ID: {parent.stripeCustomerId}
-              {parent.recurringPayment?.enabled && (
-                <span> • Recurring: {parent.recurringPayment.frequency}</span>
-              )}
-            </p>
-          )}
         </div>
       )}
 
@@ -542,83 +477,6 @@ function AddParentFormContent() {
               onChange={handleParentChange}
               placeholder="Emergency Phone"
             />
-
-            {/* Recurring Payment Section */}
-            <div className="md:col-span-2 border-t pt-6 mt-4">
-              <div className="flex items-center gap-3 mb-4">
-                <Repeat size={20} className="text-[#0B4B31]" />
-                <h4 className="text-lg font-semibold text-gray-700">
-                  Recurring Payments
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <input
-                    type="checkbox"
-                    name="recurringEnabled"
-                    checked={parentData.recurringEnabled}
-                    onChange={handleParentChange}
-                    className="rounded border-gray-300 text-[#0B4B31] focus:ring-[#0B4B31]"
-                    id="recurringEnabled"
-                  />
-                  <label
-                    htmlFor="recurringEnabled"
-                    className="text-sm font-semibold text-gray-700 cursor-pointer"
-                  >
-                    Enable Recurring Payments
-                  </label>
-                </div>
-
-                <FormDropdown
-                  label="Payment Frequency"
-                  name="recurringFrequency"
-                  value={parentData.recurringFrequency}
-                  onChange={handleParentChange}
-                  options={recurringOptions}
-                  placeholder="Select Frequency"
-                  className={
-                    !parentData.recurringEnabled
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }
-                />
-              </div>
-
-              {parentData.recurringEnabled && (
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    Recurring payments will be automatically processed{" "}
-                    {parentData.recurringFrequency}
-                    {parentData.recurringFrequency === "weekly" &&
-                      " every week"}
-                    {parentData.recurringFrequency === "monthly" &&
-                      " on the same day each month"}
-                    {parentData.recurringFrequency === "quarterly" &&
-                      " every 3 months"}
-                    .
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              <StripeCardInput
-                label="Credit Card Details"
-                onCardChange={handleCardChange}
-              />
-              {cardDetails && (
-                <div className="flex items-center gap-2 mt-2 p-2 bg-green-50 rounded-lg">
-                  <CreditCard size={16} className="text-green-600" />
-                  <span className="text-green-700 text-sm font-medium">
-                    Card verified:{" "}
-                    {cardDetails.brand.charAt(0).toUpperCase() +
-                      cardDetails.brand.slice(1)}{" "}
-                    ending in {cardDetails.last4}
-                  </span>
-                </div>
-              )}
-            </div>
 
             <div className="flex items-center gap-2">
               <input
@@ -770,8 +628,6 @@ function AddParentFormContent() {
             type="submit"
             disabled={
               status === "loading" ||
-              !stripe ||
-              !cardComplete ||
               isProcessing ||
               classesLoading
             }

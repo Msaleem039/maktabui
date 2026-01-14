@@ -15,7 +15,7 @@ function parseUserCookie() {
 export function getAdminId() {
   const user = parseUserCookie();
   if (!user) return null;
-  if (user?.role === "SubAdmin" && user?.adminId) {
+  if (user?.adminId) {
     return user.adminId;
   }
   return user.id || null;
