@@ -202,11 +202,11 @@ export default function CreateAdmin() {
           />
 
           <FormInput
-            label="Branch"
+            label="Institute"
             name="branch"
             value={formData.branch}
             onChange={handleInputChange}
-            placeholder="Branch"
+            placeholder="Institute"
           />
 
           <div>
