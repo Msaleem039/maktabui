@@ -829,10 +829,8 @@ export default function DashboardLayout({ children }) {
     pathname?.includes("/student") ||
     pathname === "/dashboard/student";
 
-  // Load theme from branch on mount
   useEffect(() => {
     const loadThemeByBranch = async () => {
-      // Get user role to check if they have permission
       let userRole = null;
       try {
         const userCookie = getCookie("user");
@@ -847,7 +845,6 @@ export default function DashboardLayout({ children }) {
         console.error("Error parsing user cookie:", error);
       }
 
-      // Normalize role
       const normalizedRole = userRole?.trim().toLowerCase();
       const isAdminOrSubAdmin =
         normalizedRole === "admin" ||
@@ -856,18 +853,15 @@ export default function DashboardLayout({ children }) {
         normalizedRole === "super admin" ||
         normalizedRole === "superadmin";
 
-      // Only fetch theme for Admin or SubAdmin users
       if (!isAdminOrSubAdmin) {
         return;
       }
 
-      // Try to get branch from user data
       const branch =
         reduxUser?.admin?.branch ||
         reduxUser?.branch ||
         reduxUser?.admin?.branchName;
 
-      // If no branch in Redux, try to get from cookie
       let userBranch = branch;
       if (!userBranch) {
         try {
@@ -884,10 +878,8 @@ export default function DashboardLayout({ children }) {
         }
       }
 
-      // If still no branch, use default
       const branchToUse = userBranch || "Main Branch";
 
-      // Only fetch if theme is not already loaded (check current theme state)
       const isDefaultTheme =
         !theme.themeColor || theme.themeColor === "#0B4B31";
       if (isDefaultTheme) {
@@ -908,14 +900,12 @@ export default function DashboardLayout({ children }) {
             );
           }
         } catch (themeError) {
-          // Only log error if it's not a permission error
           if (
             !themeError?.includes?.("Access denied") &&
             !themeError?.includes?.("role required")
           ) {
             console.error("Failed to fetch theme by branch:", themeError);
           }
-          // Fallback to websiteSettings if available
           if (reduxUser?.admin?.websiteSettings) {
             const websiteSettings = reduxUser.admin.websiteSettings;
             dispatch(
