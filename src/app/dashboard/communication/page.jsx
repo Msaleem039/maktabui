@@ -426,30 +426,6 @@ const CommunicationPage = () => {
             />
           </div> */}
 
-          <div className="flex items-center gap-2">
-            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
-              <Grid size={18} style={{ color: themeColor }} />
-            </button>
-            <button style={{ borderColor: themeColor }} className="w-9 h-9 flex items-center justify-center rounded-full border bg-white shadow-sm">
-              <Moon size={18} style={{ color: themeColor }} />
-            </button>
-            <div style={{ borderColor: themeColor }} className="flex items-center gap-2 bg-white border rounded-full px-2 py-1.5 pr-3 cursor-pointer hover:bg-emerald-50 shadow-sm">
-              <div className="relative w-8 h-8 rounded-full border border-gray-200 overflow-hidden">
-                <Image
-                  src="/main-dashboard.jpg"
-                  alt="user"
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
-                {userName}
-              </span>
-              <ChevronDown size={16} style={{ color: themeColor }} />
-            </div>
-          </div>
         </div>
       </header>
 
