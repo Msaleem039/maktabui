@@ -6,7 +6,6 @@ import { setTheme } from "../../../redux/slices/themeSlices/themeSlice";
 import { getThemeByBranchAction } from "../../../redux/slices/adminSlices/adminSlices";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
-import { LayoutGrid } from "lucide-react";
 import Image from "next/image";
 
 const Page = () => {
