@@ -54,14 +54,14 @@ export const getAllClassesAction = createAsyncThunk(
 
 export const getAllClassesNameAction = createAsyncThunk(
   `classes/getAllClassesName`,
-  async (_, { rejectWithValue }) => {
+  async (adminId, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClassesName`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllClassesName`, { adminId }
       );
       return res.data.classes;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message);
     }
   }
 );

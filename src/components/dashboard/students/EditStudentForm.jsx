@@ -8,13 +8,23 @@ import {
   updateStudentById,
   resetUpdateStudentState,
   clearUpdateStudentError,
-  resetSuccessStatus
+  resetSuccessStatus,
 } from "@/redux/slices/studentSlices/studentSlices";
 
 import { MultiSelectDropdown } from "@/components/MultiSelectDropdown";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
+import { getAdminId } from "@/utils/getCookies";
 
-const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
+const FormInput = ({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  className = "",
+}) => {
   return (
     <div className={className}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -36,23 +46,30 @@ const FormInput = ({ label, name, type = "text", value, onChange, placeholder, r
 export default function EditStudentForm({ studentId, student }) {
   const dispatch = useDispatch();
 
-  const { status: updateStatus, error: updateError, success: updateSuccess } = useSelector(state => state.updateStudent);
-  const { classNames, loading: classesLoading } = useSelector(state => state.getAllClassesName);
+  const {
+    status: updateStatus,
+    error: updateError,
+    success: updateSuccess,
+  } = useSelector((state) => state.updateStudent);
+  const { classNames, loading: classesLoading } = useSelector(
+    (state) => state.getAllClassesName
+  );
+  const adminId = getAdminId();
 
   const [studentData, setStudentData] = useState({
     name: "",
     phone: "",
     address: "",
     classes: [],
-    fee: ""
+    fee: "",
   });
 
   const [dropdownStates, setDropdownStates] = useState({
-    classes: false
+    classes: false,
   });
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
+    dispatch(getAllClassesNameAction(adminId));
   }, [dispatch]);
 
   useEffect(() => {
@@ -62,11 +79,18 @@ export default function EditStudentForm({ studentId, student }) {
         name: student.name || "",
         phone: student.phone || "",
         address: student.address || "",
-        classes: student.classes || student.class ?
-          (Array.isArray(student.classes) ? student.classes :
-            Array.isArray(student.class) ? student.class :
-              [student.class]) : [],
-        fee: student.fee?.toString() || ""
+        classes: Array.isArray(student.classes)
+          ? student.classes.map((cls) =>
+              typeof cls === "string" ? cls : cls._id
+            )
+          : student.class
+          ? [
+              typeof student.class === "string"
+                ? student.class
+                : student.class._id,
+            ]
+          : [],
+        fee: student.fee?.toString() || "",
       });
     }
   }, [student]);
@@ -86,26 +110,26 @@ export default function EditStudentForm({ studentId, student }) {
   };
 
   const handleDropdownToggle = (name) => {
-    setDropdownStates(prev => ({
+    setDropdownStates((prev) => ({
       ...prev,
-      [name]: !prev[name]
+      [name]: !prev[name],
     }));
   };
 
   const handleItemToggle = (itemId, itemLabel) => {
-    setStudentData(prev => {
+    setStudentData((prev) => {
       const currentClasses = prev.classes || [];
       const isSelected = currentClasses.includes(itemId);
 
       if (isSelected) {
         return {
           ...prev,
-          classes: currentClasses.filter(id => id !== itemId)
+          classes: currentClasses.filter((id) => id !== itemId),
         };
       } else {
         return {
           ...prev,
-          classes: [...currentClasses, itemId]
+          classes: [...currentClasses, itemId],
         };
       }
     });
@@ -120,11 +144,13 @@ export default function EditStudentForm({ studentId, student }) {
     if (selectedClasses.length === 0) return "";
 
     const classMap = {};
-    classOptions.forEach(option => {
+    classOptions.forEach((option) => {
       if (option.value) classMap[option.value] = option.label || option.name;
     });
 
-    const selectedNames = selectedClasses.map(classId => classMap[classId]).filter(Boolean);
+    const selectedNames = selectedClasses
+      .map((classId) => classMap[classId])
+      .filter(Boolean);
 
     if (selectedNames.length === 0) return "";
     if (selectedNames.length === 1) return selectedNames[0];
@@ -141,23 +167,25 @@ export default function EditStudentForm({ studentId, student }) {
       phone: studentData.phone,
       address: studentData.address,
       classes: studentData.classes,
-      fee: studentData.fee ? parseInt(studentData.fee) : 0
+      fee: studentData.fee ? parseInt(studentData.fee) : 0,
     };
 
     dispatch(updateStudentById(submitData));
   };
 
-  const classOptions = classNames.map(cls => ({
+  const classOptions = classNames.map((cls) => ({
     label: cls.name || cls.className || "Unnamed Class",
     value: cls._id || cls.id || cls.name,
-    name: cls.name || cls.className || "Unnamed Class"
+    name: cls.name || cls.className || "Unnamed Class",
   }));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-700">Edit Student Information</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Edit Student Information
+          </h3>
           <button
             type="button"
             className="flex items-center gap-2 rounded-full bg-[#E5EFEB] px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE]"
@@ -228,7 +256,9 @@ export default function EditStudentForm({ studentId, student }) {
             onItemToggle={handleItemToggle}
             isItemSelected={isItemSelected}
             getDisplayValue={getDisplayValue}
-            placeholder={classesLoading ? "Loading classes..." : "Select Classes"}
+            placeholder={
+              classesLoading ? "Loading classes..." : "Select Classes"
+            }
             required
           />
 
@@ -248,8 +278,9 @@ export default function EditStudentForm({ studentId, student }) {
         <button
           type="submit"
           disabled={updateStatus === "loading"}
-          className={`rounded-full bg-[#E5EFEB] px-8 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] ${updateStatus === "loading" ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+          className={`rounded-full bg-[#E5EFEB] px-8 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] ${
+            updateStatus === "loading" ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           {updateStatus === "loading" ? "Updating..." : "Save Changes"}
         </button>

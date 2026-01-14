@@ -155,6 +155,18 @@ export const getAdminDashboardStatsAction = createAsyncThunk(
   }
 );
 
+export const getAllAdminsNameAction = createAsyncThunk(
+  "admins/getAllAdminsName",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getAllAdminsName`);
+      return res.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const createAdminSlice = createSlice({
   name: "createAdmin",
   initialState: { loading: false, admin: null, error: null },
@@ -395,7 +407,42 @@ const adminDashboardSlice = createSlice({
   },
 });
 
+const getAllAdminsNameSlice = createSlice({
+  name: "getAllAdminsName",
+  initialState: { 
+    loading: false, 
+    adminsName: [], 
+    error: null 
+  },
+  reducers: {
+    resetGetAllAdminsNameState: (state) => {
+      state.loading = false;
+      state.adminsName = [];
+      state.error = null;
+    },
+    clearGetAllAdminsNameError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getAllAdminsNameAction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllAdminsNameAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.adminsName = action.payload || [];
+      })
+      .addCase(getAllAdminsNameAction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
 
+export const { resetGetAllAdminsNameState, clearGetAllAdminsNameError } = getAllAdminsNameSlice.actions;
+export const getAllAdminsNameReducer = getAllAdminsNameSlice.reducer;
 export const { resetState } = updateAdminSlice.actions;
 export const { resetDeleteAdminState } = deleteAdminSlice.actions;
 export const { resetUpdateThemeState, clearUpdateThemeError } = updateThemeSlice.actions;

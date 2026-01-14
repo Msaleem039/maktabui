@@ -18,10 +18,10 @@ export const createStudent = createAsyncThunk(
 
 export const getStudentNamesWithIds = createAsyncThunk(
   `students/getStudentNamesWithIds`,
-  async (_, { rejectWithValue }) => {
+  async (adminId, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentNamesWithIds`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/getStudentNamesWithIds`,{adminId}
       );
       return response.data;
     } catch (error) {

@@ -173,7 +173,7 @@ const CreateClass = () => {
     const handleDropdownSelect = (name, value, selectedTeacher) => {
         setFormData(prev => ({
             ...prev,
-            [name]: value, // This stores the teacher ID
+            [name]: value,
             teacherName: selectedTeacher ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}` : "" // Store display name
         }));
         setDropdownOpen(null);
@@ -192,9 +192,10 @@ const CreateClass = () => {
             code: formData.code,
             subject: formData.subject,
             description: formData.description,
-            teacherId: formData.teacherId, // This is the ID that gets sent to the backend
+            teacherId: formData.teacherId,
             startDate: convertToISODate(formData.startDate),
-            endDate: convertToISODate(formData.endDate)
+            endDate: convertToISODate(formData.endDate),
+            adminId
         };
 
         dispatch(createClassAction(classData));
@@ -235,7 +236,7 @@ const CreateClass = () => {
 
                 {createdClass && (
                     <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full text-center mb-6">
-                        Class created successfully! (UI Testing Mode)
+                        Class created successfully!
                     </div>
                 )}
 

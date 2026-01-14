@@ -125,8 +125,8 @@ const Page = () => {
 
   useEffect(() => {
     dispatch(getTeachersName(adminId));
-    dispatch(getAllClassesNameAction());
-    dispatch(getStudentNamesWithIds());
+    dispatch(getAllClassesNameAction(adminId));
+    dispatch(getStudentNamesWithIds(adminId));
   }, [dispatch]);
 
   useEffect(() => {

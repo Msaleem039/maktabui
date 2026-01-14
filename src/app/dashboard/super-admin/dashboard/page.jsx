@@ -7,7 +7,7 @@ import { useTheme } from "@/hooks/useTheme";
 
 const Page = () => {
   const { mainText } = useTheme();
-  
+
   return (
     <>
       {/* Header */}
@@ -40,18 +40,22 @@ const Page = () => {
                   priority
                 />
               </div>
-              <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">Ahmed J.</span>
+              <span className="text-gray-800 font-medium text-sm truncate max-w-[80px] sm:max-w-[120px]">
+                Ahmed J.
+              </span>
               <ChevronDown size={16} className="text-[#0B4B31]" />
             </div>
           </div>
         </div>
       </header>
       <div className="min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
-
-
         {/* Welcome */}
-        <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">Welcome to</h1>
-        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">{mainText || "MaktabOS"}</p>
+        <h1 className="text-[2.5rem] font-semibold text-[#0B4B31] mb-1">
+          Welcome to
+        </h1>
+        <p className="text-[1.75rem] font-medium text-[#000000] mb-8">
+          {mainText || "MaktabOS"}
+        </p>
 
         {/* Stats & Charts */}
         <div className="flex flex-col xl:flex-row gap-6 pb-6">
@@ -67,6 +71,8 @@ const Page = () => {
                 </h3>
 
                 <select className="border border-gray-200 rounded-lg px-3 py-1 text-sm text-gray-600 focus:outline-none focus:ring-emerald-500">
+                  <option>2026</option>
+
                   <option>2025</option>
                   <option>2024</option>
                   <option>2023</option>
@@ -100,10 +106,12 @@ const Page = () => {
 
               <div className="flex justify-center gap-4 sm:gap-8 mt-6 text-sm text-gray-500 flex-wrap">
                 <span className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-black rounded-full"></span> Paid (52.1%)
+                  <span className="w-3 h-3 bg-black rounded-full"></span> Paid
+                  (52.1%)
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-emerald-300 rounded-full"></span> Unpaid (13.9%)
+                  <span className="w-3 h-3 bg-emerald-300 rounded-full"></span>{" "}
+                  Unpaid (13.9%)
                 </span>
               </div>
             </div>
@@ -119,16 +127,26 @@ const Page = () => {
                   "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 13.66%, rgba(133, 165, 152, 0.965) 99.29%)",
               }}
             >
-              <h3 className="text-white text-[1.125rem] leading-[100%] mb-4 font-extrabold">Total Unpaid</h3>
+              <h3 className="text-white text-[1.125rem] leading-[100%] mb-4 font-extrabold">
+                Total Unpaid
+              </h3>
 
               <div className="bg-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4">
                 <div className="flex items-center justify-center bg-[#0b4b31] w-12 h-12 rounded-full flex-shrink-0">
-                  <img src="/Dollar Coin.png" alt="Dollar Coin" className="w-12 h-12 object-contain" />
+                  <img
+                    src="/Dollar Coin.png"
+                    alt="Dollar Coin"
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
 
                 <div className="flex flex-col items-center sm:items-start">
-                  <h2 className="text-[#0B4B31] text-[1.5rem] leading-[100%] font-extrabold">$33,543.00</h2>
-                  <p className="text-[#525967] text-[0.75rem] leading-[100%] mt-2 text-center sm:text-left">90 Voices Left Out of 100</p>
+                  <h2 className="text-[#0B4B31] text-[1.5rem] leading-[100%] font-extrabold">
+                    $33,543.00
+                  </h2>
+                  <p className="text-[#525967] text-[0.75rem] leading-[100%] mt-2 text-center sm:text-left">
+                    90 Voices Left Out of 100
+                  </p>
                 </div>
               </div>
             </div>
@@ -141,12 +159,20 @@ const Page = () => {
                   "linear-gradient(53.14deg, rgba(11, 75, 49, 0.93) 29.92%, rgba(133, 165, 152, 0.965) 99.29%, #FFFFFF 99.3%)",
               }}
             >
-              <h3 className="font-outfit font-extrabold text-[18px] leading-[100%] mb-1">Current Income This Month</h3>
-              <p className="text-xs opacity-80 mb-4">Payments made this month compared to last month</p>
+              <h3 className="font-outfit font-extrabold text-[18px] leading-[100%] mb-1">
+                Current Income This Month
+              </h3>
+              <p className="text-xs opacity-80 mb-4">
+                Payments made this month compared to last month
+              </p>
 
               <div className="flex flex-col">
-                <p className="font-outfit font-extrabold text-[12px] leading-[100%] uppercase">Revenue</p>
-                <p className="font-outfit font-extrabold text-[24px] leading-[100%] my-2">$30.00</p>
+                <p className="font-outfit font-extrabold text-[12px] leading-[100%] uppercase">
+                  Revenue
+                </p>
+                <p className="font-outfit font-extrabold text-[24px] leading-[100%] my-2">
+                  $30.00
+                </p>
                 <p className="text-xs opacity-80">Compared to Last month</p>
               </div>
 
@@ -161,33 +187,85 @@ const Page = () => {
 
         {/* Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {[{
-            title: "Top Paying Parents",
-            subtitle: "Parents who have contributed the most",
-            btnText: "See All ↗",
-            btnColor: "text-[#0B4B31] bg-[#c9d7d2] hover:bg-[#E3F1EB]",
-            rows: [
-              { name: "Milad Hersi", date: "06 Jun, 2025", amount: "-$5,000", color: "text-red-500" },
-              { name: "Milad Hersi", date: "04 Jun, 2025", amount: "+$65", color: "text-green-600" },
-              { name: "Milad Hersi", date: "03 Jun, 2025", amount: "-$200", color: "text-red-500" },
-              { name: "Milad Hersi", date: "02 Jun, 2025", amount: "+$800", color: "text-green-600" },
-            ]
-          }, {
-            title: "Top Outstanding Balances",
-            subtitle: "Parents with highest unpaid invoices",
-            btnText: "See All ↗",
-            btnColor: "text-[#F14336] bg-[#fde1df] hover:bg-[#FADDDD]",
-            rows: [
-              { name: "Ayan Nur", date: "06 Jun, 2025", amount: "-$5,000", color: "text-red-500" },
-              { name: "Muhammad Hasan", date: "04 Jun, 2025", amount: "+$65", color: "text-green-600" },
-              { name: "Ayesha Nur", date: "03 Jun, 2025", amount: "-$200", color: "text-red-500" },
-              { name: "Fariha Hasan", date: "02 Jun, 2025", amount: "+$800", color: "text-green-600" },
-            ]
-          }].map((table, i) => (
-            <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
+          {[
+            {
+              title: "Top Paying Parents",
+              subtitle: "Parents who have contributed the most",
+              btnText: "See All ↗",
+              btnColor: "text-[#0B4B31] bg-[#c9d7d2] hover:bg-[#E3F1EB]",
+              rows: [
+                {
+                  name: "Milad Hersi",
+                  date: "06 Jun, 2025",
+                  amount: "-$5,000",
+                  color: "text-red-500",
+                },
+                {
+                  name: "Milad Hersi",
+                  date: "04 Jun, 2025",
+                  amount: "+$65",
+                  color: "text-green-600",
+                },
+                {
+                  name: "Milad Hersi",
+                  date: "03 Jun, 2025",
+                  amount: "-$200",
+                  color: "text-red-500",
+                },
+                {
+                  name: "Milad Hersi",
+                  date: "02 Jun, 2025",
+                  amount: "+$800",
+                  color: "text-green-600",
+                },
+              ],
+            },
+            {
+              title: "Top Outstanding Balances",
+              subtitle: "Parents with highest unpaid invoices",
+              btnText: "See All ↗",
+              btnColor: "text-[#F14336] bg-[#fde1df] hover:bg-[#FADDDD]",
+              rows: [
+                {
+                  name: "Ayan Nur",
+                  date: "06 Jun, 2025",
+                  amount: "-$5,000",
+                  color: "text-red-500",
+                },
+                {
+                  name: "Muhammad Hasan",
+                  date: "04 Jun, 2025",
+                  amount: "+$65",
+                  color: "text-green-600",
+                },
+                {
+                  name: "Ayesha Nur",
+                  date: "03 Jun, 2025",
+                  amount: "-$200",
+                  color: "text-red-500",
+                },
+                {
+                  name: "Fariha Hasan",
+                  date: "02 Jun, 2025",
+                  amount: "+$800",
+                  color: "text-green-600",
+                },
+              ],
+            },
+          ].map((table, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 overflow-x-auto"
+            >
               <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-                <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">{table.title}</h3>
-                <button className={`text-[12px] px-3 py-[2px] rounded-full transition ${table.btnColor}`}>{table.btnText}</button>
+                <h3 className="text-[#0B4B31] text-[18px] font-semibold uppercase tracking-wide">
+                  {table.title}
+                </h3>
+                <button
+                  className={`text-[12px] px-3 py-[2px] rounded-full transition ${table.btnColor}`}
+                >
+                  {table.btnText}
+                </button>
               </div>
               <p className="text-[#000000] text-sm mb-4">{table.subtitle}</p>
 
@@ -195,9 +273,13 @@ const Page = () => {
                 <table className="w-full text-sm min-w-[400px] sm:min-w-full">
                   <thead>
                     <tr className="bg-[#0B4B31] text-white">
-                      <th className="text-left px-3 py-2 rounded-tl-md">Names ↕</th>
+                      <th className="text-left px-3 py-2 rounded-tl-md">
+                        Names ↕
+                      </th>
                       <th className="text-left px-3 py-2">Joined On ↕</th>
-                      <th className="text-right px-3 py-2 rounded-tr-md">Amount ↕</th>
+                      <th className="text-right px-3 py-2 rounded-tr-md">
+                        Amount ↕
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -207,7 +289,11 @@ const Page = () => {
                           {row.name}
                         </td>
                         <td className="py-3 px-3">{row.date}</td>
-                        <td className={`py-3 px-3 text-right font-medium ${row.color}`}>{row.amount}</td>
+                        <td
+                          className={`py-3 px-3 text-right font-medium ${row.color}`}
+                        >
+                          {row.amount}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

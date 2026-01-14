@@ -39,7 +39,6 @@ export default function ClassPage() {
     return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
   }, []);
 
-  // Get action menu items based on user role
   const actionMenuItems = useMemo(() => {
     const isStudent = user?.role === "Student";
     
@@ -47,7 +46,6 @@ export default function ClassPage() {
       { label: "View Detail", icon: Eye, action: "view" },
     ];
 
-    // Only show Edit and Remove for non-students
     if (!isStudent) {
       items.push(
         { label: "Edit", icon: Edit, action: "edit" },
@@ -58,7 +56,6 @@ export default function ClassPage() {
     return items;
   }, [user?.role]);
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchValue);
@@ -67,7 +64,6 @@ export default function ClassPage() {
     return () => clearTimeout(timer);
   }, [searchValue]);
 
-  // Fetch classes when user, debounced search, or pagination changes
   useEffect(() => {
     let requestData = {
       page: pagination.currentPage,
@@ -85,7 +81,6 @@ export default function ClassPage() {
     dispatch(getAllClassesAction(requestData));
   }, [dispatch, user, debouncedSearch, pagination.currentPage]);
 
-  // Sync local search with store search on mount
   useEffect(() => {
     if (storeSearch) {
       setSearchValue(storeSearch);

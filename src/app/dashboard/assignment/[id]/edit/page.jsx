@@ -31,7 +31,6 @@ const FileUploadField = ({
     const selectedFiles = Array.from(e.target.files);
     onFilesChange([...files, ...selectedFiles]);
   };
-  const adminId = getAdminId();
   const removeFile = (index) => {
     const newFiles = files.filter((_, i) => i !== index);
     onFilesChange(newFiles);
@@ -135,6 +134,7 @@ const Page = () => {
   const router = useRouter();
   const params = useParams();
   const assignmentId = params.id;
+  const adminId = getAdminId();
 
   const {
     currentAssignment,
@@ -190,8 +190,8 @@ const Page = () => {
       dispatch(getAssignmentById(assignmentId));
     }
     dispatch(getTeachersName(adminId));
-    dispatch(getAllClassesNameAction());
-    dispatch(getStudentNamesWithIds());
+    dispatch(getAllClassesNameAction(adminId));
+    dispatch(getStudentNamesWithIds(adminId));
   }, [dispatch, assignmentId]);
 
   useEffect(() => {

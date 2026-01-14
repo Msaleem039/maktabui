@@ -10,83 +10,6 @@ import { SimpleDropdown } from "@/components/SimpleDropdown";
 import CustomDatePicker from "@/components/DatePicker";
 import { getAdminId,getUserBranch } from "@/utils/getCookies";
 
-const DateInput = ({ label, name, value, onChange, placeholder, required = false, className = "" }) => {
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return '';
-    
-    if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
-      return dateString;
-    }
-    
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      const [year, month, day] = dateString.split('-');
-      return `${month}-${day}-${year}`;
-    }
-    
-    return dateString;
-  };
-
-  const handleDateChange = (e) => {
-    let input = e.target.value;
-    
-    input = input.replace(/\D/g, '');
-    
-    if (input.length > 2) {
-      input = input.substring(0, 2) + '-' + input.substring(2);
-    }
-    if (input.length > 5) {
-      input = input.substring(0, 5) + '-' + input.substring(5, 9);
-    }
-    
-    onChange({
-      target: {
-        name: e.target.name,
-        value: input
-      }
-    });
-  };
-
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} {required && "*"}
-      </label>
-      <div className="relative">
-        <input
-          type="text"
-          name={name}
-          value={formatDateForDisplay(value)}
-          onChange={handleDateChange}
-          placeholder={placeholder}
-          required={required}
-          maxLength={10}
-          className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
-        />
-        <Calendar size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]/60 pointer-events-none" />
-      </div>
-      <p className="text-xs text-gray-500 mt-1 ml-2">Format: MM-DD-YYYY (e.g., 05-15-2010)</p>
-    </div>
-  );
-};
-
-const convertToISODate = (dateString) => {
-  if (!dateString) return null;
-  
-  const [month, day, year] = dateString.split('-');
-  if (!month || !day || !year) return null;
-  
-  const monthNum = parseInt(month, 10);
-  const dayNum = parseInt(day, 10);
-  const yearNum = parseInt(year, 10);
-  
-  if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31 || yearNum < 1900 || yearNum > 2100) {
-    return null;
-  }
-  
-  const isoDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-  return isoDate.toISOString();
-};
-
 export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
   const { status, error, student, parent, existingParent } = useSelector((state) => state.createStudent);
@@ -119,14 +42,13 @@ export default function AddStudentSimpleForm() {
     studentAddToWaitList: false, 
   });
 
-  // State for dropdown open/close
   const [dropdownStates, setDropdownStates] = useState({
     gender: false,
     class: false
   });
 
   useEffect(() => {
-    dispatch(getAllClassesNameAction());
+    dispatch(getAllClassesNameAction(adminId));
   }, [dispatch]);
 
   const classOptions = classNames.map(classItem => ({

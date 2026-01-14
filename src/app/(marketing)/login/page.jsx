@@ -62,7 +62,8 @@ const Page = () => {
           email: payload.email,
           role: payload.role,
           id: payload.id || "",
-          branch:payload.branch
+          branch: payload.branch,
+          adminId: payload.adminId,
         };
 
         if (payload.role === "SubAdmin") {
@@ -72,31 +73,41 @@ const Page = () => {
 
         setCookie("user", JSON.stringify(userCookie), tokenOptions);
 
-        const branch = payload.admin?.branch || payload.branch || payload.admin?.branchName || "Main Branch";
-        
+        const branch =
+          payload.admin?.branch ||
+          payload.branch ||
+          payload.admin?.branchName ||
+          "Main Branch";
+
         try {
-          const themeResult = await dispatch(getThemeByBranchAction(branch)).unwrap();
+          const themeResult = await dispatch(
+            getThemeByBranchAction(branch)
+          ).unwrap();
           if (themeResult?.success && themeResult?.theme) {
             const theme = themeResult.theme;
-            dispatch(setTheme({
-              themeColor: theme.themeColor || "#0B4B31",
-              secondaryColor: theme.secondaryColor || "#13574A",
-              logo: theme.logo || "",
-              favicon: theme.favicon || "",
-              mainText: theme.mainText || "MaktabOS",
-            }));
+            dispatch(
+              setTheme({
+                themeColor: theme.themeColor || "#0B4B31",
+                secondaryColor: theme.secondaryColor || "#13574A",
+                logo: theme.logo || "",
+                favicon: theme.favicon || "",
+                mainText: theme.mainText || "MaktabOS",
+              })
+            );
           }
         } catch (themeError) {
           console.error("Failed to fetch theme by branch:", themeError);
           if (payload.role === "Admin" && payload.admin?.websiteSettings) {
             const websiteSettings = payload.admin.websiteSettings;
-            dispatch(setTheme({
-              themeColor: websiteSettings.themeColor || "#0B4B31",
-              secondaryColor: websiteSettings.secondaryColor || "#13574A",
-              logo: websiteSettings.logo || "",
-              favicon: websiteSettings.favicon || "",
-              mainText: websiteSettings.mainText || "MaktabOS",
-            }));
+            dispatch(
+              setTheme({
+                themeColor: websiteSettings.themeColor || "#0B4B31",
+                secondaryColor: websiteSettings.secondaryColor || "#13574A",
+                logo: websiteSettings.logo || "",
+                favicon: websiteSettings.favicon || "",
+                mainText: websiteSettings.mainText || "MaktabOS",
+              })
+            );
           }
         }
 

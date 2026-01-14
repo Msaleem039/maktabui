@@ -11,12 +11,20 @@ import { getAdminId } from "@/utils/getCookies";
 
 const Page = () => {
   const dispatch = useDispatch();
-  const { loading, class: createdClass, error } = useSelector((state) => state.createClass);
-  const { teacherNames, status: teachersStatus, error: teachersError } = useSelector((state) => state.getTeachersName);
-    const adminId = getAdminId();
+  const {
+    loading,
+    class: createdClass,
+    error,
+  } = useSelector((state) => state.createClass);
+  const {
+    teacherNames,
+    status: teachersStatus,
+    error: teachersError,
+  } = useSelector((state) => state.getTeachersName);
+  const adminId = getAdminId();
   const user = useMemo(() => {
     const userCookie = getCookie("user");
-    return typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+    return typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
   }, []);
 
   const isTeacher = user?.role === "Teacher";
@@ -29,7 +37,7 @@ const Page = () => {
     teacherId: "",
     teacherName: "",
     startDate: "",
-    endDate: ""
+    endDate: "",
   });
   const [dropdownOpen, setDropdownOpen] = useState(null);
 
@@ -39,67 +47,66 @@ const Page = () => {
 
   useEffect(() => {
     if (isTeacher && user?.id) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         teacherId: user.id,
-        teacherName: `Teacher - ${user.email.split('@')[0]}`
+        teacherName: `Teacher - ${user.email.split("@")[0]}`,
       }));
     }
   }, [isTeacher, user]);
 
-  // Transform teacherNames to match SimpleDropdown expected format
   const teacherOptions = useMemo(() => {
     if (!teacherNames || !Array.isArray(teacherNames)) return [];
-    
-    return teacherNames.map(teacher => ({
-      value: teacher.id || teacher._id, // Use appropriate ID field
+
+    return teacherNames.map((teacher) => ({
+      value: teacher.id || teacher._id,
       label: `${teacher.fullName} - ${teacher.specialization}`,
-      teacherData: teacher // Keep original data for reference
+      teacherData: teacher,
     }));
   }, [teacherNames]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleDropdownToggle = (name) => {
-    if (isTeacher) return; // Don't allow dropdown interaction for teachers
-    setDropdownOpen(prev => prev === name ? null : name);
+    if (isTeacher) return;
+    setDropdownOpen((prev) => (prev === name ? null : name));
   };
 
   const handleDropdownSelect = (name, value) => {
-    if (isTeacher) return; // Don't allow selection for teachers
+    if (isTeacher) return;
 
-    const selectedTeacher = teacherNames.find(teacher => 
-      teacher.id === value || teacher._id === value
+    const selectedTeacher = teacherNames.find(
+      (teacher) => teacher.id === value || teacher._id === value
     );
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
-      teacherName: selectedTeacher ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}` : ""
+      teacherName: selectedTeacher
+        ? `${selectedTeacher.fullName} - ${selectedTeacher.specialization}`
+        : "",
     }));
     setDropdownOpen(null);
   };
 
   const convertToISODate = (dateString) => {
     if (!dateString) return "";
-    // Assuming dateString is in YYYY-MM-DD format (HTML date input)
     return new Date(dateString).toISOString();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // For teachers, ensure the teacherId is set to their own ID
     const finalTeacherId = isTeacher ? user.id : formData.teacherId;
 
     if (!formData.name || !formData.subject || !finalTeacherId) {
-      alert('Please fill all required fields: Name, Subject, and Teacher');
+      alert("Please fill all required fields: Name, Subject, and Teacher");
       return;
     }
 
@@ -110,7 +117,8 @@ const Page = () => {
       description: formData.description,
       teacherId: finalTeacherId,
       startDate: convertToISODate(formData.startDate),
-      endDate: convertToISODate(formData.endDate)
+      endDate: convertToISODate(formData.endDate),
+      adminId,
     };
 
     dispatch(createClassAction(classData));
@@ -124,23 +132,28 @@ const Page = () => {
         subject: "",
         description: "",
         teacherId: isTeacher ? user.id : "",
-        teacherName: isTeacher ? `Teacher - ${user.email.split('@')[0]}` : "",
+        teacherName: isTeacher ? `Teacher - ${user.email.split("@")[0]}` : "",
         startDate: "",
-        endDate: ""
+        endDate: "",
       });
     }
   }, [createdClass, isTeacher, user]);
 
-  // Get loading state for teachers
   const fetchingTeachers = teachersStatus === "loading";
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">Welcome to</h1>
-      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">MaktabOS</p>
+      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">
+        Welcome to
+      </h1>
+      <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">
+        MaktabOS
+      </p>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-7xl">
-        <h2 className="text-lg font-semibold mb-6 text-[#000000]">Create Class</h2>
+        <h2 className="text-lg font-semibold mb-6 text-[#000000]">
+          Create Class
+        </h2>
 
         {/* Status Messages */}
         {loading && (
@@ -151,7 +164,7 @@ const Page = () => {
 
         {createdClass && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full text-center mb-6">
-            Class created successfully! (UI Testing Mode)
+            Class created successfully!
           </div>
         )}
 
@@ -199,10 +212,10 @@ const Page = () => {
               onToggle={handleDropdownToggle}
               placeholder={
                 isTeacher
-                  ? `Teacher - ${user.email.split('@')[0]}`
+                  ? `Teacher - ${user.email.split("@")[0]}`
                   : fetchingTeachers
-                    ? "Loading teachers..."
-                    : "Select a teacher"
+                  ? "Loading teachers..."
+                  : "Select a teacher"
               }
               required={true}
               disabled={isTeacher}
@@ -256,7 +269,7 @@ const Page = () => {
                   : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
               }`}
             >
-              {loading ? 'Creating Class...' : 'Create Class'}
+              {loading ? "Creating Class..." : "Create Class"}
             </button>
           </div>
         </form>

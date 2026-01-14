@@ -17,7 +17,6 @@ import { Doughnut, Bar } from "react-chartjs-2";
 import {
   getAllPaymentStatsAction,
   setCurrentPage,
-  updateFilters,
 } from "@/redux/slices/paymentSlices/paymentSlices";
 
 ChartJS.register(
@@ -249,14 +248,12 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* Error State */}
       {error && (
         <div className="rounded-[18px] bg-red-50 px-8 py-6">
           <p className="text-red-600">Error: {error}</p>
         </div>
       )}
 
-      {/* Key Metrics Banner */}
       {!loading && !error && stats && (
         <div className="relative rounded-[18px] bg-[#E5EFEB] px-8 py-6 overflow-hidden">
           <div
@@ -305,10 +302,8 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* Charts Grid */}
       {!loading && !error && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Payment Methods Distribution */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <h3 className="text-[0.8125rem] font-medium text-[#0000008C] mb-4">
               Payment Methods Distribution
@@ -342,7 +337,6 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          {/* Monthly Payment Trends */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">
@@ -366,7 +360,6 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* All Payment Records Section */}
       {!loading && !error && (
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -376,7 +369,6 @@ export default function PaymentPage() {
           </div>
 
           <div className="mt-6 space-y-4">
-            {/* Search and Actions */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <label className="relative flex w-full max-w-xl items-center">
                 <span className="absolute left-4 text-[#979699]">🔍</span>
@@ -387,20 +379,9 @@ export default function PaymentPage() {
                   className="w-full rounded-full border border-[#C5D2CD] bg-[#F7FAF8] py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31] focus:bg-white"
                 />
               </label>
-
-              {/* See All Button */}
-              {/* <div>
-                <button
-                  type="button"
-                  className="rounded-full border border-[#0B4B3138] bg-[#E5EFEB] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
-                >
-                  See All ↗
-                </button>
-              </div> */}
             </div>
           </div>
 
-          {/* Payment Records Table */}
           <div className="mt-6 overflow-x-auto">
             <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
               <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
@@ -443,7 +424,6 @@ export default function PaymentPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {pagination && pagination.totalRecords > 0 && (
             <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-[0.8125rem] font-normal text-[#979699]">
