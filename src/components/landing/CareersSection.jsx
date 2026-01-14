@@ -118,7 +118,7 @@ const CareersSection = () => {
     <section id="careers" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="bg-white py-10 text-center">
         <h2 className="text-3xl leading-[1.2] md:text-[3rem] md:leading-normal font-medium text-[#121212] ">
-          Careers at MaktabOS — Now <br /> Hiring!
+        Careers at MaktabOS | Join Our Growing Team <br /> 
         </h2>
       </div>
 

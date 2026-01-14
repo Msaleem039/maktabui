@@ -233,8 +233,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const reduxRole = reduxUser?.role;
   const reduxPermissions = reduxUser?.permissions;
   const theme = useSelector((state) => state.theme);
-  const sidebarBgColor = theme.themeColor || "#0B4B31";
-  const activeBgColor = theme.secondaryColor || "#13574A";
+  // Validate theme colors - ensure they're not black, empty, or invalid
+  const getValidThemeColor = (color) => {
+    if (!color || color === "#000000" || color === "black" || color.trim() === "" || color === "transparent") {
+      return "#0B4B31";
+    }
+    return color;
+  };
+  const sidebarBgColor = getValidThemeColor(theme?.themeColor) || "#0B4B31";
+  const activeBgColor = getValidThemeColor(theme?.secondaryColor) || "#13574A";
   
   // Construct logo URL - if it's from backend (multer), prepend backend URL
   const getLogoUrl = (logo) => {
@@ -749,7 +756,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               isCollapsed ? "justify-center" : ""
             }`}
           >
-            <div className="w-13 h-13 rounded-md bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 border-2 border-white/20 shadow-lg">
+            {/* <div className="w-13 h-13 rounded-md bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 border-2 border-white/20 shadow-lg">
               <Image
                 src={logoUrl}
                 alt={theme.mainText || "MaktabOS"}
@@ -758,7 +765,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 className="w-full h-full object-contain rounded-full"
                 unoptimized={logoUrl.startsWith("http") || logoUrl.includes(process.env.NEXT_PUBLIC_BACKEND_URL || "")}
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="flex flex-col space-y-2">
@@ -842,7 +849,14 @@ export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme);
   const reduxUser = useSelector((state) => state.user?.userInfo);
-  const sidebarBgColor = theme.themeColor || "#0B4B31";
+  // Validate theme colors - ensure they're not black, empty, or invalid
+  const getValidThemeColor = (color) => {
+    if (!color || color === "#000000" || color === "black" || color.trim() === "" || color === "transparent") {
+      return "#0B4B31";
+    }
+    return color;
+  };
+  const sidebarBgColor = getValidThemeColor(theme?.themeColor) || "#0B4B31";
 
   const showStudentHeader =
     pathname?.includes("/parent") ||
@@ -869,11 +883,9 @@ export default function DashboardLayout({ children }) {
       const isAdminOrSubAdmin = 
         normalizedRole === "admin" || 
         normalizedRole === "subadmin" || 
-        normalizedRole === "sub admin" ||
-        normalizedRole === "super admin" ||
-        normalizedRole === "superadmin";
+        normalizedRole === "sub admin";
 
-      // Only fetch theme for Admin or SubAdmin users
+      // Only fetch theme for Admin or SubAdmin users (NOT Super Admin)
       if (!isAdminOrSubAdmin) {
         return;
       }
@@ -905,9 +917,24 @@ export default function DashboardLayout({ children }) {
           const themeResult = await dispatch(getThemeByBranchAction(branchToUse)).unwrap();
           if (themeResult?.success && themeResult?.theme) {
             const theme = themeResult.theme;
+            // Validate colors - reject black colors
+            const validThemeColor = theme.themeColor && 
+                                    theme.themeColor !== "#000000" && 
+                                    theme.themeColor !== "black" &&
+                                    theme.themeColor.trim() !== ""
+                                    ? theme.themeColor 
+                                    : "#0B4B31";
+            
+            const validSecondaryColor = theme.secondaryColor && 
+                                        theme.secondaryColor !== "#000000" && 
+                                        theme.secondaryColor !== "black" &&
+                                        theme.secondaryColor.trim() !== ""
+                                        ? theme.secondaryColor 
+                                        : "#13574A";
+            
             dispatch(setTheme({
-              themeColor: theme.themeColor || "#0B4B31",
-              secondaryColor: theme.secondaryColor || "#13574A",
+              themeColor: validThemeColor,
+              secondaryColor: validSecondaryColor,
               logo: theme.logo || "",
               favicon: theme.favicon || "",
               mainText: theme.mainText || "MaktabOS",
@@ -921,12 +948,36 @@ export default function DashboardLayout({ children }) {
           // Fallback to websiteSettings if available
           if (reduxUser?.admin?.websiteSettings) {
             const websiteSettings = reduxUser.admin.websiteSettings;
+            // Validate colors - reject black colors
+            const validThemeColor = websiteSettings.themeColor && 
+                                    websiteSettings.themeColor !== "#000000" && 
+                                    websiteSettings.themeColor !== "black" &&
+                                    websiteSettings.themeColor.trim() !== ""
+                                    ? websiteSettings.themeColor 
+                                    : "#0B4B31";
+            
+            const validSecondaryColor = websiteSettings.secondaryColor && 
+                                        websiteSettings.secondaryColor !== "#000000" && 
+                                        websiteSettings.secondaryColor !== "black" &&
+                                        websiteSettings.secondaryColor.trim() !== ""
+                                        ? websiteSettings.secondaryColor 
+                                        : "#13574A";
+            
             dispatch(setTheme({
-              themeColor: websiteSettings.themeColor || "#0B4B31",
-              secondaryColor: websiteSettings.secondaryColor || "#13574A",
+              themeColor: validThemeColor,
+              secondaryColor: validSecondaryColor,
               logo: websiteSettings.logo || "",
               favicon: websiteSettings.favicon || "",
               mainText: websiteSettings.mainText || "MaktabOS",
+            }));
+          } else {
+            // Ensure defaults are set even if API fails and no websiteSettings
+            dispatch(setTheme({
+              themeColor: "#0B4B31",
+              secondaryColor: "#13574A",
+              logo: "",
+              favicon: "",
+              mainText: "MaktabOS",
             }));
           }
         }

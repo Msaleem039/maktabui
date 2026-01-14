@@ -8,11 +8,13 @@ import { useRouter } from "next/navigation";
 import { getAllParentsWithStudents } from "@/redux/slices/parentSlices/parentSlice";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { getAdminId } from "@/utils/getCookies";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function CreateInvoice() {
     const dispatch = useDispatch();
     const router = useRouter();
     const adminId = getAdminId();
+    const { mainText, themeColor } = useTheme();
 
     const { loading, invoice, success, error } = useSelector(
         (state) => state.createInvoice
@@ -164,11 +166,11 @@ export default function CreateInvoice() {
         <div className="space-y-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+                    <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
                         Welcome to
                     </p>
                     <h1 className="font-medium text-[#000000] text-[1.75rem]">
-                        MaktabOS
+                        {mainText || "MaktabOS"}
                     </h1>
                 </div>
             </div>

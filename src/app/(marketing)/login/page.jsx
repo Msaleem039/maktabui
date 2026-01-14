@@ -72,32 +72,107 @@ const Page = () => {
 
         setCookie("user", JSON.stringify(userCookie), tokenOptions);
 
-        const branch = payload.admin?.branch || payload.branch || payload.admin?.branchName || "Main Branch";
-        
-        try {
-          const themeResult = await dispatch(getThemeByBranchAction(branch)).unwrap();
-          if (themeResult?.success && themeResult?.theme) {
-            const theme = themeResult.theme;
-            dispatch(setTheme({
-              themeColor: theme.themeColor || "#0B4B31",
-              secondaryColor: theme.secondaryColor || "#13574A",
-              logo: theme.logo || "",
-              favicon: theme.favicon || "",
-              mainText: theme.mainText || "MaktabOS",
-            }));
+        // Only fetch theme for Admin or SubAdmin users (NOT Super Admin)
+        const normalizedRole = payload.role?.trim().toLowerCase();
+        const isAdminOrSubAdmin = 
+          normalizedRole === "admin" || 
+          normalizedRole === "subadmin" || 
+          normalizedRole === "sub admin";
+
+        if (isAdminOrSubAdmin) {
+          // Clear old theme from localStorage first to avoid showing old/black theme
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.removeItem("maktabTheme");
+            } catch (e) {
+              console.error("Error clearing theme from localStorage:", e);
+            }
           }
-        } catch (themeError) {
-          console.error("Failed to fetch theme by branch:", themeError);
-          if (payload.role === "Admin" && payload.admin?.websiteSettings) {
-            const websiteSettings = payload.admin.websiteSettings;
-            dispatch(setTheme({
-              themeColor: websiteSettings.themeColor || "#0B4B31",
-              secondaryColor: websiteSettings.secondaryColor || "#13574A",
-              logo: websiteSettings.logo || "",
-              favicon: websiteSettings.favicon || "",
-              mainText: websiteSettings.mainText || "MaktabOS",
-            }));
+          
+          // Reset theme to defaults first to avoid showing old/black theme
+          dispatch(setTheme({
+            themeColor: "#0B4B31",
+            secondaryColor: "#13574A",
+            logo: "",
+            favicon: "",
+            mainText: "MaktabOS",
+          }));
+
+          const branch = payload.admin?.branch || payload.branch || payload.admin?.branchName || "Main Branch";
+          
+          try {
+            const themeResult = await dispatch(getThemeByBranchAction(branch)).unwrap();
+            if (themeResult?.success && themeResult?.theme) {
+              const theme = themeResult.theme;
+              // Validate colors - reject black colors
+              const validThemeColor = theme.themeColor && 
+                                      theme.themeColor !== "#000000" && 
+                                      theme.themeColor !== "black" &&
+                                      theme.themeColor.trim() !== ""
+                                      ? theme.themeColor 
+                                      : "#0B4B31";
+              
+              const validSecondaryColor = theme.secondaryColor && 
+                                          theme.secondaryColor !== "#000000" && 
+                                          theme.secondaryColor !== "black" &&
+                                          theme.secondaryColor.trim() !== ""
+                                          ? theme.secondaryColor 
+                                          : "#13574A";
+              
+              dispatch(setTheme({
+                themeColor: validThemeColor,
+                secondaryColor: validSecondaryColor,
+                logo: theme.logo || "",
+                favicon: theme.favicon || "",
+                mainText: theme.mainText || "MaktabOS",
+              }));
+            }
+          } catch (themeError) {
+            console.error("Failed to fetch theme by branch:", themeError);
+            if (payload.role === "Admin" && payload.admin?.websiteSettings) {
+              const websiteSettings = payload.admin.websiteSettings;
+              // Validate colors - reject black colors
+              const validThemeColor = websiteSettings.themeColor && 
+                                      websiteSettings.themeColor !== "#000000" && 
+                                      websiteSettings.themeColor !== "black" &&
+                                      websiteSettings.themeColor.trim() !== ""
+                                      ? websiteSettings.themeColor 
+                                      : "#0B4B31";
+              
+              const validSecondaryColor = websiteSettings.secondaryColor && 
+                                          websiteSettings.secondaryColor !== "#000000" && 
+                                          websiteSettings.secondaryColor !== "black" &&
+                                          websiteSettings.secondaryColor.trim() !== ""
+                                          ? websiteSettings.secondaryColor 
+                                          : "#13574A";
+              
+              dispatch(setTheme({
+                themeColor: validThemeColor,
+                secondaryColor: validSecondaryColor,
+                logo: websiteSettings.logo || "",
+                favicon: websiteSettings.favicon || "",
+                mainText: websiteSettings.mainText || "MaktabOS",
+              }));
+            } else {
+              // Ensure defaults are set even if API fails and no websiteSettings
+              dispatch(setTheme({
+                themeColor: "#0B4B31",
+                secondaryColor: "#13574A",
+                logo: "",
+                favicon: "",
+                mainText: "MaktabOS",
+              }));
+            }
           }
+        } else {
+          // For non-admin users, ensure default theme is set
+          dispatch(setTheme({
+            themeColor: "#0B4B31",
+            secondaryColor: "#13574A",
+            logo: "",
+            favicon: "",
+            mainText: "MaktabOS",
+          }));
         }
 
         const userRole = payload.role;
@@ -135,7 +210,7 @@ const Page = () => {
           {/* MaktabOS Learning Management System Image */}
           <div className="my-10 relative z-10 w-full flex justify-center">
             <Image
-              src="/matkktab.png"
+              src="/welcome.png"
               alt="Maktab OS Learning Management System"
               width={600}
               height={400}
@@ -145,10 +220,10 @@ const Page = () => {
           </div>
 
           <div className="flex items-center gap-3 relative z-10">
-            <LayoutGrid size={40} className="text-[#0B4B31] fill-[#0B4B31]" />
-            <span className="text-[#0B4B31] text-4xl font-semibold">
+            {/* <LayoutGrid size={40} className="text-[#0B4B31] fill-[#0B4B31]" /> */}
+            {/* <span className="text-[#0B4B31] text-4xl font-semibold">
               MaktabOS
-            </span>
+            </span> */}
           </div>
         </div>
 
@@ -159,7 +234,7 @@ const Page = () => {
               Welcome to
             </h2>
             <h2 className=" font-medium text-[20px] leading-[136%] text-[#0B4B31]">
-              MaktabOS
+              School Management System
             </h2>
           </div>
 

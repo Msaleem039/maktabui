@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createEvent, clearError, clearSuccess } from "@/redux/slices/eventSlices/eventSlices";
 import { FormInput } from "@/components/FormInput";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function CreateEventPage() {
   const dispatch = useDispatch();
+  const { mainText, themeColor } = useTheme();
   const { loading, error, success } = useSelector(state => state.events);
 
   const [formData, setFormData] = useState({
@@ -74,11 +76,11 @@ export default function CreateEventPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-[2.5rem] font-semibold text-[#0B4B31]">
+        <h1 className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
           Welcome to
         </h1>
         <p className="text-[1.75rem] font-medium text-[#000000]">
-          MaktabOS
+          {mainText || "MaktabOS"}
         </p>
       </div>
 

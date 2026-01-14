@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
 import { getAllPaymentStatsAction, setCurrentPage, updateFilters } from "@/redux/slices/paymentSlices/paymentSlices";
+import { useTheme } from "@/hooks/useTheme";
 
 ChartJS.register(
   ArcElement,
@@ -28,6 +29,7 @@ ChartJS.register(
 
 export default function PaymentPage() {
   const dispatch = useDispatch();
+  const { mainText, themeColor } = useTheme();
   const { 
     loading, 
     stats, 
@@ -184,11 +186,11 @@ export default function PaymentPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+          <p className="text-[2.5rem] font-semibold" style={{ color: themeColor }}>
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

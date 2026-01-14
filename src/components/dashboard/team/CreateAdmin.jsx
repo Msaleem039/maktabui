@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createAdminAction } from "@/redux/slices/adminSlices/adminSlices";
 import { FormInput } from "@/components/FormInput";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function CreateAdmin() {
   const dispatch = useDispatch();
@@ -27,6 +28,7 @@ export default function CreateAdmin() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -151,14 +153,37 @@ export default function CreateAdmin() {
             placeholder="Email"
           />
 
-          <FormInput
-            label="Password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            placeholder="Password"
-          />
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Password"
+                style={{
+                  backgroundColor: "#D5E2DB",
+                  color: "#0B4B31",
+                }}
+                className="w-full placeholder:opacity-60 rounded-full px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-opacity-30"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31] hover:text-[#084A2E] transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            </div>
+          </div>
 
           <FormInput
             label="Address"
