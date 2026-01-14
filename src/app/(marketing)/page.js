@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import "../globals.css";
 
 import Navbar from "@/components/Navbar";
@@ -10,6 +11,7 @@ import OnlineQuranSection from "@/components/landing/OnlineQuranSection";
 import PricingSection from "@/components/landing/PricingSection";
 import CareersSection from "@/components/landing/CareersSection";
 import FooterSection from "@/components/landing/FooterSection";
+import BookDemoModal from "@/components/BookDemoModal";
 import Link from "next/link";
 import Buttonstart from "@/components/landing/Buttonstart";
 
@@ -23,6 +25,16 @@ const primaryNavItems = [
 ];
 
 export default function Home() {
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
+  const openDemoModal = () => {
+    setIsDemoModalOpen(true);
+  };
+
+  const closeDemoModal = () => {
+    setIsDemoModalOpen(false);
+  };
+
   return (
     <>
       <div
@@ -55,12 +67,12 @@ export default function Home() {
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
-                <Link
-                  href="/login"
-                  className="rounded-full bg-white px-6 py-3 text-[1.0625rem] font-semibold text-[#0B4B31] shadow-lg shadow-black/10 transition hover:bg-[#F3F6F5]"
+                <button
+                  onClick={openDemoModal}
+                  className="rounded-full bg-white px-6 py-3 text-[1.0625rem] font-semibold text-[#0B4B31] shadow-lg shadow-black/10 transition hover:bg-[#F3F6F5] cursor-pointer"
                 >
                   Get Started
-                </Link>
+                </button>
 
                 <Link href="/login"
                   className="rounded-full bg-[#0B4B31] px-6 py-3 text-[1.0625rem] font-semibold text-white transition hover:border-white hover:bg-[#0B4B31]/60"
@@ -75,12 +87,13 @@ export default function Home() {
 
       <AboutSection />
       <CoreFeature />
-      <HowItWorks />
+      <HowItWorks onGetStartedClick={openDemoModal} />
       <PricingSection />
 {/* <Buttonstart /> */}
-      <OnlineQuranSection />
+      <OnlineQuranSection onGetStartedClick={openDemoModal} />
       <CareersSection />
       <FooterSection />
+      <BookDemoModal isOpen={isDemoModalOpen} onClose={closeDemoModal} />
     </>
   );
 }

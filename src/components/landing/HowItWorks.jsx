@@ -31,7 +31,14 @@ const steps = [
   },
 ];
 
-const HowItWorks = () => {
+const HowItWorks = ({ onGetStartedClick }) => {
+  const handleGetStartedClick = (e) => {
+    e.preventDefault();
+    if (onGetStartedClick) {
+      onGetStartedClick();
+    }
+  };
+
   return (
     <section
       id="how-it-works"
@@ -39,12 +46,12 @@ const HowItWorks = () => {
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 px-6 text-center">
-        <Link
-          href="/login"
-          className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
+        <button
+          onClick={handleGetStartedClick}
+          className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80 cursor-pointer"
         >
           Get Started Now
-        </Link>
+        </button>
 
         <div className="space-y-4">
           <h2 className="text-3xl leading-[1.2] md:text-[3rem] md:leading-normal font-bold text-[#262626] ">
@@ -81,12 +88,12 @@ const HowItWorks = () => {
           ))}
         </div>
 
-        <Link
-          href="/login"
-          className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
+        <button
+          onClick={handleGetStartedClick}
+          className="rounded-full bg-black px-6 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80 cursor-pointer"
         >
           Get Started Now
-        </Link>
+        </button>
       </div>
     </section>
   );
