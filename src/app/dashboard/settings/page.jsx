@@ -328,7 +328,7 @@ export default function SettingsPage() {
               className="md:col-span-1"
             />
 
-            <ImageUpload
+            {/* <ImageUpload
               label="Favicon"
               name="favicon"
               selectedFile={selectedFiles.favicon}
@@ -336,10 +336,10 @@ export default function SettingsPage() {
               onFileSelect={handleFileSelect}
               onRemove={handleFileRemove}
               className="md:col-span-1"
-            />
+            /> */}
 
             <FormInput
-              label="Main Text"
+              label="Institute Name"
               name="mainText"
               type="text"
               value={formData.mainText}
@@ -365,7 +365,7 @@ export default function SettingsPage() {
                   themeColor: "#0B4B31",
                   secondaryColor: "#13574A",
                   logo: "",
-                  favicon: "",
+                  // favicon: "",
                   mainText: "",
                 });
                 dispatch(resetUpdateThemeState());

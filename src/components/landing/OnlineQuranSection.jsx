@@ -1,7 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const OnlineQuranSection = () => {
+const OnlineQuranSection = ({ onGetStartedClick }) => {
+  const handleGetStartedClick = (e) => {
+    e.preventDefault();
+    if (onGetStartedClick) {
+      onGetStartedClick();
+    }
+  };
+
   return (
     <section
       id="online-quran"
@@ -33,12 +40,12 @@ const OnlineQuranSection = () => {
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
-            <Link
-              href="/login"
-              className="rounded-full bg-black px-7 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80"
+            <button
+              onClick={handleGetStartedClick}
+              className="rounded-full bg-black px-7 py-3 text-base font-semibold tracking-[0.18em] text-white transition hover:bg-black/80 cursor-pointer"
             >
               Get Started Now
-            </Link>
+            </button>
             {/* <a
               href="#demo"
               className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white/80 transition hover:border-white hover:text-white"

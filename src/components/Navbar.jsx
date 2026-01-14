@@ -45,13 +45,13 @@ const Navbar = ({ items = [] }) => {
         </nav>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex lg:gap-2 xl:gap-4">
-          <Link
-            href="/login"
+          <button
+            onClick={() => setIsDemoModalOpen(true)}
             className="whitespace-nowrap rounded-full bg-[#0B4B31] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             Get Started →
-          </Link>
+          </button>
           <button
             onClick={() => setIsDemoModalOpen(true)}
             className="whitespace-nowrap rounded-tr-xl rounded-bl-xl rounded-tl-none rounded-br-none bg-white px-3 py-1.5 text-xs font-bold text-[#0B4B31] transition hover:bg-[#F3F6F5] lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
@@ -89,13 +89,15 @@ const Navbar = ({ items = [] }) => {
             </Link>
           ))}
           <div className="mt-2 flex flex-col gap-2">
-            <Link
-              href="/login"
-              onClick={closeMenu}
+            <button
+              onClick={() => {
+                closeMenu();
+                setIsDemoModalOpen(true);
+              }}
               className="rounded-full bg-[#0B4B31] px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
             >
               Get Started →
-            </Link>
+            </button>
             <button
               onClick={() => {
                 closeMenu();

@@ -9,8 +9,10 @@ import {
   User,
   MapPin,
   CheckCircle,
+  Clock,
 } from "lucide-react";
 import axios from "axios";
+import CustomDatePicker from "./DatePicker";
 
 const BookDemoModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -19,6 +21,8 @@ const BookDemoModal = ({ isOpen, onClose }) => {
     phone: "",
     organization: "",
     message: "",
+    date: "",
+    time: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -46,6 +50,8 @@ const BookDemoModal = ({ isOpen, onClose }) => {
           phone: "",
           organization: "",
           message: "",
+          date: "",
+          time: "",
         });
         onClose();
       }, 3000);
@@ -88,6 +94,14 @@ const BookDemoModal = ({ isOpen, onClose }) => {
       newErrors.organization = "Organization is required";
     }
 
+    if (!formData.date) {
+      newErrors.date = "Date is required";
+    }
+
+    if (!formData.time) {
+      newErrors.time = "Time is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -121,6 +135,8 @@ const BookDemoModal = ({ isOpen, onClose }) => {
         phone: formData.phone,
         organization: formData.organization,
         address: formData.organization,
+        date: formData.date,
+        time: formData.time,
       };
 
       const response = await axios.post(
@@ -347,6 +363,73 @@ const BookDemoModal = ({ isOpen, onClose }) => {
                       <span className="text-red-500">⚠</span> {errors.organization}
                     </p>
                   )}
+                </div>
+
+                {/* Date and Time Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Date Field */}
+                  <div className="space-y-2.5 group">
+                    <label
+                      htmlFor="demo-date"
+                      className="flex items-center gap-2.5 text-sm font-bold text-[#0B4B31] mb-2"
+                    >
+                      <div className="p-1.5 rounded-lg bg-[#0B4B31]/10">
+                        <Calendar size={16} className="text-[#0B4B31]" />
+                      </div>
+                      Preferred Date
+                    </label>
+                    <div className="relative">
+                      <CustomDatePicker
+                        name="date"
+                        value={formData.date}
+                        onChange={handleChange}
+                        placeholder="Select date"
+                        required={true}
+                        minDate={new Date()}
+                        dateFormat="MM/dd/yyyy"
+                        className="w-full"
+                        showLabel={false}
+                      />
+                    </div>
+                    {errors.date && (
+                      <p className="text-sm text-red-600 flex items-center gap-2 mt-1.5 font-medium animate-in slide-in-from-top-1">
+                        <span className="text-red-500">⚠</span> {errors.date}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Time Field */}
+                  <div className="space-y-2.5 group">
+                    <label
+                      htmlFor="demo-time"
+                      className="flex items-center gap-2.5 text-sm font-bold text-[#0B4B31] mb-2"
+                    >
+                      <div className="p-1.5 rounded-lg bg-[#0B4B31]/10">
+                        <Clock size={16} className="text-[#0B4B31]" />
+                      </div>
+                      Preferred Time
+                    </label>
+                    <div className="relative">
+                      <CustomDatePicker
+                        name="time"
+                        value={formData.time}
+                        onChange={handleChange}
+                        placeholder="Select time"
+                        required={true}
+                        className="w-full"
+                        showLabel={false}
+                        showTimeSelectOnly={true}
+                        timeIntervals={30}
+                        timeFormat="HH:mm"
+                        dateFormat="hh:mm aa"
+                      />
+                    </div>
+                    {errors.time && (
+                      <p className="text-sm text-red-600 flex items-center gap-2 mt-1.5 font-medium animate-in slide-in-from-top-1">
+                        <span className="text-red-500">⚠</span> {errors.time}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Submit Button */}
