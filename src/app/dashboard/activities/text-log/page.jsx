@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Search } from "lucide-react";
+import {  Search } from "lucide-react";
 
 const mockTextLogData = [
   {
