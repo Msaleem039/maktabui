@@ -244,7 +244,27 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const theme = useSelector((state) => state.theme);
   const sidebarBgColor = theme.themeColor || "#0B4B31";
   const activeBgColor = theme.secondaryColor || "#13574A";
-  const logoUrl = theme.logo || "/01.png";
+  
+  // Construct logo URL - if it's from backend (multer), prepend backend URL
+  const getLogoUrl = (logo) => {
+    if (!logo) return "/01.png";
+    
+    // If it's already a full URL (http/https), use it as is
+    if (logo.startsWith("http://") || logo.startsWith("https://")) {
+      return logo;
+    }
+    
+    // If it starts with "/", it's a local public path
+    if (logo.startsWith("/")) {
+      return logo;
+    }
+    
+    // Otherwise, it's a backend path from multer - prepend backend URL
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+    return `${backendUrl}${logo.startsWith("/") ? logo : `/${logo}`}`;
+  };
+  
+  const logoUrl = getLogoUrl(theme.logo);
 
   const getUserData = useCallback(() => {
     let role = null;
@@ -705,25 +725,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         <div className="flex flex-col space-y-8 overflow-y-auto flex-grow">
           <div
-            className={`flex items-center space-x-2 text-white p-2 pt-16 sm:pt-10 ${
+            className={`flex items-center justify-center text-white p-2 pt-10 sm:pt-8 ${
               isCollapsed ? "justify-center" : ""
             }`}
           >
-            <div className="w-6 h-6">
+            <div className="w-13 h-13 rounded-md bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 border-2 border-white/20 shadow-lg">
               <Image
                 src={logoUrl}
                 alt={theme.mainText || "MaktabOS"}
-                width={24}
-                height={24}
-                className="w-full h-full object-contain"
-                unoptimized={logoUrl.startsWith("http")}
+                width={48}
+                height={48}
+                className="w-full h-full object-contain rounded-full"
+                unoptimized={logoUrl.startsWith("http") || logoUrl.includes(process.env.NEXT_PUBLIC_BACKEND_URL || "")}
               />
             </div>
-            {!isCollapsed && (
-              <h1 className="text-xl font-bold tracking-wider">
-                {theme.mainText || "MaktabOS"}
-              </h1>
-            )}
           </div>
 
           <div className="flex flex-col space-y-2">

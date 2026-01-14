@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Grid3x3, LayoutGrid, Menu, X } from "lucide-react";
 import Link from "next/link";
+import BookDemoModal from "./BookDemoModal";
 
 const Navbar = ({ items = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const closeMenu = () => setIsOpen(false);
 
@@ -50,13 +52,13 @@ const Navbar = ({ items = [] }) => {
           >
             Get Started →
           </Link>
-          <Link
-            href="#careers"
+          <button
+            onClick={() => setIsDemoModalOpen(true)}
             className="whitespace-nowrap rounded-tr-xl rounded-bl-xl rounded-tl-none rounded-br-none bg-white px-3 py-1.5 text-xs font-bold text-[#0B4B31] transition hover:bg-[#F3F6F5] lg:px-3 lg:py-2 lg:text-sm xl:px-4 xl:text-base"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Book a Demo
-          </Link>
+          </button>
 
         </div>
 
@@ -94,16 +96,24 @@ const Navbar = ({ items = [] }) => {
             >
               Get Started →
             </Link>
-            <Link
-              href="#careers"
-              onClick={closeMenu}
+            <button
+              onClick={() => {
+                closeMenu();
+                setIsDemoModalOpen(true);
+              }}
               className="rounded-full bg-[#0B4B31]/10 px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-[#0B4B31] transition hover:bg-[#0B4B31]/15"
             >
               Book a Demo
-            </Link>
+            </button>
           </div>
         </nav>
       )}
+
+      {/* Book Demo Modal */}
+      <BookDemoModal
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
+      />
     </header>
   );
 };
