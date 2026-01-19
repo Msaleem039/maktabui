@@ -229,17 +229,17 @@ const Page = () => {
 
         <div className="p-2 px-12 pb-12 flex flex-col justify-center bg-gray-50 min-h-[720px]">
           <div className="mb-1">
-            <h2 className=" font-medium text-[2rem] leading-[136%] mb-4 text-center">
-              Welcome Back
+            <h2 className=" font-medium text-[2rem] leading-[136%] mb-2 text-center">
+              Welcome 
             </h2>
             {/* <h2 className=" font-medium text-[20px] leading-[136%] text-[#0B4B31]">
               School Management System
             </h2> */}
           </div>
-{/* 
-          <p className="mb-8 text-[#2F2F2F]  font-light text-[20px] leading-[136%]">
-            Please login to continue
-          </p> */}
+
+          <p className="mb-8 text-[#2F2F2F]  font-light text-[20px] leading-[136%] text-center">
+           Please login to continue
+         </p> 
 
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
