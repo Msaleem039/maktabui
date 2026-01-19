@@ -267,14 +267,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       return logo;
     }
 
-    // If it starts with "/", it's a local public path
+    // If it starts with "/uploads/", it's a backend path from multer - prepend backend URL
+    if (logo.startsWith("/uploads/")) {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+      return `${backendUrl}${logo}`;
+    }
+
+    // If it starts with "/" but not "/uploads/", it's a local public path
     if (logo.startsWith("/")) {
       return logo;
     }
 
     // Otherwise, it's a backend path from multer - prepend backend URL
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-    return `${backendUrl}${logo.startsWith("/") ? logo : `/${logo}`}`;
+    return `${backendUrl}/${logo}`;
   };
 
   const logoUrl = getLogoUrl(theme.logo);
@@ -778,16 +784,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               isCollapsed ? "justify-center" : ""
             }`}
           >
-            {/* <div className="w-13 h-13 rounded-md bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 border-2 border-white/20 shadow-lg">
+            <div className="w-18 h-16 bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 border-2 border-white/20 shadow-lg rounded-lg">
               <Image
                 src={logoUrl}
                 alt={theme.mainText || "MaktabOS"}
-                width={48}
+                width={72}
                 height={48}
-                className="w-full h-full object-contain rounded-full"
-                unoptimized={logoUrl.startsWith("http") || logoUrl.includes(process.env.NEXT_PUBLIC_BACKEND_URL || "")}
+                className="w-full h-full object-contain"
+                unoptimized={logoUrl.startsWith("http") || logoUrl.includes(process.env.NEXT_PUBLIC_BACKEND_URL || "") || logoUrl.startsWith("/uploads/")}
               />
-            </div> */}
+            </div>
           </div>
 
           <div className="flex flex-col space-y-2">

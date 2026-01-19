@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Download, Eye, Pencil, MessageSquare, Trash2, ChevronDown } from "lucide-react";
-import ActionMenu from "../ActionMenu";
 
 const StudentTable = ({
   title = "Students (All Classes)",
@@ -47,6 +46,10 @@ const StudentTable = ({
   }, [transformedStudents]);
 
   const [selectedId, setSelectedId] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [dropdownPositions, setDropdownPositions] = useState({});
+  const dropdownRefs = useRef({});
+  const buttonRefs = useRef({});
 
   const filteredStudents = tableData;
 
@@ -75,6 +78,82 @@ const StudentTable = ({
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      Object.values(dropdownRefs.current).forEach((ref) => {
+        if (ref && !ref.contains(event.target)) {
+          const isButtonClick = Object.values(buttonRefs.current).some(
+            (buttonRef) => buttonRef && buttonRef.contains(event.target)
+          );
+          if (!isButtonClick) {
+            setOpenDropdownId(null);
+          }
+        }
+      });
+    };
+
+    const handleScroll = () => {
+      setOpenDropdownId(null);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, []);
+
+  const toggleDropdown = (id, event) => {
+    event.stopPropagation();
+    const isOpening = openDropdownId !== id;
+
+    if (isOpening && typeof window !== "undefined") {
+      const button = event.currentTarget;
+      const buttonRect = button.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+      const dropdownHeight = 150; // Approximate height of dropdown with 3 items
+      const dropdownWidth = 180;
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const shouldOpenUp = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+      // Calculate position
+      let top, right;
+      
+      if (shouldOpenUp) {
+        top = buttonRect.top - dropdownHeight - 8; // 8px margin
+      } else {
+        top = buttonRect.bottom + 8; // 8px margin
+      }
+
+      // Align to right edge of button
+      right = viewportWidth - buttonRect.right;
+      
+      // Ensure dropdown stays within viewport
+      if (right + dropdownWidth > viewportWidth) {
+        right = viewportWidth - dropdownWidth - 8;
+      }
+      if (right < 8) {
+        right = 8;
+      }
+
+      setDropdownPositions((prev) => ({
+        ...prev,
+        [id]: { top, right },
+      }));
+    } else {
+      setDropdownPositions((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+
+    setOpenDropdownId(isOpening ? id : null);
   };
 
   const getPageNumbers = () => {
@@ -223,13 +302,53 @@ const StudentTable = ({
                     {student.email}
                   </td>
                   <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <ActionMenu
-                      triggerLabel="Take Action"
-                      items={actionMenuItems.map(item => ({
-                        ...item,
-                        onClick: () => item.onClick(student.id)
-                      }))}
-                    />
+                    <div className="relative inline-block">
+                      <button
+                        ref={(el) => (buttonRefs.current[student.id] = el)}
+                        type="button"
+                        onClick={(e) => toggleDropdown(student.id, e)}
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-[#0B4B31] transition bg-[#0B4B3138]"
+                      >
+                        Take Action
+                        <span>▾</span>
+                      </button>
+
+                      {openDropdownId === student.id && (
+                        <div
+                          ref={(el) => {
+                            dropdownRefs.current[student.id] = el;
+                          }}
+                          style={{
+                            position: 'fixed',
+                            top: `${dropdownPositions[student.id]?.top || 0}px`,
+                            right: `${dropdownPositions[student.id]?.right || 0}px`,
+                            zIndex: 9999,
+                          }}
+                          className="min-w-[180px] rounded-xl border border-[#00000040] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                        >
+                          {actionMenuItems.map((item, idx) => {
+                            const Icon = item.icon;
+                            return (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  item.onClick(student.id);
+                                  setOpenDropdownId(null);
+                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-normal text-[#1e1e1e] transition-all duration-150 hover:bg-[#E5EFEB] ${
+                                  idx === 0 ? "" : "border-t border-[#00000040]"
+                                }`}
+                              >
+                                {Icon && <Icon size={16} className={item.iconClassName || "text-[#0B4B31]"} />}
+                                <span>{item.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
