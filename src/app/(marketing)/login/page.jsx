@@ -38,6 +38,20 @@ const Page = () => {
     setIsDropdownOpen(false);
   };
 
+  const handleForgotPasswordClick = () => {
+    if (!role) {
+      setError("Please select your role first");
+      return;
+    }
+    
+    if (role !== "Admin") {
+      setError("Forgot Password is only available for Admin role");
+      return;
+    }
+    
+    router.push("/forgot-password");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -71,8 +85,6 @@ const Page = () => {
 
         setCookie("user", JSON.stringify(userCookie), tokenOptions);
 
-
-        // Only fetch theme for Admin or SubAdmin users (NOT Super Admin)
         const normalizedRole = payload.role?.trim().toLowerCase();
         const isAdminOrSubAdmin = 
           normalizedRole === "admin" || 
@@ -80,7 +92,6 @@ const Page = () => {
           normalizedRole === "sub admin";
 
         if (isAdminOrSubAdmin) {
-          // Clear old theme from localStorage first to avoid showing old/black theme
           if (typeof window !== "undefined") {
             try {
               localStorage.removeItem("maktabTheme");
@@ -89,7 +100,6 @@ const Page = () => {
             }
           }
           
-          // Reset theme to defaults first to avoid showing old/black theme
           dispatch(setTheme({
             themeColor: "#0B4B31",
             secondaryColor: "#13574A",
@@ -104,7 +114,6 @@ const Page = () => {
             const themeResult = await dispatch(getThemeByBranchAction(branch)).unwrap();
             if (themeResult?.success && themeResult?.theme) {
               const theme = themeResult.theme;
-              // Validate colors - reject black colors
               const validThemeColor = theme.themeColor && 
                                       theme.themeColor !== "#000000" && 
                                       theme.themeColor !== "black" &&
@@ -131,7 +140,6 @@ const Page = () => {
             console.error("Failed to fetch theme by branch:", themeError);
             if (payload.role === "Admin" && payload.admin?.websiteSettings) {
               const websiteSettings = payload.admin.websiteSettings;
-              // Validate colors - reject black colors
               const validThemeColor = websiteSettings.themeColor && 
                                       websiteSettings.themeColor !== "#000000" && 
                                       websiteSettings.themeColor !== "black" &&
@@ -143,8 +151,8 @@ const Page = () => {
                                           websiteSettings.secondaryColor !== "#000000" && 
                                           websiteSettings.secondaryColor !== "black" &&
                                           websiteSettings.secondaryColor.trim() !== ""
-                                          ? websiteSettings.secondaryColor 
-                                          : "#13574A";
+                                      ? websiteSettings.secondaryColor 
+                                      : "#13574A";
               
               dispatch(setTheme({
                 themeColor: validThemeColor,
@@ -154,7 +162,6 @@ const Page = () => {
                 mainText: websiteSettings.mainText || "MaktabOS",
               }));
             } else {
-              // Ensure defaults are set even if API fails and no websiteSettings
               dispatch(setTheme({
                 themeColor: "#0B4B31",
                 secondaryColor: "#13574A",
@@ -163,11 +170,8 @@ const Page = () => {
                 mainText: "MaktabOS",
               }));
             }
-
-  
           }
         } else {
-          // For non-admin users, ensure default theme is set
           dispatch(setTheme({
             themeColor: "#0B4B31",
             secondaryColor: "#13574A",
@@ -201,7 +205,6 @@ const Page = () => {
   return (
     <div className="min-h-screen flex bg-gray-100 items-center justify-center px-6 py-14">
       <div className="bg-white rounded-3xl shadow-lg overflow-hidden w-full max-w-6xl grid md:grid-cols-2">
-        {/* Left Section */}
         <div
           className="text-white flex flex-col justify-center items-center p-12 min-h-[700px] relative overflow-hidden"
           style={{
@@ -209,7 +212,6 @@ const Page = () => {
               "linear-gradient(217.64deg, #0B4B31 -5.84%, #85A598 106.72%, #FFFFFF 106.73%)",
           }}
         >
-          {/* MaktabOS Learning Management System Image */}
           <div className="my-10 relative z-10 w-full flex justify-center">
             <Image
               src="/welcome.png"
@@ -222,14 +224,9 @@ const Page = () => {
           </div>
 
           <div className="flex items-center gap-3 relative z-10">
-            {/* <LayoutGrid size={40} className="text-[#0B4B31] fill-[#0B4B31]" /> */}
-            {/* <span className="text-[#0B4B31] text-4xl font-semibold">
-              MaktabOS
-            </span> */}
           </div>
         </div>
 
-        {/* Right Section */}
         <div className="p-2 px-12 pb-12 flex flex-col justify-center bg-gray-50 min-h-[720px]">
           <div className="mb-1">
             <h2 className=" font-medium text-[27px] leading-[136%] mb-1">
@@ -244,7 +241,6 @@ const Page = () => {
             Please login to continue
           </p>
 
-          {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
               {error}
@@ -252,7 +248,6 @@ const Page = () => {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Email Field */}
             <div className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -277,7 +272,6 @@ const Page = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div className="flex items-center bg-gray-200 rounded-xl px-4 py-3 w-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -345,7 +339,6 @@ const Page = () => {
               </button>
             </div>
 
-            {/* Role Selection - Custom Dropdown */}
             <div className="relative w-full">
               <div
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -388,7 +381,6 @@ const Page = () => {
                 </svg>
               </div>
 
-              {/* Dropdown Menu */}
               {isDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl overflow-hidden z-10 border border-gray-200 animate-slideDown">
                   {roles.map((roleOption, index) => (
@@ -435,9 +427,7 @@ const Page = () => {
               </label>
               <button
                 type="button"
-                onClick={() => {
-                  router.push("/forgot-password");
-                }}
+                onClick={handleForgotPasswordClick}
                 className="text-[#0B4B31] hover:text-[#084A2E] font-medium transition-colors"
               >
                 Forgot Password?

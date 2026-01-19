@@ -39,7 +39,7 @@ const NavItem = ({
     isActive = subItems.some(
       (subItem) =>
         pathname === subItem.path ||
-        (subItem.path && pathname.startsWith(subItem.path + "/"))
+        (subItem.path && pathname.startsWith(subItem.path + "/")),
     );
   } else if (path) {
     isActive = pathname === path;
@@ -244,33 +244,39 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const theme = useSelector((state) => state.theme);
   // Validate theme colors - ensure they're not black, empty, or invalid
   const getValidThemeColor = (color) => {
-    if (!color || color === "#000000" || color === "black" || color.trim() === "" || color === "transparent") {
+    if (
+      !color ||
+      color === "#000000" ||
+      color === "black" ||
+      color.trim() === "" ||
+      color === "transparent"
+    ) {
       return "#0B4B31";
     }
     return color;
   };
   const sidebarBgColor = getValidThemeColor(theme?.themeColor) || "#0B4B31";
   const activeBgColor = getValidThemeColor(theme?.secondaryColor) || "#13574A";
-  
+
   // Construct logo URL - if it's from backend (multer), prepend backend URL
   const getLogoUrl = (logo) => {
     if (!logo) return "/01.png";
-    
+
     // If it's already a full URL (http/https), use it as is
     if (logo.startsWith("http://") || logo.startsWith("https://")) {
       return logo;
     }
-    
+
     // If it starts with "/", it's a local public path
     if (logo.startsWith("/")) {
       return logo;
     }
-    
+
     // Otherwise, it's a backend path from multer - prepend backend URL
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
     return `${backendUrl}${logo.startsWith("/") ? logo : `/${logo}`}`;
   };
-  
+
   const logoUrl = getLogoUrl(theme.logo);
 
   const getUserData = useCallback(() => {
@@ -329,7 +335,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const { role: userRole, permissions: userPermissions } = useMemo(
     () => getUserData(),
-    [getUserData]
+    [getUserData],
   );
 
   useEffect(() => {
@@ -345,7 +351,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
       return userPermissions.some((perm) => perm[permissionKey] === true);
     },
-    [userRole, userPermissions]
+    [userRole, userPermissions],
   );
 
   const getNavItems = useCallback(() => {
@@ -452,7 +458,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             name: "Create Invoices",
             path: `${basePath}/institute-finance/invoice/add`,
-          }
+          },
         ],
       },
       events: {
@@ -541,6 +547,29 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       return hasPermission(item.permission);
     };
 
+    // Create profile setting path based on role
+    const getProfileSettingPath = () => {
+      switch (userRole) {
+        case "Teacher":
+          return `${basePath}/teacher/profile-setting`;
+        case "Student":
+          return `${basePath}/student/profile-setting`;
+        case "Parent":
+          return `${basePath}/parent/profile-setting`;
+        case "Super Admin":
+        case "Admin":
+        case "Sub Admin":
+        default:
+          return `${basePath}/profile-setting`;
+      }
+    };
+
+    const profileSettingItem = {
+      name: "Profile Setting",
+      icon: "/Settings.png",
+      path: getProfileSettingPath(),
+    };
+
     switch (userRole) {
       case "Super Admin":
         return [
@@ -548,6 +577,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.team,
           allItems.instituteFinance,
           allItems.communication,
+          profileSettingItem,
         ];
 
       case "Admin":
@@ -561,11 +591,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.finance,
           allItems.events,
           allItems.team,
-          {
-            name: "Settings",
-            icon: "/Settings.png",
-            path: `${basePath}/settings`,
-          },
+          profileSettingItem,
         ];
 
       case "Sub Admin": {
@@ -574,6 +600,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         Object.values(allItems).forEach((item) => {
           if (shouldIncludeItem(item)) subAdminItems.push(item);
         });
+
+        subAdminItems.push(profileSettingItem);
 
         return subAdminItems;
       }
@@ -584,24 +612,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.class,
             subItems: allItems.class.subItems.filter(
-              (i) => i.name !== "Create Class"
+              (i) => i.name !== "Create Class",
             ),
           },
           {
             ...allItems.students,
             subItems: allItems.students.subItems.filter(
-              (i) => i.name === "Student"
+              (i) => i.name === "Student",
             ),
           },
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (i) => i.name === "C Assignment" || i.name === "S Assignment"
+              (i) => i.name === "C Assignment" || i.name === "S Assignment",
             ),
           },
           allItems.notifications,
           allItems.attendance,
           allItems.communication,
+          profileSettingItem,
         ];
 
       case "Student":
@@ -610,11 +639,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.assignment,
             subItems: allItems.assignment.subItems.filter(
-              (i) => i.name === "Assignments" || i.name === "Grade"
+              (i) => i.name === "Assignments" || i.name === "Grade",
             ),
           },
           allItems.notifications,
           allItems.communication,
+          profileSettingItem,
         ];
 
       case "Parent":
@@ -624,11 +654,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             ...allItems.finance,
             subItems: allItems.finance.subItems.filter(
-              (i) => i.name === "Invoice" || i.name === "Payments"
+              (i) => i.name === "Invoice" || i.name === "Payments",
             ),
           },
           allItems.notifications,
           allItems.communication,
+          profileSettingItem,
         ];
 
       default:
@@ -654,7 +685,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       if (item.hasSubmenu && item.subItems) {
         const shouldBeOpen = item.subItems.some(
           (subItem) =>
-            pathname === subItem.path || pathname.startsWith(subItem.path)
+            pathname === subItem.path || pathname.startsWith(subItem.path),
         );
         if (shouldBeOpen) {
           newOpenSubmenus[item.name] = true;
@@ -831,7 +862,13 @@ export default function DashboardLayout({ children }) {
   const reduxUser = useSelector((state) => state.user?.userInfo);
   // Validate theme colors - ensure they're not black, empty, or invalid
   const getValidThemeColor = (color) => {
-    if (!color || color === "#000000" || color === "black" || color.trim() === "" || color === "transparent") {
+    if (
+      !color ||
+      color === "#000000" ||
+      color === "black" ||
+      color.trim() === "" ||
+      color === "transparent"
+    ) {
       return "#0B4B31";
     }
     return color;
@@ -861,9 +898,9 @@ export default function DashboardLayout({ children }) {
 
       const normalizedRole = userRole?.trim().toLowerCase();
 
-      const isAdminOrSubAdmin = 
-        normalizedRole === "admin" || 
-        normalizedRole === "subadmin" || 
+      const isAdminOrSubAdmin =
+        normalizedRole === "admin" ||
+        normalizedRole === "subadmin" ||
         normalizedRole === "sub admin";
 
       // Only fetch theme for Admin or SubAdmin users (NOT Super Admin)
@@ -900,33 +937,37 @@ export default function DashboardLayout({ children }) {
       if (isDefaultTheme) {
         try {
           const themeResult = await dispatch(
-            getThemeByBranchAction(branchToUse)
+            getThemeByBranchAction(branchToUse),
           ).unwrap();
           if (themeResult?.success && themeResult?.theme) {
             const theme = themeResult.theme;
 
             // Validate colors - reject black colors
-            const validThemeColor = theme.themeColor && 
-                                    theme.themeColor !== "#000000" && 
-                                    theme.themeColor !== "black" &&
-                                    theme.themeColor.trim() !== ""
-                                    ? theme.themeColor 
-                                    : "#0B4B31";
-            
-            const validSecondaryColor = theme.secondaryColor && 
-                                        theme.secondaryColor !== "#000000" && 
-                                        theme.secondaryColor !== "black" &&
-                                        theme.secondaryColor.trim() !== ""
-                                        ? theme.secondaryColor 
-                                        : "#13574A";
-            
-            dispatch(setTheme({
-              themeColor: theme.themeColor || "#0B4B31",
-              secondaryColor: theme.secondaryColor || "#13574A",
-              logo: theme.logo || "",
-              favicon: theme.favicon || "",
-              mainText: theme.mainText || "MaktabOS",
-            }));
+            const validThemeColor =
+              theme.themeColor &&
+              theme.themeColor !== "#000000" &&
+              theme.themeColor !== "black" &&
+              theme.themeColor.trim() !== ""
+                ? theme.themeColor
+                : "#0B4B31";
+
+            const validSecondaryColor =
+              theme.secondaryColor &&
+              theme.secondaryColor !== "#000000" &&
+              theme.secondaryColor !== "black" &&
+              theme.secondaryColor.trim() !== ""
+                ? theme.secondaryColor
+                : "#13574A";
+
+            dispatch(
+              setTheme({
+                themeColor: theme.themeColor || "#0B4B31",
+                secondaryColor: theme.secondaryColor || "#13574A",
+                logo: theme.logo || "",
+                favicon: theme.favicon || "",
+                mainText: theme.mainText || "MaktabOS",
+              }),
+            );
           }
         } catch (themeError) {
           if (
@@ -939,36 +980,42 @@ export default function DashboardLayout({ children }) {
             const websiteSettings = reduxUser.admin.websiteSettings;
 
             // Validate colors - reject black colors
-            const validThemeColor = websiteSettings.themeColor && 
-                                    websiteSettings.themeColor !== "#000000" && 
-                                    websiteSettings.themeColor !== "black" &&
-                                    websiteSettings.themeColor.trim() !== ""
-                                    ? websiteSettings.themeColor 
-                                    : "#0B4B31";
-            
-            const validSecondaryColor = websiteSettings.secondaryColor && 
-                                        websiteSettings.secondaryColor !== "#000000" && 
-                                        websiteSettings.secondaryColor !== "black" &&
-                                        websiteSettings.secondaryColor.trim() !== ""
-                                        ? websiteSettings.secondaryColor 
-                                        : "#13574A";
-            
-            dispatch(setTheme({
-              themeColor: validThemeColor,
-              secondaryColor: validSecondaryColor,
-              logo: websiteSettings.logo || "",
-              favicon: websiteSettings.favicon || "",
-              mainText: websiteSettings.mainText || "MaktabOS",
-            }));
+            const validThemeColor =
+              websiteSettings.themeColor &&
+              websiteSettings.themeColor !== "#000000" &&
+              websiteSettings.themeColor !== "black" &&
+              websiteSettings.themeColor.trim() !== ""
+                ? websiteSettings.themeColor
+                : "#0B4B31";
+
+            const validSecondaryColor =
+              websiteSettings.secondaryColor &&
+              websiteSettings.secondaryColor !== "#000000" &&
+              websiteSettings.secondaryColor !== "black" &&
+              websiteSettings.secondaryColor.trim() !== ""
+                ? websiteSettings.secondaryColor
+                : "#13574A";
+
+            dispatch(
+              setTheme({
+                themeColor: validThemeColor,
+                secondaryColor: validSecondaryColor,
+                logo: websiteSettings.logo || "",
+                favicon: websiteSettings.favicon || "",
+                mainText: websiteSettings.mainText || "MaktabOS",
+              }),
+            );
           } else {
             // Ensure defaults are set even if API fails and no websiteSettings
-            dispatch(setTheme({
-              themeColor: websiteSettings.themeColor || "#0B4B31",
-              secondaryColor: websiteSettings.secondaryColor || "#13574A",
-              logo: websiteSettings.logo || "",
-              favicon: websiteSettings.favicon || "",
-              mainText: websiteSettings.mainText || "MaktabOS",
-            }));
+            dispatch(
+              setTheme({
+                themeColor: websiteSettings.themeColor || "#0B4B31",
+                secondaryColor: websiteSettings.secondaryColor || "#13574A",
+                logo: websiteSettings.logo || "",
+                favicon: websiteSettings.favicon || "",
+                mainText: websiteSettings.mainText || "MaktabOS",
+              }),
+            );
           }
         }
       }
