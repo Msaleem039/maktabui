@@ -233,13 +233,6 @@ export default function AddParentForm() {
         </div>
       )}
 
-      {formError && (
-        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-          <p className="font-semibold">Form Error:</p>
-          <p>{formError}</p>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <h3 className="text-lg font-semibold text-gray-700">Parent/Guardian</h3>

@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import {
   getInvoiceByIdAction,
   updateInvoiceAction,
+  resetUpdateInvoiceState, // Import the correct action
+  clearUpdateInvoiceError, // Import error clearing action
 } from "@/redux/slices/invoiceSlices/invoiceSlices";
 import { FormInput } from "@/components/FormInput";
 import { getAllParentsWithStudents } from "@/redux/slices/parentSlices/parentSlice";
@@ -50,12 +52,25 @@ export default function EditInvoice() {
     studentId: false,
   });
 
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [localError, setLocalError] = useState(null);
+
+  // Reset update state when component mounts
+  useEffect(() => {
+    dispatch(resetUpdateInvoiceState());
+  }, [dispatch]);
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    dispatch(clearUpdateInvoiceError());
+  }, [dispatch]);
+
   useEffect(() => {
     if (id) {
       dispatch(getInvoiceByIdAction(id));
     }
     dispatch(getAllParentsWithStudents(adminId));
-  }, [dispatch, id]);
+  }, [dispatch, id, adminId]);
 
   useEffect(() => {
     if (invoice) {
@@ -100,6 +115,27 @@ export default function EditInvoice() {
       }
     }
   }, [formData.parentId, formData.studentId, parentsWithStudents]);
+
+  useEffect(() => {
+    if (updateSuccess) {
+      setShowSuccess(true);
+      
+      const timer = setTimeout(() => {
+        router.push("/dashboard/finance/invoice");
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [updateSuccess, router]);
+
+  // Handle update errors
+  useEffect(() => {
+    if (updateError) {
+      setLocalError(updateError);
+    } else {
+      setLocalError(null);
+    }
+  }, [updateError]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -160,6 +196,11 @@ export default function EditInvoice() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Clear previous states
+    setShowSuccess(false);
+    setLocalError(null);
+    dispatch(clearUpdateInvoiceError());
 
     const payload = {
       parentId: formData.parentId,
@@ -175,13 +216,12 @@ export default function EditInvoice() {
     dispatch(updateInvoiceAction({ id, updateData: payload }));
   };
 
+  // Cleanup on unmount
   useEffect(() => {
-    if (updateSuccess) {
-      setTimeout(() => {
-        router.push("/dashboard/finance/invoice");
-      }, 2000);
-    }
-  }, [updateSuccess, router]);
+    return () => {
+      dispatch(resetUpdateInvoiceState());
+    };
+  }, [dispatch]);
 
   const parentOptions = parentsWithStudents?.map((p) => ({
     value: p._id,
@@ -230,15 +270,15 @@ export default function EditInvoice() {
           Edit Invoice
         </h2>
 
-        {updateError && (
+        {localError && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {updateError}
+            {localError}
           </div>
         )}
 
-        {updateSuccess && (
+        {showSuccess && (
           <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-            Invoice updated successfully!
+            Invoice updated successfully! Redirecting...
           </div>
         )}
 

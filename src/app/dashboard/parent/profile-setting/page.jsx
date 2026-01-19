@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Save, X, User, Phone, MapPin, Lock } from "lucide-react";
 import { useSelector, useDispatch } from 'react-redux';
-import { updateParent,getParentById } from '@/redux/slices/parentSlices/parentSlice';
+import { updateParent, getParentById } from '@/redux/slices/parentSlices/parentSlice';
+import { getUserId } from "@/utils/getCookies";
 
 const FormInput = ({
   label,
@@ -106,7 +107,7 @@ const ProfileInfoCard = ({ icon: Icon, label, value }) => (
 
 export default function ProfileSettings() {
   const dispatch = useDispatch();
-  const { currentParent, loading, error } = useSelector((state) => state.parent);
+  const { parent, status, error } = useSelector((state) => state.getParentById);
   
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -117,7 +118,6 @@ export default function ProfileSettings() {
     lastName: "",
     phone: "",
     address: "",
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -131,20 +131,36 @@ export default function ProfileSettings() {
   };
 
   useEffect(() => {
-    if (currentParent) {
-      const { firstName, lastName } = extractNames(currentParent.fullName);
+    const fetchParentData = async () => {
+      try {
+        const parentId = getUserId();
+        if (parentId) {
+          await dispatch(getParentById(parentId)).unwrap();
+        } else {
+          console.error("No parent ID found");
+        }
+      } catch (error) {
+        console.error("Error fetching parent data:", error);
+      }
+    };
+
+    fetchParentData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (parent) {
+      const { firstName, lastName } = extractNames(parent.fullName);
       
       setProfileData({
         firstName,
         lastName,
-        phone: currentParent.phone || '',
-        address: currentParent.address || '',
-        currentPassword: '',
+        phone: parent.phone || '',
+        address: parent.address || '',
         newPassword: '',
         confirmPassword: '',
       });
     }
-  }, [currentParent]);
+  }, [parent]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -182,9 +198,6 @@ export default function ProfileSettings() {
     }
 
     if (profileData.newPassword || profileData.confirmPassword) {
-      if (!profileData.currentPassword) {
-        newErrors.currentPassword = "Current password is required to change password";
-      }
       if (profileData.newPassword.length < 6) {
         newErrors.newPassword = "Password must be at least 6 characters";
       }
@@ -204,20 +217,25 @@ export default function ProfileSettings() {
       return;
     }
 
+    const parentId = getUserId();
+    if (!parentId) {
+      setErrors({ submit: "User ID not found. Please log in again." });
+      return;
+    }
+
     const updateData = {
       fullName: `${profileData.firstName} ${profileData.lastName}`.trim(),
       phone: profileData.phone,
       address: profileData.address,
     };
 
-    if (profileData.newPassword && profileData.currentPassword) {
-      updateData.currentPassword = profileData.currentPassword;
+    if (profileData.newPassword) {
       updateData.password = profileData.newPassword;
     }
 
     try {
       const result = await dispatch(updateParent({
-        parentId: currentParent._id,
+        parentId: parentId,
         updateData
       })).unwrap();
       
@@ -226,7 +244,6 @@ export default function ProfileSettings() {
       
       setProfileData((prev) => ({
         ...prev,
-        currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       }));
@@ -242,14 +259,13 @@ export default function ProfileSettings() {
 
   const handleCancel = () => {
     setIsEditing(false);
-    if (currentParent) {
-      const { firstName, lastName } = extractNames(currentParent.fullName);
+    if (parent) {
+      const { firstName, lastName } = extractNames(parent.fullName);
       setProfileData({
         firstName,
         lastName,
-        phone: currentParent.phone || '',
-        address: currentParent.address || '',
-        currentPassword: '',
+        phone: parent.phone || '',
+        address: parent.address || '',
         newPassword: '',
         confirmPassword: '',
       });
@@ -257,7 +273,7 @@ export default function ProfileSettings() {
     setErrors({});
   };
 
-  if (!currentParent && loading) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#F5F9F7] to-[#E5EFEB] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B4B31]"></div>
@@ -265,7 +281,7 @@ export default function ProfileSettings() {
     );
   }
 
-  if (error && !currentParent) {
+  if (error && !parent) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#F5F9F7] to-[#E5EFEB] flex items-center justify-center">
         <div className="text-center">
@@ -311,7 +327,7 @@ export default function ProfileSettings() {
           </div>
         )}
 
-        {loading && (
+        {status === 'updating' && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31] mx-auto mb-3"></div>
@@ -331,7 +347,7 @@ export default function ProfileSettings() {
                   <h2 className="text-2xl font-bold text-gray-800">
                     {profileData.firstName} {profileData.lastName}
                   </h2>
-                  <p className="text-gray-600 mt-1">{currentParent?.email}</p>
+                  <p className="text-gray-600 mt-1">{parent?.email}</p>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
@@ -410,7 +426,7 @@ export default function ProfileSettings() {
                       label="Email"
                       name="email"
                       type="email"
-                      value={currentParent?.email || ''}
+                      value={parent?.email || ''}
                       onChange={() => {}}
                       placeholder="Your email"
                       disabled
@@ -487,49 +503,32 @@ export default function ProfileSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <PasswordInput
-                      label="Current Password"
-                      name="currentPassword"
-                      value={profileData.currentPassword}
+                      label="New Password"
+                      name="newPassword"
+                      value={profileData.newPassword}
                       onChange={handleChange}
-                      placeholder="Enter current password"
+                      placeholder="Enter new password (leave blank to keep current)"
                     />
-                    {errors.currentPassword && (
+                    {errors.newPassword && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.currentPassword}
+                        {errors.newPassword}
                       </p>
                     )}
                   </div>
 
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <PasswordInput
-                        label="New Password"
-                        name="newPassword"
-                        value={profileData.newPassword}
-                        onChange={handleChange}
-                        placeholder="Enter new password"
-                      />
-                      {errors.newPassword && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {errors.newPassword}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <PasswordInput
-                        label="Confirm New Password"
-                        name="confirmPassword"
-                        value={profileData.confirmPassword}
-                        onChange={handleChange}
-                        placeholder="Confirm new password"
-                      />
-                      {errors.confirmPassword && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {errors.confirmPassword}
-                        </p>
-                      )}
-                    </div>
+                  <div>
+                    <PasswordInput
+                      label="Confirm New Password"
+                      name="confirmPassword"
+                      value={profileData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm new password"
+                    />
+                    {errors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -544,7 +543,7 @@ export default function ProfileSettings() {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  disabled={loading}
+                  disabled={status === 'updating'}
                   className="flex-1 rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <X size={18} />
@@ -552,10 +551,10 @@ export default function ProfileSettings() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={status === 'updating'}
                   className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {loading ? (
+                  {status === 'updating' ? (
                     <>
                       <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

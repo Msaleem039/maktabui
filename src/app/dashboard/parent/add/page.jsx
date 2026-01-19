@@ -316,14 +316,7 @@ export default function AddParentForm() {
         </div>
       )}
 
-      {formError && (
-        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-          <p className="font-semibold">Form Error:</p>
-          <p>{formError}</p>
-        </div>
-      )}
 
-      {/* Classes Loading/Error Messages */}
       {classesLoading && (
         <div className="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
           <p className="font-semibold">Loading classes...</p>
