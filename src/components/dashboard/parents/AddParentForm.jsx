@@ -7,6 +7,7 @@ import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/
 import CustomDatePicker from "@/components/DatePicker";
 import { getAdminId } from "@/utils/getCookies";
 
+
 const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   return (
     <div className={className}>
