@@ -1,41 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, CreditCard } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createParent, resetAllParentsState } from "@/redux/slices/parentSlices/parentSlice";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  useStripe,
-  useElements,
-  CardElement,
-} from "@stripe/react-stripe-js";
 import CustomDatePicker from "@/components/DatePicker";
 import { getAdminId } from "@/utils/getCookies";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_51ST33BJVO0vFfpflc4DWY8yeQ544KDduqajZGHU0K8E9HByfBBrQmNLWjFd0wRkY3D5jFOAgHYswSZudeUBA2rgJ00Rs04VO1X");
-
-const StripeCardInput = ({ label, className = "", onCardChange }) => {
-  
-  return (
-    <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label} *
-      </label>
-      <div className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 min-h-[50px] flex items-center">
-        <div className="w-full">
-          <CardElement 
-            onChange={onCardChange}
-          />
-        </div>
-      </div>
-      <p className="text-xs text-gray-500 mt-2">
-        Test card: 4242 4242 4242 4242 | Exp: 12/34 | CVC: 123 | ZIP: 12345
-      </p>
-    </div>
-  );
-};
 
 const FormInput = ({ label, name, type = "text", value, onChange, placeholder, required = false, className = "" }) => {
   return (
@@ -95,10 +65,8 @@ const FormDropdown = ({ label, name, value, options, onChange, placeholder = "Se
   );
 };
 
-function AddParentFormContent() {
+export default function AddParentForm() {
   const dispatch = useDispatch();
-  const stripe = useStripe();
-  const elements = useElements();
   const { status, error, parent, student } = useSelector((state) => state.createParent);
   const adminId = getAdminId();
 
@@ -132,10 +100,7 @@ function AddParentFormContent() {
   ]);
 
   const [showSuccess, setShowSuccess] = useState(false);
-  const [cardComplete, setCardComplete] = useState(false);
-  const [stripeError, setStripeError] = useState("");
-  const [cardDetails, setCardDetails] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const handleParentChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -155,22 +120,6 @@ function AddParentFormContent() {
       };
       return updated;
     });
-  };
-
-  const handleCardChange = (event) => {
-    setCardComplete(event.complete);
-    setStripeError(event.error ? event.error.message : "");
-    
-    if (event.complete) {
-      setCardDetails({
-        brand: event.brand,
-        last4: event.last4,
-        expMonth: event.exp_month,
-        expYear: event.exp_year
-      });
-    } else {
-      setCardDetails(null);
-    }
   };
 
   const addMoreStudents = () => {
@@ -200,57 +149,13 @@ function AddParentFormContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsProcessing(true);
-
-    if (!stripe || !elements) {
-      console.error("Stripe hasn't loaded yet");
-      setStripeError("Stripe hasn't loaded yet. Please try again.");
-      setIsProcessing(false);
-      return;
-    }
-
-    const cardElement = elements.getElement(CardElement);
-
-    if (!cardComplete) {
-      setStripeError("Please complete the card details");
-      setIsProcessing(false);
-      return;
-    }
-
-    setStripeError("");
+    setFormError("");
 
     try {
-      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: {
-          name: parentData.fullName,
-          email: parentData.email,
-          phone: parentData.phone,
-          address: {
-            line1: parentData.address,
-          },
-        },
-      });
-
-      if (stripeError) {
-        console.error("Stripe error:", stripeError);
-        setStripeError(`Payment error: ${stripeError.message}`);
-        setIsProcessing(false);
-        return;
-      }
-
       const submissionData = {
         parent: {
           ...parentData,
           fee: parentData.fee ? Number(parentData.fee) : 0,
-          paymentMethodId: paymentMethod.id,
-          cardDetails: {
-            brand: paymentMethod.card.brand,
-            last4: paymentMethod.card.last4,
-            expMonth: paymentMethod.card.exp_month,
-            expYear: paymentMethod.card.exp_year
-          }
         },
         children: children.map(child => ({
           ...child,
@@ -276,9 +181,7 @@ function AddParentFormContent() {
       }
     } catch (error) {
       console.error('Error creating parent:', error);
-      setStripeError(error.message || "An error occurred while processing your request.");
-    } finally {
-      setIsProcessing(false);
+      setFormError(error.message || "An error occurred while processing your request.");
     }
   };
 
@@ -310,17 +213,7 @@ function AddParentFormContent() {
         email: "",
       },
     ]);
-    
-    if (elements) {
-      const cardElement = elements.getElement(CardElement);
-      if (cardElement) {
-        cardElement.clear();
-      }
-    }
-    
-    setCardComplete(false);
-    setStripeError("");
-    setCardDetails(null);
+    setFormError("");
   };
 
   return (
@@ -328,12 +221,7 @@ function AddParentFormContent() {
       {showSuccess && (
         <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
           <p className="font-semibold">Family added successfully!</p>
-          <p>Parent and student records have been created with payment method.</p>
-          {parent && (
-            <p className="text-sm mt-1">
-              Stripe Customer ID: {parent.stripeCustomerId}
-            </p>
-          )}
+          <p>Parent and student records have been created.</p>
         </div>
       )}
 
@@ -344,10 +232,10 @@ function AddParentFormContent() {
         </div>
       )}
 
-      {stripeError && (
+      {formError && (
         <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-          <p className="font-semibold">Payment Error:</p>
-          <p>{stripeError}</p>
+          <p className="font-semibold">Form Error:</p>
+          <p>{formError}</p>
         </div>
       )}
 
@@ -427,21 +315,6 @@ function AddParentFormContent() {
               placeholder="Emergency Phone"
             />
             
-            <div className="md:col-span-2">
-              <StripeCardInput 
-                label="Credit Card Details"
-                onCardChange={handleCardChange}
-              />
-              {cardDetails && (
-                <div className="flex items-center gap-2 mt-2 p-2 bg-green-50 rounded-lg">
-                  <CreditCard size={16} className="text-green-600" />
-                  <span className="text-green-700 text-sm font-medium">
-                    Card verified: {cardDetails.brand.charAt(0).toUpperCase() + cardDetails.brand.slice(1)} ending in {cardDetails.last4}
-                  </span>
-                </div>
-              )}
-            </div>
-
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -588,23 +461,13 @@ function AddParentFormContent() {
           </button>
           <button
             type="submit"
-            disabled={status === "loading" || !stripe || !cardComplete || isProcessing}
+            disabled={status === "loading"}
             className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing Payment..." : 
-             status === "loading" ? "Adding Family..." : 
-             "Add Family & Setup Payment"}
+            {status === "loading" ? "Adding Family..." : "Add Family"}
           </button>
         </div>
       </form>
     </>
-  );
-}
-
-export default function AddParentForm() {
-  return (
-    <Elements stripe={stripePromise}>
-      <AddParentFormContent />
-    </Elements>
   );
 }

@@ -1,25 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Calendar, CreditCard, Repeat } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createParent,
   resetAllParentsState,
 } from "@/redux/slices/parentSlices/parentSlice";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  useStripe,
-  useElements,
-  CardElement,
-} from "@stripe/react-stripe-js";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { getAdminId, getUserBranch } from "@/utils/getCookies";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
 
 const FormInput = ({
   label,
@@ -130,15 +119,14 @@ const DateInput = ({
   );
 };
 
-function AddParentFormContent() {
+export default function AddParentForm() {
   const dispatch = useDispatch();
-  const stripe = useStripe();
-  const elements = useElements();
+  const adminId = getAdminId();
+  const branch = getUserBranch();
+
   const { status, error, parent, student } = useSelector(
     (state) => state.createParent
   );
-  const adminId = getAdminId();
-  const branch = getUserBranch();
 
   const {
     classNames,
@@ -157,8 +145,6 @@ function AddParentFormContent() {
     password: "",
     identityNumber: "",
     addToWaitList: false,
-    recurringEnabled: false,
-    recurringFrequency: "monthly",
   });
 
   const [children, setChildren] = useState([
@@ -178,10 +164,7 @@ function AddParentFormContent() {
   ]);
 
   const [showSuccess, setShowSuccess] = useState(false);
-  const [cardComplete, setCardComplete] = useState(false);
-  const [stripeError, setStripeError] = useState("");
-  const [cardDetails, setCardDetails] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     dispatch(getAllClassesNameAction(adminId));
@@ -193,13 +176,6 @@ function AddParentFormContent() {
         value: classItem._id || classItem.id,
       }))
     : [];
-
-  // Recurring frequency options
-  const recurringOptions = [
-    { label: "Weekly", value: "weekly" },
-    { label: "Monthly", value: "monthly" },
-    { label: "Quarterly", value: "quarterly" },
-  ];
 
   const handleParentChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -219,22 +195,6 @@ function AddParentFormContent() {
       };
       return updated;
     });
-  };
-
-  const handleCardChange = (event) => {
-    setCardComplete(event.complete);
-    setStripeError(event.error ? event.error.message : "");
-
-    if (event.complete) {
-      setCardDetails({
-        brand: event.brand,
-        last4: event.last4,
-        expMonth: event.exp_month,
-        expYear: event.exp_year,
-      });
-    } else {
-      setCardDetails(null);
-    }
   };
 
   const addMoreStudents = () => {
@@ -264,16 +224,7 @@ function AddParentFormContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsProcessing(true);
-
-    if (!stripe || !elements) {
-      console.error("Stripe hasn't loaded yet");
-      setStripeError("Stripe hasn't loaded yet. Please try again.");
-      setIsProcessing(false);
-      return;
-    }
-
-    setStripeError("");
+    setFormError("");
 
     try {
       const submissionData = {
@@ -312,11 +263,9 @@ function AddParentFormContent() {
       }
     } catch (error) {
       console.error("Error creating parent:", error);
-      setStripeError(
+      setFormError(
         error.message || "An error occurred while processing your request."
       );
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -331,7 +280,7 @@ function AddParentFormContent() {
       email: "",
       password: "",
       identityNumber: "",
-      addToWaitList: false
+      addToWaitList: false,
     });
     setChildren([
       {
@@ -348,27 +297,15 @@ function AddParentFormContent() {
         email: "",
       },
     ]);
-
-    if (elements) {
-      const cardElement = elements.getElement(CardElement);
-      if (cardElement) {
-        cardElement.clear();
-      }
-    }
-
-    setCardComplete(false);
-    setStripeError("");
-    setCardDetails(null);
+    setFormError("");
   };
 
   return (
-    <>
+    <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-10 py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
       {showSuccess && (
         <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
           <p className="font-semibold">Family added successfully!</p>
-          <p>
-            Parent and student records have been created.
-          </p>
+          <p>Parent and student records have been created.</p>
         </div>
       )}
 
@@ -379,10 +316,10 @@ function AddParentFormContent() {
         </div>
       )}
 
-      {stripeError && (
+      {formError && (
         <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-          <p className="font-semibold">Payment Error:</p>
-          <p>{stripeError}</p>
+          <p className="font-semibold">Form Error:</p>
+          <p>{formError}</p>
         </div>
       )}
 
@@ -626,31 +563,13 @@ function AddParentFormContent() {
           </button>
           <button
             type="submit"
-            disabled={
-              status === "loading" ||
-              isProcessing ||
-              classesLoading
-            }
+            disabled={status === "loading" || classesLoading}
             className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isProcessing
-              ? "Processing Payment..."
-              : status === "loading"
-              ? "Adding Family..."
-              : "Add Family & Setup Payment"}
+            {status === "loading" ? "Adding Family..." : "Add Family"}
           </button>
         </div>
       </form>
-    </>
-  );
-}
-
-export default function AddParentForm() {
-  return (
-    <Elements stripe={stripePromise}>
-      <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-10 py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
-        <AddParentFormContent />
-      </div>
-    </Elements>
+    </div>
   );
 }
