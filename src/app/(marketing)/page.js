@@ -17,7 +17,7 @@ import Buttonstart from "@/components/landing/Buttonstart";
 
 const primaryNavItems = [
   { label: "Home", href: "#home" },
-  { label: "About Us", href: "/about" },
+  { label: "About Us", href: "#about" },
   { label: "Features", href: "#features" },
   { label: "Plan", href: "#plan" },
   { label: "Careers", href: "#careers" },
