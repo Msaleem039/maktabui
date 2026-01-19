@@ -232,7 +232,6 @@ export default function AddParentForm() {
           <p>{error}</p>
         </div>
       )}
-
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <h3 className="text-lg font-semibold text-gray-700">Parent/Guardian</h3>
