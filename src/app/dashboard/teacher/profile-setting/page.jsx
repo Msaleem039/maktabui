@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Save, X, User, Phone, MapPin, Lock } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { getTeacherById,updateTeacher } from "@/redux/slices/teacherSlices/teacherSlices";
+import { getUserId } from "@/utils/getCookies";
 
-// Reusing your FormInput component
 const FormInput = ({
   label,
   name,
@@ -44,7 +46,6 @@ const FormInput = ({
   );
 };
 
-// Password Input with visibility toggle
 const PasswordInput = ({
   label,
   name,
@@ -92,7 +93,6 @@ const PasswordInput = ({
   );
 };
 
-// Profile Info Card Component
 const ProfileInfoCard = ({ icon: Icon, label, value }) => (
   <div className="p-4 bg-[#F5F9F7] rounded-xl border border-[#E2E7E4]">
     <div className="flex items-center gap-3 mb-2">
@@ -106,40 +106,71 @@ const ProfileInfoCard = ({ icon: Icon, label, value }) => (
 );
 
 export default function ProfileSettings() {
+  const dispatch = useDispatch();
+  const teacherId = getUserId();
+  
+  const { teacher, status, error } = useSelector((state) => state.getTeacherById);
+  const updateStatus = useSelector((state) => state.updateTeacher?.status);
+  
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Profile data state
   const [profileData, setProfileData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
+    fullName: "",
     address: "",
-    currentPassword: "",
-    newPassword: "",
+    phone: "",
+    password: "",
     confirmPassword: "",
   });
 
-  // Mock initial user data - in real app, this would come from Redux or API
-  const initialUserData = {
-    firstName: "John",
-    lastName: "Doe",
-    phone: "+1 (555) 123-4567",
-    address: "123 Green Street, Eco City, Green State 12345",
-    email: "john.doe@example.com", // Read-only field
-  };
-
-  // Load initial data
   useEffect(() => {
-    setProfileData({
-      ...initialUserData,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-  }, []);
+    if (teacherId) {
+      dispatch(getTeacherById(teacherId));
+    }
+  }, [dispatch, teacherId]);
+
+  useEffect(() => {
+    if (teacher) {
+      setProfileData({
+        fullName: teacher.fullName || "",
+        address: teacher.address || "",
+        phone: teacher.phone || "",
+        password: "",
+        confirmPassword: "",
+      });
+    }
+  }, [teacher]);
+
+  // Handle success message after update
+  useEffect(() => {
+    if (updateStatus === 'succeeded') {
+      setShowSuccess(true);
+      setIsEditing(false);
+      
+      // Reset password fields after successful update
+      setProfileData(prev => ({
+        ...prev,
+        password: "",
+        confirmPassword: "",
+      }));
+      
+      // Refresh teacher data
+      dispatch(getTeacherById(teacherId));
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => setShowSuccess(false), 3000);
+    }
+  }, [updateStatus, dispatch, teacherId]);
+
+  // Handle error from update
+  useEffect(() => {
+    if (error) {
+      setErrors({
+        submit: error,
+      });
+    }
+  }, [error]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -161,11 +192,8 @@ export default function ProfileSettings() {
     const newErrors = {};
 
     // Name validation
-    if (!profileData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-    if (!profileData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
+    if (!profileData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
     }
 
     // Phone validation (basic)
@@ -174,15 +202,12 @@ export default function ProfileSettings() {
     }
 
     // Password validation (only if changing password)
-    if (profileData.newPassword || profileData.confirmPassword) {
-      if (!profileData.currentPassword) {
-        newErrors.currentPassword = "Current password is required to change password";
+    if (profileData.password) {
+      if (profileData.password.length < 6) {
+        newErrors.password = "Password must be at least 6 characters";
       }
-      if (profileData.newPassword.length < 6) {
-        newErrors.newPassword = "Password must be at least 6 characters";
-      }
-      if (profileData.newPassword !== profileData.confirmPassword) {
-        newErrors.confirmPassword = "New passwords do not match";
+      if (profileData.password !== profileData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
       }
     }
 
@@ -197,48 +222,50 @@ export default function ProfileSettings() {
       return;
     }
 
-    setIsLoading(true);
-    
-    try {
-      // Simulate API call - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // In real app, you would dispatch an update action here
-      // await dispatch(updateProfile(profileData)).unwrap();
-      
-      setShowSuccess(true);
-      setIsEditing(false);
-      
-      // Reset password fields after successful update
-      setProfileData((prev) => ({
-        ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      setErrors({
-        submit: error.message || "Failed to update profile. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+    // Prepare data for API - only include password if provided
+    const updateData = {
+      id: teacherId,
+      fullName: profileData.fullName,
+      address: profileData.address,
+      phone: profileData.phone,
+      // Only include password if user wants to change it
+      ...(profileData.password && { password: profileData.password })
+    };
+
+    // Include other required fields from existing teacher data to avoid errors
+    if (teacher) {
+      updateData.gender = teacher.gender || "";
+      updateData.dateOfBirth = teacher.dateOfBirth || "";
+      updateData.qualification = teacher.qualification || "";
+      updateData.specialization = teacher.specialization || "";
+      updateData.experienceYears = teacher.experienceYears || 0;
+      updateData.hireDate = teacher.hireDate || "";
+      updateData.assignedClasses = teacher.assignedClasses || [];
+      updateData.subjects = teacher.subjects || [];
+      updateData.languages = teacher.languages || [];
+      updateData.status = teacher.status || "active";
     }
+
+    // Dispatch update action
+    dispatch(updateTeacher(updateData));
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setProfileData({
-      ...initialUserData,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    // Reset form to current teacher data
+    if (teacher) {
+      setProfileData({
+        fullName: teacher.fullName || "",
+        address: teacher.address || "",
+        phone: teacher.phone || "",
+        password: "",
+        confirmPassword: "",
+      });
+    }
     setErrors({});
   };
+
+  const isLoading = status === 'loading' || updateStatus === 'loading';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F5F9F7] to-[#E5EFEB] py-8 px-4">
@@ -273,196 +300,174 @@ export default function ProfileSettings() {
           </div>
         )}
 
-        <div className="bg-white rounded-[28px] border border-[#E2E7E4] shadow-[0_30px_80px_-50px_rgba(11,75,49,0.15)] p-8">
-          {/* Profile Overview - Read-only mode */}
-          {!isEditing && (
-            <div className="mb-10">
-              <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#0B4B31]/20 to-[#D5E2DB] border-4 border-white shadow-lg flex items-center justify-center">
-                  <User size={40} className="text-[#0B4B31]" />
-                </div>
-                <div className="text-center sm:text-left">
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    {profileData.firstName} {profileData.lastName}
-                  </h2>
-                  <p className="text-gray-600 mt-1">{initialUserData.email}</p>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Profile
-                  </button>
-                </div>
-              </div>
+        {/* Loading State */}
+        {status === 'loading' && !teacher && (
+          <div className="mb-6 p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31]"></div>
+            <p className="mt-2 text-gray-600">Loading profile data...</p>
+          </div>
+        )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ProfileInfoCard
-                  icon={Phone}
-                  label="Phone Number"
-                  value={profileData.phone}
-                />
-                <ProfileInfoCard
-                  icon={MapPin}
-                  label="Address"
-                  value={profileData.address}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Edit Form */}
-          {isEditing && (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Name Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
-                  <div className="p-2 bg-[#E5EFEB] rounded-full">
-                    <User size={20} className="text-[#0B4B31]" />
+        {teacher && (
+          <div className="bg-white rounded-[28px] border border-[#E2E7E4] shadow-[0_30px_80px_-50px_rgba(11,75,49,0.15)] p-8">
+            {/* Profile Overview - Read-only mode */}
+            {!isEditing && (
+              <div className="mb-10">
+                <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#0B4B31]/20 to-[#D5E2DB] border-4 border-white shadow-lg flex items-center justify-center">
+                    <User size={40} className="text-[#0B4B31]" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Personal Information
-                  </h3>
+                  <div className="text-center sm:text-left">
+                    <h2 className="text-2xl font-bold text-gray-800">
+                      {profileData.fullName}
+                    </h2>
+                    <p className="text-gray-600 mt-1">{teacher.email}</p>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      disabled={isLoading}
+                      className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit Profile
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <FormInput
-                      label="First Name"
-                      name="firstName"
-                      value={profileData.firstName}
-                      onChange={handleChange}
-                      placeholder="Enter your first name"
-                      required
-                      icon={<User size={18} />}
-                    />
-                    {errors.firstName && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.firstName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <FormInput
-                      label="Last Name"
-                      name="lastName"
-                      value={profileData.lastName}
-                      onChange={handleChange}
-                      placeholder="Enter your last name"
-                      required
-                    />
-                    {errors.lastName && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.lastName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <FormInput
-                      label="Email"
-                      name="email"
-                      type="email"
-                      value={initialUserData.email}
-                      onChange={() => {}}
-                      placeholder="Your email"
-                      disabled
-                      icon={
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      }
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Email cannot be changed. Contact support if you need to update your email.
-                    </p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ProfileInfoCard
+                    icon={Phone}
+                    label="Phone Number"
+                    value={profileData.phone}
+                  />
+                  <ProfileInfoCard
+                    icon={MapPin}
+                    label="Address"
+                    value={profileData.address}
+                  />
                 </div>
               </div>
+            )}
 
-              {/* Contact Information */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
-                  <div className="p-2 bg-[#E5EFEB] rounded-full">
-                    <Phone size={20} className="text-[#0B4B31]" />
+            {/* Edit Form */}
+            {isEditing && (
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Name Section */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
+                    <div className="p-2 bg-[#E5EFEB] rounded-full">
+                      <User size={20} className="text-[#0B4B31]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Personal Information
+                    </h3>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Contact Information
-                  </h3>
-                </div>
 
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <FormInput
-                      label="Phone Number"
-                      name="phone"
-                      value={profileData.phone}
-                      onChange={handleChange}
-                      placeholder="Enter your phone number"
-                      icon={<Phone size={18} />}
-                    />
-                    {errors.phone && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.phone}
+                  <div className="grid grid-cols-1 gap-6">
+                    <div>
+                      <FormInput
+                        label="Full Name"
+                        name="fullName"
+                        value={profileData.fullName}
+                        onChange={handleChange}
+                        placeholder="Enter your full name"
+                        required
+                        icon={<User size={18} />}
+                      />
+                      {errors.fullName && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.fullName}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <FormInput
+                        label="Email"
+                        name="email"
+                        type="email"
+                        value={teacher.email || ""}
+                        onChange={() => {}}
+                        placeholder="Your email"
+                        disabled
+                        icon={
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        }
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Email cannot be changed. Contact support if you need to update your email.
                       </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <FormInput
-                      label="Address"
-                      name="address"
-                      value={profileData.address}
-                      onChange={handleChange}
-                      placeholder="Enter your full address"
-                      icon={<MapPin size={18} />}
-                    />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Password Change */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
-                  <div className="p-2 bg-[#E5EFEB] rounded-full">
-                    <Lock size={20} className="text-[#0B4B31]" />
+                {/* Contact Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
+                    <div className="p-2 bg-[#E5EFEB] rounded-full">
+                      <Phone size={20} className="text-[#0B4B31]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Contact Information
+                    </h3>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Change Password
-                  </h3>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    <div>
+                      <FormInput
+                        label="Phone Number"
+                        name="phone"
+                        value={profileData.phone}
+                        onChange={handleChange}
+                        placeholder="Enter your phone number"
+                        icon={<Phone size={18} />}
+                      />
+                      {errors.phone && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.phone}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <FormInput
+                        label="Address"
+                        name="address"
+                        value={profileData.address}
+                        onChange={handleChange}
+                        placeholder="Enter your full address"
+                        icon={<MapPin size={18} />}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <PasswordInput
-                      label="Current Password"
-                      name="currentPassword"
-                      value={profileData.currentPassword}
-                      onChange={handleChange}
-                      placeholder="Enter current password"
-                    />
-                    {errors.currentPassword && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.currentPassword}
-                      </p>
-                    )}
+                {/* Password Change */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
+                    <div className="p-2 bg-[#E5EFEB] rounded-full">
+                      <Lock size={20} className="text-[#0B4B31]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Change Password
+                    </h3>
                   </div>
 
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <PasswordInput
                         label="New Password"
-                        name="newPassword"
-                        value={profileData.newPassword}
+                        name="password"
+                        value={profileData.password}
                         onChange={handleChange}
                         placeholder="Enter new password"
                       />
-                      {errors.newPassword && (
+                      {errors.password && (
                         <p className="mt-1 text-sm text-red-600">
-                          {errors.newPassword}
+                          {errors.password}
                         </p>
                       )}
                     </div>
@@ -482,61 +487,61 @@ export default function ProfileSettings() {
                       )}
                     </div>
                   </div>
+
+                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                    <p className="text-sm text-blue-700">
+                      <span className="font-semibold">Note:</span> Leave password fields blank if you don't want to change your password.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                  <p className="text-sm text-blue-700">
-                    <span className="font-semibold">Note:</span> Leave password fields blank if you don't want to change your password.
-                  </p>
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    disabled={isLoading}
+                    className="flex-1 rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <X size={18} />
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
                 </div>
-              </div>
+              </form>
+            )}
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                  className="flex-1 rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <X size={18} />
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={18} />
-                      Save Changes
-                    </>
-                  )}
-                </button>
+            {/* Information for read-only mode */}
+            {!isEditing && (
+              <div className="mt-8 p-4 bg-[#F5F9F7] border border-[#E2E7E4] rounded-xl">
+                <h4 className="font-semibold text-gray-700 mb-2">Profile Information</h4>
+                <p className="text-sm text-gray-600">
+                  Click "Edit Profile" to update your name, phone number, address, or password.
+                  Your email is permanent and cannot be changed.
+                </p>
               </div>
-            </form>
-          )}
-
-          {/* Information for read-only mode */}
-          {!isEditing && (
-            <div className="mt-8 p-4 bg-[#F5F9F7] border border-[#E2E7E4] rounded-xl">
-              <h4 className="font-semibold text-gray-700 mb-2">Profile Information</h4>
-              <p className="text-sm text-gray-600">
-                Click "Edit Profile" to update your name, phone number, address, or password.
-                Your email is permanent and cannot be changed.
-              </p>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

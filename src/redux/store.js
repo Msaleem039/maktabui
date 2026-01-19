@@ -18,6 +18,7 @@ import {
   removeCardReducer,
   parentDashboardReducer,
   deleteParentReducer,
+  updateParentReducer
 } from "./slices/parentSlices/parentSlice";
 
 import {
@@ -134,6 +135,7 @@ export const store = configureStore({
     removeCard: removeCardReducer,
     parentDashboard: parentDashboardReducer,
     deleteParent: deleteParentReducer,
+    updateParent: updateParentReducer,
 
     // Student management
     createStudent: createStudentReducer,

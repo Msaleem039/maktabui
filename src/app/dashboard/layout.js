@@ -547,7 +547,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       return hasPermission(item.permission);
     };
 
-    // Create profile setting path based on role
     const getProfileSettingPath = () => {
       switch (userRole) {
         case "Teacher":
@@ -564,11 +563,23 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       }
     };
 
-    const profileSettingItem = {
-      name: "Profile Setting",
-      icon: "/Settings.png",
-      path: getProfileSettingPath(),
+    const getSettingsItem = () => {
+      if (userRole === "Admin") {
+        return {
+          name: "Settings",
+          icon: "/Settings.png",
+          path: `${basePath}/settings`,
+        };
+      }
+
+      return {
+        name: "Profile Setting",
+        icon: "/Settings.png",
+        path: getProfileSettingPath(),
+      };
     };
+
+    const settingsItem = getSettingsItem();
 
     switch (userRole) {
       case "Super Admin":
@@ -577,7 +588,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.team,
           allItems.instituteFinance,
           allItems.communication,
-          profileSettingItem,
+          settingsItem,
         ];
 
       case "Admin":
@@ -591,7 +602,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.finance,
           allItems.events,
           allItems.team,
-          profileSettingItem,
+          settingsItem,
         ];
 
       case "Sub Admin": {
@@ -601,7 +612,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           if (shouldIncludeItem(item)) subAdminItems.push(item);
         });
 
-        subAdminItems.push(profileSettingItem);
+        subAdminItems.push(settingsItem);
 
         return subAdminItems;
       }
@@ -630,7 +641,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           allItems.notifications,
           allItems.attendance,
           allItems.communication,
-          profileSettingItem,
+          settingsItem,
         ];
 
       case "Student":
@@ -644,7 +655,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
           allItems.notifications,
           allItems.communication,
-          profileSettingItem,
+          settingsItem,
         ];
 
       case "Parent":
@@ -659,7 +670,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
           allItems.notifications,
           allItems.communication,
-          profileSettingItem,
+          settingsItem,
         ];
 
       default:

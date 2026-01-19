@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Save, X, User, Phone, MapPin, Lock } from "lucide-react";
+import { useSelector, useDispatch } from 'react-redux';
+import { updateParent,getParentById } from '@/redux/slices/parentSlices/parentSlice';
 
-// Reusing your FormInput component
 const FormInput = ({
   label,
   name,
@@ -44,7 +45,6 @@ const FormInput = ({
   );
 };
 
-// Password Input with visibility toggle
 const PasswordInput = ({
   label,
   name,
@@ -92,7 +92,6 @@ const PasswordInput = ({
   );
 };
 
-// Profile Info Card Component
 const ProfileInfoCard = ({ icon: Icon, label, value }) => (
   <div className="p-4 bg-[#F5F9F7] rounded-xl border border-[#E2E7E4]">
     <div className="flex items-center gap-3 mb-2">
@@ -106,12 +105,13 @@ const ProfileInfoCard = ({ icon: Icon, label, value }) => (
 );
 
 export default function ProfileSettings() {
+  const dispatch = useDispatch();
+  const { currentParent, loading, error } = useSelector((state) => state.parent);
+  
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Profile data state
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -122,24 +122,29 @@ export default function ProfileSettings() {
     confirmPassword: "",
   });
 
-  // Mock initial user data - in real app, this would come from Redux or API
-  const initialUserData = {
-    firstName: "John",
-    lastName: "Doe",
-    phone: "+1 (555) 123-4567",
-    address: "123 Green Street, Eco City, Green State 12345",
-    email: "john.doe@example.com", // Read-only field
+  const extractNames = (fullName) => {
+    const names = fullName?.split(' ') || ['', ''];
+    return {
+      firstName: names[0] || '',
+      lastName: names.slice(1).join(' ') || ''
+    };
   };
 
-  // Load initial data
   useEffect(() => {
-    setProfileData({
-      ...initialUserData,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-  }, []);
+    if (currentParent) {
+      const { firstName, lastName } = extractNames(currentParent.fullName);
+      
+      setProfileData({
+        firstName,
+        lastName,
+        phone: currentParent.phone || '',
+        address: currentParent.address || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    }
+  }, [currentParent]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -148,7 +153,6 @@ export default function ProfileSettings() {
       [name]: value,
     }));
     
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -160,7 +164,6 @@ export default function ProfileSettings() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Name validation
     if (!profileData.firstName.trim()) {
       newErrors.firstName = "First name is required";
     }
@@ -168,12 +171,16 @@ export default function ProfileSettings() {
       newErrors.lastName = "Last name is required";
     }
 
-    // Phone validation (basic)
-    if (profileData.phone && !/^[\d\s\+\-\(\)]+$/.test(profileData.phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+    if (!profileData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^[\d\s\+\-\(\)]{10,}$/.test(profileData.phone.replace(/\D/g, ''))) {
+      newErrors.phone = "Please enter a valid phone number (at least 10 digits)";
     }
 
-    // Password validation (only if changing password)
+    if (!profileData.address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
     if (profileData.newPassword || profileData.confirmPassword) {
       if (!profileData.currentPassword) {
         newErrors.currentPassword = "Current password is required to change password";
@@ -197,59 +204,91 @@ export default function ProfileSettings() {
       return;
     }
 
-    setIsLoading(true);
-    
+    const updateData = {
+      fullName: `${profileData.firstName} ${profileData.lastName}`.trim(),
+      phone: profileData.phone,
+      address: profileData.address,
+    };
+
+    if (profileData.newPassword && profileData.currentPassword) {
+      updateData.currentPassword = profileData.currentPassword;
+      updateData.password = profileData.newPassword;
+    }
+
     try {
-      // Simulate API call - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // In real app, you would dispatch an update action here
-      // await dispatch(updateProfile(profileData)).unwrap();
+      const result = await dispatch(updateParent({
+        parentId: currentParent._id,
+        updateData
+      })).unwrap();
       
       setShowSuccess(true);
       setIsEditing(false);
       
-      // Reset password fields after successful update
       setProfileData((prev) => ({
         ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
       }));
       
-      // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
       setErrors({
-        submit: error.message || "Failed to update profile. Please try again.",
+        submit: error || "Failed to update profile. Please try again.",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setProfileData({
-      ...initialUserData,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    if (currentParent) {
+      const { firstName, lastName } = extractNames(currentParent.fullName);
+      setProfileData({
+        firstName,
+        lastName,
+        phone: currentParent.phone || '',
+        address: currentParent.address || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    }
     setErrors({});
   };
+
+  if (!currentParent && loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#F5F9F7] to-[#E5EFEB] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B4B31]"></div>
+      </div>
+    );
+  }
+
+  if (error && !currentParent) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#F5F9F7] to-[#E5EFEB] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">Error loading profile: {error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-full bg-[#0B4B31] px-6 py-3 text-white font-semibold hover:bg-[#0B4B31]/90"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F5F9F7] to-[#E5EFEB] py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-[#0B4B31]">Profile Settings</h1>
           <p className="text-gray-600 mt-2">Update your personal information and password</p>
         </div>
 
-        {/* Success Message */}
         {showSuccess && (
           <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl shadow-sm">
             <div className="flex items-center gap-2">
@@ -261,7 +300,6 @@ export default function ProfileSettings() {
           </div>
         )}
 
-        {/* Error Message */}
         {errors.submit && (
           <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl shadow-sm">
             <div className="flex items-center gap-2">
@@ -273,8 +311,16 @@ export default function ProfileSettings() {
           </div>
         )}
 
+        {loading && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B4B31] mx-auto mb-3"></div>
+              <p className="text-gray-700">Updating profile...</p>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-[28px] border border-[#E2E7E4] shadow-[0_30px_80px_-50px_rgba(11,75,49,0.15)] p-8">
-          {/* Profile Overview - Read-only mode */}
           {!isEditing && (
             <div className="mb-10">
               <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
@@ -285,7 +331,7 @@ export default function ProfileSettings() {
                   <h2 className="text-2xl font-bold text-gray-800">
                     {profileData.firstName} {profileData.lastName}
                   </h2>
-                  <p className="text-gray-600 mt-1">{initialUserData.email}</p>
+                  <p className="text-gray-600 mt-1">{currentParent?.email}</p>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
@@ -313,10 +359,8 @@ export default function ProfileSettings() {
             </div>
           )}
 
-          {/* Edit Form */}
           {isEditing && (
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Name Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
                   <div className="p-2 bg-[#E5EFEB] rounded-full">
@@ -366,7 +410,7 @@ export default function ProfileSettings() {
                       label="Email"
                       name="email"
                       type="email"
-                      value={initialUserData.email}
+                      value={currentParent?.email || ''}
                       onChange={() => {}}
                       placeholder="Your email"
                       disabled
@@ -383,7 +427,6 @@ export default function ProfileSettings() {
                 </div>
               </div>
 
-              {/* Contact Information */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
                   <div className="p-2 bg-[#E5EFEB] rounded-full">
@@ -402,6 +445,7 @@ export default function ProfileSettings() {
                       value={profileData.phone}
                       onChange={handleChange}
                       placeholder="Enter your phone number"
+                      required
                       icon={<Phone size={18} />}
                     />
                     {errors.phone && (
@@ -418,13 +462,18 @@ export default function ProfileSettings() {
                       value={profileData.address}
                       onChange={handleChange}
                       placeholder="Enter your full address"
+                      required
                       icon={<MapPin size={18} />}
                     />
+                    {errors.address && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.address}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Password Change */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 pb-3 border-b border-[#E2E7E4]">
                   <div className="p-2 bg-[#E5EFEB] rounded-full">
@@ -491,12 +540,11 @@ export default function ProfileSettings() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  disabled={isLoading}
+                  disabled={loading}
                   className="flex-1 rounded-full bg-[#E5EFEB] px-6 py-3 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#D4E6DE] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <X size={18} />
@@ -504,10 +552,10 @@ export default function ProfileSettings() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={loading}
                   className="flex-1 rounded-full bg-[#0B4B31] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isLoading ? (
+                  {loading ? (
                     <>
                       <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -526,7 +574,6 @@ export default function ProfileSettings() {
             </form>
           )}
 
-          {/* Information for read-only mode */}
           {!isEditing && (
             <div className="mt-8 p-4 bg-[#F5F9F7] border border-[#E2E7E4] rounded-xl">
               <h4 className="font-semibold text-gray-700 mb-2">Profile Information</h4>

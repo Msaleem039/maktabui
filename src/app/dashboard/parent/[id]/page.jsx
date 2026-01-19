@@ -9,7 +9,6 @@ export default function ParentDetailPage({ params }) {
   const dispatch = useDispatch();
   const { parent, status, error } = useSelector((state) => state.getParentById);
   
-  // Unwrap the params promise using React.use()
   const resolvedParams = use(params);
   const parentId = resolvedParams.id;
 

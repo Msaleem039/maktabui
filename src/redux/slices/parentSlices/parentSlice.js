@@ -173,6 +173,26 @@ export const deleteParent = createAsyncThunk(
   }
 );
 
+export const updateParent = createAsyncThunk(
+  'parent/updateParent',
+  async ({ parentId, updateData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/updateParentById`,
+        {
+          id: parentId,
+          ...updateData
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message
+      );
+    }
+  }
+);
+
 const getAllParentsWithStudentsSlice = createSlice({
   name: "parentsWithStudents",
   initialState: {
@@ -857,6 +877,46 @@ const deleteParentSlice = createSlice({
   }
 });
 
+const updateParentSlice = createSlice({
+  name: 'updateParent',
+  initialState: {
+    loading: false,
+    success: false,
+    error: null,
+    data: null
+  },
+  reducers: {
+    resetUpdateParent: (state) => {
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+      state.data = null;
+    },
+    clearUpdateParentError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(updateParent.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(updateParent.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(updateParent.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+      });
+  }
+});
+
 export const {
   resetAddWaitList,
 } = addToWaitListSlice.actions;
@@ -917,6 +977,12 @@ export const {
   clearDeleteParentError,
 } = deleteParentSlice.actions;
 
+export const {
+  resetUpdateParent,
+  clearUpdateParentError
+} = updateParentSlice.actions;
+
+
 export const addToWaitListReducer = addToWaitListSlice.reducer;
 export const createParentReducer = createParentSlice.reducer;
 export const getAllParentsReducer = getAllParentsSlice.reducer;
@@ -929,6 +995,7 @@ export const setDefaultCardReducer = setDefaultCardSlice.reducer;
 export const removeCardReducer = removeCardSlice.reducer;
 export const parentDashboardReducer = dashboardSlice.reducer;
 export const deleteParentReducer = deleteParentSlice.reducer;
+export const updateParentReducer = updateParentSlice.reducer;
 
 export default getAllParentsWithStudentsSlice.reducer;
 
@@ -945,4 +1012,6 @@ export const parentReducer = {
   removeCard: removeCardReducer,
   dashboard: parentDashboardReducer,
   deleteParent: deleteParentReducer,
+    updateParent: updateParentReducer
+
 };
