@@ -68,7 +68,7 @@ const ColorPicker = ({ label, name, value, onChange, required = false, className
   );
 };
 
-const ImageUpload = ({ label, name, selectedFile, previewUrl, onFileSelect, onRemove, required = false, className = "" }) => {
+const ImageUpload = ({ label, name, selectedFile, previewUrl, isLoadingPreview, onFileSelect, onRemove, required = false, className = "" }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -95,15 +95,33 @@ const ImageUpload = ({ label, name, selectedFile, previewUrl, onFileSelect, onRe
         {label} {required && "*"}
       </label>
       <div className="space-y-3">
-        {previewUrl && (
+        {/* Show preview only when it's loaded and stored in state */}
+        {previewUrl && 
+         typeof previewUrl === "string" && 
+         !isLoadingPreview && 
+         (previewUrl.startsWith("data:") || 
+          previewUrl.startsWith("http://") || 
+          previewUrl.startsWith("https://") || 
+          previewUrl.startsWith("/")) && (
           <div className="relative w-32 h-32 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
             <Image
               src={previewUrl}
               alt={label}
               fill
               className="object-contain p-2"
-              unoptimized={previewUrl.startsWith("blob:")}
+              unoptimized={previewUrl.startsWith("blob:") || previewUrl.startsWith("data:")}
+              onError={(e) => {
+                console.error("Image load error:", previewUrl);
+                // Hide the image on error
+                e.target.style.display = "none";
+              }}
             />
+          </div>
+        )}
+        {/* Show loading indicator while preview is being generated */}
+        {isLoadingPreview && (
+          <div className="relative w-32 h-32 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+            <div className="text-xs text-gray-500">Loading preview...</div>
           </div>
         )}
         <div className="flex items-center gap-3">
@@ -160,9 +178,14 @@ export default function SettingsPage() {
     favicon: "",
   });
 
-  // Load existing theme data from Redux on mount and when theme changes
+  const [isLoadingPreview, setIsLoadingPreview] = useState({
+    logo: false,
+    favicon: false,
+  });
+
+  // Load existing theme data from Redux on mount and when theme values change
   useEffect(() => {
-    if (theme) {
+    if (theme && Object.keys(theme).length > 0) {
       setFormData((prev) => {
         // Only update if values are different to avoid unnecessary re-renders
         const newData = {
@@ -175,20 +198,39 @@ export default function SettingsPage() {
         return newData;
       });
       
-      // Set preview URLs only if they're valid server URLs (not blob URLs)
+      // Set preview URLs only if they're valid server URLs (not blob or data URLs)
       // This ensures existing logos from the server are displayed
+      // Only update if we don't have a newly selected file (data URL preview)
       setPreviewUrls((prev) => {
         const newUrls = { ...prev };
-        if (theme.logo && !theme.logo.startsWith("blob:") && theme.logo !== prev.logo) {
+        // Only set server URL if it's a valid HTTP/HTTPS URL or relative path
+        // and we don't already have a data URL (newly selected file)
+        if (theme.logo && 
+            typeof theme.logo === "string" &&
+            !theme.logo.startsWith("blob:") && 
+            !theme.logo.startsWith("data:") &&
+            (theme.logo.startsWith("http://") || 
+             theme.logo.startsWith("https://") || 
+             theme.logo.startsWith("/")) &&
+            theme.logo !== prev.logo &&
+            !prev.logo.startsWith("data:")) {
           newUrls.logo = theme.logo;
         }
-        if (theme.favicon && !theme.favicon.startsWith("blob:") && theme.favicon !== prev.favicon) {
+        if (theme.favicon && 
+            typeof theme.favicon === "string" &&
+            !theme.favicon.startsWith("blob:") && 
+            !theme.favicon.startsWith("data:") &&
+            (theme.favicon.startsWith("http://") || 
+             theme.favicon.startsWith("https://") || 
+             theme.favicon.startsWith("/")) &&
+            theme.favicon !== prev.favicon &&
+            !prev.favicon.startsWith("data:")) {
           newUrls.favicon = theme.favicon;
         }
         return newUrls;
       });
     }
-  }, [theme]);
+  }, [theme?.themeColor, theme?.secondaryColor, theme?.logo, theme?.favicon, theme?.mainText]);
 
   useEffect(() => {
     // Reset success state after 3 seconds
@@ -200,16 +242,23 @@ export default function SettingsPage() {
     }
   }, [success, dispatch]);
 
-  // Cleanup preview URLs when they change or component unmounts
+  // Cleanup blob URLs when component unmounts
   useEffect(() => {
+    const currentPreviewUrls = previewUrls;
     return () => {
-      Object.values(previewUrls).forEach((url) => {
-        if (url && url.startsWith("blob:")) {
-          URL.revokeObjectURL(url);
+      // Cleanup any blob URLs on unmount only
+      Object.values(currentPreviewUrls).forEach((url) => {
+        if (url && typeof url === "string" && url.startsWith("blob:")) {
+          try {
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            // Ignore errors if URL was already revoked
+            console.warn("Error revoking blob URL:", error);
+          }
         }
       });
     };
-  }, [previewUrls]);
+  }, []); // Only run on unmount
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -217,30 +266,74 @@ export default function SettingsPage() {
   };
 
   const handleFileSelect = (name, file) => {
-    // Cleanup old preview URL if it exists
+    // Set loading state before processing
+    setIsLoadingPreview((prev) => ({ ...prev, [name]: true }));
+    
+    // Cleanup old preview URL if it exists (blob URLs only)
     setPreviewUrls((prev) => {
-      if (prev[name] && prev[name].startsWith("blob:")) {
-        URL.revokeObjectURL(prev[name]);
+      if (prev[name] && typeof prev[name] === "string" && prev[name].startsWith("blob:")) {
+        try {
+          URL.revokeObjectURL(prev[name]);
+        } catch (error) {
+          console.warn("Error revoking blob URL:", error);
+        }
       }
       return prev;
     });
     
-    // Create new preview URL
-    const previewUrl = URL.createObjectURL(file);
-    
-    setSelectedFiles((prev) => ({ ...prev, [name]: file }));
-    setPreviewUrls((prev) => ({ ...prev, [name]: previewUrl }));
+    // Use FileReader to create a data URL instead of blob URL
+    // This is more reliable in production environments
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (reader.result) {
+        const dataUrl = reader.result;
+        // Store file and preview URL in state before displaying
+        setSelectedFiles((prev) => ({ ...prev, [name]: file }));
+        setPreviewUrls((prev) => ({ ...prev, [name]: dataUrl }));
+        // Clear loading state after preview is stored
+        setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
+      } else {
+        console.error("FileReader result is empty");
+        setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
+        alert("Failed to load image preview. Please try again.");
+      }
+    };
+    reader.onerror = () => {
+      console.error("Error reading file:", reader.error);
+      setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
+      alert("Failed to load image preview. Please try again.");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleFileRemove = (name) => {
-    // Cleanup preview URL
-    if (previewUrls[name] && previewUrls[name].startsWith("blob:")) {
-      URL.revokeObjectURL(previewUrls[name]);
+    // Clear loading state
+    setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
+    
+    // Cleanup preview URL (only blob URLs need explicit cleanup)
+    if (previewUrls[name] && typeof previewUrls[name] === "string" && previewUrls[name].startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(previewUrls[name]);
+      } catch (error) {
+        console.warn("Error revoking blob URL:", error);
+      }
     }
 
     setSelectedFiles((prev) => ({ ...prev, [name]: null }));
-    setPreviewUrls((prev) => ({ ...prev, [name]: "" }));
-    setFormData((prev) => ({ ...prev, [name]: "" }));
+    
+    // Restore server URL if it exists, otherwise clear
+    const serverUrl = formData[name] && 
+                      typeof formData[name] === "string" &&
+                      !formData[name].startsWith("blob:") && 
+                      !formData[name].startsWith("data:") 
+      ? formData[name] 
+      : "";
+    setPreviewUrls((prev) => ({ ...prev, [name]: serverUrl }));
+    
+    // Don't clear formData[name] if it's a server URL - only clear if it was a blob/data URL
+    if (formData[name] && typeof formData[name] === "string" && (formData[name].startsWith("blob:") || formData[name].startsWith("data:"))) {
+      setFormData((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -290,12 +383,16 @@ export default function SettingsPage() {
         mainText: formData.mainText || "MaktabOS",
       }));
 
-      // Cleanup preview URLs after successful upload
-      if (previewUrls.logo && previewUrls.logo.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrls.logo);
+      // Cleanup blob/data URLs after successful upload (they'll be replaced with server URLs)
+      if (previewUrls.logo && (previewUrls.logo.startsWith("blob:") || previewUrls.logo.startsWith("data:"))) {
+        if (previewUrls.logo.startsWith("blob:")) {
+          URL.revokeObjectURL(previewUrls.logo);
+        }
       }
-      if (previewUrls.favicon && previewUrls.favicon.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrls.favicon);
+      if (previewUrls.favicon && (previewUrls.favicon.startsWith("blob:") || previewUrls.favicon.startsWith("data:"))) {
+        if (previewUrls.favicon.startsWith("blob:")) {
+          URL.revokeObjectURL(previewUrls.favicon);
+        }
       }
 
       // Update form data with returned URLs
@@ -308,6 +405,8 @@ export default function SettingsPage() {
       // Clear selected files after successful upload
       setSelectedFiles({ logo: null, favicon: null });
       setPreviewUrls({ logo: logoUrl, favicon: faviconUrl });
+      // Clear loading states
+      setIsLoadingPreview({ logo: false, favicon: false });
     } catch (error) {
       console.error("Failed to update theme:", error);
     }
@@ -362,7 +461,8 @@ export default function SettingsPage() {
               label="Logo"
               name="logo"
               selectedFile={selectedFiles.logo}
-              previewUrl={previewUrls.logo || formData.logo}
+              previewUrl={previewUrls.logo || (formData.logo && !formData.logo.startsWith("blob:") && !formData.logo.startsWith("data:") ? formData.logo : "")}
+              isLoadingPreview={isLoadingPreview.logo}
               onFileSelect={handleFileSelect}
               onRemove={handleFileRemove}
               className="md:col-span-1"

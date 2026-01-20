@@ -285,7 +285,7 @@ export default function InvoiceReportPage() {
   const handleActionClick = (action, id, originalInvoice, event) => {
     event.stopPropagation();
     if (action === "payment") {
-      router.push(`/dashboard/finance/invoice/${id}/payment`);
+      router.push(`/dashboard/finance/invoice/${id}/edit`);
     } else if (action === "view") {
       router.push(`/dashboard/finance/invoice/${id}`);
     } else if (action === "edit") {
