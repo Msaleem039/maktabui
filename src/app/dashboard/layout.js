@@ -785,14 +785,30 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             }`}
           >
             <div className="w-18 h-16 bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 border-2 border-white/20 shadow-lg rounded-lg">
-              <Image
-                src={logoUrl}
-                alt={theme.mainText || "MaktabOS"}
-                width={72}
-                height={48}
-                className="w-full h-full object-contain"
-                unoptimized={logoUrl.startsWith("http") || logoUrl.includes(process.env.NEXT_PUBLIC_BACKEND_URL || "") || logoUrl.startsWith("/uploads/")}
-              />
+              {logoUrl && (logoUrl.startsWith("http://") || logoUrl.startsWith("https://") || logoUrl.includes("backend.maktabos.com")) ? (
+                <img
+                  src={logoUrl}
+                  alt={theme.mainText || "MaktabOS"}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    console.error("Logo image failed to load:", logoUrl);
+                    e.target.src = "/01.png";
+                  }}
+                />
+              ) : (
+                <Image
+                  src={logoUrl}
+                  alt={theme.mainText || "MaktabOS"}
+                  width={72}
+                  height={48}
+                  className="w-full h-full object-contain"
+                  unoptimized={logoUrl.startsWith("/uploads/") || logoUrl.includes("localhost")}
+                  onError={(e) => {
+                    console.error("Logo image failed to load:", logoUrl);
+                    e.target.src = "/01.png";
+                  }}
+                />
+              )}
             </div>
           </div>
 
