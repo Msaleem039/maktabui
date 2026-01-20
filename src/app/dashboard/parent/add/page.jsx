@@ -497,6 +497,7 @@ export default function AddParentForm() {
                 onChange={(e) => handleChildChange(index, e)}
                 placeholder="Select Date"
               />
+              
               <FormDropdown
                 label="Gender"
                 name="gender"
