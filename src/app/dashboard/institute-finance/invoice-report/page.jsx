@@ -83,7 +83,6 @@ export default function InvoiceReportPage() {
     unpaidFilterBy
   ]);
 
-  // Use the unpaidInvoices directly from Redux (already filtered and paginated by backend)
   const tableData = unpaidInvoices?.map((invoice, index) => {
     const dueAmount = invoice.totalAmount - (invoice.paidAmount || 0);
     const isPartiallyPaid = invoice.paidAmount > 0 && invoice.paidAmount < invoice.totalAmount;
@@ -99,6 +98,9 @@ export default function InvoiceReportPage() {
       statusColor = "#E67E22";
     } else if (invoice.status === "pending") {
       statusText = "PENDING";
+      statusColor = "#E67E22";
+    } else if (invoice.status === "paid") {
+      statusText = "Paid";
       statusColor = "#E67E22";
     }
 
@@ -335,15 +337,14 @@ export default function InvoiceReportPage() {
   };
 
   const handleLimitChange = (e) => {
-    // Note: You need to add setInvoicesLimit action to your slice
-    // For now, we'll dispatch the stats action with new limit
+
     const newLimit = Number(e.target.value);
     const filters = {
       date: selectedDate,
       status: selectedStatus,
       search: searchValue,
       filterBy: filterBy,
-      page: 1, // Reset to page 1 when changing limit
+      page: 1, 
       limit: newLimit,
       unpaidSearch,
       unpaidStatus: unpaidFilterBy

@@ -42,7 +42,7 @@ export default function EditAdminInvoice() {
       .split("T")[0],
     notes: "",
     status: "pending",
-    paidAmount: 0,
+    paidAmount: "",
   });
 
   const [dropdownOpen, setDropdownOpen] = useState({
@@ -93,7 +93,7 @@ export default function EditAdminInvoice() {
               .split("T")[0],
         notes: currentInvoice.notes || "",
         status: currentInvoice.status || "pending",
-        paidAmount: currentInvoice.paidAmount || 0,
+        paidAmount: currentInvoice.paidAmount || "",
       });
     }
   }, [currentInvoice, isSubmitted]);
@@ -101,9 +101,11 @@ export default function EditAdminInvoice() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "totalAmount" || name === "paidAmount") {
+    if (name === "totalAmount") {
       const numValue = parseFloat(value) || 0;
       setFormData((prev) => ({ ...prev, [name]: numValue }));
+    } else if (name === "paidAmount") {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -134,7 +136,8 @@ export default function EditAdminInvoice() {
       return;
     }
 
-    if (formData.paidAmount > formData.totalAmount) {
+    const paidAmountValue = parseFloat(formData.paidAmount) || 0;
+    if (paidAmountValue > formData.totalAmount) {
       alert("Paid amount cannot exceed total amount");
       setIsSubmitted(false);
       return;
@@ -146,7 +149,7 @@ export default function EditAdminInvoice() {
       dueDate: formData.dueDate,
       notes: formData.notes,
       status: formData.status,
-      paidAmount: formData.paidAmount,
+      paidAmount: paidAmountValue,
     };
     
     hasShownUpdateSuccess.current = false;

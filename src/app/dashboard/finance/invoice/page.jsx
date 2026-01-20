@@ -21,6 +21,7 @@ import {
   setInvoicesSearch,
   setInvoicesFilter
 } from "@/redux/slices/invoiceSlices/invoiceSlices";
+import { getAdminId } from "@/utils/getCookies";
 
 ChartJS.register(
   ArcElement,
@@ -43,6 +44,7 @@ export default function InvoicePage() {
   const [dropdownPositions, setDropdownPositions] = useState({});
   const dropdownRefs = useRef({});
   const buttonRefs = useRef({});
+  const adminId = getAdminId();
 
   const {
     invoices,
@@ -53,7 +55,6 @@ export default function InvoicePage() {
     filters
   } = useSelector((state) => state.getAllInvoices);
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(localSearch);
@@ -62,20 +63,19 @@ export default function InvoicePage() {
     return () => clearTimeout(timer);
   }, [localSearch]);
 
-  // Sync local search with store search on mount
   useEffect(() => {
     if (storeSearch) {
       setLocalSearch(storeSearch);
     }
   }, [storeSearch]);
 
-  // Fetch invoices when search, filters, or pagination changes
   useEffect(() => {
     dispatch(getAllInvoicesAction({
       search: debouncedSearch,
       status: filters.status,
       page: pagination.currentPage,
-      limit: pagination.itemsPerPage
+      limit: pagination.itemsPerPage,
+      adminId:adminId
     }));
   }, [dispatch, debouncedSearch, filters.status, pagination.currentPage, pagination.itemsPerPage]);
 

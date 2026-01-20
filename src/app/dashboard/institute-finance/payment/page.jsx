@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
 import {
-  getAllPaymentStatsAction,
+  getAllInstitutePaymentStatsAction,
   setCurrentPage,
 } from "@/redux/slices/paymentSlices/paymentSlices";
 
@@ -48,7 +48,6 @@ export default function PaymentPage() {
     new Date().getFullYear().toString()
   );
 
-  // Fetch payment stats on component mount and when filters change
   useEffect(() => {
     const filters = {
       page: pagination?.currentPage || 1,
@@ -59,7 +58,7 @@ export default function PaymentPage() {
       year: selectedYear,
     };
 
-    dispatch(getAllPaymentStatsAction(filters));
+    dispatch(getAllInstitutePaymentStatsAction(filters));
   }, [
     dispatch,
     pagination?.currentPage,

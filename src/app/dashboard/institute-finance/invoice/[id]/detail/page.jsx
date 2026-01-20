@@ -145,7 +145,6 @@ export default function ViewAdminInvoicePage() {
       const contentWidth = pageWidth - margin * 2;
       let yPos = margin;
 
-      // Header
       pdf.setFontSize(24);
       pdf.setTextColor(11, 75, 49);
       pdf.setFont("helvetica", "bold");
@@ -158,7 +157,7 @@ export default function ViewAdminInvoicePage() {
       pdf.text(
         `#${invoiceData.invoiceNumber || invoiceData._id || "N/A"}`,
         margin,
-        yPos
+        yPos,
       );
 
       const statusText = getStatusText(invoiceData.status);
@@ -174,7 +173,7 @@ export default function ViewAdminInvoicePage() {
         8,
         4,
         4,
-        "F"
+        "F",
       );
 
       pdf.setFontSize(8);
@@ -234,7 +233,6 @@ export default function ViewAdminInvoicePage() {
       pdf.setTextColor(102, 102, 102);
       pdf.text(invoiceData.admin?.email || "N/A", billToX + 8, yPos + 22);
 
-      // Role section
       pdf.setDrawColor(210, 226, 219);
       pdf.setLineWidth(0.5);
       pdf.line(billToX + 8, yPos + 28, billToX + sectionWidth - 8, yPos + 28);
@@ -250,7 +248,6 @@ export default function ViewAdminInvoicePage() {
 
       yPos += 60;
 
-      // Invoice Summary
       pdf.setFontSize(12);
       pdf.setTextColor(11, 75, 49);
       pdf.setFont("helvetica", "bold");
@@ -264,7 +261,6 @@ export default function ViewAdminInvoicePage() {
 
       const summaryYStart = yPos + 10;
 
-      // Total Amount
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -276,7 +272,7 @@ export default function ViewAdminInvoicePage() {
         formatCurrency(invoiceData.totalAmount),
         pageWidth - margin - 10,
         summaryYStart,
-        { align: "right" }
+        { align: "right" },
       );
 
       pdf.setDrawColor(210, 226, 219);
@@ -285,10 +281,9 @@ export default function ViewAdminInvoicePage() {
         margin + 10,
         summaryYStart + 5,
         pageWidth - margin - 10,
-        summaryYStart + 5
+        summaryYStart + 5,
       );
 
-      // Paid Amount
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -300,17 +295,16 @@ export default function ViewAdminInvoicePage() {
         formatCurrency(invoiceData.paidAmount || 0),
         pageWidth - margin - 10,
         summaryYStart + 13,
-        { align: "right" }
+        { align: "right" },
       );
 
       pdf.line(
         margin + 10,
         summaryYStart + 18,
         pageWidth - margin - 10,
-        summaryYStart + 18
+        summaryYStart + 18,
       );
 
-      // Currency
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -322,7 +316,7 @@ export default function ViewAdminInvoicePage() {
         invoiceData.currency || "USD",
         pageWidth - margin - 10,
         summaryYStart + 26,
-        { align: "right" }
+        { align: "right" },
       );
 
       yPos += 45;
@@ -342,7 +336,6 @@ export default function ViewAdminInvoicePage() {
 
       const paymentYStart = yPos + 10;
 
-      // Due Date
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -354,10 +347,9 @@ export default function ViewAdminInvoicePage() {
         formatDate(invoiceData.dueDate),
         margin + paymentSectionWidth - 10,
         paymentYStart,
-        { align: "right" }
+        { align: "right" },
       );
 
-      // Invoice Date
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -369,10 +361,9 @@ export default function ViewAdminInvoicePage() {
         formatDate(invoiceData.createdAt),
         margin + paymentSectionWidth - 10,
         paymentYStart + 12,
-        { align: "right" }
+        { align: "right" },
       );
 
-      // Notes if available
       if (invoiceData.notes && invoiceData.notes.trim()) {
         pdf.setDrawColor(210, 226, 219);
         pdf.setLineWidth(0.5);
@@ -380,7 +371,7 @@ export default function ViewAdminInvoicePage() {
           margin + 10,
           paymentYStart + 24,
           margin + paymentSectionWidth - 10,
-          paymentYStart + 24
+          paymentYStart + 24,
         );
 
         pdf.setFontSize(9);
@@ -392,17 +383,15 @@ export default function ViewAdminInvoicePage() {
         pdf.setTextColor(30, 30, 30);
         pdf.setFont("helvetica", "normal");
 
-        // Wrap long notes
         const notes = pdf.splitTextToSize(
           invoiceData.notes,
-          paymentSectionWidth - 20
+          paymentSectionWidth - 20,
         );
         notes.forEach((line, index) => {
           pdf.text(line, margin + 10, paymentYStart + 37 + index * 4);
         });
       }
 
-      // Amount Summary
       const amountX = margin + paymentSectionWidth + 15;
       const amountY = yPos - 8;
       pdf.setFontSize(12);
@@ -418,7 +407,6 @@ export default function ViewAdminInvoicePage() {
 
       const amountYStart = yPos + 10;
 
-      // Total Amount
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -430,10 +418,9 @@ export default function ViewAdminInvoicePage() {
         formatCurrency(invoiceData.totalAmount),
         amountX + paymentSectionWidth - 10,
         amountYStart,
-        { align: "right" }
+        { align: "right" },
       );
 
-      // Amount Paid
       pdf.setFontSize(10);
       pdf.setTextColor(102, 102, 102);
       pdf.setFont("helvetica", "normal");
@@ -445,59 +432,11 @@ export default function ViewAdminInvoicePage() {
         formatCurrency(invoiceData.paidAmount || 0),
         amountX + paymentSectionWidth - 10,
         amountYStart + 12,
-        { align: "right" }
+        { align: "right" },
       );
 
-      // Balance Due / Amount Paid
-      pdf.setDrawColor(210, 226, 219);
-      pdf.setLineWidth(1.5);
-      pdf.line(
-        amountX + 10,
-        amountYStart + 22,
-        amountX + paymentSectionWidth - 10,
-        amountYStart + 22
-      );
-
-      pdf.setFontSize(11);
-      pdf.setTextColor(11, 75, 49);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(
-        isFullyPaid ? "Amount Paid" : "Balance Due",
-        amountX + 10,
-        amountYStart + 32
-      );
-
-      pdf.setFontSize(12);
-      const balanceColor = isFullyPaid ? [22, 163, 74] : [220, 38, 38];
-      pdf.setTextColor(balanceColor[0], balanceColor[1], balanceColor[2]);
-      pdf.text(
-        formatCurrency(isFullyPaid ? invoiceData.paidAmount : remainingAmount),
-        amountX + paymentSectionWidth - 10,
-        amountYStart + 32,
-        { align: "right" }
-      );
-
-      yPos += 75;
-
-      // Footer
-      pdf.setDrawColor(226, 231, 228);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 10;
-
-      pdf.setFontSize(9);
-      pdf.setTextColor(102, 102, 102);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(
-        "Thank you for your service! If you have any questions, please contact us at contact@maktabos.edu",
-        pageWidth / 2,
-        yPos,
-        { align: "center" }
-      );
-
-      // Save PDF
       pdf.save(
-        `admin-invoice-${invoiceData.invoiceNumber || invoiceData._id}.pdf`
+        `admin-invoice-${invoiceData.invoiceNumber || invoiceData._id}.pdf`,
       );
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -573,7 +512,7 @@ export default function ViewAdminInvoicePage() {
         <button
           onClick={() =>
             router.push(
-              `/dashboard/institute-finance/invoice/${invoiceData._id}/edit`
+              `/dashboard/institute-finance/invoice/${invoiceData._id}/edit`,
             )
           }
           className="flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0B4B31]/90"
@@ -614,7 +553,7 @@ export default function ViewAdminInvoicePage() {
           <div className="mt-4 md:mt-0 text-right">
             <span
               className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium ${getStatusColorClass(
-                invoiceData.status
+                invoiceData.status,
               )}`}
             >
               {getStatusText(invoiceData.status)}
@@ -740,7 +679,7 @@ export default function ViewAdminInvoicePage() {
                   }`}
                 >
                   {formatCurrency(
-                    isFullyPaid ? invoiceData.paidAmount : remainingAmount
+                    isFullyPaid ? invoiceData.paidAmount : remainingAmount,
                   )}
                 </p>
               </div>

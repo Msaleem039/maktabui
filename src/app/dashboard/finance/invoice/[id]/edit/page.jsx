@@ -6,8 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import {
   getInvoiceByIdAction,
   updateInvoiceAction,
-  resetUpdateInvoiceState, // Import the correct action
-  clearUpdateInvoiceError, // Import error clearing action
+  resetUpdateInvoiceState,
+  clearUpdateInvoiceError,
 } from "@/redux/slices/invoiceSlices/invoiceSlices";
 import { FormInput } from "@/components/FormInput";
 import { getAllParentsWithStudents } from "@/redux/slices/parentSlices/parentSlice";
@@ -21,7 +21,7 @@ export default function EditInvoice() {
   const adminId = getAdminId();
 
   const { invoice, loading: invoiceLoading } = useSelector(
-    (state) => state.getInvoiceById
+    (state) => state.getInvoiceById,
   );
 
   const {
@@ -31,20 +31,20 @@ export default function EditInvoice() {
   } = useSelector((state) => state.updateInvoice);
 
   const { data: parentsWithStudents } = useSelector(
-    (state) => state.getAllParentsWithStudents
+    (state) => state.getAllParentsWithStudents,
   );
 
   const [formData, setFormData] = useState({
     parentId: "",
     studentId: "",
-    items: [{ description: "", amount: 0, quantity: 1 }],
-    totalAmount: 0,
+    items: [{ description: "", amount: "", quantity: 1 }],
+    totalAmount: "",
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0],
     notes: "",
     status: "pending",
-    paidAmount: 0,
+    paidAmount: "",
   });
 
   const [dropdownOpen, setDropdownOpen] = useState({
@@ -55,12 +55,10 @@ export default function EditInvoice() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [localError, setLocalError] = useState(null);
 
-  // Reset update state when component mounts
   useEffect(() => {
     dispatch(resetUpdateInvoiceState());
   }, [dispatch]);
 
-  // Clear errors when component mounts
   useEffect(() => {
     dispatch(clearUpdateInvoiceError());
   }, [dispatch]);
@@ -79,10 +77,10 @@ export default function EditInvoice() {
         studentId: invoice.student?._id || invoice.student || "",
         items: invoice.items?.map((item) => ({
           description: item.description || "",
-          amount: item.amount || 0,
+          amount: item.amount?.toString() || "",
           quantity: item.quantity || 1,
-        })) || [{ description: "", amount: 0, quantity: 1 }],
-        totalAmount: invoice.totalAmount || 0,
+        })) || [{ description: "", amount: "", quantity: 1 }],
+        totalAmount: invoice.totalAmount?.toString() || "",
         dueDate: invoice.dueDate
           ? new Date(invoice.dueDate).toISOString().split("T")[0]
           : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -90,7 +88,7 @@ export default function EditInvoice() {
               .split("T")[0],
         notes: invoice.notes || "",
         status: invoice.status || "pending",
-        paidAmount: invoice.paidAmount || 0,
+        paidAmount: invoice.paidAmount?.toString() || "",
       });
     }
   }, [invoice]);
@@ -98,11 +96,11 @@ export default function EditInvoice() {
   useEffect(() => {
     if (formData.parentId && parentsWithStudents) {
       const parent = parentsWithStudents.find(
-        (p) => p._id === formData.parentId
+        (p) => p._id === formData.parentId,
       );
       if (parent && parent.students?.length > 0) {
         const currentStudentInParent = parent.students.find(
-          (s) => s._id === formData.studentId
+          (s) => s._id === formData.studentId,
         );
         if (!currentStudentInParent) {
           setFormData((prev) => ({
@@ -119,7 +117,7 @@ export default function EditInvoice() {
   useEffect(() => {
     if (updateSuccess) {
       setShowSuccess(true);
-      
+
       const timer = setTimeout(() => {
         router.push("/dashboard/finance/invoice");
       }, 2000);
@@ -128,7 +126,6 @@ export default function EditInvoice() {
     }
   }, [updateSuccess, router]);
 
-  // Handle update errors
   useEffect(() => {
     if (updateError) {
       setLocalError(updateError);
@@ -141,31 +138,36 @@ export default function EditInvoice() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "paidAmount" ? Number(value) : value,
+      [name]: value,
     }));
   };
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...formData.items];
-    updatedItems[index][field] =
-      field === "amount" || field === "quantity" ? Number(value) : value;
+
+    updatedItems[index][field] = value;
 
     setFormData((prev) => ({
       ...prev,
       items: updatedItems,
     }));
 
-    const total = updatedItems.reduce(
-      (sum, item) => sum + item.amount * item.quantity,
-      0
-    );
-    setFormData((prev) => ({ ...prev, totalAmount: total }));
+    const total = updatedItems.reduce((sum, item) => {
+      const amount = parseFloat(item.amount) || 0;
+      const quantity = parseInt(item.quantity) || 0;
+      return sum + amount * quantity;
+    }, 0);
+
+    setFormData((prev) => ({
+      ...prev,
+      totalAmount: total > 0 ? total.toFixed(2) : "",
+    }));
   };
 
   const addItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { description: "", amount: 0, quantity: 1 }],
+      items: [...prev.items, { description: "", amount: "", quantity: 1 }],
     }));
   };
 
@@ -177,11 +179,16 @@ export default function EditInvoice() {
         items: updatedItems,
       }));
 
-      const total = updatedItems.reduce(
-        (sum, item) => sum + item.amount * item.quantity,
-        0
-      );
-      setFormData((prev) => ({ ...prev, totalAmount: total }));
+      const total = updatedItems.reduce((sum, item) => {
+        const amount = parseFloat(item.amount) || 0;
+        const quantity = parseInt(item.quantity) || 0;
+        return sum + amount * quantity;
+      }, 0);
+
+      setFormData((prev) => ({
+        ...prev,
+        totalAmount: total > 0 ? total.toFixed(2) : "",
+      }));
     }
   };
 
@@ -196,27 +203,49 @@ export default function EditInvoice() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Clear previous states
+
     setShowSuccess(false);
     setLocalError(null);
     dispatch(clearUpdateInvoiceError());
 
+    const invalidItems = formData.items.filter((item) => {
+      const amount = parseFloat(item.amount);
+      return !item.description || isNaN(amount) || amount <= 0;
+    });
+
+    if (invalidItems.length > 0) {
+      alert(
+        "Please enter valid description and amount for all items (amount must be greater than 0)",
+      );
+      return;
+    }
+
+    const paidAmount = parseFloat(formData.paidAmount) || 0;
+    const totalAmount = parseFloat(formData.totalAmount) || 0;
+
+    if (paidAmount > totalAmount) {
+      alert("Paid amount cannot exceed total amount");
+      return;
+    }
+
     const payload = {
       parentId: formData.parentId,
       studentId: formData.studentId,
-      items: formData.items,
-      totalAmount: formData.totalAmount,
+      items: formData.items.map((item) => ({
+        description: item.description,
+        amount: parseFloat(item.amount) || 0,
+        quantity: parseInt(item.quantity) || 1,
+      })),
+      totalAmount: parseFloat(formData.totalAmount) || 0,
       dueDate: formData.dueDate,
       notes: formData.notes,
       status: formData.status,
-      paidAmount: formData.paidAmount,
+      paidAmount: parseFloat(formData.paidAmount) || 0,
     };
 
     dispatch(updateInvoiceAction({ id, updateData: payload }));
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       dispatch(resetUpdateInvoiceState());
@@ -335,6 +364,7 @@ export default function EditInvoice() {
                 <option value="paid">Paid</option>
                 <option value="overdue">Overdue</option>
                 <option value="cancelled">Cancelled</option>
+                <option value="partial">Partial</option>
               </select>
             </div>
 
@@ -347,7 +377,7 @@ export default function EditInvoice() {
               onChange={handleInputChange}
               step="0.01"
               min="0"
-              max={formData.totalAmount}
+              max={parseFloat(formData.totalAmount) || 0}
               placeholder="0.00"
             />
 
@@ -362,6 +392,8 @@ export default function EditInvoice() {
                 placeholder="0.00"
                 readOnly
                 className="bg-gray-50"
+                min="0"
+                step="0.01"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Calculated automatically from items

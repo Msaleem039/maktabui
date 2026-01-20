@@ -8,7 +8,7 @@ import { FormInput } from "@/components/FormInput";
 import { FormCheckbox } from "@/components/FormCheckbox";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import CustomDatePicker from "@/components/DatePicker";
-import { getAdminId,getUserBranch } from "@/utils/getCookies";
+import { getAdminId, getUserBranch } from "@/utils/getCookies";
 
 export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
@@ -18,28 +18,28 @@ export default function AddStudentSimpleForm() {
   const branch = getUserBranch();
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    address: "",
-    phone: "",
+    fullName: "", // *
+    address: "", // *
+    phone: "", // *
     spouse: "",
     spousePhone: "",
     emergencyPhone: "",
-    parentEmail: "",
-    parentPassword: "",
-    identityNumber: "",
+    parentEmail: "", // *
+    parentPassword: "", // *
+    identityNumber: "", // *
     addToWaitList: false,
 
-    studentName: "",
+    studentName: "", // *
     studentPhone: "",
-    studentAddress: "",
+    studentAddress: "", // *
     dateOfBirth: "",
     gender: "",
     enrollDate: "",
     fee: "",
-    studentEmail: "",
-    studentPassword: "",
-    class: "", 
-    studentAddToWaitList: false, 
+    studentEmail: "", // *
+    studentPassword: "", // *
+    class: "", // *
+    studentAddToWaitList: false,
   });
 
   const [dropdownStates, setDropdownStates] = useState({
@@ -211,32 +211,36 @@ export default function AddStudentSimpleForm() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormInput
-            label="Full Name"
+            label="Full Name *"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
             placeholder="Parent Full Name"
+            required
           />
           <FormInput
-            label="Identity Number"
+            label="Identity Number *"
             name="identityNumber"
             value={formData.identityNumber}
             onChange={handleChange}
             placeholder="Identity Number"
+            required
           />
           <FormInput
-            label="Address"
+            label="Address *"
             name="address"
             value={formData.address}
             onChange={handleChange}
             placeholder="Parent Address"
+            required
           />
           <FormInput
-            label="Phone"
+            label="Phone *"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             placeholder="Parent Phone"
+            required
           />
           <FormInput
             label="Spouse Name"
@@ -260,20 +264,22 @@ export default function AddStudentSimpleForm() {
             placeholder="Emergency Phone"
           />
           <FormInput
-            label="Email"
+            label="Email *"
             name="parentEmail"
             type="email"
             value={formData.parentEmail}
             onChange={handleChange}
             placeholder="Parent Email"
+            required
           />
           <FormInput
-            label="Password"
+            label="Password *"
             name="parentPassword"
             type="password"
             value={formData.parentPassword}
             onChange={handleChange}
             placeholder="Parent Password"
+            required
           />
           <div className="flex items-center md:col-span-2">
             <FormCheckbox
@@ -293,7 +299,7 @@ export default function AddStudentSimpleForm() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormInput
-            label="Student Name"
+            label="Student Name *"
             name="studentName"
             value={formData.studentName}
             onChange={handleChange}
@@ -301,11 +307,12 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Student Address"
+            label="Student Address *"
             name="studentAddress"
             value={formData.studentAddress}
             onChange={handleChange}
             placeholder="Student Address"
+            required
           />
           <CustomDatePicker
             label="Date of Birth"
@@ -313,7 +320,6 @@ export default function AddStudentSimpleForm() {
             value={formData.dateOfBirth}
             onChange={handleChange}
             placeholder="Select date of birth"
-            required
             maxDate={new Date()}
             showYearDropdown
             showMonthDropdown
@@ -346,20 +352,22 @@ export default function AddStudentSimpleForm() {
             placeholder="Student Phone"
           />
           <FormInput
-            label="Student Email"
+            label="Student Email *"
             name="studentEmail"
             type="email"
             value={formData.studentEmail}
             onChange={handleChange}
             placeholder="Student Email"
+            required
           />
           <FormInput
-            label="Student Password"
+            label="Student Password *"
             name="studentPassword"
             type="password"
             value={formData.studentPassword}
             onChange={handleChange}
             placeholder="Student Password"
+            required
           />
           <SimpleDropdown
             label="Gender"
@@ -370,10 +378,9 @@ export default function AddStudentSimpleForm() {
             isOpen={dropdownStates.gender}
             onToggle={() => toggleDropdown('gender')}
             placeholder="Select Gender"
-            required
           />
           <SimpleDropdown
-            label="Class"
+            label="Class *"
             name="class"
             value={formData.class}
             options={classOptions}

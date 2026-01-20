@@ -17,6 +17,12 @@ const hexToRgba = (hex, alpha = 1) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const formatDate = (isoDate) => {
+  if (!isoDate) return "-";
+  return new Date(isoDate).toISOString().split("T")[0];
+};
+
+
 const Page = () => {
   const dispatch = useDispatch();
   const { themeColor, secondaryColor, mainText } = useTheme();
@@ -202,9 +208,6 @@ const Page = () => {
                     >
                       ${stats?.totalUnpaidAmount || 0}
                     </h2>
-                    <p className="text-[#525967] text-[0.75rem] mt-2">
-                      {stats?.unpaidInvoicesCount || 0} Invoices Pending
-                    </p>
                   </div>
                 </div>
               </div>
@@ -293,7 +296,7 @@ const DashboardTable = ({ title, subtitle, btnColor, rows }) => {
           {rows?.map((row, idx) => (
             <tr key={idx} className="border-b border-gray-100">
               <td className="py-3 px-3">{row.name}</td>
-              <td className="py-3 px-3">{row.date}</td>
+<td className="py-3 px-3">{formatDate(row.date)}</td>
               <td
                 className={`py-3 px-3 text-right font-medium ${
                   row.amount < 0 ? "text-red-500" : "text-green-600"

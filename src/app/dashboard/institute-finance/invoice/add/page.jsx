@@ -24,7 +24,7 @@ export default function CreateInvoice() {
 
   const [formData, setFormData] = useState({
     admin: currentAdminId || "",
-    totalAmount: 0,
+    totalAmount: "",
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0],
@@ -35,7 +35,6 @@ export default function CreateInvoice() {
     admin: false,
   });
 
-  // Clear success state on component mount
   useEffect(() => {
     dispatch(clearAdminInvoiceSuccess());
   }, [dispatch]);
@@ -48,8 +47,7 @@ export default function CreateInvoice() {
     const { name, value } = e.target;
 
     if (name === "totalAmount") {
-      const numValue = parseFloat(value) || 0;
-      setFormData((prev) => ({ ...prev, [name]: numValue }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -72,14 +70,15 @@ export default function CreateInvoice() {
       return;
     }
 
-    if (formData.totalAmount <= 0) {
+    const amount = parseFloat(formData.totalAmount) || 0;
+    if (amount <= 0) {
       alert("Total amount must be greater than 0");
       return;
     }
 
     const payload = {
       adminId: formData.admin,
-      totalAmount: formData.totalAmount,
+      totalAmount: amount,
       dueDate: formData.dueDate,
       notes: formData.notes,
     };
@@ -91,14 +90,13 @@ export default function CreateInvoice() {
     if (success) {
       setFormData({
         admin: currentAdminId || "",
-        totalAmount: 0,
+        totalAmount: "",
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
           .toISOString()
           .split("T")[0],
         notes: "",
       });
 
-      // Clear success state after redirect
       const redirectTimer = setTimeout(() => {
         dispatch(clearAdminInvoiceSuccess());
         router.push("/dashboard/institute-finance/invoice");

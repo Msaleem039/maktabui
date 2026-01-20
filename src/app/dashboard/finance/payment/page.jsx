@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Download } from "lucide-react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -14,7 +13,12 @@ import {
   Title,
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
-import { getAllPaymentStatsAction, setCurrentPage, updateFilters } from "@/redux/slices/paymentSlices/paymentSlices";
+import {
+  getAllPaymentStatsAction,
+  setCurrentPage,
+  updateFilters,
+} from "@/redux/slices/paymentSlices/paymentSlices";
+import { getAdminId } from "@/utils/getCookies";
 
 ChartJS.register(
   ArcElement,
@@ -23,27 +27,29 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
-  Title
+  Title,
 );
 
 export default function PaymentPage() {
   const dispatch = useDispatch();
-  const { 
-    loading, 
-    stats, 
-    tableData, 
-    paymentMethodsData, 
-    monthlyTrendsData, 
+  const {
+    loading,
+    stats,
+    tableData,
+    paymentMethodsData,
+    monthlyTrendsData,
     pagination,
-    error 
+    error,
   } = useSelector((state) => state.getAllPaymentStats);
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState(
+    new Date().getFullYear().toString(),
+  );
+  const adminId = getAdminId();
 
-  // Fetch payment stats on component mount and when filters change
   useEffect(() => {
     const filters = {
       page: pagination?.currentPage || 1,
@@ -51,11 +57,20 @@ export default function PaymentPage() {
       search: searchValue,
       startDate: selectedDate,
       status: selectedStatus,
-      year: selectedYear
+      year: selectedYear,
+      adminId: adminId,
     };
-    
+
     dispatch(getAllPaymentStatsAction(filters));
-  }, [dispatch, pagination?.currentPage, pagination?.limit, searchValue, selectedDate, selectedStatus, selectedYear]);
+  }, [
+    dispatch,
+    pagination?.currentPage,
+    pagination?.limit,
+    searchValue,
+    selectedDate,
+    selectedStatus,
+    selectedYear,
+  ]);
 
   // Handle pagination
   const handlePageChange = (page) => {
@@ -109,7 +124,8 @@ export default function PaymentPage() {
     scales: {
       y: {
         beginAtZero: true,
-        max: Math.max(...(monthlyTrendsData?.datasets?.[0]?.data || [])) + 5 || 30,
+        max:
+          Math.max(...(monthlyTrendsData?.datasets?.[0]?.data || [])) + 5 || 30,
         ticks: {
           stepSize: 10,
           callback: function (value) {
@@ -137,7 +153,7 @@ export default function PaymentPage() {
         className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50"
       >
         ‹
-      </button>
+      </button>,
     );
 
     // Page buttons
@@ -154,13 +170,13 @@ export default function PaymentPage() {
             }`}
           >
             {i}
-          </button>
+          </button>,
         );
       } else if (i === 5 && totalPages > 5) {
         buttons.push(
           <span key="ellipsis" className="px-2 text-[#0B4B31]">
             ...
-          </span>
+          </span>,
         );
       }
     }
@@ -174,7 +190,7 @@ export default function PaymentPage() {
         className="rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition hover:bg-[#F3F6F5] disabled:opacity-50"
       >
         ›
-      </button>
+      </button>,
     );
 
     return buttons;
@@ -215,7 +231,9 @@ export default function PaymentPage() {
             <option value="failed">Failed</option>
             <option value="processing">Processing</option>
           </select>
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">▾</span>
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0B4B31]">
+            ▾
+          </span>
         </div>
         <button
           type="button"
@@ -256,25 +274,33 @@ export default function PaymentPage() {
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 {stats.totalPayments?.toLocaleString() || 0}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Total Payments</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Total Payments
+              </p>
             </div>
             <div>
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 ${stats.totalAmount || "0.00"}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Total Amount</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Total Amount
+              </p>
             </div>
             <div>
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 ${stats.averagePayment?.toLocaleString() || "0.00"}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Average Payment</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Average Payment
+              </p>
             </div>
             <div>
               <p className="text-[1.5rem] font-semibold text-[#000000]">
                 {stats.lastPaymentDate || "No payments"}
               </p>
-              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">Last Payment Date</p>
+              <p className="text-[0.8125rem] font-normal text-[#979699] mt-1">
+                Last Payment Date
+              </p>
             </div>
           </div>
         </div>
@@ -285,21 +311,27 @@ export default function PaymentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Payment Methods Distribution */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
-            <h3 className="text-[0.8125rem] font-medium text-[#0000008C] mb-4">Payment Methods Distribution</h3>
+            <h3 className="text-[0.8125rem] font-medium text-[#0000008C] mb-4">
+              Payment Methods Distribution
+            </h3>
             <div className="relative h-64 flex items-center justify-center">
-              <Doughnut data={paymentMethodsData} options={paymentMethodsOptions} />
+              <Doughnut
+                data={paymentMethodsData}
+                options={paymentMethodsOptions}
+              />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="flex flex-col gap-3 items-center">
                   {paymentMethodsData.labels.map((label, i) => {
                     const value = paymentMethodsData.datasets[0].data[i];
-                    const color = paymentMethodsData.datasets[0].backgroundColor[i];
+                    const color =
+                      paymentMethodsData.datasets[0].backgroundColor[i];
                     return (
                       <div key={i} className="flex items-center gap-2">
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-xs" style={{ fontSize: '12px' }}>
+                        <span className="text-xs" style={{ fontSize: "12px" }}>
                           <span style={{ color: "#737373" }}>{label}: </span>
                           <span style={{ color: "#0A0A0A" }}>{value}%</span>
                         </span>
@@ -314,12 +346,16 @@ export default function PaymentPage() {
           {/* Monthly Payment Trends */}
           <div className="rounded-[18px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">Monthly Payment Trends</h3>
-              <select 
-                value={selectedYear} 
+              <h3 className="text-[0.8125rem] font-medium text-[#0000008C]">
+                Monthly Payment Trends
+              </h3>
+              <select
+                value={selectedYear}
                 onChange={handleYearChange}
                 className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-xs text-[#0B4B31] outline-none focus:border-[#0B4B31]"
               >
+                {" "}
+                <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
@@ -336,7 +372,9 @@ export default function PaymentPage() {
       {!loading && !error && (
         <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">All Payment Records</h2>
+            <h2 className="text-[0.8125rem] font-medium text-[#0000008C]">
+              All Payment Records
+            </h2>
           </div>
 
           <div className="mt-6 space-y-4">
@@ -369,10 +407,18 @@ export default function PaymentPage() {
             <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
               <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
                 <tr>
-                  <th className="px-4 font-normal text-[#0000008C]">Receipt #</th>
-                  <th className="px-4 font-normal text-[#0000008C]">Payment Date</th>
-                  <th className="px-4 font-normal text-[#0000008C]">Payment Amount</th>
-                  <th className="px-4 font-normal text-[#0000008C]">Payment Method</th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Receipt #
+                  </th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Payment Date
+                  </th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Payment Amount
+                  </th>
+                  <th className="px-4 font-normal text-[#0000008C]">
+                    Payment Method
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -381,10 +427,18 @@ export default function PaymentPage() {
                     key={record.id}
                     className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
                   >
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.receiptNumber}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentDate}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentAmount}</td>
-                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">{record.paymentMethod}</td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.receiptNumber}
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.paymentDate}
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.paymentAmount}
+                    </td>
+                    <td className="px-4 py-3 font-normal text-[#1e1e1e]">
+                      {record.paymentMethod}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -395,9 +449,12 @@ export default function PaymentPage() {
           {pagination && pagination.totalRecords > 0 && (
             <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-[0.8125rem] font-normal text-[#979699]">
-                Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to{" "}
-                {Math.min(pagination.currentPage * pagination.limit, pagination.totalRecords)} of{" "}
-                {pagination.totalRecords} entries
+                Showing {(pagination.currentPage - 1) * pagination.limit + 1} to{" "}
+                {Math.min(
+                  pagination.currentPage * pagination.limit,
+                  pagination.totalRecords,
+                )}{" "}
+                of {pagination.totalRecords} entries
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[0.8125rem] font-normal text-[#979699]">
