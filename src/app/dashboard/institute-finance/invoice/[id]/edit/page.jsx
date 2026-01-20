@@ -18,7 +18,6 @@ export default function EditAdminInvoice() {
   const router = useRouter();
   const { id } = useParams();
   
-  
   const hasShownUpdateSuccess = useRef(false);
   const redirectTimerRef = useRef(null);
   const isInitialMount = useRef(true);

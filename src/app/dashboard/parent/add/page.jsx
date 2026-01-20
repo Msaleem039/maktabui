@@ -45,6 +45,7 @@ const FormDropdown = ({
   options,
   onChange,
   placeholder = "Select",
+  required = false,
   className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +55,7 @@ const FormDropdown = ({
   return (
     <div className={`relative ${className}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label}
+        {label} {required && "*"}
       </label>
       <div
         className="w-full bg-[#D5E2DB] text-[#0B4B31] rounded-full px-4 py-3 flex justify-between items-center cursor-pointer outline-none focus:ring-2 focus:ring-[#0B4B31]/30"
@@ -125,7 +126,7 @@ export default function AddParentForm() {
   const branch = getUserBranch();
 
   const { status, error, parent, student } = useSelector(
-    (state) => state.createParent
+    (state) => state.createParent,
   );
 
   const {
@@ -243,8 +244,8 @@ export default function AddParentForm() {
             child.gender === "male"
               ? "Male"
               : child.gender === "female"
-              ? "Female"
-              : "Other",
+                ? "Female"
+                : "Other",
         })),
         adminId,
         branch,
@@ -264,7 +265,7 @@ export default function AddParentForm() {
     } catch (error) {
       console.error("Error creating parent:", error);
       setFormError(
-        error.message || "An error occurred while processing your request."
+        error.message || "An error occurred while processing your request.",
       );
     }
   };
@@ -507,6 +508,7 @@ export default function AddParentForm() {
                   { label: "Other", value: "other" },
                 ]}
                 placeholder="Select Gender"
+                required={true}
               />
               <DateInput
                 label="Enroll Date"
@@ -522,6 +524,7 @@ export default function AddParentForm() {
                 value={child.fee}
                 onChange={(e) => handleChildChange(index, e)}
                 placeholder="0.00"
+                required
               />
               <FormDropdown
                 label="Class"
@@ -535,6 +538,7 @@ export default function AddParentForm() {
                 className={
                   classesLoading ? "opacity-50 cursor-not-allowed" : ""
                 }
+                required={true}
               />
               <div className="flex items-center gap-2 md:col-span-2">
                 <input

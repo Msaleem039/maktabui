@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createStudent, resetCreateStudentState } from "../../../redux/slices/studentSlices/studentSlices";
+import {
+  createStudent,
+  resetCreateStudentState,
+} from "../../../redux/slices/studentSlices/studentSlices";
 import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
 import { FormInput } from "@/components/FormInput";
 import { FormCheckbox } from "@/components/FormCheckbox";
@@ -12,59 +15,65 @@ import { getAdminId, getUserBranch } from "@/utils/getCookies";
 
 export default function AddStudentSimpleForm() {
   const dispatch = useDispatch();
-  const { status, error, student, parent, existingParent } = useSelector((state) => state.createStudent);
-  const { classNames, loading: classesLoading, error: classesError } = useSelector((state) => state.getAllClassesName);
+  const { status, error, student, parent, existingParent } = useSelector(
+    (state) => state.createStudent,
+  );
+  const {
+    classNames,
+    loading: classesLoading,
+    error: classesError,
+  } = useSelector((state) => state.getAllClassesName);
   const adminId = getAdminId();
   const branch = getUserBranch();
 
   const [formData, setFormData] = useState({
-    fullName: "", // *
-    address: "", // *
-    phone: "", // *
+    fullName: "",
+    address: "",
+    phone: "",
     spouse: "",
     spousePhone: "",
     emergencyPhone: "",
-    parentEmail: "", // *
-    parentPassword: "", // *
-    identityNumber: "", // *
+    parentEmail: "",
+    parentPassword: "",
+    identityNumber: "",
     addToWaitList: false,
 
-    studentName: "", // *
+    studentName: "",
     studentPhone: "",
-    studentAddress: "", // *
+    studentAddress: "",
     dateOfBirth: "",
     gender: "",
     enrollDate: "",
     fee: "",
-    studentEmail: "", // *
-    studentPassword: "", // *
-    class: "", // *
+    studentEmail: "",
+    studentPassword: "",
+    class: "",
     studentAddToWaitList: false,
   });
 
   const [dropdownStates, setDropdownStates] = useState({
     gender: false,
-    class: false
+    class: false,
   });
 
   useEffect(() => {
     dispatch(getAllClassesNameAction(adminId));
   }, [dispatch]);
 
-  const classOptions = classNames.map(classItem => ({
+  const classOptions = classNames.map((classItem) => ({
     label: classItem.name,
-    value: classItem._id 
+    value: classItem._id,
   }));
 
   const genderOptions = [
     { label: "Male", value: "Male" },
-    { label: "Female", value: "Female" }
+    { label: "Female", value: "Female" },
   ];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    if (type === 'checkbox') {
+
+    if (type === "checkbox") {
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -77,9 +86,9 @@ export default function AddStudentSimpleForm() {
   };
 
   const toggleDropdown = (name) => {
-    setDropdownStates((prev) => ({ 
-      ...prev, 
-      [name]: !prev[name] 
+    setDropdownStates((prev) => ({
+      ...prev,
+      [name]: !prev[name],
     }));
   };
 
@@ -97,7 +106,6 @@ export default function AddStudentSimpleForm() {
     }
 
     const studentData = {
-      // Parent data
       fullName: formData.fullName,
       address: formData.address,
       phone: formData.phone,
@@ -109,7 +117,6 @@ export default function AddStudentSimpleForm() {
       password: formData.parentPassword,
       identityNumber: formData.identityNumber,
 
-      // Student data
       studentName: formData.studentName,
       studentPhone: formData.studentPhone,
       studentAddress: formData.studentAddress,
@@ -121,8 +128,8 @@ export default function AddStudentSimpleForm() {
       studentEmail: formData.studentEmail,
       studentPassword: formData.studentPassword,
       class: formData.class,
-      adminId,branch
-
+      adminId,
+      branch,
     };
 
     dispatch(createStudent(studentData));
@@ -150,17 +157,20 @@ export default function AddStudentSimpleForm() {
         fee: "",
         studentEmail: "",
         studentPassword: "",
-        class: "", // Reset class selection
+        class: "",
         studentAddToWaitList: false,
       });
 
-      // Reset dropdown states
       setDropdownStates({
         gender: false,
-        class: false
+        class: false,
       });
 
-      console.log("Student created successfully:", { student, parent, existingParent });
+      console.log("Student created successfully:", {
+        student,
+        parent,
+        existingParent,
+      });
 
       setTimeout(() => {
         dispatch(resetCreateStudentState());
@@ -207,11 +217,13 @@ export default function AddStudentSimpleForm() {
       {/* Parent Information Section */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-700">Parent Information</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Parent Information
+          </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormInput
-            label="Full Name *"
+            label="Full Name"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
@@ -219,7 +231,7 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Identity Number *"
+            label="Identity Number"
             name="identityNumber"
             value={formData.identityNumber}
             onChange={handleChange}
@@ -227,7 +239,7 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Address *"
+            label="Address"
             name="address"
             value={formData.address}
             onChange={handleChange}
@@ -235,7 +247,7 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Phone *"
+            label="Phone"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
@@ -264,7 +276,7 @@ export default function AddStudentSimpleForm() {
             placeholder="Emergency Phone"
           />
           <FormInput
-            label="Email *"
+            label="Email"
             name="parentEmail"
             type="email"
             value={formData.parentEmail}
@@ -273,7 +285,7 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Password *"
+            label="Password"
             name="parentPassword"
             type="password"
             value={formData.parentPassword}
@@ -295,11 +307,13 @@ export default function AddStudentSimpleForm() {
       {/* Student Information Section */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-700">Student Information</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Student Information
+          </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormInput
-            label="Student Name *"
+            label="Student Name"
             name="studentName"
             value={formData.studentName}
             onChange={handleChange}
@@ -307,7 +321,7 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Student Address *"
+            label="Student Address"
             name="studentAddress"
             value={formData.studentAddress}
             onChange={handleChange}
@@ -352,7 +366,7 @@ export default function AddStudentSimpleForm() {
             placeholder="Student Phone"
           />
           <FormInput
-            label="Student Email *"
+            label="Student Email"
             name="studentEmail"
             type="email"
             value={formData.studentEmail}
@@ -361,7 +375,7 @@ export default function AddStudentSimpleForm() {
             required
           />
           <FormInput
-            label="Student Password *"
+            label="Student Password"
             name="studentPassword"
             type="password"
             value={formData.studentPassword}
@@ -376,17 +390,18 @@ export default function AddStudentSimpleForm() {
             options={genderOptions}
             onSelect={handleDropdownSelect}
             isOpen={dropdownStates.gender}
-            onToggle={() => toggleDropdown('gender')}
+            onToggle={() => toggleDropdown("gender")}
             placeholder="Select Gender"
+            required
           />
           <SimpleDropdown
-            label="Class *"
+            label="Class"
             name="class"
             value={formData.class}
             options={classOptions}
             onSelect={handleDropdownSelect}
             isOpen={dropdownStates.class}
-            onToggle={() => toggleDropdown('class')}
+            onToggle={() => toggleDropdown("class")}
             placeholder={classesLoading ? "Loading classes..." : "Select Class"}
             required
           />
@@ -401,7 +416,6 @@ export default function AddStudentSimpleForm() {
         </div>
       </div>
 
-      {/* Create Student Button */}
       <div className="flex justify-center pt-6">
         <button
           type="submit"
