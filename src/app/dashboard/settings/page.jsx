@@ -95,13 +95,14 @@ const ImageUpload = ({ label, name, selectedFile, previewUrl, onFileSelect, onRe
         {label} {required && "*"}
       </label>
       <div className="space-y-3">
-        {(previewUrl || selectedFile) && (
+        {previewUrl && (
           <div className="relative w-32 h-32 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
             <Image
-              src={previewUrl || URL.createObjectURL(selectedFile)}
+              src={previewUrl}
               alt={label}
               fill
               className="object-contain p-2"
+              unoptimized={previewUrl.startsWith("blob:")}
             />
           </div>
         )}
@@ -139,6 +140,7 @@ export default function SettingsPage() {
   const dispatch = useDispatch();
   const { themeColor } = useTheme();
   const { loading, success, error } = useSelector((state) => state.updateTheme);
+  const theme = useSelector((state) => state.theme || {});
 
   const [formData, setFormData] = useState({
     themeColor: "#0B4B31",
@@ -158,6 +160,36 @@ export default function SettingsPage() {
     favicon: "",
   });
 
+  // Load existing theme data from Redux on mount and when theme changes
+  useEffect(() => {
+    if (theme) {
+      setFormData((prev) => {
+        // Only update if values are different to avoid unnecessary re-renders
+        const newData = {
+          themeColor: theme.themeColor || prev.themeColor,
+          secondaryColor: theme.secondaryColor || prev.secondaryColor,
+          logo: theme.logo || prev.logo,
+          favicon: theme.favicon || prev.favicon,
+          mainText: theme.mainText || prev.mainText,
+        };
+        return newData;
+      });
+      
+      // Set preview URLs only if they're valid server URLs (not blob URLs)
+      // This ensures existing logos from the server are displayed
+      setPreviewUrls((prev) => {
+        const newUrls = { ...prev };
+        if (theme.logo && !theme.logo.startsWith("blob:") && theme.logo !== prev.logo) {
+          newUrls.logo = theme.logo;
+        }
+        if (theme.favicon && !theme.favicon.startsWith("blob:") && theme.favicon !== prev.favicon) {
+          newUrls.favicon = theme.favicon;
+        }
+        return newUrls;
+      });
+    }
+  }, [theme]);
+
   useEffect(() => {
     // Reset success state after 3 seconds
     if (success) {
@@ -168,7 +200,7 @@ export default function SettingsPage() {
     }
   }, [success, dispatch]);
 
-  // Cleanup preview URLs
+  // Cleanup preview URLs when they change or component unmounts
   useEffect(() => {
     return () => {
       Object.values(previewUrls).forEach((url) => {
@@ -177,7 +209,7 @@ export default function SettingsPage() {
         }
       });
     };
-  }, []);
+  }, [previewUrls]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -185,7 +217,15 @@ export default function SettingsPage() {
   };
 
   const handleFileSelect = (name, file) => {
-    // Create preview URL
+    // Cleanup old preview URL if it exists
+    setPreviewUrls((prev) => {
+      if (prev[name] && prev[name].startsWith("blob:")) {
+        URL.revokeObjectURL(prev[name]);
+      }
+      return prev;
+    });
+    
+    // Create new preview URL
     const previewUrl = URL.createObjectURL(file);
     
     setSelectedFiles((prev) => ({ ...prev, [name]: file }));
