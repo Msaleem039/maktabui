@@ -951,42 +951,52 @@ export default function DashboardLayout({ children }) {
 
       const branchToUse = userBranch || "Main Branch";
 
+      // Only fetch theme if it's truly default (no logo and default colors)
+      // This prevents overwriting user's saved theme on refresh
       const isDefaultTheme =
-        !theme.themeColor || theme.themeColor === "#0B4B31";
-      if (isDefaultTheme) {
+        (!theme.themeColor || theme.themeColor === "#0B4B31") &&
+        (!theme.logo || theme.logo === "");
+      
+      // Also check if theme exists in localStorage - if it does, don't overwrite
+      const hasStoredTheme = typeof window !== "undefined" && localStorage.getItem("maktabTheme");
+      
+      if (isDefaultTheme && !hasStoredTheme) {
         try {
           const themeResult = await dispatch(
             getThemeByBranchAction(branchToUse),
           ).unwrap();
           if (themeResult?.success && themeResult?.theme) {
-            const theme = themeResult.theme;
+            const fetchedTheme = themeResult.theme;
 
             // Validate colors - reject black colors
             const validThemeColor =
-              theme.themeColor &&
-              theme.themeColor !== "#000000" &&
-              theme.themeColor !== "black" &&
-              theme.themeColor.trim() !== ""
-                ? theme.themeColor
+              fetchedTheme.themeColor &&
+              fetchedTheme.themeColor !== "#000000" &&
+              fetchedTheme.themeColor !== "black" &&
+              fetchedTheme.themeColor.trim() !== ""
+                ? fetchedTheme.themeColor
                 : "#0B4B31";
 
             const validSecondaryColor =
-              theme.secondaryColor &&
-              theme.secondaryColor !== "#000000" &&
-              theme.secondaryColor !== "black" &&
-              theme.secondaryColor.trim() !== ""
-                ? theme.secondaryColor
+              fetchedTheme.secondaryColor &&
+              fetchedTheme.secondaryColor !== "#000000" &&
+              fetchedTheme.secondaryColor !== "black" &&
+              fetchedTheme.secondaryColor.trim() !== ""
+                ? fetchedTheme.secondaryColor
                 : "#13574A";
 
-            dispatch(
-              setTheme({
-                themeColor: theme.themeColor || "#0B4B31",
-                secondaryColor: theme.secondaryColor || "#13574A",
-                logo: theme.logo || "",
-                favicon: theme.favicon || "",
-                mainText: theme.mainText || "MaktabOS",
-              }),
-            );
+            // Only update if we don't already have a theme with a logo
+            if (!theme.logo || theme.logo === "") {
+              dispatch(
+                setTheme({
+                  themeColor: fetchedTheme.themeColor || "#0B4B31",
+                  secondaryColor: fetchedTheme.secondaryColor || "#13574A",
+                  logo: fetchedTheme.logo || "",
+                  favicon: fetchedTheme.favicon || "",
+                  mainText: fetchedTheme.mainText || "MaktabOS",
+                }),
+              );
+            }
           }
         } catch (themeError) {
           if (
@@ -995,7 +1005,8 @@ export default function DashboardLayout({ children }) {
           ) {
             console.error("Failed to fetch theme by branch:", themeError);
           }
-          if (reduxUser?.admin?.websiteSettings) {
+          // Only use websiteSettings as fallback if we don't have a stored theme
+          if (reduxUser?.admin?.websiteSettings && (!theme.logo || theme.logo === "")) {
             const websiteSettings = reduxUser.admin.websiteSettings;
 
             // Validate colors - reject black colors
@@ -1024,24 +1035,13 @@ export default function DashboardLayout({ children }) {
                 mainText: websiteSettings.mainText || "MaktabOS",
               }),
             );
-          } else {
-            // Ensure defaults are set even if API fails and no websiteSettings
-            dispatch(
-              setTheme({
-                themeColor: websiteSettings.themeColor || "#0B4B31",
-                secondaryColor: websiteSettings.secondaryColor || "#13574A",
-                logo: websiteSettings.logo || "",
-                favicon: websiteSettings.favicon || "",
-                mainText: websiteSettings.mainText || "MaktabOS",
-              }),
-            );
           }
         }
       }
     };
 
     loadThemeByBranch();
-  }, [reduxUser, dispatch, theme.themeColor]);
+  }, [reduxUser?.admin?.branch, reduxUser?.branch, reduxUser?.admin?.branchName, dispatch]); // Only re-run when branch changes, not when theme changes
 
   // Handle Sub Admin redirect and initialization
   useEffect(() => {
