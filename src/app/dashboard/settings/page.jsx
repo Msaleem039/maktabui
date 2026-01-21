@@ -371,8 +371,10 @@ export default function SettingsPage() {
       const result = await dispatch(updateThemeAction(submitFormData)).unwrap();
 
       // Get the returned URLs from the backend response
-      const logoUrl = result?.theme?.logo || formData.logo || "";
-      const faviconUrl = result?.theme?.favicon || formData.favicon || "";
+      // Response structure: { success, message, data: { websiteSettings: { logo, favicon, ... } } }
+      const websiteSettings = result?.data?.websiteSettings || {};
+      const logoUrl = websiteSettings.logo || result?.theme?.logo || formData.logo || "";
+      const faviconUrl = websiteSettings.favicon || result?.theme?.favicon || formData.favicon || "";
 
       // Update theme state with new values
       dispatch(setTheme({
