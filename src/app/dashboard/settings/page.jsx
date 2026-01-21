@@ -104,18 +104,30 @@ const ImageUpload = ({ label, name, selectedFile, previewUrl, isLoadingPreview, 
           previewUrl.startsWith("https://") || 
           previewUrl.startsWith("/")) && (
           <div className="relative w-32 h-32 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-            <Image
-              src={previewUrl}
-              alt={label}
-              fill
-              className="object-contain p-2"
-              unoptimized={previewUrl.startsWith("blob:") || previewUrl.startsWith("data:")}
-              onError={(e) => {
-                console.error("Image load error:", previewUrl);
-                // Hide the image on error
-                e.target.style.display = "none";
-              }}
-            />
+            {/* Use regular img tag for external URLs to avoid CSP and Next.js Image optimization issues */}
+            {(previewUrl.startsWith("http://") || previewUrl.startsWith("https://") || previewUrl.startsWith("data:")) ? (
+              <img
+                src={previewUrl}
+                alt={label}
+                className="w-full h-full object-contain p-2"
+                onError={(e) => {
+                  console.error("Image load error:", previewUrl);
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : (
+              <Image
+                src={previewUrl}
+                alt={label}
+                fill
+                className="object-contain p-2"
+                unoptimized={previewUrl.startsWith("blob:") || previewUrl.startsWith("data:")}
+                onError={(e) => {
+                  console.error("Image load error:", previewUrl);
+                  e.target.style.display = "none";
+                }}
+              />
+            )}
           </div>
         )}
         {/* Show loading indicator while preview is being generated */}

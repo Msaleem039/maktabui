@@ -36,7 +36,7 @@ const nextConfig = {
     unoptimized: false,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox; img-src 'self' data: https://backend.maktabos.com https://*.maktabos.com https://rixdrbokebnvidwyzvzo.supabase.co;",
   },
 }
 
