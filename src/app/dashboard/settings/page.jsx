@@ -68,7 +68,7 @@ const ColorPicker = ({ label, name, value, onChange, required = false, className
   );
 };
 
-const ImageUpload = ({ label, name, selectedFile, previewUrl, isLoadingPreview, onFileSelect, onRemove, required = false, className = "" }) => {
+const ImageUpload = ({ label, name, selectedFile, previewUrl, isLoadingPreview, onFileSelect, onRemove, required = false, className = "", uploading = false, uploadProgress = 0 }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -137,16 +137,17 @@ const ImageUpload = ({ label, name, selectedFile, previewUrl, isLoadingPreview, 
           </div>
         )}
         <div className="flex items-center gap-3">
-          <label className="cursor-pointer bg-[#0B4B31] text-white px-4 py-3 rounded-full hover:bg-[#0B4B31]/90 transition-colors text-sm font-semibold">
-            {selectedFile ? "Change Image" : "Select Image"}
+          <label className={`cursor-pointer bg-[#0B4B31] text-white px-4 py-3 rounded-full hover:bg-[#0B4B31]/90 transition-colors text-sm font-semibold ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+            {uploading ? `Uploading ${uploadProgress}%` : selectedFile ? "Change Image" : "Select Image"}
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
               className="hidden"
+              disabled={uploading}
             />
           </label>
-          {(selectedFile || previewUrl) && (
+          {(selectedFile || previewUrl) && !uploading && (
             <button
               type="button"
               onClick={() => onRemove(name)}
@@ -156,7 +157,7 @@ const ImageUpload = ({ label, name, selectedFile, previewUrl, isLoadingPreview, 
             </button>
           )}
         </div>
-        {selectedFile && (
+        {selectedFile && !uploading && (
           <p className="text-xs text-gray-500">
             Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
           </p>
@@ -193,6 +194,16 @@ export default function SettingsPage() {
   const [isLoadingPreview, setIsLoadingPreview] = useState({
     logo: false,
     favicon: false,
+  });
+
+  const [uploading, setUploading] = useState({
+    logo: false,
+    favicon: false,
+  });
+
+  const [uploadProgress, setUploadProgress] = useState({
+    logo: 0,
+    favicon: 0,
   });
 
   // Load existing theme data from Redux on mount and when theme values change
@@ -277,7 +288,46 @@ export default function SettingsPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileSelect = (name, file) => {
+  const uploadImageToSupabase = (file, name) => {
+    setUploading((prev) => ({ ...prev, [name]: true }));
+    setUploadProgress((prev) => ({ ...prev, [name]: 0 }));
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      xhr.open("PUT", `/api/uploadImage`);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress((prev) => ({
+            ...prev,
+            [name]: Math.round((e.loaded / e.total) * 100),
+          }));
+        }
+      };
+
+      xhr.onload = () => {
+        setUploading((prev) => ({ ...prev, [name]: false }));
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          resolve(res.file.url);
+        } else {
+          reject(new Error("Upload failed"));
+        }
+      };
+
+      xhr.onerror = () => {
+        setUploading((prev) => ({ ...prev, [name]: false }));
+        reject(new Error("Network error"));
+      };
+
+      xhr.send(formData);
+    });
+  };
+
+  const handleFileSelect = async (name, file) => {
     // Set loading state before processing
     setIsLoadingPreview((prev) => ({ ...prev, [name]: true }));
     
@@ -293,29 +343,22 @@ export default function SettingsPage() {
       return prev;
     });
     
-    // Use FileReader to create a data URL instead of blob URL
-    // This is more reliable in production environments
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        const dataUrl = reader.result;
-        // Store file and preview URL in state before displaying
-        setSelectedFiles((prev) => ({ ...prev, [name]: file }));
-        setPreviewUrls((prev) => ({ ...prev, [name]: dataUrl }));
-        // Clear loading state after preview is stored
-        setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
-      } else {
-        console.error("FileReader result is empty");
-        setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
-        alert("Failed to load image preview. Please try again.");
-      }
-    };
-    reader.onerror = () => {
-      console.error("Error reading file:", reader.error);
+    try {
+      // Upload to Supabase
+      const url = await uploadImageToSupabase(file, name);
+      console.log("Uploaded image URL:", url);
+
+      // Store file and uploaded URL
+      setSelectedFiles((prev) => ({ ...prev, [name]: file }));
+      setPreviewUrls((prev) => ({ ...prev, [name]: url }));
+      setFormData((prev) => ({ ...prev, [name]: url }));
+      // Clear loading state after upload is complete
       setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
-      alert("Failed to load image preview. Please try again.");
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      setIsLoadingPreview((prev) => ({ ...prev, [name]: false }));
+      alert("Failed to upload image. Please try again.");
+    }
   };
 
   const handleFileRemove = (name) => {
@@ -358,21 +401,18 @@ export default function SettingsPage() {
     }
 
     try {
-      // Create FormData with File objects or existing URLs
+      // Create FormData with Supabase URLs (images are already uploaded)
       const submitFormData = new FormData();
       submitFormData.append("adminId", adminId);
       submitFormData.append("themeColor", formData.themeColor);
       submitFormData.append("secondaryColor", formData.secondaryColor);
       
-      if (selectedFiles.logo) {
-        submitFormData.append("logo", selectedFiles.logo);
-      } else if (formData.logo) {
+      // Use Supabase URLs from formData (uploaded when file was selected)
+      if (formData.logo) {
         submitFormData.append("logo", formData.logo);
       }
       
-      if (selectedFiles.favicon) {
-        submitFormData.append("favicon", selectedFiles.favicon);
-      } else if (formData.favicon) {
+      if (formData.favicon) {
         submitFormData.append("favicon", formData.favicon);
       }
       
@@ -479,6 +519,8 @@ export default function SettingsPage() {
               isLoadingPreview={isLoadingPreview.logo}
               onFileSelect={handleFileSelect}
               onRemove={handleFileRemove}
+              uploading={uploading.logo}
+              uploadProgress={uploadProgress.logo}
               className="md:col-span-1"
             />
 

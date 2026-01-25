@@ -565,7 +565,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         case "Admin":
         case "Sub Admin":
         default:
-          return `${basePath}/profile-setting`;
+          return `${basePath}/settings`;
       }
     };
 

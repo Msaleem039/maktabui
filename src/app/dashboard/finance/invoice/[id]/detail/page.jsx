@@ -9,11 +9,13 @@ import {
 } from "@/redux/slices/invoiceSlices/invoiceSlices";
 import { ArrowLeft, Edit, Download } from "lucide-react";
 import jsPDF from "jspdf";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function ViewInvoicePage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { themeColor, mainText } = useTheme();
 
   const {
     invoice,
@@ -513,11 +515,11 @@ const generatePDF = async () => {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+          <p className="text-[2.5rem] font-semibold mb-1" style={{ color: themeColor }}>
             Welcome to
           </p>
           <h1 className="font-medium text-[#000000] text-[1.75rem]">
-            MaktabOS
+            {mainText || "MaktabOS"}
           </h1>
         </div>
       </div>

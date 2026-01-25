@@ -8,9 +8,11 @@ import { getCookie } from "cookies-next";
 import { FormInput } from "@/components/FormInput";
 import { SimpleDropdown } from "@/components/SimpleDropdown";
 import { getAdminId } from "@/utils/getCookies";
+import { useTheme } from "@/hooks/useTheme";
 
 const Page = () => {
   const dispatch = useDispatch();
+  const { themeColor, mainText } = useTheme();
   const {
     loading,
     class: createdClass,
@@ -143,11 +145,11 @@ const Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl sm:text-4xl font-semibold text-[#104D2E] mb-1">
+      <h1 className="text-3xl sm:text-4xl font-semibold mb-1" style={{ color: themeColor }}>
         Welcome to
       </h1>
       <p className="text-lg sm:text-xl font-semibold text-[#0E0E0E] mb-8">
-        MaktabOS
+        {mainText || "MaktabOS"}
       </p>
 
       <div className="bg-white shadow-md rounded-2xl p-6 sm:p-8 w-full max-w-7xl">
