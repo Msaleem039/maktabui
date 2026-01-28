@@ -1,0 +1,436 @@
+"use client";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { ChevronDown } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllClassesNameAction } from "@/redux/slices/classSlices/classSlice";
+import {
+  createTeacher,
+  resetCreateTeacherState,
+} from "@/redux/slices/teacherSlices/teacherSlices";
+import { FormInput } from "@/components/FormInput";
+import { SimpleDropdown } from "@/components/SimpleDropdown";
+import { MultiSelectDropdown } from "@/components/MultiSelectDropdown";
+import { getAdminId, getUserBranch } from "@/utils/getCookies";
+
+const CreateTeacher = () => {
+  const dispatch = useDispatch();
+  const adminId = getAdminId();
+  const branch = getUserBranch();
+
+  const teacherStatus = useSelector((state) => state.createTeacher.status);
+  const teacherError = useSelector((state) => state.createTeacher.error);
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    gender: "",
+    dateOfBirth: "",
+    address: "",
+    phone: "",
+    email: "",
+    password: "",
+    qualification: "",
+    specialization: "",
+    experienceYears: "",
+    hireDate: "",
+    subjects: "",
+    languages: "",
+  });
+
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  const genderOptions = useMemo(
+    () => [
+      { label: "Male", value: "Male" },
+      { label: "Female", value: "Female" },
+      { label: "Other", value: "Other" },
+    ],
+    []
+  );
+
+  const qualificationOptions = useMemo(
+    () => [
+      { label: "B.Ed", value: "B.Ed" },
+      { label: "M.Ed", value: "M.Ed" },
+      { label: "B.Sc", value: "B.Sc" },
+      { label: "M.Sc", value: "M.Sc" },
+      { label: "PhD", value: "PhD" },
+    ],
+    []
+  );
+
+  const experienceYearsOptions = [
+    { label: "1 year", value: "1 year" },
+    { label: "2 years", value: "2 years" },
+    { label: "3 years", value: "3 years" },
+    { label: "4 years", value: "4 years" },
+    { label: "5 years", value: "5 years" },
+    { label: "6-10 years", value: "6-10 years" },
+    { label: "10+ years", value: "10+ years" },
+  ];
+
+  const languagesOptions = useMemo(
+    () => [
+      { label: "English", value: "English" },
+      { label: "Spanish", value: "Spanish" },
+      { label: "French", value: "French" },
+      { label: "German", value: "German" },
+      { label: "Chinese", value: "Chinese" },
+      { label: "Arabic", value: "Arabic" },
+      { label: "Hindi", value: "Hindi" },
+      { label: "Urdu", value: "Urdu" },
+    ],
+    []
+  );
+
+  useEffect(() => {
+    if (teacherStatus === "succeeded") {
+      setFormData({
+        fullName: "",
+        gender: "",
+        dateOfBirth: "",
+        address: "",
+        phone: "",
+        email: "",
+        password: "",
+        qualification: "",
+        specialization: "",
+        experienceYears: "",
+        hireDate: "",
+        subjects: "",
+        languages: "",
+      });
+
+      setTimeout(() => {
+        dispatch(resetCreateTeacherState());
+      }, 3000);
+    }
+  }, [teacherStatus, dispatch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".dropdown-container")) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }, []);
+
+  const toggleDropdown = useCallback((name) => {
+    setOpenDropdown((prev) => (prev === name ? null : name));
+  }, []);
+
+  const selectOption = useCallback((field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setOpenDropdown(null);
+  }, []);
+
+  const handleLanguageToggle = useCallback((language) => {
+    setFormData((prev) => {
+      const currentLanguages = prev.languages
+        ? prev.languages
+            .split(",")
+            .map((lang) => lang.trim())
+            .filter((lang) => lang)
+        : [];
+      const languageIndex = currentLanguages.indexOf(language);
+
+      if (languageIndex > -1) {
+        currentLanguages.splice(languageIndex, 1);
+      } else {
+        currentLanguages.push(language);
+      }
+
+      return {
+        ...prev,
+        languages: currentLanguages.join(", "),
+      };
+    });
+  }, []);
+
+  const isLanguageSelected = useCallback(
+    (language) => {
+      return formData.languages
+        ? formData.languages
+            .split(",")
+            .map((lang) => lang.trim())
+            .includes(language)
+        : false;
+    },
+    [formData.languages]
+  );
+
+  const getSelectedLanguagesDisplay = useCallback(() => {
+    return formData.languages || "Select languages";
+  }, [formData.languages]);
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      const { fullName, email, password, phone } = formData;
+      if (!fullName || !email || !password || !phone) {
+        alert("Full name, email, password, and phone are required.");
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        subjects: formData.subjects
+          ? formData.subjects.split(",").map((item) => item.trim())
+          : [],
+        languages: formData.languages
+          ? formData.languages.split(",").map((item) => item.trim())
+          : [],
+        adminId,
+        branch,
+      };
+
+      console.log("Submitting payload:", payload);
+      dispatch(createTeacher(payload));
+    },
+    [formData, dispatch]
+  );
+
+  const StyledDateField = useCallback(
+    ({
+      label,
+      name,
+      value,
+      onChange,
+      placeholder,
+      required = false,
+      className = "",
+    }) => {
+      return (
+        <div className={className}>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {label} {required && "*"}
+          </label>
+          <input
+            type="date"
+            name={name}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            required={required}
+            className="w-full bg-[#D5E2DB] text-[#0B4B31] placeholder-[#0B4B31]/60 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B4B31]/30 [color-scheme:light]"
+          />
+        </div>
+      );
+    },
+    []
+  );
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[2.5rem] font-semibold text-[#0B4B31]">
+            Welcome to
+          </p>
+          <h1 className="font-medium text-[#000000] text-[1.75rem]">
+            MaktabOS
+          </h1>
+        </div>
+      </div>
+
+      <div className="relative mx-auto max-w-5xl rounded-[28px] border border-[#E2E7E4] bg-white px-6 py-8 sm:px-10 sm:py-10 shadow-[0_30px_80px_-50px_rgba(11,75,49,0.35)]">
+        <h2 className="text-lg font-semibold text-gray-700 mb-6">
+          Create Teacher
+        </h2>
+
+        {/* Status Messages */}
+        {teacherStatus === "loading" && (
+          <div className="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
+            <p className="font-semibold">Creating teacher...</p>
+          </div>
+        )}
+
+        {teacherStatus === "succeeded" && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            <p className="font-semibold">Teacher created successfully!</p>
+            <p>Teacher account has been created successfully.</p>
+          </div>
+        )}
+
+        {teacherError && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            <p className="font-semibold">Error:</p>
+            <p>{teacherError}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Full Name */}
+            <FormInput
+              label="Full Name"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              placeholder="Enter full name"
+              required={true}
+            />
+
+            {/* Gender Dropdown */}
+            <SimpleDropdown
+              label="Gender"
+              name="gender"
+              value={formData.gender}
+              options={genderOptions}
+              onSelect={selectOption}
+              isOpen={openDropdown === "gender"}
+              onToggle={toggleDropdown}
+              placeholder="Select gender"
+            />
+
+            {/* Date of Birth */}
+            <StyledDateField
+              label="Date of Birth"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleInputChange}
+              placeholder="MM-DD-YYYY"
+            />
+
+            {/* Address */}
+            <FormInput
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Enter address"
+            />
+
+            {/* Phone */}
+            <FormInput
+              label="Phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Enter phone number"
+              required={true}
+            />
+
+            {/* Email */}
+            <FormInput
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter email"
+              required={true}
+            />
+
+            {/* Password */}
+            <FormInput
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Enter password"
+              required={true}
+            />
+
+            {/* Qualification Dropdown */}
+            <SimpleDropdown
+              label="Qualification"
+              name="qualification"
+              value={formData.qualification}
+              options={qualificationOptions}
+              onSelect={selectOption}
+              isOpen={openDropdown === "qualification"}
+              onToggle={toggleDropdown}
+              placeholder="Select qualification"
+            />
+
+            {/* Specialization */}
+            <FormInput
+              label="Specialization"
+              name="specialization"
+              value={formData.specialization}
+              onChange={handleInputChange}
+              placeholder="e.g. Mathematics"
+            />
+
+            {/* Experience Years Dropdown */}
+            <SimpleDropdown
+              label="Experience (Years)"
+              name="experienceYears"
+              value={formData.experienceYears}
+              options={experienceYearsOptions}
+              onSelect={selectOption}
+              isOpen={openDropdown === "experienceYears"}
+              onToggle={toggleDropdown}
+              placeholder="Select years"
+            />
+
+            {/* Hire Date */}
+            <StyledDateField
+              label="Hire Date"
+              name="hireDate"
+              value={formData.hireDate}
+              onChange={handleInputChange}
+              placeholder="MM-DD-YYYY"
+            />
+
+            {/* Subjects */}
+            <FormInput
+              label="Subjects"
+              name="subjects"
+              value={formData.subjects}
+              onChange={handleInputChange}
+              placeholder="e.g. English, Math"
+            />
+
+            {/* Languages Multi-Select Dropdown */}
+            <MultiSelectDropdown
+              label="Languages"
+              name="languages"
+              value={formData.languages}
+              options={languagesOptions}
+              isOpen={openDropdown === "languages"}
+              onToggle={toggleDropdown}
+              placeholder="Select languages"
+              onItemToggle={handleLanguageToggle}
+              isItemSelected={isLanguageSelected}
+              getDisplayValue={getSelectedLanguagesDisplay}
+            />
+          </div>
+
+          <div className="flex justify-center pt-6">
+            <button
+              type="submit"
+              disabled={teacherStatus === "loading"}
+              className={`rounded-full px-8 py-3 text-sm font-semibold ${
+                teacherStatus === "loading"
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#E5EFEB] text-[#0B4B31] hover:bg-[#D4E6DE]"
+              }`}
+            >
+              {teacherStatus === "loading"
+                ? "Creating Teacher..."
+                : "Create Teacher"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default CreateTeacher;

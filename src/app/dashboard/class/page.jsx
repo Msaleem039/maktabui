@@ -1,0 +1,557 @@
+"use client";
+
+import { useState, useRef, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Download, Eye, Edit, Trash2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "@/hooks/useTheme";
+import {
+  getAllClassesAction,
+  setAllClassesPage,
+} from "@/redux/slices/classSlices/classSlice";
+import { getCookie } from "cookies-next";
+import { getAdminId } from "@/utils/getCookies";
+
+export default function ClassPage() {
+  const { mainText } = useTheme();
+  const [searchValue, setSearchValue] = useState("");
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [dropdownDirections, setDropdownDirections] = useState({});
+  const [dropdownPositions, setDropdownPositions] = useState({});
+  const dropdownRefs = useRef({});
+  const buttonRefs = useRef({});
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const adminId = getAdminId();
+
+  const {
+    classes,
+    loading,
+    error,
+    pagination,
+    search: storeSearch,
+  } = useSelector((state) => state.getAllClasses);
+
+  const user = useMemo(() => {
+    const userCookie = getCookie("user");
+    return typeof userCookie === "string" ? JSON.parse(userCookie) : userCookie;
+  }, []);
+
+  const actionMenuItems = useMemo(() => {
+    const isStudent = user?.role === "Student";
+
+    const items = [{ label: "View Detail", icon: Eye, action: "view" }];
+
+    if (!isStudent) {
+      items.push(
+        { label: "Edit", icon: Edit, action: "edit" },
+        { label: "Remove", icon: Trash2, action: "remove" },
+      );
+    }
+
+    return items;
+  }, [user?.role]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchValue);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  useEffect(() => {
+    let requestData = {
+      page: pagination.currentPage,
+      limit: 10,
+      search: debouncedSearch,
+      adminId,
+    };
+
+    if (user?.role === "Student" && user?.id) {
+      requestData.studentId = user.id;
+    } else if (user?.role === "Teacher" && user?.id) {
+      requestData.teacherId = user.id;
+    }
+
+    dispatch(getAllClassesAction(requestData));
+  }, [dispatch, user, debouncedSearch, pagination.currentPage]);
+
+  useEffect(() => {
+    if (storeSearch) {
+      setSearchValue(storeSearch);
+    }
+  }, [storeSearch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      Object.values(dropdownRefs.current).forEach((ref) => {
+        if (ref && !ref.contains(event.target)) {
+          // Check if click is on the button
+          const isButtonClick = Object.values(buttonRefs.current).some(
+            (buttonRef) => buttonRef && buttonRef.contains(event.target),
+          );
+          if (!isButtonClick) {
+            setOpenDropdownId(null);
+          }
+        }
+      });
+    };
+
+    const handleScroll = () => {
+      // Close dropdown on scroll
+      setOpenDropdownId(null);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, []);
+
+  const toggleDropdown = (id, event) => {
+    event.stopPropagation();
+    const isOpening = openDropdownId !== id;
+
+    if (isOpening && typeof window !== "undefined") {
+      const button = event.currentTarget;
+      const buttonRect = button.getBoundingClientRect();
+      const viewportHeight =
+        window.innerHeight || document.documentElement.clientHeight || 0;
+      const viewportWidth =
+        window.innerWidth || document.documentElement.clientWidth || 0;
+      const dropdownHeight = 150; // Approximate height of dropdown with 3 items
+      const dropdownWidth = 180;
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const shouldOpenUp =
+        spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+      // Calculate position
+      let top, left, right;
+
+      if (shouldOpenUp) {
+        top = buttonRect.top - dropdownHeight - 8; // 8px margin
+      } else {
+        top = buttonRect.bottom + 8; // 8px margin
+      }
+
+      // Align to right edge of button
+      right = viewportWidth - buttonRect.right;
+
+      // Ensure dropdown stays within viewport
+      if (right + dropdownWidth > viewportWidth) {
+        right = viewportWidth - dropdownWidth - 8;
+      }
+      if (right < 8) {
+        right = 8;
+      }
+
+      setDropdownDirections((prev) => ({
+        ...prev,
+        [id]: shouldOpenUp ? "up" : "down",
+      }));
+
+      setDropdownPositions((prev) => ({
+        ...prev,
+        [id]: { top, right },
+      }));
+    } else {
+      setDropdownDirections((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setDropdownPositions((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+
+    setOpenDropdownId(isOpening ? id : null);
+  };
+
+  const handleActionClick = (action, id, event) => {
+    event.stopPropagation();
+    if (action === "view") {
+      router.push(`/dashboard/class/${id}`);
+    } else if (action === "edit") {
+      router.push(`/dashboard/class/${id}/edit`);
+    } else if (action === "remove") {
+      if (confirm("Are you sure you want to remove this class?")) {
+        console.log(`Remove class ${id}`);
+      }
+    }
+    setOpenDropdownId(null);
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    // Reset to page 1 when searching
+    if (value !== debouncedSearch) {
+      dispatch(setAllClassesPage(1));
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      dispatch(setAllClassesPage(newPage));
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const current = pagination.currentPage;
+    const total = pagination.totalPages;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(total);
+      } else if (current >= total - 3) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = total - 4; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(total);
+      }
+    }
+
+    return pages;
+  };
+
+  // Loading state
+  if (loading && classes.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+              Welcome to
+            </p>
+            <h1 className="font-medium text-[#000000]  text-[1.75rem]">
+              {mainText || "MaktabOS"}
+            </h1>
+          </div>
+          {(user?.role === "Admin" || user?.role === "Super Admin") && (
+            <Link
+              href="/dashboard/class/createClass"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+            >
+              <span className="text-lg">+</span>
+              Add New Class
+            </Link>
+          )}
+        </div>
+
+        <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#0B4B31] border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+              <p className="mt-4 text-[#0B4B31]">Loading classes...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error && classes.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+              Welcome to
+            </p>
+            <h1 className="font-medium text-[#000000]  text-[1.75rem]">
+              {mainText || "MaktabOS"}
+            </h1>
+          </div>
+          {(user?.role === "Admin" || user?.role === "Super Admin") && (
+            <Link
+              href="/dashboard/class/createClass"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+            >
+              <span className="text-lg">+</span>
+              Add New Class
+            </Link>
+          )}
+        </div>
+
+        <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-red-600">Error loading classes: {error}</p>
+              <button
+                onClick={() => dispatch(getAllClassesAction())}
+                className="mt-4 rounded-full bg-[#0B4B31] px-6 py-2 text-white hover:bg-[#0B4B31]/90"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#0B4B31] text-[2.5rem]">
+            Welcome to
+          </p>
+          <h1 className="font-medium text-[#000000]  text-[1.75rem]">
+            {mainText || "MaktabOS"}
+          </h1>
+        </div>
+        {(user?.role === "Admin" || user?.role === "Super Admin") && (
+          <Link
+            href="/dashboard/class/createClass"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0B4B3138] px-4 py-2 text-sm font-normal text-[#0B4B31] transition"
+          >
+            <span className="text-lg">+</span>
+            Add New Class
+          </Link>
+        )}
+      </div>
+
+      <section className="rounded-[36px] border border-[#E2E7E4] bg-white px-6 py-6 shadow-[0_40px_80px_-60px_rgba(11,75,49,0.45)] sm:px-10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-[#104D2E]">
+            Manage Classes
+          </h2>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2">
+          <label className="relative flex w-full max-w-xl items-center">
+            <span className="absolute left-4 text-[#0B4B31]/60">🔍</span>
+            <input
+              value={searchValue}
+              onChange={handleSearchChange}
+              placeholder="Search by class name, subject, or code..."
+              className="w-full rounded-full border border-[#0B4B31] bg-white py-3 pl-10 pr-4 text-sm text-[#0B4B31] outline-none focus:bg-white"
+            />
+          </label>
+
+          {/* See All Button */}
+          {/* <div>
+            <button
+              type="button"
+              className="rounded-full border border-[#0B4B31]/30 px-4 py-2 text-sm font-semibold text-[#0B4B31] transition hover:bg-[#F3F6F5]"
+            >
+              See All ↗
+            </button>
+          </div> */}
+        </div>
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full border-separate border-spacing-y-3 text-left text-sm text-[#333]">
+            <thead className="text-xs font-semibold uppercase tracking-wide text-[#8A928F]">
+              <tr>
+                <th className="px-4 font-normal text-[#0000008C]">
+                  Class Name
+                </th>
+                <th className="px-4 font-normal text-[#0000008C]">Subject</th>
+                <th className="px-4 font-normal text-[#0000008C]">
+                  Class Code
+                </th>
+                <th className="px-4 font-normal text-[#0000008C]">Duration</th>
+                <th className="px-4 font-normal text-[#0000008C]">Students</th>
+                <th className="px-4 font-normal text-right text-[#0000008C]">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {classes.length > 0 ? (
+                classes.map((classItem) => (
+                  <tr
+                    key={classItem._id}
+                    className="rounded-3xl border border-[#E2E7E4] bg-[#FBFDFB] shadow-sm"
+                  >
+                    <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                      {classItem.name || "N/A"}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                      {classItem.subject || "N/A"}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                      {classItem.code || "N/A"}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                      {formatDate(classItem.startDate)} -{" "}
+                      {formatDate(classItem.endDate)}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-[#1E1E1E]">
+                      {classItem.studentCount ?? 0}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium text-[#1E1E1E]">
+                      <div className="relative inline-block">
+                        <button
+                          ref={(el) => (buttonRefs.current[classItem._id] = el)}
+                          type="button"
+                          onClick={(e) => toggleDropdown(classItem._id, e)}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#0B4B31] px-4 py-2 text-sm font-semibold text-[#71DD8C] transition hover:bg-[#0B4B31]/90"
+                        >
+                          Take Action
+                          <span>▾</span>
+                        </button>
+
+                        {openDropdownId === classItem._id && (
+                          <div
+                            ref={(el) => {
+                              dropdownRefs.current[classItem._id] = el;
+                            }}
+                            style={{
+                              position: "fixed",
+                              top: `${dropdownPositions[classItem._id]?.top || 0}px`,
+                              right: `${dropdownPositions[classItem._id]?.right || 0}px`,
+                              zIndex: 9999,
+                            }}
+                            className="min-w-[180px] rounded-xl border border-[#D2E2DB] bg-white shadow-[0_8px_24px_-8px_rgba(11,75,49,0.25)] overflow-hidden"
+                          >
+                            {actionMenuItems.map((item, idx) => {
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={item.action}
+                                  type="button"
+                                  onClick={(e) =>
+                                    handleActionClick(
+                                      item.action,
+                                      classItem._id,
+                                      e,
+                                    )
+                                  }
+                                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0B4B31] transition-all duration-150 ${
+                                    idx === 0 ? "" : "border-t border-[#E2E7E4]"
+                                  } hover:bg-[#E5EFEB]`}
+                                >
+                                  <Icon size={16} className="text-[#0B4B31]" />
+                                  <span>{item.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-8 text-center text-[#8A928F]"
+                  >
+                    {debouncedSearch
+                      ? "No classes match your search."
+                      : "No classes found."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {pagination.totalCount > 0 && (
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[#8A928F]">
+              Showing {classes.length} of {pagination.totalCount} entries
+              {debouncedSearch && " (filtered)"}
+            </div>
+            <div className="flex items-center gap-3">
+              {/* <select 
+                onChange={handleLimitChange}
+                className="rounded-full border border-[#C5D2CD] bg-white px-4 py-2 text-sm text-[#0B4B31] outline-none focus:border-[#0B4B31]"
+              >
+                <option value="10">Display 10</option>
+                <option value="20">Display 20</option>
+                <option value="50">Display 50</option>
+              </select> */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
+                    pagination.hasPrevPage
+                      ? "hover:bg-[#F3F6F5]"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  ‹
+                </button>
+
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      typeof page === "number" && handlePageChange(page)
+                    }
+                    disabled={page === "..."}
+                    className={`rounded-full border border-[#C5D2CD] px-4 py-2 text-sm transition ${
+                      page === pagination.currentPage
+                        ? "bg-[#0B4B31] text-white border-[#0B4B31]"
+                        : page === "..."
+                          ? "bg-white text-[#0B4B31] cursor-default"
+                          : "bg-white text-[#0B4B31] hover:bg-[#F3F6F5]"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className={`rounded-full border border-[#C5D2CD] bg-white px-3 py-2 text-sm text-[#0B4B31] transition ${
+                    pagination.hasNextPage
+                      ? "hover:bg-[#F3F6F5]"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
